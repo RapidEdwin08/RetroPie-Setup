@@ -480,6 +480,8 @@ function get_platform() {
                 else
                     __platform="$architecture"
                 fi
+				# Added here because ES still does not Include __platform=rpi5 when calling retropie_setup.sh
+				##__platform="rpi5"
                 ;;
         esac
     fi
