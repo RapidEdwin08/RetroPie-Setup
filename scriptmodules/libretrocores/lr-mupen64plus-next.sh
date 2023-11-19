@@ -31,6 +31,11 @@ function sources_lr-mupen64plus-next() {
 }
 
 function build_lr-mupen64plus-next() {
+    if isPlatform "64bit"; then
+        rpSwap on 2048
+    else
+        rpSwap on 750
+    fi
     local params=()
     if isPlatform "arm"; then
         if isPlatform "videocore"; then
@@ -63,7 +68,7 @@ function build_lr-mupen64plus-next() {
     else
         make "${params[@]}"
     fi
-
+    rpSwap off
     md_ret_require="$md_build/mupen64plus_next_libretro.so"
 }
 
