@@ -9,11 +9,30 @@
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
 
+# Config for mpv Image Viewing [/etc/mpv/mpv.conf] [~/.config/mpv/mpv.conf]:
+mpvIMAGESreference=$(
+echo '
+# Infinite Duration If the current file is an Image
+image-display-duration=inf
+
+# Loop files in case of webms or gifs
+#loop-file=inf
+
+scale=spline36
+cscale=spline36
+dscale=mitchell
+dither-depth=auto
+correct-downscaling
+sigmoid-upscaling
+')
+
 rp_module_id="splashscreen"
 rp_module_desc="Configure Splashscreen"
 rp_module_section="main"
 rp_module_repo="git https://github.com/RetroPie/retropie-splashscreens.git master"
-rp_module_flags="noinstclean !all rpi !osmc !xbian !aarch64"
+#rp_module_flags="noinstclean !all rpi !osmc !xbian !aarch64"
+REGEX_VIDEO="\.avi\|\.mov\|\.mp4\|\.mkv\|\.3gp\|\.mpg\|\.mp3\|\.wav\|\.m4a\|\.aac\|\.ogg\|\.flac"
+rp_splash_boot=/opt/retropie/supplementary/splashscreen/asplashscreen.sh
 
 function _update_hook_splashscreen() {
     # make sure splashscreen is always up to date if updating just RetroPie-Setup
@@ -32,9 +51,10 @@ function _video_exts_splashscreen() {
 }
 
 function depends_splashscreen() {
-    local params=(insserv)
-    isPlatform "32bit" && params+=(omxplayer)
-    getDepends "${params[@]}"
+	getDepends fbi fim mpv vlc insserv vorbis-tools
+	if [ ! -f /etc/mpv/mpv.conf ]; then echo "$mpvIMAGESreference" > /etc/mpv/mpv.conf; fi
+	if [ ! -f ~/.config/mpv/mpv.conf ]; then mkdir ~/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > ~/.config/mpv/mpv.conf; fi
+	if [ ! -f /home/pi/.config/mpv/mpv.conf ]; then mkdir /home/pi/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > /home/pi/.config/mpv/mpv.conf; fi
 }
 
 function install_bin_splashscreen() {
@@ -55,7 +75,7 @@ RemainAfterExit=yes
 WantedBy=sysinit.target
 _EOF_
 
-    rp_installModule "omxiv" "_autoupdate_"
+    ##rp_installModule "omxiv" "_autoupdate_"
 
     gitPullOrClone "$md_inst"
 
@@ -118,7 +138,7 @@ function configure_splashscreen() {
 function remove_splashscreen() {
     enable_plymouth_splashscreen
     disable_splashscreen
-    rp_callModule "omxiv" remove
+    ##rp_callModule "omxiv" remove
     rm -f /etc/splashscreen.list /etc/systemd/system/asplashscreen.service
     systemctl daemon-reload
 }
@@ -199,22 +219,27 @@ function randomize_splashscreen() {
     case "$choice" in
         0)
             iniSet "RANDOMIZE" "disabled"
+			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"disabled\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer disabled."
             ;;
         1)
             iniSet "RANDOMIZE" "retropie"
+			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"retropie\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled in directory $rootdir/supplementary/$md_id"
             ;;
         2)
             iniSet "RANDOMIZE" "custom"
+			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"custom\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled in directory $datadir/splashscreens"
             ;;
         3)
             iniSet "RANDOMIZE" "all"
+			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"all\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled for both splashscreen directories."
             ;;
         4)
             iniSet "RANDOMIZE" "list"
+			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"list\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled for entries in /etc/splashscreen.list"
             ;;
     esac
@@ -229,7 +254,7 @@ function preview_splashscreen() {
 
     local path
     local file
-    local omxiv="/opt/retropie/supplementary/omxiv/omxiv"
+    local omxiv="/opt/retropie/supplementary/omxiv/omxiv" #Deprecated
     while true; do
         local cmd=(dialog --backtitle "$__backtitle" --menu "Choose an option." 22 86 16)
         local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
@@ -241,13 +266,19 @@ function preview_splashscreen() {
                 1)
                     file=$(choose_splashscreen "$path" "image")
                     [[ -z "$file" ]] && break
-                    $omxiv -b "$file"
+					clear; fbi -T 2 -a -noverbose "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fbi)
+					#clear; fim -a -q -T 2 "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fim)
+                    #clear; mpv -vo sdl -fs --ontop --no-terminal "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep mpv)
+                    #clear; cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep vlc)
                     ;;
                 2)
                     file=$(mktemp)
-                    find "$path" -type f ! -regex ".*/\..*" ! -regex ".*LICENSE" ! -regex ".*README.*" ! -regex ".*\.sh" | sort > "$file"
+                    find "$path" -type f ! -regex ".*/\..*" ! -regex ".*LICENSE" ! -regex ".*README.*" ! -regex ".*\.sh" ! -regex ".*retropie.pkg.*" | grep -v "$REGEX_VIDEO" | sort > "$file"
                     if [[ -s "$file" ]]; then
-                        $omxiv -t 6 -T blend -b --once -f "$file"
+						Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fbi -T 2 -a -t 2 --noverbose --once --list "$file" > /dev/null 2>&1; while pgrep fbi; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+						#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fim) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fim -a -q -T 2 "$file" > /dev/null 2>&1; while pgrep fim; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+						#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1; while pgrep mpv; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+						#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1; while pgrep vlc; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
                     else
                         printMsgs "dialog" "There are no splashscreens installed in $path"
                     fi
@@ -257,7 +288,8 @@ function preview_splashscreen() {
                 3)
                     file=$(choose_splashscreen "$path" "video")
                     [[ -z "$file" ]] && break
-                    omxplayer --no-osd -b --layer 10000 "$file"
+					Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --audio-device=alsa/sysdefault:CARD=vc4hdmi0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+					#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
                     ;;
             esac
         done
