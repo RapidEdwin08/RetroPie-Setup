@@ -291,7 +291,7 @@ function _pulseaudio_audiosettings() {
                 ;;
             P)
                 _toggle_${sound_server,,}_audiosettings "off"
-                printMsgs "dialog" "${sound_server} disabled"
+                printMsgs "dialog" "${sound_server} disabled \n \n Reboot may be Required for changes to take effect..."
                 ;;
         esac
     fi
