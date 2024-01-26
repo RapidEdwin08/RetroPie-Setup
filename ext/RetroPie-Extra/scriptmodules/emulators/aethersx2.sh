@@ -16,7 +16,7 @@ rp_module_section="exp"
 rp_module_flags="!all arm aarch64 rpi4 rpi5"
 
 function depends_aethersx2() {
-    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev
+    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox
 }
 
 function sources_aethersx2() {
