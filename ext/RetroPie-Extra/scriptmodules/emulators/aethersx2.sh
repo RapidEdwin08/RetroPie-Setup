@@ -10,7 +10,7 @@
 #
 
 rp_module_id="aethersx2"
-rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                               \n \n AetherSX2-v1.5-3606.AppImage \n \n https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\""
+rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                                                     \n \n AetherSX2-v1.5-3606.AppImage \n \n https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\""
 rp_module_licence="Aethersx2 https://aethersx2.net/terms-conditions"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 rpi4 rpi5"
