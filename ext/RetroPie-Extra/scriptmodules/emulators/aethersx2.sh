@@ -33,7 +33,7 @@ function install_aethersx2() {
     if [[ ! -d "$home/.config/aethersx2" ]]; then mkdir "$home/.config/aethersx2"; fi
 	if [[ ! -d "$home/.config/aethersx2/inis" ]]; then mkdir "$home/.config/aethersx2/inis"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/aethersx2/inis"; fi
-	if [[ ! -d "$home/.config/aethersx2/bios" ]]; then ln -s /home/pi/RetroPie/BIOS "$home/.config/aethersx2/bios"
+	if [[ ! -d "$home/.config/aethersx2/bios" ]]; then ln -s /home/pi/RetroPie/BIOS "$home/.config/aethersx2/bios"; fi
     chown "$(basename $home)" -R "$home/.config/aethersx2"
 
     mkdir "$home/RetroPie/roms/ps2"
