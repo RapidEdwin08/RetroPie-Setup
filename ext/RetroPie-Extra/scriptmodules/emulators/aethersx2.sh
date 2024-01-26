@@ -39,7 +39,7 @@ function install_aethersx2() {
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
     chown "$(basename $home)" -R "$home/.config/aethersx2"
 
-    mkdir "$home/RetroPie/roms/ps2"
+    if [[ ! -d "$home/RetroPie/roms/ps2" ]]; then mkdir "$home/RetroPie/roms/ps2"; fi
     chmod 755 '+Start AetherSX2.sh'; mv '+Start AetherSX2.sh' "$home/RetroPie/roms/ps2"
     if [[ ! -f "$home/RetroPie/roms/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$home/RetroPie/roms/ps2"; fi
     if [[ ! -d "$home/RetroPie/roms/ps2/media" ]]; then mv 'media' "$home/RetroPie/roms/ps2"; fi
