@@ -47,7 +47,7 @@ function install_aethersx2() {
 }
 
 function configure_aethersx2() {
-    addPort "$md_id" "ps2" "aethersx2" "XINIT: /opt/retropie/emulators/aethersx2/aethersx2.sh %ROM%"
     addSystem "ps2"
-    rm "$home/RetroPie/roms/ports/aethersx2.sh"
+    addEmulator "$md_id" "ps2" "aethersx2" "XINIT: /opt/retropie/emulators/aethersx2/aethersx2.sh %ROM%"
+    sed -i 's/default\ =.*/default\ =\ \"aethersx2\"/g' /opt/retropie/configs/ps2/emulators.cfg
 }
