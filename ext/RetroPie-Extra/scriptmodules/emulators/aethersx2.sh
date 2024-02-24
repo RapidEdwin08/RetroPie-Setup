@@ -37,6 +37,10 @@ function install_aethersx2() {
     if [[ ! -d "$home/.config/aethersx2/bios" ]]; then ln -s /home/pi/RetroPie/BIOS "$home/.config/aethersx2/bios"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
+    if [[ ! -d "$home/.config/aethersx2/gamesettings" ]]; then mkdir "$home/.config/aethersx2/gamesettings"; fi
+    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20062_5E115FB6.ini" ]]; then mv "SLUS-20062_5E115FB6.ini" "$home/.config/aethersx2/gamesettings"; fi
+    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20552_248E6126.ini" ]]; then mv "SLUS-20552_248E6126.ini" "$home/.config/aethersx2/gamesettings"; fi
+    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20946_2C6BE434.ini" ]]; then mv "SLUS-20946_2C6BE434.ini" "$home/.config/aethersx2/gamesettings"; fi
     chown "$(basename $home)" -R "$home/.config/aethersx2"
 
     if [[ ! -d "$home/RetroPie/roms/ps2" ]]; then mkdir "$home/RetroPie/roms/ps2"; fi
