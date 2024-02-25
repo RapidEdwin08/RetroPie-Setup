@@ -53,5 +53,6 @@ function install_aethersx2() {
 function configure_aethersx2() {
     addSystem "ps2"
     addEmulator "$md_id" "aethersx2" "ps2" "XINIT: /opt/retropie/emulators/aethersx2/aethersx2.sh %ROM%"
+	if [[ $(cat /opt/retropie/configs/ps2/emulators.cfg | grep -q 'default =' ; echo $?) == '1' ]]; then echo 'default = "aethersx2"' >> /opt/retropie/configs/ps2/emulators.cfg
     sed -i 's/default\ =.*/default\ =\ \"aethersx2\"/g' /opt/retropie/configs/ps2/emulators.cfg
 }
