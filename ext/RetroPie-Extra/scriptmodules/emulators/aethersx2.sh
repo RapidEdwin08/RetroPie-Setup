@@ -10,7 +10,7 @@
 #
 
 rp_module_id="aethersx2"
-rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                                                     \n \n AetherSX2-v1.5-3606.AppImage \n \n https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\""
+rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                                                     \n \n AetherSX2-v1.5-3606.AppImage \n \n http://web.archive.org/web/20240222085515/https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\""
 rp_module_licence="Aethersx2 https://aethersx2.net/terms-conditions"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 rpi4 rpi5"
@@ -20,7 +20,8 @@ function depends_aethersx2() {
 }
 
 function sources_aethersx2() {
-    download "https://www.aethersx2.com/archive/desktop/linux/AetherSX2-v1.5-3606.AppImage" "$md_build"
+    # Tahleth Suspended Development 202301 - 0riginal site 404 Since 202403 - Pull from http://web.archive.org
+    download "http://web.archive.org/web/20240120140213/https://www.aethersx2.com/archive/desktop/linux/AetherSX2-v1.5-3606.AppImage" "$md_build"
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/aethersx2/aethersx2-rp-assets.tar.gz" "$md_build"
 }
 
