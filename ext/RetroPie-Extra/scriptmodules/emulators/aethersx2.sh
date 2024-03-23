@@ -10,7 +10,7 @@
 #
 
 rp_module_id="aethersx2"
-rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                                                     \n \n AetherSX2-v1.5-3606.AppImage \n \n http://web.archive.org/web/20240222085515/https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\""
+rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                                                     \n \n AetherSX2-v1.5-3606.AppImage \n \n http://web.archive.org/web/20240222085515/https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\" \n \n RPi5 may need [kernel=kernel8.img] in [boot/config.txt]"
 rp_module_licence="Aethersx2 https://aethersx2.net/terms-conditions"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 rpi4 rpi5"
@@ -28,7 +28,7 @@ function sources_aethersx2() {
 function install_aethersx2() {
     chmod 755 "AetherSX2-v1.5-3606.AppImage"; mv 'AetherSX2-v1.5-3606.AppImage' "$md_inst"
     chmod 755 "aethersx2.sh"; mv "aethersx2.sh" "$md_inst"
-    chmod 755 "AetherSX2.desktop"; cp "AetherSX2.desktop" "$md_inst"
+    chmod 755 "AetherSX2.desktop"; cp "AetherSX2.desktop" "$md_inst"; cp "AetherSX2.desktop" "/usr/share/applications/"
     mv "AetherSX2.desktop" "$home/Desktop"; chown "$(basename $home)" "$home/Desktop/AetherSX2.desktop"
     mv "AetherSX2-128.xpm" "$md_inst"; mv "PS2BIOSRequired.jpg" "$md_inst"
 
