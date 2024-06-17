@@ -18,7 +18,7 @@ rp_module_flags="sdl2 !armv6"
 
 function _get_version_gzdoom() {
     # default GZDoom version
-    local gzdoom_version="g4.11.3"
+    local gzdoom_version="g4.12.2"
 
     # 32 bit is no longer supported since g4.8.1
     isPlatform "32bit" && gzdoom_version="g4.8.0"
@@ -41,6 +41,8 @@ function sources_gzdoom() {
     gitPullOrClone zmusic https://github.com/ZDoom/ZMusic
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
+    # lzma assumes hardware crc support on arm which breaks when building on armv7
+    isPlatform "armv7" && applyPatch "$md_data/lzma_armv7_crc.diff"
 }
 
 function build_gzdoom() {
@@ -78,13 +80,26 @@ function install_gzdoom() {
 }
 
 function add_games_gzdoom() {
-    local params=("-fullscreen")
+    local params=("-fullscreen -config $romdir/ports/doom/gzdoom.ini -savedir $romdir/ports/doom/gzdoom-saves")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
-
-    # FluidSynth is too memory/CPU intensive, use OPL emulation for MIDI
-    if isPlatform "arm"; then
-        params+=("+set snd_mididevice -3")
-    fi
+	
+	# https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
+	# 0 (Standard): Bright lighting model and stronger fading in bright sectors.
+    # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
+    # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
+    # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
+    # 4 (Legacy): Emulates lighting of Legacy 1.4's GL renderer.
+    # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+	params+=("+gl_maplightmode 8")
+	
+    ## -1 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
+    if isPlatform "arm"; then # FluidSynth is too memory/CPU intensive
+        params+=("'+set snd_mididevice -2'")
+	else
+		params+=("'+snd_mididevice -1'")
+	fi
+	
     # when using the 32bit version on GLES platforms, pre-set the renderer
     if isPlatform "32bit" && hasFlag "gles"; then
         params+=("+set vid_preferbackend 2")
@@ -99,6 +114,8 @@ function add_games_gzdoom() {
 
 function configure_gzdoom() {
     mkRomDir "ports/doom"
+	mkRomDir "ports/doom/mods"
+	mkRomDir "ports/doom/gzdoom-saves"
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 
