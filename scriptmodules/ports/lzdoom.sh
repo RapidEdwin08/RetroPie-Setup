@@ -73,6 +73,9 @@ function add_games_lzdoom() {
     else
         params+=("'+snd_mididevice -1'")
     fi
+    
+    # Music Volume
+    params+=("+snd_musicvolume 1")
 
     if isPlatform "kms"; then
         params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
