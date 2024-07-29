@@ -1,26 +1,15 @@
 #!/bin/sh
 
-ROOTDIR=""
-DATADIR=""
-REGEX_VIDEO=""
-REGEX_IMAGE=""
-
-# Load user settings
-. /opt/retropie/configs/all/splashscreen.cfg
-
-is_fkms() {
-    if grep -q okay /proc/device-tree/soc/v3d@7ec00000/status 2> /dev/null || grep -q okay /proc/device-tree/soc/firmwarekms@7e600000/status 2> /dev/null ; then
-        return 0
-    else
-        return 1
-    fi
-}
+ROOTDIR="/opt/retropie"
+DATADIR="/home/pi/RetroPie"
+RANDOMIZE="all"
+REGEX_VIDEO="\.avi\|\.mov\|\.mp4\|\.mkv\|\.3gp\|\.mpg\|\.mp3\|\.wav\|\.m4a\|\.aac\|\.ogg\|\.flac"
+REGEX_IMAGE="\.bmp\|\.jpg\|\.jpeg\|\.gif\|\.png\|\.ppm\|\.tiff\|\.webp"
 
 do_start () {
     local config="/etc/splashscreen.list"
     local line
     local re="$REGEX_VIDEO\|$REGEX_IMAGE"
-    local omxiv="/opt/retropie/supplementary/omxiv/omxiv"
     case "$RANDOMIZE" in
         disabled)
             line="$(head -1 "$config")"
@@ -43,7 +32,8 @@ do_start () {
         while ! pgrep "dbus" >/dev/null; do
             sleep 1
         done
-        omxplayer --no-osd -o both -b --layer 10001 "$line"
+		mpv -vo sdl -fs -ao=alsa --no-terminal --audio-device=alsa/sysdefault:CARD=vc4hdmi0 "$line" >/dev/null 2>&1
+		#cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0 "$line" >/dev/null 2>&1
     elif $(echo "$line" | grep -q "$REGEX_IMAGE"); then
         if [ "$RANDOMIZE" = "disabled" ]; then
             local count=$(wc -l <"$config")
@@ -51,15 +41,17 @@ do_start () {
             local count=1
         fi
         [ $count -eq 0 ] && count=1
-        [ $count -gt 12 ] && count=12
-
-        # Default duration is 12 seconds, check if configured otherwise
-        [ -z "$DURATION" ] && DURATION=12
-        local delay=$((DURATION/count))
+        [ $count -gt 20 ] && count=20
+        local delay=$((20/count))
+        delay="$(cat /opt/retropie/configs/all/splashscreen.cfg | grep "DURATION" | awk -F'=' '{print $2}'| cut -c 2- | rev | cut -c 2- | rev)"; if [ "$delay" == '' ]; then delay=12; fi
         if [ "$RANDOMIZE" = "disabled" ]; then
-            "$omxiv" --once -t $delay -b --layer 10001 -f "$config" >/dev/null 2>&1
+            ( sleep "$delay" ; kill $(pgrep mpv) ) & mpv -vo sdl -fs --ontop --no-terminal $(cat "$config")
+            #( sleep $delay ; kill $(pgrep fbi) ) & fbi -T 2 -a -noverbose $(cat "$config")
+            #( sleep $delay ; kill $(pgrep vlc) ) & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 $(cat "$config")
         else
-            "$omxiv" --once -t $delay -b --layer 10001 -r "$line" >/dev/null 2>&1
+            ( sleep "$delay" ; kill $(pgrep mpv) ) & mpv -vo sdl -fs --ontop --no-terminal "$line"
+            #( sleep $delay ; kill $(pgrep fbi) ) & fbi -T 2 -a -noverbose "$line"
+            #( sleep $delay ; kill $(pgrep vlc) ) & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$line"
         fi
     fi
     exit 0
@@ -84,3 +76,5 @@ case "$1" in
         exit 3
         ;;
 esac
+
+:
