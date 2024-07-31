@@ -190,7 +190,7 @@ function get_os_version() {
 
             # 64bit Raspberry Pi OS identifies as Debian, but functions (currently) as Raspbian
             # we will check package sources and set to Raspbian
-            if isPlatform "aarch64" && apt-cache policy | grep -q "archive.raspberrypi.org"; then
+            if isPlatform "aarch64" && apt-cache policy | grep -qE "archive.raspberrypi.(com|org)"; then
                 __os_id="Raspbian"
             fi
 
@@ -322,6 +322,10 @@ function get_os_version() {
 
 function get_retropie_depends() {
     local depends=(git subversion dialog curl gcc g++ build-essential unzip xmlstarlet python3-pyudev ca-certificates dirmngr)
+    # on RaspiOS, install an extra package for X11 support on Pi5
+    if isPlatform "rpi5" && [[ "$__os_id" == "Raspbian" ]]; then
+        depends+=(gldriver-test)
+    fi
 
     [[ -n "$DISTCC_HOSTS" ]] && depends+=(distcc)
 
@@ -354,7 +358,7 @@ function get_rpi_video() {
 
     if [[ "$__has_kms" -eq 1 ]]; then
         __platform_flags+=(mesa kms)
-        if [[ -z "$__has_dispmanx" ]]; then
+        if ! isPlatform "aarm64" && [[ -z "$__has_dispmanx" ]]; then
             if [[ "$__chroot" -eq 1 ]]; then
                 # in a chroot default to fkms (supporting dispmanx) when debian is older than 11 (bullseye)
                 [[ "$__os_debian_ver" -lt 11 ]] && __has_dispmanx=1
@@ -364,12 +368,15 @@ function get_rpi_video() {
             fi
         fi
         [[ "$__has_dispmanx" -eq 1 ]] && __platform_flags+=(dispmanx)
-        ## Pi4/5 have Vulkan working under KMS on Debian 12 (bookworm) or newer
+		## Pi4/5 have Vulkan working under KMS on Debian 12 (bookworm) or newer
         if (isPlatform "rpi4" || isPlatform "rpi5")  && [[ "$__os_debian_ver" -ge 12 ]]; then
             __platform_flags+=(vulkan)
         fi
     else
-        __platform_flags+=(videocore dispmanx)
+        __platform_flags+=(videocore)
+        if ! isPlatform "aarm64"; then
+            __platform_flags+=(dispmanx)
+        fi
     fi
 
     # delete legacy pkgconfig that conflicts with Mesa (may be installed via rpi-update)
@@ -380,37 +387,42 @@ function get_rpi_video() {
     export PKG_CONFIG_PATH="$pkgconfig"
 }
 
+function get_rpi_model() {
+    # calculated based on the information from https://github.com/AndrewFromMelbourne/raspberry_pi_revision
+    # see also https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes
+    local rev="0x$(sed -n '/^Revision/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo)"
+    # if bit 23 is not set, we are on a rpi1 (bit 23 means the revision is a bitfield)
+    if [[ $((($rev >> 23) & 1)) -eq 0 ]]; then
+        __platform="rpi1"
+    else
+        # if bit 23 is set, get the cpu from bits 12-15
+        local cpu=$((($rev >> 12) & 15))
+        case $cpu in
+            0)
+                __platform="rpi1"
+                ;;
+            1)
+                __platform="rpi2"
+                ;;
+            2)
+                __platform="rpi3"
+                ;;
+            3)
+                __platform="rpi4"
+                ;;
+            4)
+                __platform="rpi5"
+                ;;
+        esac
+    fi
+}
 function get_platform() {
     local architecture="$(uname --machine)"
     if [[ -z "$__platform" ]]; then
         case "$(sed -n '/^Hardware/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo)" in
             BCM*)
-                # calculated based on information from https://github.com/AndrewFromMelbourne/raspberry_pi_revision
-                local rev="0x$(sed -n '/^Revision/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo)"
-                # if bit 23 is not set, we are on a rpi1 (bit 23 means the revision is a bitfield)
-                if [[ $((($rev >> 23) & 1)) -eq 0 ]]; then
-                    __platform="rpi1"
-                else
-                    # if bit 23 is set, get the cpu from bits 12-15
-                    local cpu=$((($rev >> 12) & 15))
-                    case $cpu in
-                        0)
-                            __platform="rpi1"
-                            ;;
-                        1)
-                            __platform="rpi2"
-                            ;;
-                        2)
-                            __platform="rpi3"
-                            ;;
-                        3)
-                            __platform="rpi4"
-                            ;;
-                        4)
-                            __platform="rpi5"
-                            ;;
-                    esac
-                fi
+                # RPI kernels before 2023-11-24 print a 'Hardware: BCM2835' line
+                get_rpi_model
                 ;;
             *ODROIDC)
                 __platform="odroid-c1"
@@ -438,6 +450,9 @@ function get_platform() {
                 # refer to the nv.sh script in the L4T DTS for a similar implementation
                 if [[ -e "/proc/device-tree/compatible" ]]; then
                     case "$(tr -d '\0' < /proc/device-tree/compatible)" in
+                        *raspberrypi*)
+                            get_rpi_model
+                            ;;
                         *tegra186*)
                             __platform="tegra-x2"
                             ;;
@@ -484,8 +499,8 @@ function get_platform() {
                 else
                     __platform="$architecture"
                 fi
-				# Added here because ES still does not Include __platform=rpi5 when calling retropie_setup.sh
-				##__platform="rpi5"
+                ## Added here because ES still does not Include __platform=rpi5 when calling retropie_setup.sh
+                __platform="rpi5"
                 ;;
         esac
     fi
