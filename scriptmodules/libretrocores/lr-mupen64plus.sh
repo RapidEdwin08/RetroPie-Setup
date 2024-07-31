@@ -52,11 +52,7 @@ function sources_lr-mupen64plus() {
 }
 
 function build_lr-mupen64plus() {
-    if isPlatform "64bit"; then
-        rpSwap on 2048
-    else
-        rpSwap on 750
-    fi
+    rpSwap on 750
     local params=()
     if isPlatform "videocore"; then
         params+=(platform="$__platform")
