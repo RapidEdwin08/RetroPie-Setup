@@ -112,16 +112,6 @@ function rp_callModule() {
         return 3
     fi
 
-    # skip for modules 'builder' and 'setup' so that distcc settings do not propagate from them
-    if [[ "$md_id" != "builder" && "$md_id" != "setup" ]]; then
-        # if distcc is used and the module doesn't exclude it, add /usr/lib/distcc to PATH and MAKEFLAGS
-        if [[ -n "$DISTCC_HOSTS" ]] && ! hasFlag "${__mod_info[$md_id/flags]}" "nodistcc"; then
-            # use local variables so they are available to all child functions without changing the globals 
-            local PATH="/usr/lib/distcc:$PATH"
-            local MAKEFLAGS="$MAKEFLAGS PATH=$PATH"
-        fi
-    fi
-
     # parameters _auto_ _binary or _source_ (_source_ is used if no parameters are given for a module)
     case "$mode" in
         # install the module if not installed, and update if it is
@@ -150,7 +140,7 @@ function rp_callModule() {
             isConnected && has_net=1
 
             # for modules with nonet flag that don't need to download data, we force has_net to 1
-            hasFlag "${__mod_info[$md_id/flags]}" "nonet" && has_net=1
+            hasFlag "${__mod_info[$id/flags]}" "nonet" && has_net=1
 
             if [[ "$has_net" -eq 1 ]]; then
                 rp_hasBinary "$md_id"
@@ -947,22 +937,6 @@ function rp_registerModule() {
             # flags with !flag will exclude the module for the platform
             if [[ "$flag" =~ ^\!(.+) ]] && isPlatform "${BASH_REMATCH[1]}"; then
                 enabled=0
-                continue
-            fi
-            # enable or disable based on a comparison in the format :\$var:cmp:val or !:\$var:cmp:val
-            # eg. :\$__gcc_version:-lt:7 would be evaluated as [[ $__gcc_version -lt 7 ]]
-            # this would enable a module if the comparison was true
-            # !:\$__gcc_version:-lt:7 would disable if the comparison was true
-
-            # match and extract the parameters
-            if [[ "$flag" =~ ^(\!?):([^:]+):([^:]+):(.+)$ ]]; then
-                # enable or disable based on the first parameter (!)
-                local e=1
-                [[ ${BASH_REMATCH[1]} == "!" ]] && e=0
-                # evaluate the comparison
-                if eval "[[ ${BASH_REMATCH[2]} ${BASH_REMATCH[3]} ${BASH_REMATCH[4]} ]]"; then
-                    enabled=$e
-                fi
                 continue
             fi
         done
