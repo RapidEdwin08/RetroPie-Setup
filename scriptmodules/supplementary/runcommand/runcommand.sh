@@ -129,7 +129,7 @@ function get_config() {
     if [[ -n "$DISPLAY" ]] && $XRANDR &>/dev/null; then
         HAS_MODESET="x11"
     # copy kms tool output to global variable to avoid multiple invocations
-    elif KMS_BUFFER="$($KMSTOOL -r 2>/dev/null)"; then
+    elif [[ -c /dev/dri/card0 ]] && KMS_BUFFER="$($KMSTOOL -r 2>/dev/null)"; then
         HAS_MODESET="kms"
     elif [[ -f "$TVSERVICE" ]]; then
         HAS_MODESET="tvs"
@@ -959,6 +959,7 @@ _EOF_
                 cat >>"$xinitrc" <<_EOF_
 matchbox-window-manager ${params[@]} &
 sleep 0.5
+xset -dpms s off s noblank
 _EOF_
             fi
 
@@ -1060,6 +1061,9 @@ function config_backend() {
                     COMMAND="SDL_DISPMANX_WIDTH=${MODE_CUR[2]} SDL_DISPMANX_HEIGHT=${MODE_CUR[3]} $COMMAND"
                 fi
                 COMMAND="SDL1_VIDEODRIVER=dispmanx $COMMAND"
+                ;;
+            sdl12-compat)
+                COMMAND="LD_PRELOAD=\"$ROOTDIR/supplementary/sdl12-compat/libSDL-1.2.so.0\" $COMMAND"
                 ;;
             x11)
                 XINIT=1
@@ -1201,19 +1205,30 @@ function get_sys_command() {
     quake_dir="${quake_dir%/*}"
     COMMAND="${COMMAND//\%QUAKEDIR\%/\"$quake_dir\"}"
 
-    # if it starts with CON: it is a console application (so we don't redirect stdout later)
-    if [[ "$COMMAND" == CON:* ]]; then
-        # remove CON:
-        COMMAND="${COMMAND:4}"
-        CONSOLE_OUT=1
+    # check if COMMAND starts with a launch OPTION:
+    if [[ "$COMMAND" =~ ^([A-Z\-]+?):(.*)$ ]]; then
+        # extract the command
+        COMMAND="${BASH_REMATCH[2]}"
+
+        case "${BASH_REMATCH[1]}" in
+            # if it starts with CON: it is a console application (so we don't redirect stdout later)
+            CON)
+                CONSOLE_OUT=1
+                ;;
+            # if it starts with XINIT it is an X11 application (so we need to launch via xinit)
+            XINIT*)
+                XINIT=1
+                ;;&
+            # if it starts with XINIT-WM or XINIT-WMC (with cursor) it is an X11 application needing a window manager
+            XINIT-WM)
+                XINIT_WM=1
+                ;;
+            XINIT-WMC)
+                XINIT_WM=2
+                ;;
+        esac
     fi
 
-    # if it starts with XINIT: it is an X11 application (so we need to launch via xinit)
-    if [[ "$COMMAND" == XINIT:* ]]; then
-        # remove XINIT:
-        COMMAND="${COMMAND:6}"
-        XINIT=1
-    fi
 }
 
 function show_launch() {
@@ -1312,11 +1327,11 @@ function launch_command() {
     if [[ "$CONSOLE_OUT" -eq 1 ]]; then
         # turn cursor on
         tput cnorm
-        eval $COMMAND </dev/tty 2>>"$LOG"
+        eval "$COMMAND" </dev/tty 2>>"$LOG"
         ret=$?
         tput civis
     else
-        eval $COMMAND </dev/tty &>>"$LOG"
+        eval "$COMMAND" </dev/tty &>>"$LOG"
         ret=$?
     fi
     return $ret

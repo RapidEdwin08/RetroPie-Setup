@@ -66,6 +66,7 @@ function _config_files_skyscraper() {
         'peas.json'
         'platforms_idmap.csv'
         'resources'
+        'supplementary/bash-completion/Skyscraper.bash'
         'screenscraper_platforms.json'
         'tgdb_developers.json'
         'tgdb_genres.json'
@@ -73,6 +74,16 @@ function _config_files_skyscraper() {
         'tgdb_publishers.json'
     )
     echo "${config_files[@]}"
+}
+
+function remove_skyscraper() {
+    md_ret_info+=("Skyscraper's cache in ~/.skyscraper/cache/ is not empty and is not removed.")
+
+    # Remove possible per-user deployment introduced with v3.9.3
+    rm -f "$home/.bash_completion.d/Skyscraper.bash"
+
+    rm -f "/etc/bash_completion.d/Skyscraper.bash"
+    rm -f "/usr/local/bin/Skyscraper"
 }
 
 # Get the location of the cached resources folder. In v3+, this changed to 'cache'.
@@ -147,13 +158,13 @@ function _purge_platform_skyscraper() {
 
 function _get_ver_skyscraper() {
     if [[ -f "$md_inst/Skyscraper" ]]; then
-        echo $(sudo -u "$user" "$md_inst/Skyscraper" --version | cut -d' ' -f2 2>/dev/null)
+        echo $(sudo -u "$user" "$md_inst/Skyscraper" -h | grep 'Running Skyscraper' | cut -d' ' -f 3 | tr -d v 2>/dev/null)
     fi
 }
 
 function _check_ver_skyscraper() {
     ver=$(_get_ver_skyscraper)
-    if compareVersions "$ver" lt "3.5"; then
+    if ! compareVersions "$ver" ge "3.5"; then
         printMsgs "dialog" "The version of Skyscraper you currently have installed is incompatible with options used by this script. Please update Skyscraper to the latest version to continue."
         return 1
     fi
@@ -163,11 +174,6 @@ function _check_ver_skyscraper() {
 # List any non-empty systems found in the ROM folder
 function _list_systems_skyscraper() {
     find -L "$romdir/" -mindepth 1 -maxdepth 1 -type d -not -empty | sort -u
-}
-
-function remove_skyscraper() {
-    # On removal of the package, purge the cache
-    _purge_skyscraper
 }
 
 function configure_skyscraper() {
@@ -217,13 +223,12 @@ function configure_skyscraper() {
 }
 
 function _init_config_skyscraper() {
-
     local config_files=($(_config_files_skyscraper))
 
     # assume new(er) install
     mkdir -p .pristine_cfgs
     for cf in "${config_files[@]}"; do
-        bn=${cf#*/} # cut off cache/
+        bn=${cf##*/} # cut off all folders
         if [[ -e "$md_inst/$bn" ]]; then
             cp -rf "$md_inst/$bn" ".pristine_cfgs/"
             rm -rf "$md_inst/$bn"
@@ -275,6 +280,14 @@ function _init_config_skyscraper() {
     # Create the cache folder and add the sample 'priorities.xml' file to it
     mkUserDir "$scraper_conf_dir/cache"
     cp -f "$md_inst/.pristine_cfgs/priorities.xml.example" "$scraper_conf_dir/cache"
+
+    # Deploy programmable completion script
+    cp -f "$md_inst/.pristine_cfgs/Skyscraper.bash" "/etc/bash_completion.d/"
+    # Ease of use but also needed for proper completion
+    ln -sf "$md_inst/Skyscraper" "/usr/local/bin/Skyscraper"
+
+    # Remove possible per-user deployment introduced with v3.9.3
+    rm -f "$home/.bash_completion.d/Skyscraper.bash"
 }
 
 # Scrape one system, passed as parameter

@@ -61,6 +61,13 @@ function install_theme_esthemes() {
 
     mkdir -p "/etc/emulationstation/themes"
     gitPullOrClone "/etc/emulationstation/themes/$name" "https://github.com/$repo/es-theme-$theme.git" "$branch"
+
+    # apply any patches for themes broken due to ES fixes
+    if [[ "$pixel_pos" == 1 && -f "$md_data/patch-$repo-$theme.diff" ]]; then
+        pushd "/etc/emulationstation/themes/$name"
+        applyPatch "$md_data/patch-$repo-$theme.diff"
+        popd
+    fi
 }
 
 function uninstall_theme_esthemes() {
@@ -280,6 +287,8 @@ function gui_esthemes() {
         'RetroHursty69 ToggleBobble'
         'RetroHursty69 Sheeny'
         'RetroHursty69 ballsy'
+        'RetroHursty69 AIGEN'
+        'RetroHursty69 AIGEN_PLUS'
         'Saracade scv720'
         'chicueloarcade Chicuelo'
         'SuperMagicom nostalgic'

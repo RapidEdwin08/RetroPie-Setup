@@ -291,7 +291,7 @@ function _pulseaudio_audiosettings() {
                 ;;
             P)
                 _toggle_${sound_server,,}_audiosettings "off"
-                printMsgs "dialog" "${sound_server} disabled \n \n Reboot may be Required for changes to take effect..."
+                printMsgs "dialog" "${sound_server} disabled"
                 ;;
         esac
     fi
@@ -303,29 +303,11 @@ function _toggle_pulseaudio_audiosettings() {
     if [[ "$state" == "on" ]]; then
         _pa_cmd_audiosettings systemctl --user unmask pulseaudio.socket
         _pa_cmd_audiosettings systemctl --user start  pulseaudio.service
-		## Pipewire OFF
-        _pa_cmd_audiosettings systemctl --user mask pipewire-pulse.socket pipewire.socket
-        _pa_cmd_audiosettings systemctl --user stop pipewire.service pipewire-pulse.service wireplumber.service
-        systemctl --global -q disable pipewire-pulse
-        systemctl --global -q disable wireplumber
-        systemctl --global -q enable pulseaudio
-        if [ -e /etc/alsa/conf.d/99-pipewire-default.conf ] ; then
-			rm /etc/alsa/conf.d/99-pipewire-default.conf
-        fi
     fi
 
     if [[ "$state" == "off" ]]; then
         _pa_cmd_audiosettings systemctl --user mask pulseaudio.socket
         _pa_cmd_audiosettings systemctl --user stop pulseaudio.service
-		## Pipewire ON
-        _pa_cmd_audiosettings systemctl --user unmask pipewire-pulse.socket pipewire.socket
-        _pa_cmd_audiosettings systemctl --user start  pipewire.service pipewire-pulse.service wireplumber.service
-        systemctl --global -q disable pulseaudio
-        systemctl --global -q enable pipewire-pulse
-        systemctl --global -q enable wireplumber
-        if [ -e /usr/share/doc/pipewire/examples/alsa.conf.d/99-pipewire-default.conf ] ; then
-			cp /usr/share/doc/pipewire/examples/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
-        fi
     fi
 }
 
@@ -335,29 +317,11 @@ function _toggle_pipewire_audiosettings() {
     if [[ "$state" == "on" ]]; then
         _pa_cmd_audiosettings systemctl --user unmask pipewire-pulse.socket pipewire.socket
         _pa_cmd_audiosettings systemctl --user start  pipewire.service pipewire-pulse.service wireplumber.service
-		## Pulse OFF
-        _pa_cmd_audiosettings systemctl --user mask pulseaudio.socket
-        _pa_cmd_audiosettings systemctl --user stop pulseaudio.service
-        systemctl --global -q disable pulseaudio
-        systemctl --global -q enable pipewire-pulse
-        systemctl --global -q enable wireplumber
-        if [ -e /usr/share/doc/pipewire/examples/alsa.conf.d/99-pipewire-default.conf ] ; then
-			cp /usr/share/doc/pipewire/examples/alsa.conf.d/99-pipewire-default.conf /etc/alsa/conf.d/
-        fi
     fi
 
     if [[ "$state" == "off" ]]; then
         _pa_cmd_audiosettings systemctl --user mask pipewire-pulse.socket pipewire.socket
         _pa_cmd_audiosettings systemctl --user stop pipewire.service pipewire-pulse.service wireplumber.service
-		## Pulse ON
-        _pa_cmd_audiosettings systemctl --user unmask pulseaudio.socket
-        _pa_cmd_audiosettings systemctl --user start  pulseaudio.service
-        systemctl --global -q disable pipewire-pulse
-        systemctl --global -q disable wireplumber
-        systemctl --global -q enable pulseaudio
-        if [ -e /etc/alsa/conf.d/99-pipewire-default.conf ] ; then
-			rm /etc/alsa/conf.d/99-pipewire-default.conf
-        fi
      fi
 }
 
