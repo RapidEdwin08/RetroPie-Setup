@@ -15,7 +15,6 @@ rp_module_help="ROM Extensions: .32x .iso .cue .sms .smd .bin .gen .md .sg .zip\
 rp_module_licence="NONCOM https://raw.githubusercontent.com/libretro/picodrive/master/COPYING"
 rp_module_repo="git https://github.com/libretro/picodrive.git master"
 rp_module_section="main"
-rp_module_flags="nodistcc"
 
 function sources_lr-picodrive() {
     gitPullOrClone

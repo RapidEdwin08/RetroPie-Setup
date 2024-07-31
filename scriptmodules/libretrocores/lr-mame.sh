@@ -13,22 +13,21 @@ rp_module_id="lr-mame"
 rp_module_desc="MAME emulator - MAME (current) port for libretro"
 rp_module_help="ROM Extension: .zip\n\nCopy your MAME roms to either $romdir/mame-libretro or\n$romdir/arcade"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/libretro/mame/master/COPYING"
-rp_module_repo="git https://github.com/libretro/mame.git :_get_version_lr-mame"
+rp_module_repo="git https://github.com/libretro/mame.git master"
 rp_module_section="exp"
-rp_module_flags="!:\$__gcc_version:-lt:7"
+rp_module_flags=""
 
-function _get_version_lr-mame() {
-    if compareVersions "$(gcc -dumpfullversion)" lt 10.3.0; then
-        echo "lrmame0264"
-    fi
-}
 function _get_params_lr-mame() {
-    local params=(OSD=retro RETRO=1 PYTHON_EXECUTABLE=python3 NOWERROR=1 OS=linux OPTIMIZE=2 TARGETOS=linux CONFIG=libretro NO_USE_MIDI=1 NO_USE_PORTAUDIO=1 TARGET=mame)
+    local params=(OSD=retro RETRO=1 NOWERROR=1 OS=linux TARGETOS=linux CONFIG=libretro NO_USE_MIDI=1 TARGET=mame PYTHON_EXECUTABLE=python3)
     isPlatform "64bit" && params+=(PTR64=1)
     echo "${params[@]}"
 }
 
 function depends_lr-mame() {
+    if [[ "$__gcc_version" -lt 7 ]]; then
+        md_ret_errors+=("Sorry, you need an OS with gcc 7 or newer to compile $md_id")
+        return 1
+    fi
     local depends=(libasound2-dev)
     isPlatform "gles" && depends+=(libgles2-mesa-dev)
     isPlatform "gl" && depends+=(libglu1-mesa-dev)
@@ -40,11 +39,7 @@ function sources_lr-mame() {
 }
 
 function build_lr-mame() {
-    if isPlatform "64bit"; then
-        rpSwap on 10240
-    else
-        rpSwap on 6144
-    fi
+    rpSwap on 4096
     local params=($(_get_params_lr-mame) SUBTARGET=arcade)
     make clean
     make "${params[@]}"

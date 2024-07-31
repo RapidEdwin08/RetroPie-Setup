@@ -15,7 +15,6 @@ rp_module_help="ROM Extensions: .bin .smc .sfc .fig .swc .mgd .zip\n\nCopy your 
 rp_module_licence="NONCOM https://raw.githubusercontent.com/libretro/snes9x/master/LICENSE"
 rp_module_repo="git https://github.com/libretro/snes9x.git master"
 rp_module_section="main armv6=opt armv7=opt"
-rp_module_flags="nodistcc"
 
 function sources_lr-snes9x() {
     gitPullOrClone
@@ -27,7 +26,8 @@ function build_lr-snes9x() {
 
     cd libretro
     make "${params[@]}" clean
-    make "${params[@]}"
+    # temporarily disable distcc due to segfaults with cross compiler and lto
+    DISTCC_HOSTS="" make "${params[@]}"
     md_ret_require="$md_build/libretro/snes9x_libretro.so"
 }
 

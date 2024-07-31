@@ -13,7 +13,7 @@ rp_module_id="lr-mess"
 rp_module_desc="MESS emulator - MESS Port for libretro"
 rp_module_help="see wiki for detailed explanation"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/libretro/mame/master/COPYING"
-rp_module_repo="git https://github.com/libretro/mame.git :_get_version_lr-mame"
+rp_module_repo="git https://github.com/libretro/mame.git master"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -26,11 +26,7 @@ function sources_lr-mess() {
 }
 
 function build_lr-mess() {
-    if isPlatform "64bit"; then
-        rpSwap on 10240
-    else
-        rpSwap on 6144
-    fi
+    rpSwap on 4096
     local params=($(_get_params_lr-mame) SUBTARGET=mess)
     make clean
     make "${params[@]}"
