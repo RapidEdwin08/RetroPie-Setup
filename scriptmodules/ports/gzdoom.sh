@@ -80,13 +80,29 @@ function install_gzdoom() {
 }
 
 function add_games_gzdoom() {
-    local params=("-fullscreen")
+    local params=("-fullscreen -config $romdir/ports/doom/gzdoom.ini -savedir $romdir/ports/doom/gzdoom-saves")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
-
-    # FluidSynth is too memory/CPU intensive, use OPL emulation for MIDI
-    if isPlatform "arm"; then
-        params+=("+set snd_mididevice -3")
+    
+    # https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
+    # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
+    # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
+    # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
+    # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
+    # 4 (Legacy): Emulates lighting of Legacy 1.4's GL renderer.
+    # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    params+=("+gl_maplightmode 8")
+    
+    ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
+    if isPlatform "arm"; then # FluidSynth is too memory/CPU intensive
+        params+=("'+set snd_mididevice -2'")
+    else
+        params+=("'+snd_mididevice -5'")
     fi
+    
+    # Music Volume
+    params+=("+snd_musicvolume 1")
+    
     # when using the 32bit version on GLES platforms, pre-set the renderer
     if isPlatform "32bit" && hasFlag "gles"; then
         params+=("+set vid_preferbackend 2")
@@ -101,6 +117,8 @@ function add_games_gzdoom() {
 
 function configure_gzdoom() {
     mkRomDir "ports/doom"
+	mkRomDir "ports/doom/mods"
+	mkRomDir "ports/doom/gzdoom-saves"
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 

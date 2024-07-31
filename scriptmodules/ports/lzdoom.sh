@@ -32,7 +32,6 @@ function sources_lzdoom() {
         applyPatch "$md_data/01_remove_cmake_arm_options.diff"
         # patch the 21.06 version of LZMA-SDK to disable the CRC32 ARMv8 intrinsics forced for ARM CPUs
         applyPatch "$md_data/02_lzma_sdk_dont_force_arm_crc32.diff"
-    fi
 }
 
 function build_lzdoom() {
@@ -59,7 +58,7 @@ function install_lzdoom() {
 }
 
 function add_games_lzdoom() {
-    local params=("+fullscreen 1")
+    local params=("+fullscreen 1 -config $romdir/ports/doom/lzdoom.ini -savedir $romdir/ports/doom/lzdoom-saves")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
 
     if isPlatform "mesa" || isPlatform "gl"; then
@@ -68,10 +67,15 @@ function add_games_lzdoom() {
         params+=("+vid_renderer 0")
     fi
 
-    # FluidSynth is too memory/CPU intensive
-    if isPlatform "arm"; then
-        params+=("+snd_mididevice -3")
+    ## -1 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
+    if isPlatform "arm"; then # FluidSynth is too memory/CPU intensive
+        params+=("'+set snd_mididevice -2'")
+    else
+        params+=("'+snd_mididevice -1'")
     fi
+    
+    # Music Volume
+    params+=("+snd_musicvolume 1")
 
     if isPlatform "kms"; then
         params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
@@ -82,6 +86,8 @@ function add_games_lzdoom() {
 
 function configure_lzdoom() {
     mkRomDir "ports/doom"
+    mkRomDir "ports/doom/mods"
+    mkRomDir "ports/doom/lzdoom-saves"
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 
