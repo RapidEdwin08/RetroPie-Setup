@@ -66,7 +66,6 @@ function _config_files_skyscraper() {
         'peas.json'
         'platforms_idmap.csv'
         'resources'
-        'supplementary/bash-completion/Skyscraper.bash'
         'screenscraper_platforms.json'
         'tgdb_developers.json'
         'tgdb_genres.json'
@@ -74,16 +73,6 @@ function _config_files_skyscraper() {
         'tgdb_publishers.json'
     )
     echo "${config_files[@]}"
-}
-
-function remove_skyscraper() {
-    md_ret_info+=("Skyscraper's cache in ~/.skyscraper/cache/ is not empty and is not removed.")
-
-    # Remove possible per-user deployment introduced with v3.9.3
-    rm -f "$home/.bash_completion.d/Skyscraper.bash"
-
-    rm -f "/etc/bash_completion.d/Skyscraper.bash"
-    rm -f "/usr/local/bin/Skyscraper"
 }
 
 # Get the location of the cached resources folder. In v3+, this changed to 'cache'.
@@ -158,13 +147,13 @@ function _purge_platform_skyscraper() {
 
 function _get_ver_skyscraper() {
     if [[ -f "$md_inst/Skyscraper" ]]; then
-        echo $(sudo -u "$user" "$md_inst/Skyscraper" -h | grep 'Running Skyscraper' | cut -d' ' -f 3 | tr -d v 2>/dev/null)
+        echo $(sudo -u "$user" "$md_inst/Skyscraper" --version | cut -d' ' -f2 2>/dev/null)
     fi
 }
 
 function _check_ver_skyscraper() {
     ver=$(_get_ver_skyscraper)
-    if ! compareVersions "$ver" ge "3.5"; then
+    if compareVersions "$ver" lt "3.5"; then
         printMsgs "dialog" "The version of Skyscraper you currently have installed is incompatible with options used by this script. Please update Skyscraper to the latest version to continue."
         return 1
     fi
@@ -174,6 +163,11 @@ function _check_ver_skyscraper() {
 # List any non-empty systems found in the ROM folder
 function _list_systems_skyscraper() {
     find -L "$romdir/" -mindepth 1 -maxdepth 1 -type d -not -empty | sort -u
+}
+
+function remove_skyscraper() {
+    # On removal of the package, purge the cache
+    _purge_skyscraper
 }
 
 function configure_skyscraper() {
@@ -223,12 +217,13 @@ function configure_skyscraper() {
 }
 
 function _init_config_skyscraper() {
+
     local config_files=($(_config_files_skyscraper))
 
     # assume new(er) install
     mkdir -p .pristine_cfgs
     for cf in "${config_files[@]}"; do
-        bn=${cf##*/} # cut off all folders
+        bn=${cf#*/} # cut off cache/
         if [[ -e "$md_inst/$bn" ]]; then
             cp -rf "$md_inst/$bn" ".pristine_cfgs/"
             rm -rf "$md_inst/$bn"
@@ -280,31 +275,19 @@ function _init_config_skyscraper() {
     # Create the cache folder and add the sample 'priorities.xml' file to it
     mkUserDir "$scraper_conf_dir/cache"
     cp -f "$md_inst/.pristine_cfgs/priorities.xml.example" "$scraper_conf_dir/cache"
-
-    # Deploy programmable completion script
-    cp -f "$md_inst/.pristine_cfgs/Skyscraper.bash" "/etc/bash_completion.d/"
-    # Ease of use but also needed for proper completion
-    ln -sf "$md_inst/Skyscraper" "/usr/local/bin/Skyscraper"
-
-    # Remove possible per-user deployment introduced with v3.9.3
-    rm -f "$home/.bash_completion.d/Skyscraper.bash"
 }
 
-# read scriptmodule's skyscraper.cfg and prepare the command line parameters
-function _get_clioptions_skyscraper() {
-    local system=$1
-    local scrape_module=$2
+# Scrape one system, passed as parameter
+function _scrape_skyscraper() {
+    local system="$1"
 
-    local params=()
-    local flags
+    [[ -z "$system" ]] && return
 
     iniConfig " = " '"' "$configdir/all/skyscraper.cfg"
     eval $(_load_config_skyscraper)
 
-    [[ "$system" != "<platform>" ]] && system=\"$system\"
-
-    params+=(-p "$system")
-    flags="unattend,skipped,"
+    local -a params=(-p "$system")
+    local flags="unattend,skipped,"
 
     [[ "$download_videos" -eq 1 ]] && flags+="videos,"
 
@@ -334,7 +317,7 @@ function _get_clioptions_skyscraper() {
 
     # If 2nd parameter is unset, use the configured scraping source, otherwise scrape from cache.
     # Scraping from cache means we can omit '-s' from the parameter list.
-    if [[ -z "$scrape_module" ]]; then
+    if [[ -z "$2" ]]; then
         params+=(-s "$scrape_source")
     fi
 
@@ -344,24 +327,11 @@ function _get_clioptions_skyscraper() {
     flags=${flags::-1}
 
     params+=(--flags "$flags")
-    echo "${params[@]}"
-}
 
-
-# Scrape one system, passed as parameter
-function _scrape_skyscraper() {
-    local system="$1"
-    local scrape_module="$2"
-
-    [[ -z "$system" ]] && return
-
-    local params
-    params=$(_get_clioptions_skyscraper "$system" "$scrape_module")
-    declare -a "params_arr=($params)"
     # trap ctrl+c and return if pressed (rather than exiting retropie-setup etc)
     trap 'trap 2; return 1' INT
-        sudo -u "$user" stdbuf -o0 "$md_inst/Skyscraper" "${params_arr[@]}"
-        echo -e "\nCOMMAND LINE USED:\n $md_inst/Skyscraper" "${params}"
+        sudo -u "$user" stdbuf -o0  "$md_inst/Skyscraper" "${params[@]}"
+        echo -e "\nCOMMAND LINE USED:\n $md_inst/Skyscraper" "${params[@]}"
         sleep 2
     trap 2
 }
@@ -394,24 +364,14 @@ function _scrape_chosen_skyscraper() {
     [[ ${#choices[@]} -eq 0 || $? -eq 1 ]] && return 1
 
     # Confirm with the user that scraping can start
-    local cli=("$md_inst/Skyscraper ")
-    cli+=$(_get_clioptions_skyscraper "<platform>" "")
-
-    local sky_cmd
-    sky_cmd=$(echo "${cli[@]}" | sed 's/ -/ \\\\n -/g')
-
-    local msg="This will start the gathering process, which can take a long time if you have a large game collection.\n\n"
-    msg+="You can interrupt this process anytime by pressing \ZbCtrl+C\Zn.\n\n"
-    msg+="For each selected <platform> Skyscraper is run with these commandline options:\n\n$sky_cmd"
-
-    dialog --clear --colors --yes-label "Proceed" --no-label "Abort" --yesno "$msg" 20 70 2>&1 >/dev/tty
+    dialog --clear --colors --yes-label "Proceed" --no-label "Abort" --yesno "This will start the gathering process, which can take a long time if you have a large game collection.\n\nYou can interrupt this process anytime by pressing \ZbCtrl+C\Zn.\nProceed ?" 12 70 2>&1 >/dev/tty
     [[ ! $? -eq 0 ]] && return 1
 
     local choice
 
     for choice in "${choices[@]}"; do
         choice="${options[choice*3-2]}"
-        _scrape_skyscraper "$choice" ""
+        _scrape_skyscraper "$choice" "$@"
     done
 }
 
@@ -444,7 +404,7 @@ function _generate_chosen_skyscraper() {
 
     for choice in "${choices[@]}"; do
         choice="${options[choice*3-2]}"
-        _scrape_skyscraper "$choice" "cache"
+        _scrape_skyscraper "$choice" "cache" "$@"
     done
 }
 
@@ -547,10 +507,8 @@ function gui_skyscraper() {
         [1]=screenscraper
         [2]=arcadedb
         [3]=thegamesdb
-        [4]=mobygames
-        [5]=openretro
-        [6]=igdb
-        [7]=worldofspectrum
+        [4]=openretro
+        [5]=worldofspectrum
     )
     s_source+=(
         [10]=esgamelist
@@ -561,10 +519,8 @@ function gui_skyscraper() {
         [1]=ScreenScraper
         [2]=ArcadeDB
         [3]=TheGamesDB
-        [4]=MobyGames
-        [5]=OpenRetro
-        [6]="Internet Game Database"
-        [7]="World of Spectrum"
+        [4]=OpenRetro
+        [5]="World of Spectrum"
     )
     s_source_names+=(
         [10]="EmulationStation Gamelist"

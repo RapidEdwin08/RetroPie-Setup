@@ -173,10 +173,7 @@ function build_emulationstation() {
             compareVersions $gles_ver lt 2.0  && params+=(-DUSE_GLES1=On)
         else
             params+=(-DGL=On)
-            # mesa specific check of OpenGL version
             local gl_ver=$(sudo -u $user glxinfo -B | grep -oP 'Max compat profile version:\s\K.*')
-            # generic fallback check of OpenGL version
-            [[ -z "$gl_ver" ]] && gl_ver=$(sudo -u $user glxinfo -B | grep -oP "OpenGL version string: \K[^ ]+")
             compareVersions $gl_ver gt 2.0 && params+=(-DUSE_GL21=On)
         fi
     elif isPlatform "gles"; then
@@ -252,10 +249,11 @@ if [[ \$(id -u) -eq 0 ]]; then
     exit 1
 fi
 
-# use SDL2 wayland video driver if wayland session is detected, but...
-# Emulationstation has focus problems under Ubuntu 22.04's GNOME on Wayland session, so don't use the SDL2's Wayland driver in that combination
+# use SDL2 wayland video driver if wayland session is detected.
+# Emulationstation has focus problems under Ubuntu 22.04's GNOME on Wayland session. Don't use SDL2's wayland driver and run 
+# emulationstation with --fullscreen-borderless if desktop session is GNOME on Wayland.
 if [[ "\$WAYLAND_DISPLAY" == wayland* ]]; then
-    [[ "\$XDG_CURRENT_DESKTOP" == *GNOME ]] || export SDL_VIDEODRIVER=wayland
+    [[ "\$XDG_CURRENT_DESKTOP" == *GNOME ]] && set -- "\$@" "--fullscreen-borderless" || export SDL_VIDEODRIVER=wayland
 fi
 
 # save current tty/vt number for use with X so it can be launched on the correct tty

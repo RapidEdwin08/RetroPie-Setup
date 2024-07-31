@@ -10,53 +10,45 @@
 #
 
 rp_module_id="steamcontroller"
-rp_module_desc="User-mode driver for Steam Controller"
-rp_module_help="Steam Controller Driver from https://github.com/Ryochan7/sc-controller"
-rp_module_licence="GPL2 https://raw.githubusercontent.com/Ryochan7/sc-controller/python3/LICENSE"
-rp_module_repo="git https://github.com/Ryochan7/sc-controller python3"
+rp_module_desc="Standalone Steam Controller Driver"
+rp_module_help="Steam Controller Driver from https://github.com/ynsta/steamcontroller"
+rp_module_licence="MIT https://raw.githubusercontent.com/ynsta/steamcontroller/master/LICENSE"
+rp_module_repo="git https://github.com/ynsta/steamcontroller.git master"
 rp_module_section="driver"
+rp_module_flags="noinstclean"
 
-function _update_hook_steamcontroller() {
-    # remove the start command from the previous scriptmodule version
-    if rp_isInstalled "$md_id"; then
-        sed -i "/bin\/sc-.*.py/d" /etc/rc.local
-    fi
-}
 function depends_steamcontroller() {
-    getDepends python3-virtualenv python3-dev python3-setuptools
+    getDepends virtualenv python3-dev
 }
 
 function sources_steamcontroller() {
-    gitPullOrClone
+    gitPullOrClone "$md_inst"
 }
 
 function install_steamcontroller() {
-    # build the driver in a virtualenv created in $md_inst
-    virtualenv -p python3 "$md_inst"
-    source "$md_inst/bin/activate"
-    pip3 install libusb1 evdev
-    pip3 install "sccontroller @ file://$md_build"
-    deactivate
-
-    # copy the default controller profiles
-    md_ret_files=("default_profiles")
+    cd "$md_inst"
+    chown -R "$user:$user"  "$md_inst"
+    sudo -u $user bash -c "\
+        virtualenv -p python3 --no-site-packages \"$md_inst\"; \
+        source bin/activate; \
+        pip3 install libusb1; \
+        python3 setup.py install; \
+    "
 }
 
 function enable_steamcontroller() {
-    local profile="$1"
-    [[ -z "$profile" ]] && profile="XBox Controller"
+    local mode="$1"
+    [[ -z "$mode" ]] && mode="xbox"
 
-    local config="\"$md_inst/bin/scc-daemon\" \"$md_inst/default_profiles/$profile.sccprofile\" start"
+    local config="\"$md_inst/bin/sc-$mode.py\" start"
 
     disable_steamcontroller
     sed -i "s|^exit 0$|${config}\\nexit 0|" /etc/rc.local
-    printMsgs "dialog" "Steamcontroller enabled in /etc/rc.local with the following profile:\n\n$profile\n\nIt will be started on next boot."
+    printMsgs "dialog" "$md_id enabled in /etc/rc.local with the following config\n\n$config\n\nIt will be started on next boot."
 }
 
 function disable_steamcontroller() {
-    sed -i "/bin\/sc-.*.py/d" /etc/rc.local           # previous version
-    sed -i "/bin\/scc-daemon.*start/d" /etc/rc.local  # current version
-    $md_inst/bin/scc-daemon stop
+    sed -i "/bin\/sc-.*.py/d" /etc/rc.local
 }
 
 function remove_steamcontroller() {
@@ -65,12 +57,9 @@ function remove_steamcontroller() {
 }
 
 function configure_steamcontroller() {
-    cat >/etc/udev/rules.d/99-steam-controller.rules <<_EOF_
+    cat >/etc/udev/rules.d/99-steam-controller.rules <<\_EOF_
 # Steam controller keyboard/mouse mode
 SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", GROUP="input", MODE="0660"
-
-# Valve HID devices over bluetooth hidraw
-KERNEL=="hidraw*", KERNELS=="*28de:*", MODE="0660", GROUP="input", TAG+="uaccess"
 
 # Steam controller gamepad mode
 KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
@@ -80,19 +69,19 @@ _EOF_
 function gui_steamcontroller() {
     local cmd=(dialog --backtitle "$__backtitle" --menu "Choose an option." 22 86 16)
     local options=(
-        1 "Enable Steamcontroller (Xbox controller mode)"
-        2 "Enable Steamcontroller (Desktop mouse/keyboard mode)"
-        3 "Disable Steamcontroller"
+        1 "Enable steamcontroller (xbox 360 mode)"
+        2 "Enable steamcontroller (desktop mouse/keyboard mode)"
+        3 "Disable steamcontroller"
     )
     while true; do
         local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         if [[ -n "$choice" ]]; then
             case "$choice" in
                 1)
-                    enable_steamcontroller "XBox Controller"
+                    enable_steamcontroller xbox
                     ;;
                 2)
-                    enable_steamcontroller "Desktop"
+                    enable_steamcontroller desktop
                     ;;
                 3)
                     disable_steamcontroller

@@ -25,7 +25,7 @@ function _update_hook_runcommand() {
 
 function depends_runcommand() {
     local depends=()
-    isPlatform "rpi" && isPlatform "dispmanx" && depends+=(libraspberrypi-bin)
+    isPlatform "rpi" && depends+=(libraspberrypi-bin)
     isPlatform "rpi" || isPlatform "kms" && depends+=(fbi fbset)
     isPlatform "x11" && depends+=(feh)
     getDepends "${depends[@]}"
@@ -52,7 +52,7 @@ function install_bin_runcommand() {
 
     # needed for KMS modesetting (debian buster or later only)
     if [[ "$__os_debian_ver" -ge 10 ]]; then
-        rp_installModule "kmsxx" "_autoupdate_"
+        rp_installModule "mesa-drm" "_autoupdate_"
     fi
 
     md_ret_require="$md_inst/runcommand.sh"

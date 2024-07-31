@@ -20,6 +20,8 @@ function get_ver_sdl2() {
         echo "2.26.3"
     else
         echo "2.0.10"
+        #64bit RetroArch Pi3
+		#echo "2.0.20"
     fi
 }
 

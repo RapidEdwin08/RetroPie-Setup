@@ -90,7 +90,7 @@ JOY2KEY="$ROOTDIR/admin/joy2key/joy2key"
 
 # modesetting tools
 TVSERVICE="/opt/vc/bin/tvservice"
-KMSTOOL="$ROOTDIR/supplementary/kmsxx/kmsprint-rp"
+KMSTOOL="$ROOTDIR/supplementary/mesa-drm/modetest"
 XRANDR="xrandr"
 
 source "$ROOTDIR/lib/inifuncs.sh"
@@ -129,7 +129,7 @@ function get_config() {
     if [[ -n "$DISPLAY" ]] && $XRANDR &>/dev/null; then
         HAS_MODESET="x11"
     # copy kms tool output to global variable to avoid multiple invocations
-    elif [[ -c /dev/dri/card0 ]] && KMS_BUFFER="$($KMSTOOL 2>/dev/null)"; then
+    elif KMS_BUFFER="$($KMSTOOL -r 2>/dev/null)"; then
         HAS_MODESET="kms"
     elif [[ -f "$TVSERVICE" ]]; then
         HAS_MODESET="tvs"
@@ -241,23 +241,37 @@ function get_all_tvs_modes() {
 
 function get_all_kms_modes() {
     declare -Ag MODE
-    default_mode="$(echo "$KMS_BUFFER" | grep -Em1 "^Mode: [0-9]+ crtc")"
-    crtc="$(echo "$default_mode" | cut -d' ' -f  4)"
-    crtc_encoder="$(echo "$KMS_BUFFER" | grep "Encoder map:" | awk -v crtc="$crtc" '$5 == crtc { print $3 }')"
+    local default_mode="$(echo "$KMS_BUFFER" | grep -Em1 "^Mode:.*(driver|userdef).*crtc")"
+    local crtc="$(echo "$default_mode" | awk '{ print $(NF-1) }')"
+    local crtc_encoder="$(echo "$KMS_BUFFER" | grep "Encoder map:" | awk -v crtc="$crtc" '$5 == crtc { print $3 }')"
+
+    local info
+    local line
+    local mode_id
 
     # add default mode as fallback in case real mode cannot be mapped
-    MODE[def-def]="$(echo "$default_mode" | cut -d' ' -f5-)"
+    MODE[def-def]="$(echo "$default_mode" | awk '{--NF --NF --NF; print}' | cut -c7-)"
 
-    # parse only the video modes connected to the current active crtc
-    while read -r mode_str mode_id con encoder_id info; do
-           # we only need 2nd column (mode index) and the 5+ columns (resolution info)
-           # populate resolution info into arrays (using mapped crtc encoder value)
-           MODE_ID+=($crtc-$mode_id)
-           MODE[$crtc-$mode_id]="$info"
+    while read -r line; do
+        # encoder id
+        encoder_id="$(echo "$line" | awk '{ print $(NF-1) }')"
 
-           # if string matches default mode, add a special mapped entry
-           [[ "$default_mode" =~ "$info" ]] && MODE[map-map]="$crtc $mode_id"
-    done < <(echo "$KMS_BUFFER" | grep -E "^Mode: [0-9]+ connector $crtc_encoder")
+        # only match encoders that are linked to the currently active crtc
+        if [[ "$encoder_id" == "$crtc_encoder" ]]; then
+            # mode id
+            mode_id="$(echo "$line" | awk '{ print $NF }')"
+
+            # make output more human-readable
+            info="$(echo "$line" | awk '{--NF --NF --NF; print}' | cut -c7-)"
+
+            # populate resolution into arrays (using mapped crtc encoder value)
+            MODE_ID+=($crtc-$mode_id)
+            MODE[$crtc-$mode_id]="$info"
+
+            # if string matches default mode, add a special mapped entry
+            [[ "$default_mode" =~ "$info" ]] && MODE[map-map]="$crtc $mode_id"
+        fi
+    done < <(echo "$KMS_BUFFER" | grep "Mode:" | grep "connector")
 }
 
 function get_all_x11_modes()
@@ -359,7 +373,7 @@ function get_kms_mode_info() {
         fi
     fi
 
-    # split resolution (1st column)
+    # split resolution
     status=(${MODE[${mode_id[0]}-${mode_id[1]}]/x/ })
 
     # get crtc id
@@ -370,14 +384,13 @@ function get_kms_mode_info() {
 
     # get mode resolution
     mode_info[2]="${status[0]}"
-    # yres may have an ending 'i'(nterlace) flag
-    mode_info[3]="${status[1]/i/}"
+    mode_info[3]="${status[1]}"
 
-    # get aspect ratio (5th column)
+    # get aspect ratio
     mode_info[4]="${status[5]}"
 
-    # get refresh rate (4th column, remove surrounding brackets)
-    mode_info[5]="${status[4]//[()]/}"
+    # get refresh rate
+    mode_info[5]="${status[3]}"
 
     echo "${mode_info[@]}"
 }
@@ -946,7 +959,6 @@ _EOF_
                 cat >>"$xinitrc" <<_EOF_
 matchbox-window-manager ${params[@]} &
 sleep 0.5
-xset -dpms s off s noblank
 _EOF_
             fi
 
@@ -1049,9 +1061,6 @@ function config_backend() {
                 fi
                 COMMAND="SDL1_VIDEODRIVER=dispmanx $COMMAND"
                 ;;
-            sdl12-compat)
-                COMMAND="LD_PRELOAD=\"$ROOTDIR/supplementary/sdl12-compat/libSDL-1.2.so.0\" $COMMAND"
-                ;;
             x11)
                 XINIT=1
                 XINIT_WM=1
@@ -1078,8 +1087,7 @@ function retroarch_append_config() {
     touch "$conf"
     iniConfig " = " '"' "$conf"
 
-    # strip any suffix decimals appearing in refresh rate, just for comparison
-    if [[ -n "$HAS_MODESET" && "${MODE_CUR[5]%.*}" -gt 0 ]]; then
+    if [[ -n "$HAS_MODESET" && "${MODE_CUR[5]}" -gt 0 ]]; then
         # set video_refresh_rate in our config to the same as the screen refresh
         iniSet "video_refresh_rate" "${MODE_CUR[5]}"
     fi
@@ -1193,30 +1201,19 @@ function get_sys_command() {
     quake_dir="${quake_dir%/*}"
     COMMAND="${COMMAND//\%QUAKEDIR\%/\"$quake_dir\"}"
 
-    # check if COMMAND starts with a launch OPTION:
-    if [[ "$COMMAND" =~ ^([A-Z\-]+?):(.*)$ ]]; then
-        # extract the command
-        COMMAND="${BASH_REMATCH[2]}"
-
-        case "${BASH_REMATCH[1]}" in
-            # if it starts with CON: it is a console application (so we don't redirect stdout later)
-            CON)
-                CONSOLE_OUT=1
-                ;;
-            # if it starts with XINIT it is an X11 application (so we need to launch via xinit)
-            XINIT*)
-                XINIT=1
-                ;;&
-            # if it starts with XINIT-WM or XINIT-WMC (with cursor) it is an X11 application needing a window manager
-            XINIT-WM)
-                XINIT_WM=1
-                ;;
-            XINIT-WMC)
-                XINIT_WM=2
-                ;;
-        esac
+    # if it starts with CON: it is a console application (so we don't redirect stdout later)
+    if [[ "$COMMAND" == CON:* ]]; then
+        # remove CON:
+        COMMAND="${COMMAND:4}"
+        CONSOLE_OUT=1
     fi
 
+    # if it starts with XINIT: it is an X11 application (so we need to launch via xinit)
+    if [[ "$COMMAND" == XINIT:* ]]; then
+        # remove XINIT:
+        COMMAND="${COMMAND:6}"
+        XINIT=1
+    fi
 }
 
 function show_launch() {
@@ -1315,11 +1312,11 @@ function launch_command() {
     if [[ "$CONSOLE_OUT" -eq 1 ]]; then
         # turn cursor on
         tput cnorm
-        eval "$COMMAND" </dev/tty 2>>"$LOG"
+        eval $COMMAND </dev/tty 2>>"$LOG"
         ret=$?
         tput civis
     else
-        eval "$COMMAND" </dev/tty &>>"$LOG"
+        eval $COMMAND </dev/tty &>>"$LOG"
         ret=$?
     fi
     return $ret
