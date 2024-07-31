@@ -15,11 +15,11 @@ rp_module_help="ROM Extensions: .z64 .n64 .v64\n\nCopy your N64 roms to $romdir/
 rp_module_licence="GPL2 https://raw.githubusercontent.com/mupen64plus/mupen64plus-core/master/LICENSES"
 rp_module_repo=":_pkg_info_mupen64plus"
 rp_module_section="main"
-rp_module_flags="sdl2 nodistcc"
+rp_module_flags="sdl2"
 
 function depends_mupen64plus() {
     local depends=(cmake libsamplerate0-dev libspeexdsp-dev libsdl2-dev libpng-dev libfreetype6-dev fonts-freefont-ttf libboost-filesystem-dev)
-    isPlatform "videocore" && depends+=(libraspberrypi-dev)
+    isPlatform "rpi" && depends+=(libraspberrypi-bin libraspberrypi-dev)
     isPlatform "mesa" && depends+=(libgles2-mesa-dev)
     isPlatform "gl" && depends+=(libglew-dev libglu1-mesa-dev)
     isPlatform "x86" && depends+=(nasm)
@@ -65,8 +65,6 @@ function _get_repos_mupen64plus() {
     if compareVersions "$cmake_ver" lt 3.9; then
         commit="8a9d52b41b33d853445f0779dd2b9f5ec4ecdda8"
     fi
-    # avoid a GLideN64 regression introduced in 1a0621d
-    isPlatform "gles" && commit="5bbf55df8c61ab86b5e41a97906bc99ce9b00a36"
     repos+=("gonetz GLideN64 master $commit")
 
     local repo
@@ -154,7 +152,11 @@ function sources_mupen64plus() {
 }
 
 function build_mupen64plus() {
-    rpSwap on 750
+    if isPlatform "64bit"; then
+        rpSwap on 2048
+    else
+        rpSwap on 750
+    fi
 
     local dir
     local params=()
@@ -171,14 +173,14 @@ function build_mupen64plus() {
             isPlatform "x86" && params+=("SSE=SSE2")
             isPlatform "armv6" && params+=("HOST_CPU=armv6")
             isPlatform "armv7" && params+=("HOST_CPU=armv7")
-            isPlatform "armv8" && params+=("HOST_CPU=armv8")
             isPlatform "aarch64" && params+=("HOST_CPU=aarch64")
             # we don't ship a Vulkan enabled front-end, so disable Vulkan in the core project
             params+=("VULKAN=0")
 
             [[ "$dir" == "mupen64plus-ui-console" ]] && params+=("COREDIR=$md_inst/lib/" "PLUGINDIR=$md_inst/lib/mupen64plus/")
             make -C "$dir/projects/unix" "${params[@]}" clean
-            make -C "$dir/projects/unix" all "${params[@]}" OPTFLAGS="$CFLAGS -O3 -flto"
+            # temporarily disable distcc due to segfaults with cross compiler and lto
+            DISTCC_HOSTS="" make -C "$dir/projects/unix" all "${params[@]}" OPTFLAGS="$CFLAGS -O3 -flto"
         fi
     done
 

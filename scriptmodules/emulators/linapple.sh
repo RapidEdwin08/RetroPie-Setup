@@ -60,7 +60,6 @@ function configure_linapple() {
     done
 
     isPlatform "dispmanx" && setBackend "$md_id" "dispmanx"
-    ! isPlatform "dispmanx" && isPlatform "kms" && setBackend "$md_id" "sdl12-compat"
 
     mkUserDir "$md_conf_root/apple2"
     moveConfigDir "$home/.linapple" "$md_conf_root/apple2"

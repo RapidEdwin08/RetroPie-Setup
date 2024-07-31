@@ -27,16 +27,10 @@ function sources_yabasanshiro() {
 }
 
 function build_yabasanshiro() {
-    local params=(-DGIT_EXECUTABLE=/usr/bin/git -DUSE_EGL=ON -DYAB_PORTS=retro_arena -DYAB_WANT_DYNAREC_DEVMIYAX=ON -DYAB_WANT_ARM7=ON -DYAB_WANT_OPENAL=OFF -DCMAKE_INSTALL_PREFIX="$md_inst")
-    isPlatform "32bit" && params+=(-DCMAKE_SYSTEM_PROCESSOR=armv7-a)
-    isPlatform "64bit" && params+=(-DCMAKE_SYSTEM_PROCESSOR=aarch64)
-
-    export CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=199309L -D__PI4__ -D__RETORO_ARENA__"
-    export CXXFLAGS="$CXXFLAGS -D__PI4__ -D__RETORO_ARENA_"
-
-    rm -fr build && mkdir -p build
+    mkdir build
     cd build
-    cmake ../yabause/ "${params[@]}"
+    cmake ../yabause/ -DGIT_EXECUTABLE=/usr/bin/git -DYAB_PORTS=retro_arena -DYAB_WANT_DYNAREC_DEVMIYAX=ON -DYAB_WANT_ARM7=ON -DCMAKE_TOOLCHAIN_FILE=../yabause/src/retro_arena/pi4.cmake -DYAB_WANT_OPENAL=OFF -DCMAKE_INSTALL_PREFIX="$md_inst"
+    make clean
     make
     md_ret_require="$md_build/build/src/retro_arena/yabasanshiro"
 }

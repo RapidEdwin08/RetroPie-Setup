@@ -18,25 +18,11 @@ rp_module_section="opt"
 rp_module_flags="sdl2"
 
 function _get_branch_dosbox-staging() {
-    # use 0.80.1 for VideoCore devices, 0.81 and later require OpenGL
-    if isPlatform "videocore"; then
-        echo "v0.80.1"
-        return
-    fi
     download https://api.github.com/repos/dosbox-staging/dosbox-staging/releases/latest - | grep -m 1 tag_name | cut -d\" -f4
 }
 
 function depends_dosbox-staging() {
-    local depends
-    depends=(cmake libasound2-dev libglib2.0-dev libopusfile-dev libpng-dev libsdl2-dev libsdl2-net-dev libspeexdsp-dev meson ninja-build zlib1g-dev)
-    if [[ "$__os_debian_ver" -ge 11 ]]; then
-        depends+=(libslirp-dev libfluidsynth-dev)
-    else
-        # the slirp subproject requires libsdl2-image-dev to build
-        depends+=(libsdl2-image-dev)
-    fi
-
-    getDepends "${depends[@]}"
+    getDepends cmake libasound2-dev libglib2.0-dev libopusfile-dev libpng-dev libsdl2-dev libsdl2-net-dev libsdl2-image-dev libspeexdsp-dev meson ninja-build
 }
 
 function sources_dosbox-staging() {
@@ -49,7 +35,7 @@ function sources_dosbox-staging() {
 }
 
 function build_dosbox-staging() {
-    local params=(-Dprefix="$md_inst" -Ddatadir="resources" -Dtry_static_libs="iir,mt32emu")
+    local params=(-Dprefix="$md_inst" -Ddatadir="resources")
     # use the build local Meson installation if found
     local meson_cmd="meson"
     [[ -f "$md_build/meson/meson.py" ]] && meson_cmd="python3 $md_build/meson/meson.py"
@@ -72,7 +58,7 @@ function install_dosbox-staging() {
 function configure_dosbox-staging() {
     configure_dosbox
 
-    [[ "$md_mode" == "remove" ]] && return
+    [[ "$md_id" == "remove" ]] && return
 
     local config_dir="$md_conf_root/pc"
     chown -R $user: "$config_dir"

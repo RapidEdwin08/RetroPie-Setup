@@ -15,55 +15,40 @@ rp_module_help="ROM Extensions: .zip .7z\n\nCopy your MAME roms to either $romdi
 rp_module_licence="GPL2 https://raw.githubusercontent.com/mamedev/mame/master/COPYING"
 rp_module_repo="git https://github.com/mamedev/mame.git :_get_branch_mame"
 rp_module_section="exp"
-rp_module_flags="!mali !armv6 !:\$__gcc_version:-lt:7"
+rp_module_flags="!mali !armv6"
 
 function _get_branch_mame() {
-    # starting with 0.265, GCC 10.3 or later is required for full C++17 support
-    if compareVersions "$(gcc -dumpfullversion)" lt 10.3.0; then
-        echo "mame0264"
-        return
-    fi
     download https://api.github.com/repos/mamedev/mame/releases/latest - | grep -m 1 tag_name | cut -d\" -f4
 }
 
 function depends_mame() {
+    if [[ "$__gcc_version" -lt 7 ]]; then
+        md_ret_errors+=("Sorry, you need an OS with gcc 7 or newer to compile $md_id")
+        return 1
+    fi
+
     # Install required libraries required for compilation and running
     # Note: libxi-dev is required as of v0.210, because of flag changes for XInput
-    local depends=(libfontconfig1-dev libsdl2-ttf-dev libflac-dev libxinerama-dev libxi-dev libpulse-dev)
-    # build the MAME debugger only on X11 (desktop) platforms
-    isPlatform "x11" && depends+=(qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools)
-
-    getDepends "${depends[@]}"
+    getDepends libfontconfig1-dev qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libsdl2-ttf-dev libxinerama-dev libxi-dev libpulse-dev
 }
 
 function sources_mame() {
     gitPullOrClone
-    # lzma assumes hardware crc support on arm which breaks when building on armv7
-    isPlatform "armv7" && applyPatch "$md_data/lzma_armv7_crc.diff"
 }
 
 function build_mame() {
     # More memory is required for 64bit platforms
     if isPlatform "64bit"; then
-        rpSwap on 10240
-    else
         rpSwap on 8192
+    else
+        rpSwap on 4096
     fi
 
-    local params=(NOWERROR=1 ARCHOPTS=-U_FORTIFY_SOURCE PYTHON_EXECUTABLE=python3 OPTIMIZE=2 USE_SYSTEM_LIB_FLAC=1)
-    isPlatform "x11" && params+=(USE_QTDEBUG=1) || params+=(USE_QTDEBUG=0)
+    local params=(NOWERROR=1 ARCHOPTS=-U_FORTIFY_SOURCE PYTHON_EXECUTABLE=python3)
     # when building on ARM enable 'fsigned-char' for compiled code, fixes crashes in a few drivers
     isPlatform "arm" || isPlatform "aarch64" && params+=(ARCHOPTS_CXX=-fsigned-char)
-
-    # tell the linker to remove debugging info
-    LDFLAGS+=" -s"
-
-    # workaround for linker crash on bullseye (use gold linker)
-    if [[ "$__os_debian_ver" -eq 11 ]] && isPlatform "arm"; then
-        LDFLAGS+=" -fuse-ld=gold -Wl,--long-plt" make "${params[@]}"
-    else
-        QT_SELECT=5 make "${params[@]}"
-    fi
+    QT_SELECT=5 make "${params[@]}"
+    strip mame
 
     rpSwap off
     md_ret_require="$md_build/mame"

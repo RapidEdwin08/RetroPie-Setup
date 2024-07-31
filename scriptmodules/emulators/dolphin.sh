@@ -15,7 +15,7 @@ rp_module_help="ROM Extensions: .gcm .iso .wbfs .ciso .gcz .rvz .wad .wbfs\n\nCo
 rp_module_licence="GPL2 https://raw.githubusercontent.com/dolphin-emu/dolphin/master/COPYING"
 rp_module_repo="git https://github.com/dolphin-emu/dolphin.git master :_get_commit_dolphin"
 rp_module_section="exp"
-rp_module_flags="!all 64bit !:\$__gcc_version:-lt:8"
+rp_module_flags="!all 64bit"
 
 function _get_commit_dolphin() {
     local commit
@@ -31,6 +31,10 @@ function _get_commit_dolphin() {
 
 function depends_dolphin() {
     local depends=(cmake gettext pkg-config libao-dev libasound2-dev libavcodec-dev libavformat-dev libbluetooth-dev libenet-dev liblzo2-dev libminiupnpc-dev libopenal-dev libpulse-dev libreadline-dev libsfml-dev libsoil-dev libsoundtouch-dev libswscale-dev libusb-1.0-0-dev libxext-dev libxi-dev libxrandr-dev portaudio19-dev zlib1g-dev libudev-dev libevdev-dev libmbedtls-dev libcurl4-openssl-dev libegl1-mesa-dev liblzma-dev)
+    if [[ "$__gcc_version" -lt 8 ]]; then
+        md_ret_errors+=("Sorry, you need an OS with gcc 8 or newer to compile $md_id")
+        return 1
+    fi
     # check if qt6 is available, otherwise use qt5
     local has_qt6=$(apt-cache -qq madison qt6-base-private-dev | cut -d'|' -f1)
     if [[ -n "$has_qt6" ]]; then
@@ -44,12 +48,6 @@ function depends_dolphin() {
     else
         depends+=(qtbase5-private-dev)
     fi
-    # on KMS use x11 to start the emulator
-    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
-
-    # if using the latest version, add SDL2 as dependency, since it's mandatory
-    [[ "$(_get_commit_dolphin)" == "" ]] && depends+=(libsdl2-dev)
-
     getDepends "${depends[@]}"
 }
 
@@ -60,8 +58,8 @@ function sources_dolphin() {
 function build_dolphin() {
     mkdir build
     cd build
-    # use the bundled 'speexdsp' libs, distro versions before 1.2.1 trigger a 'cmake' error
-    cmake .. -DBUNDLE_SPEEX=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_ANALYTICS=OFF  -DUSE_DISCORD_PRESENCE=OFF -DCMAKE_INSTALL_PREFIX="$md_inst"
+    # use the bundled 'speexdsp' libs, distro versions before 1.2.1 produce a 'cmake' error
+    cmake .. -DBUNDLE_SPEEX=ON -DCMAKE_INSTALL_PREFIX="$md_inst"
     make clean
     make
     md_ret_require="$md_build/build/Binaries/dolphin-emu"
@@ -76,50 +74,23 @@ function configure_dolphin() {
     mkRomDir "gc"
     mkRomDir "wii"
 
-    local launch_prefix
-    isPlatform "kms" && launch_prefix="XINIT-WM:"
+    moveConfigDir "$home/.dolphin-emu" "$md_conf_root/gc"
 
-    addEmulator 0 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
-    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
-    addEmulator 0 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
-    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
+    if [[ ! -f "$md_conf_root/gc/Config/Dolphin.ini" ]]; then
+        mkdir -p "$md_conf_root/gc/Config"
+        cat >"$md_conf_root/gc/Config/Dolphin.ini" <<_EOF_
+[Display]
+FullscreenResolution = Auto
+Fullscreen = True
+_EOF_
+        chown -R $user:$user "$md_conf_root/gc/Config"
+    fi
+
+    addEmulator 1 "$md_id" "gc" "$md_inst/bin/dolphin-emu-nogui -e %ROM%"
+    addEmulator 0 "$md_id-gui" "gc" "$md_inst/bin/dolphin-emu -b -e %ROM%"
+    addEmulator 1 "$md_id" "wii" "$md_inst/bin/dolphin-emu-nogui -e %ROM%"
+    addEmulator 0 "$md_id-gui" "wii" "$md_inst/bin/dolphin-emu -b -e %ROM%"
 
     addSystem "gc"
     addSystem "wii"
-
-    [[ "$md_mode" == "remove" ]] && return
-
-    # Move the other dolphin-emu options, memory card saves etc
-    moveConfigDir "$home/.local/share/dolphin-emu" "$md_conf_root/gc/local"
-    mkUserDir "$md_conf_root/gc/local"
-
-    moveConfigDir "$home/.config/dolphin-emu" "$md_conf_root/gc/Config"
-    mkUserDir "$md_conf_root/gc/Config"
-    # preset a few options on a first installation
-    if [[ ! -f "$md_conf_root/gc/Config/Dolphin.ini" ]]; then
-        cat >"$md_conf_root/gc/Config/Dolphin.ini" <<_EOF_
-[Display]
-FullscreenDisplayRes = Auto
-Fullscreen = True
-RenderToMain = True
-KeepWindowOnTop = True
-[Interface]
-ConfirmStop = False
-[General]
-ISOPath0 = "$home/RetroPie/roms/gc"
-ISOPath1 = "$home/RetroPie/roms/wii"
-ISOPaths = 2
-[Core]
-AutoDiscChange = True
-_EOF_
-    fi
-    # use the GLES(3) render path on platforms where it's available
-    if [[ ! -f "$md_conf_root/gc/Config/GFX.ini" ]] && isPlatform "gles3"; then
-        cat >"$md_conf_root/gc/Config/GFX.ini" <<_EOF2_
-[Settings]
-PreferGLES = True
-_EOF2_
-    fi
-
-    chown -R $user:$user "$md_conf_root/gc/Config"
 }

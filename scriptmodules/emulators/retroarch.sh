@@ -12,7 +12,7 @@
 rp_module_id="retroarch"
 rp_module_desc="RetroArch - frontend to the libretro emulator cores - required by all lr-* emulators"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/libretro/RetroArch/master/COPYING"
-rp_module_repo="git https://github.com/retropie/RetroArch.git retropie-v1.19.0"
+rp_module_repo="git https://github.com/retropie/RetroArch.git retropie-v1.16.0"
 rp_module_section="core"
 
 function depends_retroarch() {
@@ -52,7 +52,6 @@ function build_retroarch() {
         isPlatform "gles31" && params+=(--enable-opengles3_1)
         isPlatform "gles32" && params+=(--enable-opengles3_2)
     fi
-    isPlatform "videocore" && params+=(--disable-crtswitchres)
     isPlatform "rpi" && isPlatform "mesa" && params+=(--disable-videocore)
     # Temporarily block dispmanx support for fkms until upstream support is fixed
     isPlatform "dispmanx" && ! isPlatform "kms" && params+=(--enable-dispmanx --disable-opengl1)
@@ -64,7 +63,7 @@ function build_retroarch() {
     ##! isPlatform "x11" && params+=(--disable-wayland)
     isPlatform "vero4k" && params+=(--enable-mali_fbdev --with-opengles_libs='-L/opt/vero3/lib')
     ##Use [pulse] instead of [alsathread] - ALSA lib pcm.c:8570:(snd_pcm_recover) underrun occurred
-    params+=(--enable-pulse)
+	params+=(--enable-pulse)
     ./configure --prefix="$md_inst" "${params[@]}"
     make clean
     make
@@ -284,13 +283,6 @@ function configure_retroarch() {
     # enable video shaders
     iniSet "video_shader_enable" "true"
 
-    # enable overlays by default
-    iniSet "input_overlay_enable" "true"
-
-    # disable save paths under sub-folders
-    iniSet "sort_savestates_enable" "false"
-    iniSet "sort_savefiles_enable" "false"
-
     copyDefaultConfig "$config" "$configdir/all/retroarch.cfg"
     rm "$config"
 
@@ -322,13 +314,6 @@ function configure_retroarch() {
     # don't save input remaps by default
     _set_config_option_retroarch "remap_save_on_exit" "false"
 
-    # enable overlays by default on upgrades
-    _set_config_option_retroarch "input_overlay_enable" "true"
-
-    # don't sort save files in sub-folders
-    _set_config_option_retroarch "sort_savefiles_enable" "false"
-    _set_config_option_retroarch "sort_savestates_enable" "false"
-
     # remapping hack for old 8bitdo firmware
     addAutoConf "8bitdo_hack" 0
 }
@@ -354,7 +339,7 @@ function keyboard_retroarch() {
         local value
         local values
         readarray -t values <<<"$choice"
-        iniConfig " = " '"' "$configdir/all/retroarch.cfg"
+        iniConfig " = " "" "$configdir/all/retroarch.cfg"
         i=0
         for value in "${values[@]}"; do
             iniSet "${key[$i]}" "$value" >/dev/null
@@ -454,7 +439,7 @@ function _set_config_option_retroarch()
 {
     local option="$1"
     local value="$2"
-    iniConfig " = " '"' "$configdir/all/retroarch.cfg"
+    iniConfig " = " "\"" "$configdir/all/retroarch.cfg"
     iniGet "$option"
     if [[ -z "$ini_value" ]]; then
         iniSet "$option" "$value"
