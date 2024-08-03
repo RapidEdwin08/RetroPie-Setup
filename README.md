@@ -26,8 +26,7 @@ git clone --depth=1 --branch 4.8.6 https://github.com/RapidEdwin08/RetroPie-Setu
 The script is executed with:
 
 ```shell
-cd RetroPie-Setup
-sudo ./retropie_setup.sh
+cd ~/RetroPie-Setup && sudo ./retropie_setup.sh; cd ~
 ```
 
 When you first run the script it may install some additional packages that are needed.
