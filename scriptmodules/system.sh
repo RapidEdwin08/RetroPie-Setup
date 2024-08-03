@@ -493,6 +493,8 @@ function get_platform() {
                 else
                     __platform="$architecture"
                 fi
+                ## Added here because ES still does not Include __platform=rpi5 when calling retropie_setup.sh
+                if [[ "$(tr -d '\0' 2>/dev/null < /proc/device-tree/model)" == "Raspberry Pi 5"* ]]; then __platform="rpi5"; fi
                 ;;
         esac
     fi
