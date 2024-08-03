@@ -20,7 +20,7 @@ rp_module_flags="!mali !x86"
 
 function depends_chocolate-doom() {
     #getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python-pil automake autoconf
-	getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf
+	getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf freepats
 }
 
 function sources_chocolate-doom() {
