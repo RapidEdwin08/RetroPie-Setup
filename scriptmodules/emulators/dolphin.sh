@@ -15,7 +15,7 @@ rp_module_help="ROM Extensions: .gcm .iso .wbfs .ciso .gcz .rvz .wad .wbfs\n\nCo
 rp_module_licence="GPL2 https://raw.githubusercontent.com/dolphin-emu/dolphin/master/COPYING"
 rp_module_repo="git https://github.com/dolphin-emu/dolphin.git master :_get_commit_dolphin"
 rp_module_section="exp"
-rp_module_flags="!all 64bit"
+rp_module_flags="!all 64bit !:\$__gcc_version:-lt:8"
 
 function _get_commit_dolphin() {
     local commit
@@ -62,6 +62,13 @@ function depends_dolphin() {
 
 function sources_dolphin() {
     gitPullOrClone
+    # Rasperry Pi OS 64bit Bookworm v20240704 Dolphin Build Errors
+    # ../build/dolphin/Source/Core/DolphinQt/Settings/GeneralPane.cpp:462:3: error: ‘m_checkbox_enable_analytics’ was not declared in this scope
+    # ../build/dolphin/Source/Core/DolphinQt/Settings/GeneralPane.cpp:464:3: error: ‘m_button_generate_new_identity’ was not declared in this scope
+    # Comment out the x3 Lines that lead to Dolphin Build Errors 20240805
+    sudo sed -i "s/m_checkbox_enable_analytics->SetDescription.*/\/\/m_checkbox_enable_analytics->SetDescription(tr(TR_ENABLE_ANALYTICS_DESCRIPTION));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
+    sudo sed -i "s/m_button_generate_new_identity->SetTitle.*/\/\/m_button_generate_new_identity->SetTitle(tr(\"Generate a New Statistics Identity\"));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
+    sudo sed -i "s/m_button_generate_new_identity->SetDescription.*/\/\/m_button_generate_new_identity->SetDescription(tr(TR_GENERATE_NEW_IDENTITY_DESCRIPTION));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
 }
 
 function build_dolphin() {
