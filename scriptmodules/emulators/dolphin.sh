@@ -66,9 +66,10 @@ function sources_dolphin() {
     # ../build/dolphin/Source/Core/DolphinQt/Settings/GeneralPane.cpp:462:3: error: ‘m_checkbox_enable_analytics’ was not declared in this scope
     # ../build/dolphin/Source/Core/DolphinQt/Settings/GeneralPane.cpp:464:3: error: ‘m_button_generate_new_identity’ was not declared in this scope
     # Comment out the x3 Lines that lead to Dolphin Build Errors 20240805
-    sudo sed -i "s/m_checkbox_enable_analytics->SetDescription.*/\/\/m_checkbox_enable_analytics->SetDescription(tr(TR_ENABLE_ANALYTICS_DESCRIPTION));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
-    sudo sed -i "s/m_button_generate_new_identity->SetTitle.*/\/\/m_button_generate_new_identity->SetTitle(tr(\"Generate a New Statistics Identity\"));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
-    sudo sed -i "s/m_button_generate_new_identity->SetDescription.*/\/\/m_button_generate_new_identity->SetDescription(tr(TR_GENERATE_NEW_IDENTITY_DESCRIPTION));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
+    # UPDATE: They seemed to have fixed this: https://github.com/dolphin-emu/dolphin/commit/316f7bfcbf41e345348a65cea4d005a8da14e3a1
+    ##sudo sed -i "s/m_checkbox_enable_analytics->SetDescription.*/\/\/m_checkbox_enable_analytics->SetDescription(tr(TR_ENABLE_ANALYTICS_DESCRIPTION));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
+    ##sudo sed -i "s/m_button_generate_new_identity->SetTitle.*/\/\/m_button_generate_new_identity->SetTitle(tr(\"Generate a New Statistics Identity\"));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
+    ##sudo sed -i "s/m_button_generate_new_identity->SetDescription.*/\/\/m_button_generate_new_identity->SetDescription(tr(TR_GENERATE_NEW_IDENTITY_DESCRIPTION));/g" $md_build/Source/Core/DolphinQt/Settings/GeneralPane.cpp
 }
 
 function build_dolphin() {
