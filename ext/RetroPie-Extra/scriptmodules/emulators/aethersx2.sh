@@ -27,6 +27,7 @@ function sources_aethersx2() {
 
 function install_aethersx2() {
     chmod 755 "AetherSX2-v1.5-3606.AppImage"; mv 'AetherSX2-v1.5-3606.AppImage' "$md_inst"
+    homeDIR=$home; sed -i s+'/home/pi/'+"$homeDIR/"+g "aethersx2.sh"
     chmod 755 "aethersx2.sh"; mv "aethersx2.sh" "$md_inst"
     chmod 755 "AetherSX2.desktop"; cp "AetherSX2.desktop" "$md_inst"; cp "AetherSX2.desktop" "/usr/share/applications/"
     mv "AetherSX2.desktop" "$home/Desktop"; chown "$(basename $home)" "$home/Desktop/AetherSX2.desktop"
