@@ -34,6 +34,7 @@ function sources_pcsx2() {
 
 function install_pcsx2() {
     chmod 755 "pcsx2-v2.0.2-linux-appimage-x64-Qt.AppImage"; mv 'pcsx2-v2.0.2-linux-appimage-x64-Qt.AppImage' "$md_inst"
+    homeDIR=$home; sed -i s+'/home/pi/'+"$homeDIR/"+g "pcsx2.sh"
     chmod 755 "pcsx2.sh"; mv "pcsx2.sh" "$md_inst"
     chmod 755 "PCSX2.desktop"; cp "PCSX2.desktop" "$md_inst"; cp "PCSX2.desktop" "/usr/share/applications/"
     mv "PCSX2.desktop" "$home/Desktop"; chown "$(basename $home)" "$home/Desktop/PCSX2.desktop"
