@@ -1,7 +1,7 @@
 pkg_origin="source"
 pkg_date="2024-10-26T10:46:16-04:00"
 pkg_repo_type="http"
-pkg_repo_url="https://pcsx2.net/downloads/pcsx2-v2.0.2-linux-appimage-x64-Qt.AppImage"
+pkg_repo_url="https://github.com/PCSX2/pcsx2/releases/download/v2.0.2/pcsx2-v2.0.2-linux-appimage-x64-Qt.AppImage"
 pkg_repo_branch="AppImage"
 pkg_repo_commit="20796b1a02a591324cffe08f8f13a192"
 pkg_repo_date="2022-07-10T07:20:28+00:00"
