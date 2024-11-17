@@ -24,13 +24,15 @@ echo
 echo "SELECT: [downgrade] or [upgrade]"
 echo "  1) DOWNGRADE libvlc to [v$ver]"
 echo "  2) REMOVE the HOLD of [v$ver] + UPGRADE libvlc"
-echo "  3) QUIT"
+echo "  3) FIX Broken Install [sudo apt --fix-broken install]"
+echo "  4) QUIT"
  
 read n
 case $n in
   1) vlcCHOICE=downgrade;;
   2) vlcCHOICE=upgrade;;
-  3) exit 0;;
+  3) vlcCHOICE=fix;;
+  4) exit 0;;
   *) echo "You must SELECT: [downgrade] or [upgrade]"; exit 0;;
 esac
  
@@ -41,6 +43,7 @@ for p in "${pkgs[@]}"; do
     arch="all"
   fi
   if [[ "$vlcCHOICE" == "upgrade" ]]; then sudo apt-mark unhold "${pkgs[@]}"; echo HOLD has been REMOVED for [v$ver]; echo Attempting to UPGRADE "${pkgs[@]}"; sudo apt-get install "${pkgs[@]}"; popd; exit 0; fi
+  if [[ "$vlcCHOICE" == "fix" ]]; then echo RUNNING [sudo apt --fix-broken install]...; sudo apt --fix-broken install; exit 0; fi
   wget "http://archive.raspberrypi.org/debian/pool/main/v/vlc/${p}_${ver}_${arch}.deb"
 done
  
