@@ -1,0 +1,87 @@
+diff -ur a/src/am_map.cpp b/src/am_map.cpp
+--- a/src/am_map.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/am_map.cpp	2024-06-13 20:12:31.212410000 -0400
+@@ -170,7 +170,7 @@
+ CVAR(Bool, am_showitems, false, CVAR_ARCHIVE);
+ CVAR(Bool, am_showtime, true, CVAR_ARCHIVE);
+ CVAR(Bool, am_showtotaltime, false, CVAR_ARCHIVE);
+-CVAR(Int, am_colorset, 0, CVAR_ARCHIVE);
++CVAR(Int, am_colorset, 1, CVAR_ARCHIVE);
+ CVAR(Bool, am_customcolors, true, CVAR_ARCHIVE);
+ CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
+ CVAR(Int, am_drawmapback, 1, CVAR_ARCHIVE);
+diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
+--- a/src/common/rendering/v_video.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/common/rendering/v_video.cpp	2024-06-13 20:14:39.475746200 -0400
+@@ -130,7 +130,7 @@
+ }
+ 
+ 
+-CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, uiscale, 2, CVAR_ARCHIVE | CVAR_NOINITCALL)
+ {
+ 	if (self < 0)
+ 	{
+diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
+--- a/src/common/statusbar/base_sbar.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/common/statusbar/base_sbar.cpp	2024-06-14 12:44:21.992893800 -0400
+@@ -57,9 +57,9 @@
+ IMPLEMENT_CLASS(DHUDFont, false, false);
+ 
+ 
+-CVAR(Color, crosshaircolor, 0xff0000, CVAR_ARCHIVE);
+-CVAR(Int, crosshairhealth, 2, CVAR_ARCHIVE);
+-CVARD(Float, crosshairscale, 0.5, CVAR_ARCHIVE, "changes the size of the crosshair");
++CVAR(Color, crosshaircolor, 0x00ff1e, CVAR_ARCHIVE);
++CVAR(Int, crosshairhealth, 1, CVAR_ARCHIVE);
++CVARD(Float, crosshairscale, 0.25, CVAR_ARCHIVE, "changes the size of the crosshair");
+ CVAR(Bool, crosshairgrow, false, CVAR_ARCHIVE);
+ 
+ CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
+diff -ur a/src/g_game.cpp b/src/g_game.cpp
+--- a/src/g_game.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/g_game.cpp	2024-06-13 20:13:02.412194500 -0400
+@@ -2206,7 +2206,7 @@
+ 
+ CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ static int nextautosave = -1;
+-CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) // [mxd]
+ CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
+--- a/src/g_statusbar/shared_sbar.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/g_statusbar/shared_sbar.cpp	2024-06-13 22:30:47.902840000 -0400
+@@ -104,7 +104,7 @@
+ 
+ 
+ // Stretch status bar to full screen width?
+-CUSTOM_CVAR (Int, st_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < -1)
+ 	{
+@@ -122,8 +122,8 @@
+ EXTERN_CVAR(Bool, hud_aspectscale)
+ 
+ CVAR (Bool, crosshairon, true, CVAR_ARCHIVE);
+-CVAR (Int, crosshair, 0, CVAR_ARCHIVE)
+-CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
++CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
++CVAR (Bool, crosshairforce, true, CVAR_ARCHIVE)
+ CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < 0 || self > 2) self = 2;
+diff -ur a/src/menu/doommenu.cpp b/src/menu/doommenu.cpp
+--- a/src/menu/doommenu.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/menu/doommenu.cpp	2024-06-13 20:14:51.235418900 -0400
+@@ -76,7 +76,7 @@
+ EXTERN_CVAR(Bool, show_messages)
+ EXTERN_CVAR(Float, hud_scalefactor)
+ 
+-CVAR(Bool, m_simpleoptions, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR(Bool, m_simpleoptions, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ 
+ typedef void(*hfunc)();
+ DMenu* CreateMessageBoxMenu(DMenu* parent, const char* message, int messagemode, bool playsound, FName action = NAME_None, hfunc handler = nullptr);
