@@ -85,3 +85,27 @@ diff -ur a/src/menu/doommenu.cpp b/src/menu/doommenu.cpp
  
  typedef void(*hfunc)();
  DMenu* CreateMessageBoxMenu(DMenu* parent, const char* message, int messagemode, bool playsound, FName action = NAME_None, hfunc handler = nullptr);
+diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
+--- a/src/console/c_notifybuffer.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/console/c_notifybuffer.cpp	2025-01-19 11:33:39.524295600 -0500
+@@ -59,7 +59,7 @@
+ CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
+ CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
+ 
+-CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
+ {
+ 	if (self < 0) self = 0;
+ }
+diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
+--- a/src/common/console/c_console.cpp	2024-06-13 19:37:29.000000000 -0400
++++ b/src/common/console/c_console.cpp	2025-01-19 11:32:30.672797700 -0500
+@@ -128,7 +128,7 @@
+ static char *work = NULL;
+ static int worklen = 0;
+ 
+-CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR(Int, con_scale, 3, CVAR_ARCHIVE)
+ {
+ 	if (self < 0) self = 0;
+ }
