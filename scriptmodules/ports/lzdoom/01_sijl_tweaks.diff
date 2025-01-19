@@ -1,0 +1,36 @@
+diff -ur a/src/m_joy.cpp b/src/m_joy.cpp
+--- a/src/m_joy.cpp	[lzdoom 3.88b SOURCE]
++++ b/src/m_joy.cpp	[lzdoom 3.88b SIJL]
+@@ -55,7 +55,7 @@
+ 
+ // PUBLIC DATA DEFINITIONS -------------------------------------------------
+ 
+-CUSTOM_CVAR(Bool, use_joystick, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
++CUSTOM_CVAR(Bool, use_joystick, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
+ {
+ #ifdef _WIN32
+ 	joy_ps2raw.Callback();
+diff -ur a/src/posix/sdl/i_input.cpp b/src/posix/sdl/i_input.cpp
+--- a/src/posix/sdl/i_input.cpp	[lzdoom 3.88b SOURCE]
++++ b/src/posix/sdl/i_input.cpp	[lzdoom 3.88b SIJL]
+@@ -204,12 +204,10 @@
+ {
+ 	// Clear out any mouse movement.
+ 	SDL_GetRelativeMouseState (NULL, NULL);
+-	SDL_SetRelativeMouseMode (SDL_TRUE);
+ }
+ 
+ void I_ReleaseMouseCapture()
+ {
+-	SDL_SetRelativeMouseMode (SDL_FALSE);
+ }
+ 
+ static void PostMouseMove (int x, int y)
+@@ -280,7 +278,6 @@
+ static void I_CheckNativeMouse ()
+ {
+ 	bool focus = SDL_GetKeyboardFocus() != NULL;
+-	bool fs = screen->IsFullscreen();
+ 	
+ 	bool wantNative = !focus || (!use_mouse || GUICapture || paused || demoplayback || !inGame());
+ 
