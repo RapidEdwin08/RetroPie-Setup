@@ -72,3 +72,21 @@ diff -ur a/src/v_draw.cpp b/src/v_draw.cpp
  {
  	if (self < 0)
  	{
+diff -ur a/src/c_console.cpp b/src/c_console.cpp
+--- a/src/c_console.cpp	2023-10-11 16:03:02.021799700 -0400
++++ b/src/c_console.cpp	2025-01-19 12:25:28.637361400 -0500
+@@ -149,12 +149,12 @@
+ 
+ CVAR(Float, con_notifytime, 3.f, CVAR_ARCHIVE)
+ CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
+-CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
+ {
+ 	if (self < 0) self = 0;
+ }
+ 
+-CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR(Int, con_scale, 3, CVAR_ARCHIVE)
+ {
+ 	if (self < 0) self = 0;
+ }
