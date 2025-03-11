@@ -1,0 +1,20 @@
+diff -ur a/Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp b/Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp
+--- a/Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp	SOURCE
++++ b/Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp	MODIFIED
+@@ -387,16 +387,6 @@
+ 
+           if ((position >= 0x001AFF00) && (position <= 0x001FF474) && !m_FontsLoaded)
+           {
+-            if (position >= 0x001FCF00)
+-            {
+-              PanicAlertT("Error: Trying to access Windows-1252 fonts but they are not loaded. "
+-                          "Games may not show fonts correctly, or crash.");
+-            }
+-            else
+-            {
+-              PanicAlertT("Error: Trying to access Shift JIS fonts but they are not loaded. "
+-                          "Games may not show fonts correctly, or crash.");
+-            }
+             m_FontsLoaded = true;  // Don't be a nag :p
+           }
+         }
