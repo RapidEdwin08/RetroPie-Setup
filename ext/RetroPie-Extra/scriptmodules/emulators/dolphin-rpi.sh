@@ -178,7 +178,7 @@ Fullscreen = True
 [Video_Hacks]
 VISkip = True
 [Video_Hardware]
-VSync = True
+VSync = False
 [Video_Settings]
 AspectRatio = 3
 _EOF_
