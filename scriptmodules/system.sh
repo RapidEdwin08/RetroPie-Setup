@@ -371,6 +371,10 @@ function get_rpi_video() {
             fi
         fi
         [[ "$__has_dispmanx" -eq 1 ]] && __platform_flags+=(dispmanx)
+		# Pi4/5 have Vulkan working under KMS on Debian 12 (bookworm) or newer
+        if (isPlatform "rpi4" || isPlatform "rpi5")  && [[ "$__os_debian_ver" -ge 12 ]]; then
+            __platform_flags+=(vulkan)
+        fi
     else
         __platform_flags+=(videocore)
         if ! isPlatform "aarm64"; then
@@ -501,6 +505,8 @@ function get_platform() {
                 else
                     __platform="$architecture"
                 fi
+                ## Added here for calling retropie_setup.sh from ES
+                if [[ "$(tr -d '\0' 2>/dev/null < /proc/device-tree/model)" == "Raspberry Pi 5"* ]]; then __platform="rpi5"; fi
                 ;;
         esac
     fi
