@@ -33,6 +33,14 @@ function sources_lzdoom() {
         # patch the 21.06 version of LZMA-SDK to disable the CRC32 ARMv8 intrinsics forced for ARM CPUs
         applyPatch "$md_data/02_lzma_sdk_dont_force_arm_crc32.diff"
     fi
+    # Apply Single-Board-Computer Specific Tweaks
+    if isPlatform "rpi"* || isPlatform "arm"; then
+        applyPatch "$md_data/00_sbc_tweaks.diff"
+    fi
+    # Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
+    applyPatch "$md_data/01_sijl_tweaks.diff"
+    applyPatch "$md_data/02_JoyMappings_0SFA.diff"
+    applyPatch "$md_data/03_Preferences.diff" #ENABLED
 }
 
 function build_lzdoom() {
