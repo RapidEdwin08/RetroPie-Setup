@@ -1,0 +1,8 @@
+pkg_origin="source"
+pkg_date="2023-12-10T00:37:13-04:00"
+pkg_repo_type="http"
+pkg_repo_url="https://www.aethersx2.com/archive/?dir=desktop/linux"
+pkg_repo_branch="AppImage"
+pkg_repo_commit="20796b1a02a591324cffe08f8f13a192"
+pkg_repo_date="2022-07-10T07:20:28+00:00"
+pkg_repo_extra=""
