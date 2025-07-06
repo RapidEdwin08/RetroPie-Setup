@@ -40,7 +40,7 @@ function sources_retroarch() {
 function build_retroarch() {
     local params=(--disable-sdl --enable-sdl2 --disable-oss --disable-al --disable-jack --disable-qt)
     if ! isPlatform "x11"; then
-        params+=(--disable-pulse)
+        ##params+=(--disable-pulse)
         ! isPlatform "mesa" && params+=(--disable-x11)
     fi
     if [[ "$__os_debian_ver" -lt 9 ]]; then
@@ -61,8 +61,10 @@ function build_retroarch() {
     isPlatform "arm" && params+=(--enable-floathard)
     isPlatform "neon" && params+=(--enable-neon)
     isPlatform "vulkan" && params+=(--enable-vulkan) || params+=(--disable-vulkan)
-    ! isPlatform "x11" && params+=(--disable-wayland)
+    ##! isPlatform "x11" && params+=(--disable-wayland)
     isPlatform "vero4k" && params+=(--enable-mali_fbdev --with-opengles_libs='-L/opt/vero3/lib')
+    ##Use [pulse] instead of [alsathread] - ALSA lib pcm.c:8570:(snd_pcm_recover) underrun occurred
+	params+=(--enable-pulse)
     ./configure --prefix="$md_inst" "${params[@]}"
     make clean
     make
