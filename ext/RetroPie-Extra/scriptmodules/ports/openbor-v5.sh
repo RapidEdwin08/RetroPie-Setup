@@ -17,7 +17,7 @@ rp_module_help="OpenBOR games need to be extracted to function properly. Place y
 rp_module_licence="BSD https://raw.githubusercontent.com/DCurrent/openbor/refs/heads/master/LICENSE"
 rp_module_repo="git https://github.com/DCurrent/openbor.git master"
 rp_module_section="exp"
-rp_module_flags="sdl1 !mali !x11 !rpi4"
+rp_module_flags="sdl1 !mali !x11 !rpi3"
 
 function depends_openbor-v5() {
     getDepends libsdl1.2-dev libsdl-gfx1.2-dev libogg-dev libvorbisidec-dev libvorbis-dev libpng-dev zlib1g-dev libvpx-dev
