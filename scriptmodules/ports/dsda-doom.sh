@@ -17,11 +17,16 @@ rp_module_section="exp"
 rp_module_flags="sdl2"
 
 function depends_dsda-doom() {
-    local depends=(cmake libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libogg-dev libmad0-dev libvorbis-dev libzip-dev zlib1g-dev zipcmp zipmerge ziptool)
+    #local depends=(cmake libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libogg-dev libmad0-dev libvorbis-dev libzip-dev zlib1g-dev zipcmp zipmerge ziptool)
     # we need Fluidsynth 2+, check whether the platform has the older libfluidsynth1
-    [[ -z "$(dpkg-query -W -f '${Version}' libfluidsynth1)" ]] && depends+=(libfluidsynth-dev fluidsynth)
+    #[[ -z "$(dpkg-query -W -f '${Version}' libfluidsynth1)" ]] && depends+=(libfluidsynth-dev fluidsynth)
 
     getDepends "${depends[@]}"
+    if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
+        getDepends cmake libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libogg-dev libmad0-dev libvorbis-dev libzip-dev zlib1g-dev zipcmp zipmerge ziptool libfluidsynth-dev fluidsynth libfluidsynth1
+    else
+        getDepends cmake libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libogg-dev libmad0-dev libvorbis-dev libzip-dev zlib1g-dev zipcmp zipmerge ziptool libfluidsynth-dev fluidsynth libfluidsynth3
+    fi
 }
 
 function sources_dsda-doom() {
