@@ -137,9 +137,9 @@ function depends_emulationstation() {
 
     [[ "$__os_debian_ver" -gt 8 ]] && depends+=(rapidjson-dev)
     isPlatform "x11" && depends+=(gnome-terminal mesa-utils)
-    ##if isPlatform "dispmanx" && ! isPlatform "osmc"; then
-        ##depends+=(omxplayer)
-    ##fi
+    if isPlatform "dispmanx" && ! isPlatform "osmc"; then
+        if [[ "$__os_debian_ver" -le 10 ]]; then depends+=(omxplayer); fi
+    fi
     getDepends "${depends[@]}"
 }
 
@@ -184,9 +184,9 @@ function build_emulationstation() {
     elif isPlatform "gl"; then
         params+=(-DGL=On)
     fi
-    ##if isPlatform "dispmanx"; then
-        ##params+=(-DOMX=On)
-    ##fi
+    if isPlatform "dispmanx"; then
+        if [[ "$__os_debian_ver" -le 10 ]]; then params+=(-DOMX=On); fi
+    fi
 
     rpSwap on 1000
     cmake . "${params[@]}"
