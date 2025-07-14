@@ -15,12 +15,16 @@ rp_module_desc="Chocolate Doom - Enhanced port of the official DOOM source"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/chocolate-doom/chocolate-doom/sdl2-branch/COPYING"
 rp_module_help="Please add your iWAD files to $romdir/ports/doom/ and reinstall chocolate-doom to create entries for each game to EmulationStation. Run 'chocolate-doom-setup' to configure your controls and options."
 rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master"
+if [[ "$__os_debian_ver" -le 10 ]]; then rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master 15cfe539f9818152cecb14d9a0cda9aca40fa018"; fi
 rp_module_section="exp"
-rp_module_flags="!mali !x86"
+rp_module_flags="!mali"
 
 function depends_chocolate-doom() {
-    #getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python-pil automake autoconf
-	getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf freepats
+    if [[ $(apt-cache search python3-pil) == '' ]]; then
+		getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python-pil automake autoconf
+	else
+		getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf freepats
+	fi
 }
 
 function sources_chocolate-doom() {
@@ -60,11 +64,11 @@ function game_data_chocolate-doom() {
     fi
 
     if [[ ! -f "$romdir/ports/doom/freedoom1.wad" ]]; then
-        wget "https://github.com/freedoom/freedoom/releases/download/v0.12.1/freedoom-0.12.1.zip"
-        unzip freedoom-0.12.1.zip
-        mv freedoom-0.12.1/*.wad "$romdir/ports/doom"
-        rm -rf freedoom-0.12.1
-        rm freedoom-0.12.1.zip
+        wget "https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip"
+        unzip freedoom-0.13.0.zip
+        mv freedoom-0.13.0/* "$romdir/ports/doom"
+        rm -rf freedoom-0.13.0
+        rm freedoom-0.13.0.zip
     fi
 }
 
