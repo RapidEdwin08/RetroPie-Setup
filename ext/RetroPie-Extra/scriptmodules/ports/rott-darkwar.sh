@@ -12,50 +12,50 @@
 
 
 rp_module_id="rott-darkwar"
-rp_module_desc="ROTT - Rise of the Triad - Dark War"
-rp_module_licence="GPL2 https://raw.githubusercontent.com/LTCHIPS/rottexpr/master/LICENSE.DOC"
-rp_module_help="Please add your full version ROTT files to $romdir/ports/rott/ to play."
-rp_module_repo="git https://github.com/LTCHIPS/rottexpr.git master"
+rp_module_desc="rott-darkwar - Rise of the Triad - Dark War"
+rp_module_licence="GPL2 https://raw.githubusercontent.com/zerojay/RoTT/master/COPYING"
+rp_module_help="Please add your full version ROTT files to $romdir/ports/rott-darkwar/ to play."
 rp_module_section="exp"
 rp_module_flags="!mali !x86"
 
 function depends_rott-darkwar() {
-    #getDepends libsdl2-dev libsdl2-mixer-dev fluidsynth libfluidsynth1 libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm
-	getDepends libsdl2-dev libsdl2-mixer-dev fluidsynth libfluidsynth3 libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm
-
+    getDepends libsdl1.2-dev libsdl-mixer1.2-dev automake
 }
 
 function sources_rott-darkwar() {
-    gitPullOrClone
+    gitPullOrClone "$md_build" https://github.com/zerojay/RoTT
 }
 
 function build_rott-darkwar() {
-    cd src
-    make rott
+    sed -i 's/SUPERROTT   ?= 1/SUPERROTT   ?= 0/g' "$md_build/rott/Makefile"
+    make clean
+    make rott-darkwar
+    make rott-darkwar
+    make rott-darkwar
     md_ret_require=(
-       "$md_build/src/rott"
+        "$md_build/rott-darkwar"
     )
 }
 
 function install_rott-darkwar() {
    md_ret_files=(
-          'src/rott'
+          'rott-darkwar'
     )
 }
 
 function configure_rott-darkwar() {
     local script="$md_inst/$md_id.sh"
     mkRomDir "ports"
-    mkRomDir "ports/rott"
+    mkRomDir "ports/$md_id"
     moveConfigDir "$home/.rott" "$md_conf_root/rott"
 	#create buffer script for launch
  cat > "$script" << _EOF_
 #!/bin/bash
-pushd "$romdir/ports/rott"
-"$md_inst/rott" \$*
+pushd "$romdir/ports/rott-darkwar"
+"$md_inst/rott-darkwar" \$*
 popd
 _EOF_
     
 	chmod +x "$script"
-    addPort "$md_id" "rott-darkwar" "Rise Of The Triad - Dark War" "$script"
+    addPort "$md_id" "rott-darkwar" "Rise Of The Triad - Dark War" "XINIT:$script"
 }
