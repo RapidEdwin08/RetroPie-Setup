@@ -9,6 +9,8 @@
 # See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/Exarkuniv/RetroPie-Extra/master/LICENSE
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="prboom-plus"
 rp_module_desc="Doom/Doom II engine - Enhanced PRBoom Port"
@@ -46,7 +48,7 @@ function game_data_prboom-plus() {
     if [[ ! -f "$romdir/ports/doom/doom1.wad" ]]; then
         # download doom 1 shareware
         wget -nv -O "$romdir/ports/doom/doom1.wad" "$__archive_url/doom1.wad"
-        chown $user:$user "$romdir/ports/doom/doom1.wad"
+        chown $__user:$__user "$romdir/ports/doom/doom1.wad"
     fi
 }
 
@@ -83,5 +85,5 @@ function configure_prboom-plus() {
     add_games_prboom-plus
 
     cp prboom-plus.wad "$romdir/ports/doom/"
-    chown $user:$user "$romdir/ports/doom/prboom-plus.wad"
+    chown $__user:$__user "$romdir/ports/doom/prboom-plus.wad"
 }
