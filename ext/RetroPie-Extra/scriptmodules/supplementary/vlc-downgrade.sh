@@ -8,6 +8,9 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# Workaround for libvlc issue with video previews in ES by Suggested by Lolonois Converted to RetroPie Script by RapidEdwin08
+# https://retropie.org.uk/forum/topic/35717/emulationstation-video-previews-on-raspberry-pi-5/17
+
 pkgs=(libvlc5 libvlc-bin libvlccore9 vlc-bin vlc-data vlc-plugin-base)
 ver="3.0.20-0+rpt6+deb12u1"
 vlc_version=$(dpkg -l | grep libvlc-bin | awk '{print $3}')
