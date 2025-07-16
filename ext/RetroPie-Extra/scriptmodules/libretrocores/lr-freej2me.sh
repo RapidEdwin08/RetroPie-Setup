@@ -9,6 +9,8 @@
 # See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/Exarkuniv/RetroPie-Extra/master/LICENSE
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="lr-freej2me"
 rp_module_desc="Java ME emulator - FreeJ2ME port for libretro."
@@ -53,5 +55,5 @@ function configure_lr-freej2me() {
     addSystem "j2me" "J2ME" ".jar .JAR"
 
     cp -Rv "$md_inst/freej2me-lr.jar" "$md_inst/freej2me-sdl.jar" "$md_inst/freej2me.jar" "$biosdir"
-    chown $user:$user -R "$biosdir/freej2me.jar" "$biosdir/freej2me-sdl.jar" "$biosdir/freej2me-lr.jar"
+    chown $__user:$__user -R "$biosdir/freej2me.jar" "$biosdir/freej2me-sdl.jar" "$biosdir/freej2me-lr.jar"
 }
