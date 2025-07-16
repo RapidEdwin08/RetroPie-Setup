@@ -9,8 +9,8 @@ Joystick 1 {
 	Axis 1: gradient, dZone 5538, xZone 29536, +key 40, -key 38
 	Axis 2: gradient, dZone 9230, xZone 28382, +key 39, -key 25
 	Axis 3: gradient, dZone 3922, +key 37, -key 0
-	Axis 4: gradient, dZone 5768, xZone 28382, maxSpeed 1, mouse+h
-	Axis 5: gradient, dZone 8768, maxSpeed 1, mouse+v
+	Axis 4: gradient, dZone 5768, xZone 28382, maxSpeed 15, mouse+h
+	Axis 5: gradient, dZone 8768, maxSpeed 10, mouse+v
 	Axis 6: gradient, throttle+, +key 105, -key 0
 	Axis 7: +key 35, -key 34
 	Axis 8: +key 116, -key 111
@@ -33,7 +33,7 @@ Joystick 1 {
 ')
 
 # Create QJoyPad.lyt if needed
-if [ ! -f "$HOME/.qjoypad3/$qjoyLAYOUT.lyt" ]; then echo "$qjoyLYT" > "$HOME/.qjoypad3/$qjoyLAYOUT.lyt"; fi
+if [ -d "$home/.qjoypad3" ] && [ ! -f "$HOME/.qjoypad3/$qjoyLAYOUT.lyt" ]; then echo "$qjoyLYT" > "$HOME/.qjoypad3/$qjoyLAYOUT.lyt"; fi
 
 # Run Window Manager
 echo 'xset -dpms s off s noblank; matchbox-window-manager -use_titlebar no &' >> /dev/shm/runcommand.info
