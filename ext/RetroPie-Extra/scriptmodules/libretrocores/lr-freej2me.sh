@@ -12,6 +12,9 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
+# Additional Legacy Branch for Debian Buster and Below
+legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
+
 rp_module_id="lr-freej2me"
 rp_module_desc="Java ME emulator - FreeJ2ME port for libretro."
 rp_module_help="ROM Extensions: .jar .zip .7z\n\nCopy your Java ME (J2ME) roms to $romdir/j2me\n\nThe BIOS files freej2me-sdl.jar, freej2me.jar and freej2me-lr.jar will automatically installed in $biosdir"
@@ -21,8 +24,23 @@ rp_module_section="exp"
 rp_module_flags=""
 
 function depends_lr-freej2me() {
-    getDepends ant
-    sudo update-alternatives --config java
+    if [[ "$legacy_branch" == '1' ]]; then
+        sudo apt-get remove ca-certificates-java openjdk-11-jre-headless -y
+        if [[ -d /etc/ssl/certs/java ]]; then sudo rm /etc/ssl/certs/java -Rf; fi
+        sudo mkdir /etc/ssl/certs/java
+
+        if [[ $(apt-cache search openjdk-11-jre-headless) == '' ]]; then
+            local depends=(ant ca-certificates-java openjdk-8-jdk)
+        else
+            local depends=(ant ca-certificates-java openjdk-11-jre-headless)
+        fi
+    else
+        depends=(ant)
+    fi
+    getDepends "${depends[@]}"
+
+    printf "%s\n" "0" | sudo update-alternatives --config java
+    printf "%s\n" "" |  sudo update-alternatives --config java
 }
 
 function sources_lr-freej2me() {
