@@ -39,7 +39,9 @@ function configure_lr-duckstation() {
 
     # Pi 4 has occasional slowdown with hardware rendering
     # e.g. Gran Turismo 2 (Arcade) race start
-    isPlatform "rpi4" && setRetroArchCoreOption "duckstation_GPU.Renderer" "Software"
+    if [[ "$__os_debian_ver" -le 10 ]]; then
+        isPlatform "rpi4" && setRetroArchCoreOption "duckstation_GPU.Renderer" "Software"
+    fi
 
     # Configure the memory card 1 saves through the libretro API
     setRetroArchCoreOption "duckstation_MemoryCards.Card1Type" "NonPersistent"
