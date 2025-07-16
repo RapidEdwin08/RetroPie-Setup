@@ -8,14 +8,19 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
+
+# Additional Legacy Branch for Debian Buster and Below
+legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
 
 rp_module_id="eduke32"
-rp_module_desc="Duke3D source port"
+rp_module_desc="Duke3D Source Port\n \nMaster Branch (Bullseye+):\nhttps://voidpoint.io/sirlemonhead/eduke32.git \nmaster 3191b5f41670ee9341f0298e155172c0ef760031\n \nLegacy Branch (Buster-):\nhttps://voidpoint.io/terminx/eduke32.git \nmaster dfc16b08"
 rp_module_licence="GPL2 https://voidpoint.io/terminx/eduke32/-/raw/master/package/common/gpl-2.0.txt?inline=false"
+rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f41670ee9341f0298e155172c0ef760031"
 #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master 17844a2f651d4347258ae2fe59ec42dc3110506e"
 #rp_module_repo="git https://voidpoint.io/dgurney/eduke32.git master 76bc19e2e55023ea5a17c212eab0e1e5db217315"
-rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f41670ee9341f0298e155172c0ef760031"
-if [[ "$__os_debian_ver" -le 10 ]]; then rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08"; fi
+if [[ "$legacy_branch" == '1' ]]; then rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08"; fi
 rp_module_section="opt"
 
 function depends_eduke32() {
@@ -33,7 +38,7 @@ function depends_eduke32() {
 function sources_eduke32() {
     gitPullOrClone
 
-    if [[ "$__os_debian_ver" -le 10 ]]; then
+    if [[ "$legacy_branch" == '0' ]]; then
         # r6918 causes a 20+ second delay on startup on ARM devices
         isPlatform "arm" && applyPatch "$md_data/0001-revert-r6918.patch"
         # r7424 gives a black skybox when r_useindexedcolortextures is 0
