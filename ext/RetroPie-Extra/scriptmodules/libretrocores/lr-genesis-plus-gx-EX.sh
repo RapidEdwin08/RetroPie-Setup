@@ -48,4 +48,9 @@ function configure_lr-genesis-plus-gx-EX() {
         addEmulator "$def" "$md_id" "$system" "$md_inst/genesis_plus_gx_libretro.so"
         addSystem "$system"
     done
+
+    if [ "$(cat /opt/retropie/configs/all/emulators.cfg | grep -e megadrive_paprium -e megadrive_Paprium)" == '' ]; then
+        echo 'megadrive_paprium = "lr-genesis-plus-gx-EX"' >> /opt/retropie/configs/all/emulators.cfg
+        echo 'megadrive_Paprium = "lr-genesis-plus-gx-EX"' >> /opt/retropie/configs/all/emulators.cfg
+    fi
 }
