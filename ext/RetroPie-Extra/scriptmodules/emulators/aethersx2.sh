@@ -8,7 +8,7 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
-
+#
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
@@ -16,7 +16,7 @@ rp_module_id="aethersx2"
 rp_module_desc="PS2 Emulator Optimized for ARM                                                                                                                                                                                                     \n \n AetherSX2-v1.5-3606.AppImage \n \n http://web.archive.org/web/20240222085515/https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\" \n \n RPi5 may need [kernel=kernel8.img] in [boot/config.txt]"
 rp_module_licence="Aethersx2 https://aethersx2.net/terms-conditions"
 rp_module_section="exp"
-rp_module_flags="!all arm aarch64 rpi4 rpi5"
+rp_module_flags="!all arm aarch64 rpi4 rpi5 !x86"
 
 function depends_aethersx2() {
     getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox
@@ -59,8 +59,8 @@ function install_aethersx2() {
 }
 
 function configure_aethersx2() {
-    addSystem "ps2"
-    addEmulator "$md_id" "aethersx2" "ps2" "XINIT: /opt/retropie/emulators/aethersx2/aethersx2.sh %ROM%"
+    addEmulator "$md_id" "aethersx2" "ps2" "XINIT:/opt/retropie/emulators/aethersx2/aethersx2.sh %ROM%"
 	if [[ $(cat /opt/retropie/configs/ps2/emulators.cfg | grep -q 'default =' ; echo $?) == '1' ]]; then echo 'default = "aethersx2"' >> /opt/retropie/configs/ps2/emulators.cfg; fi
 	sed -i 's/default\ =.*/default\ =\ \"aethersx2\"/g' /opt/retropie/configs/ps2/emulators.cfg
+    addSystem "ps2"
 }
