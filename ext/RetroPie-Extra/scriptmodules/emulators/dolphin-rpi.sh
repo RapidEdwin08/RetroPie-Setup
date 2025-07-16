@@ -8,23 +8,22 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
-
-# Script Provided by Nash - Updated by RapidEdwin08 20250311
-# https://retropie.org.uk/forum/topic/36971/gamecube-wii-error-mario-part-5/2
-
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
+# Script Provided by gvx64 - Updated by RapidEdwin08 20250311
+# https://retropie.org.uk/forum/topic/36971/gamecube-wii-error-mario-part-5/2
+
 rp_module_id="dolphin-rpi"
-rp_module_desc="Gamecube/Wii Dolphin Modified from 5.0-4544 for Pi Users"
-rp_module_help="ROM Extensions: .elf .dol .gcm .iso .rvz .wbfs .ciso .gcz .wad .dff\n\nCopy your Gamecube roms to $romdir/gc and Wii roms to $romdir/wii"
+rp_module_desc="Gamecube/Wii Emulator Dolphin v5.0-4544 Optimized for Pi"
+rp_module_help="ROM Extensions: .elf .dol .gcm .iso .rvz .wbfs .ciso .gcz .wad .dff\n\nCopy your Gamecube roms to $romdir/gc and Wii roms to $romdir/wii \n \nSample [Hotkeys.ini] :\n$home/DolphinConfig5.0/Config/Hotkeys.ini\n \nKeys/Toggle Pause = \`Button 6\` & \`Button 3\`\nKeys/Stop = \`Button 6\` & \`Button 1\`\nKeys/Reset = \`Button 6\` & \`Button 0\`\nKeys/Toggle Fullscreen = \`Button 6\` & \`Button 2\`\nKeys/Take Screenshot = \`Button 6\` & \`Button 8\`\nKeys/Exit = \`Button 6\` & \`Button 7\`\n \nExamples of Games [dolphin-rpi] is Optimized for:\nMario Kart Double Dash\nResident Evil 4\nMario Golf Toadstool Tour\nMetroid Prime\nZelda Twilight Princess (Gamecube)\nBomberman Generations\nSonic Adventure DX\nThe Last Story (Wii)\nand more..."
 rp_module_licence="GPL2 https://github.com/gvx64/dolphin-rpi/blob/master/license.txt"
 rp_module_repo="git https://github.com/gvx64/dolphin-rpi.git master"
 rp_module_section="exp"
-rp_module_flags=""
- 
+rp_module_flags="!all 64bit"
+
 function depends_dolphin-rpi() {
-    local depends=(cmake gcc-11 g++-11 pkg-config libasound2-dev libopenal-dev libevdev-dev libgtk2.0-dev qtbase5-private-dev libxxf86vm-dev x11proto-xinerama-dev)
+    local depends=(cmake gcc-11 g++-11 pkg-config libasound2-dev libopenal-dev libevdev-dev libgtk2.0-dev qtbase5-private-dev libxxf86vm-dev x11proto-xinerama-dev libsdl2-dev)
  
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
  

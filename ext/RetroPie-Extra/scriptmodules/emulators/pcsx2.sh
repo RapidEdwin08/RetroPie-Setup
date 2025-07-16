@@ -8,14 +8,11 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
-# Remove or Replace PCSX2 script in: $home/RetroPie-Setup/scriptmodules/emulators/pcsx2.sh
-#
-
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="pcsx2"
-rp_module_desc="PS2 emulator PCSX2"
+rp_module_desc="PS2 emulator PCSX2 Optimized for x86_64"
 rp_module_help="PCSX2 is an open source PS2 Emulator                                                                                                                                                                                                     \n \n pcsx2-v2.0.2-linux-appimage-x64-Qt.AppImage \n \n https://pcsx2.net \n \n PCSX2 uses third-party code. \n You can view the licenses for this code by selecting \"Third-Party Notices\" \n ROM Extensions: .bin .iso .img .mdf .z .z2 .bz2 .cso .chd .ima .gz\n\nCopy your PS2 roms to $romdir/ps2\n\nCopy the required BIOS file to $biosdir"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/PCSX2/pcsx2/master/COPYING.GPLv3"
 rp_module_section="exp"
@@ -64,8 +61,8 @@ function install_pcsx2() {
 }
 
 function configure_pcsx2() {
-    addSystem "ps2"
-    addEmulator "$md_id" "pcsx2" "ps2" "XINIT: /opt/retropie/emulators/pcsx2/pcsx2.sh %ROM%"
+    addEmulator "$md_id" "pcsx2" "ps2" "XINIT:/opt/retropie/emulators/pcsx2/pcsx2.sh %ROM%"
     if [[ $(cat /opt/retropie/configs/ps2/emulators.cfg | grep -q 'default =' ; echo $?) == '1' ]]; then echo 'default = "pcsx2"' >> /opt/retropie/configs/ps2/emulators.cfg; fi
     sed -i 's/default\ =.*/default\ =\ \"pcsx2\"/g' /opt/retropie/configs/ps2/emulators.cfg
+    addSystem "ps2"
 }
