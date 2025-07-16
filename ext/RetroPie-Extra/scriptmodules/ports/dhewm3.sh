@@ -8,14 +8,13 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="dhewm3"
 rp_module_desc="dhewm3 - Doom 3"
 rp_module_licence="GPL3 https://github.com/dhewm/dhewm3/blob/master/COPYING.txt"
-rp_module_help="Please copybase/pak000.pk4\n\nbase/pak001.pk4\n\nbase/pak002.pk4\n\nbase/pak003.pk4\n\nbase/pak004.pk4\n\nbase/pak005.pk4\n\nbase/pak006.pk4\n\nbase/pak007.pk4\n\nbase/pak008.pk4\n\n
-and if you have the expansion:\n\n
-d3xp/pak000.pk4\n\n
-d3xp/pak001.pk4\n\nInto the $romdir/doom3/base and $romdir/doom3/d3xp directories"
+rp_module_help="Please copybase/pak000.pk4\n\nbase/pak001.pk4\n\nbase/pak002.pk4\n\nbase/pak003.pk4\n\nbase/pak004.pk4\n\nbase/pak005.pk4\n\nbase/pak006.pk4\n\nbase/pak007.pk4\n\nbase/pak008.pk4\n\nand if you have the expansion:\n\nd3xp/pak000.pk4\n\nd3xp/pak001.pk4\n\nInto the $romdir/doom3/base and $romdir/doom3/d3xp directories"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -56,8 +55,8 @@ function configure_dhewm3() {
 
     mkRomDir "ports/doom3/base"
     mkRomDir "ports/doom3/d3xp"
-	chown -R pi:pi "/home/pi/RetroPie/roms/ports/doom3"
-	chown -R pi:pi "/home/pi/RetroPie/roms/ports/doom3/base"
+    chown -R $__user:$__user "$home/RetroPie/roms/ports/doom3"
+    chown -R $__user:$__user "$home/RetroPie/roms/ports/doom3/base"
 
     moveConfigDir "$md_inst/base" "$romdir/ports/doom3/base"
     moveConfigDir "$md_inst/d3xp" "$romdir/ports/doom3/d3xp"

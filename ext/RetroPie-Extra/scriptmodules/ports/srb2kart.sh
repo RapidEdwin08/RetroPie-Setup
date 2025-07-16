@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# Input Server Address and Port - Place [srb2kart-assets.tar.gz] in root of webSERVER
-webSERVER=127.0.0.1
-webPORT=8000
-srb2kVER=v1.3
-
 # This file is part of The RetroPie Project
 #
 # The RetroPie Project is the legal property of its developers, whose names are
@@ -13,6 +8,11 @@ srb2kVER=v1.3
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+
+# Input Server Address and Port - Place [srb2kart-assets.tar.gz] in root of webSERVER
+webSERVER=127.0.0.1
+webPORT=8000
+srb2kVER=v1.3
 
 rp_module_id="srb2kart"
 rp_module_desc="Sonic Robo Blast 2 Kart - 3D Sonic the Hedgehog fan-game based on Sonic Robo Blast 2 built using a modified version of the Doom Legacy source port of Doom"
