@@ -8,15 +8,19 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
-## git clone --recursive --branch master "https://voidpoint.io/terminx/eduke32.git" "/home/pi/RetroPie-Setup/tmp/build/eduke32"
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
+
+# Additional Legacy Branch for Debian Buster and Below
+legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
 
 rp_module_id="eduke32"
-rp_module_desc="Duke3D source port"
+rp_module_desc="Duke3D Source Port\n \nMaster Branch (Bullseye+):\nhttps://voidpoint.io/sirlemonhead/eduke32.git \nmaster 3191b5f41670ee9341f0298e155172c0ef760031\n \nLegacy Branch (Buster-):\nhttps://voidpoint.io/terminx/eduke32.git \nmaster dfc16b08"
 rp_module_licence="GPL2 https://voidpoint.io/terminx/eduke32/-/raw/master/package/common/gpl-2.0.txt?inline=false"
+rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f41670ee9341f0298e155172c0ef760031"
 #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master 17844a2f651d4347258ae2fe59ec42dc3110506e"
 #rp_module_repo="git https://voidpoint.io/dgurney/eduke32.git master 76bc19e2e55023ea5a17c212eab0e1e5db217315"
-rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f41670ee9341f0298e155172c0ef760031"
-if [[ "$__os_debian_ver" -le 10 ]]; then rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08"; fi
+if [[ "$legacy_branch" == '1' ]]; then rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08"; fi
 rp_module_section="opt"
 
 function depends_eduke32() {
@@ -34,7 +38,7 @@ function depends_eduke32() {
 function sources_eduke32() {
     gitPullOrClone
 
-    if [[ "$__os_debian_ver" -le 10 ]]; then
+    if [[ "$legacy_branch" == '0' ]]; then
         # r6918 causes a 20+ second delay on startup on ARM devices
         isPlatform "arm" && applyPatch "$md_data/0001-revert-r6918.patch"
         # r7424 gives a black skybox when r_useindexedcolortextures is 0
@@ -47,14 +51,14 @@ function sources_eduke32() {
         # cherry-picked commit fixing a game bug in E1M4 (shrinker ray stuck)
         applyPatch "$md_data/0005-e1m4-shrinker-bug.patch"
     fi
-	
-	# useindexedcolortextures 0FF
-	sudo sed -i s+int32_t\ r_useindexedcolortextures\ =\ 1\;+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
+    # two more commits r8241 + r8247 fixing a bug in E4M4 (instant death in water)
+    applyPatch "$md_data/0006-e4m4-water-bug.patch"
+    # useindexedcolortextures 0FF
+    sudo sed -i s+int32_t\ r_useindexedcolortextures\ =\ 1\;+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
 }
 
 function build_eduke32() {
-    #local params=(LTO=0 SDL_TARGET=2)
-	local params=(LTO=0 SDL_TARGET=2 STARTUP_WINDOW=0)
+    local params=(LTO=0 SDL_TARGET=2)
 
     [[ "$md_id" == "ionfury" ]] && params+=(FURY=1)
     ! isPlatform "x86" && params+=(NOASM=1)
@@ -66,13 +70,10 @@ function build_eduke32() {
 
     make veryclean
     CFLAGS+=" -DSDL_USEFOLDER" make "${params[@]}"
-	CFLAGS+=" -DSDL_USEFOLDER" make "${params[@]}" sw
 
     if [[ "$md_id" == "ionfury" ]]; then
         md_ret_require="$md_build/fury"
-    elif [[ "$md_id" == "sw" ]]; then
-        md_ret_require="$md_build/sw"
-	else
+    else
         md_ret_require="$md_build/eduke32"
     fi
 }
@@ -82,25 +83,22 @@ function install_eduke32() {
 
     if [[ "$md_id" == "ionfury" ]]; then
         md_ret_files+=('fury')
-    elif [[ "$md_id" == "sw" ]]; then
-        md_ret_files+=('sw')
-	else
+    else
         md_ret_files+=('eduke32')
-		#md_ret_files+=('eduke32' 'sw')
     fi
 }
 
 function game_data_eduke32() {
     local dest="$romdir/ports/duke3d"
     if [[ "$md_id" == "eduke32" ]]; then
-        if [[ ! -f "$dest/duke3d.grp" ]]; then
-            mkUserDir "$dest"
+        mkUserDir "$dest"
+        if [[ -z "$(find "$dest" -maxdepth 1 -iname duke3d.grp)" ]]; then
             local temp="$(mktemp -d)"
             download "$__archive_url/3dduke13.zip" "$temp"
             unzip -L -o "$temp/3dduke13.zip" -d "$temp" dn3dsw13.shr
             unzip -L -o "$temp/dn3dsw13.shr" -d "$dest" duke3d.grp duke.rts
             rm -rf "$temp"
-            chown -R $user:$user "$dest"
+            chown -R "$__user":"$__group" "$dest"
         fi
     fi
 }
@@ -108,13 +106,10 @@ function game_data_eduke32() {
 function configure_eduke32() {
     local appname="eduke32"
     local portname="duke3d"
-    if [[ "$md_id" == "sw" ]]; then
-        appname="sw"
-        portname="sw"
-    elif [[ "$md_id" == "ionfury" ]]; then
+    if [[ "$md_id" == "ionfury" ]]; then
         appname="fury"
         portname="ionfury"
-	fi
+    fi
     local config="$md_conf_root/$portname/settings.cfg"
 
     mkRomDir "ports/$portname"
@@ -137,7 +132,7 @@ function configure_eduke32() {
         # the VC4 & V3D drivers render menu splash colours incorrectly without this
         isPlatform "mesa" && iniSet "r_useindexedcolortextures" "0"
 
-        chown -R $user:$user "$config"
+        chown -R "$__user":"$__group" "$config"
     fi
 }
 
@@ -153,10 +148,7 @@ function add_games_eduke32() {
     if [[ "$md_id" == "ionfury" ]]; then
         num_games=0
         local game0=('Ion Fury' '' '')
-    elif [[ "$md_id" == "sw" ]]; then
-        num_games=0
-        local game0=('Shadow Warrior' '' '')
-	else
+    else
         local game0=('Duke Nukem 3D' '' '-addon 0')
         local game1=('Duke Nukem 3D - Duke It Out In DC' 'addons/dc' '-addon 1')
         local game2=('Duke Nukem 3D - Nuclear Winter' 'addons/nw' '-addon 2')

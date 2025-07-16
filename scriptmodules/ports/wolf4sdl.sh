@@ -8,6 +8,12 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# Copy/Paste *.sod Files to sd1/sd2/sd3
+# 6e914d15335125872737718470061ad8  audiohed.sod -> audiohed.sd1  audiohed.sd2  audiohed.sd3
+# 10020fce0f04d21bd07b1b5b951c360a  audiot.sod   -> audiot.sd1    audiot.sd2    audiot.sd3
+# 30b11372b9ec6bc06289eb3e9b2ef0b9  vgadict.sod  -> vgadict.sd1   vgadict.sd2   vgadict.sd3
+# 3b85f170098fb48d91d8bedd0cac4e0d  vgagraph.sod -> vgagraph.sd1  vgagraph.sd2  vgagraph.sd3
+# fb75007a1167bba05c4acadf90bc30d8  vgahead.sod  -> vgahead.sd1   vgahead.sd2   vgahead.sd3
 
 rp_module_id="wolf4sdl"
 rp_module_desc="Wolf4SDL - port of Wolfenstein 3D / Spear of Destiny engine"
@@ -93,7 +99,7 @@ function game_data_wolf4sdl() {
         downloadAndExtract "http://maniacsvault.net/ecwolf/files/shareware/soddemo.zip" "$romdir/ports/wolf3d" -j -LL
     fi
 
-    chown -R $user:$user "$romdir/ports/wolf3d"
+    chown -R "$__user":"$__group" "$romdir/ports/wolf3d"
 }
 
 function configure_wolf4sdl() {
