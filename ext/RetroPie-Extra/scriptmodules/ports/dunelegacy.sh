@@ -8,6 +8,11 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
+
+# Additional Legacy Branch for Debian Buster and Below
+legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
 
 rp_module_id="dunelegacy"
 rp_module_desc="Dune Legacy - Dune 2 Building of a Dynasty port"
@@ -21,10 +26,11 @@ rp_module_flags="!mali"
 
 function depends_dunelegacy() {
     if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
-		getDepends autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg matchbox-window-manager x11-xserver-utils libfluidsynth-dev libfluidsynth1 fluidsynth
+		local depends=(autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg matchbox-window-manager x11-xserver-utils libfluidsynth-dev libfluidsynth1 fluidsynth)
 	else
-		getDepends autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg matchbox-window-manager x11-xserver-utils libfluidsynth-dev libfluidsynth3 fluidsynth
+		local depends=(autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg matchbox-window-manager x11-xserver-utils libfluidsynth-dev libfluidsynth3 fluidsynth)
 	fi
+	getDepends "${depends[@]}"
 }
 
 function sources_dunelegacy() {
@@ -32,15 +38,10 @@ function sources_dunelegacy() {
 }
 
 function build_dunelegacy() {
-    if [[ "$__os_debian_ver" -le 10 ]]; then
-		params=(--prefix="$md_inst")
-	else
-		params=(--prefix="$md_inst" --with-asound --without-pulse --with-sdl2)
-	fi
 	sed -i "/*Mix_Init(MIX_INIT_FLUIDSYNTH | MIX_INIT_FLAC | MIX_INIT_MP3 | MIX_INIT_OGG)/c\\Mix_Init(MIX_INIT_MID | MIX_INIT_FLAC | MIX_INIT_MP3 | MIX_INIT_OGG)" $md_build/src/FileClasses/music/DirectoryPlayer.cpp
 	sed -i "/if((Mix_Init(MIX_INIT_FLUIDSYNTH) & MIX_INIT_FLUIDSYNTH) == 0) {/c\\if((Mix_Init(MIX_INIT_MID) & MIX_INIT_MID) == 0) {" $md_build/src/FileClasses/music/XMIPlayer.cpp
 	
-	if [[ "$__os_debian_ver" -ge 11 ]]; then
+	if [[ "$legacy_branch" == '0' ]]; then
 		# Bookworm error: field ‘mentatStrings’ has incomplete type ‘std::array<std::unique_ptr<MentatTextFile>, 3>’
 		sed -i '1s/^/#include <tuple> \n/' $md_build/src/FileClasses/TextManager.cpp
 		sed -i '1s/^/#include <array> \n/' $md_build/src/FileClasses/TextManager.cpp
@@ -50,6 +51,12 @@ function build_dunelegacy() {
 		sed '0,/SDL_RenderPresent(renderer);/s//\/\/SDL_RenderPresent(renderer);/' $md_build/src/Game.cpp > /dev/shm/Game.cpp; sudo mv /dev/shm/Game.cpp $md_build/src/Game.cpp
 	fi
 	
+    if [[ "$legacy_branch" == '1' ]]; then
+		params=(--prefix="$md_inst")
+	else
+		params=(--prefix="$md_inst" --with-asound --without-pulse --with-sdl2)
+	fi
+
 	echo [PARAMS]: ${params[@]}
     autoreconf --install
     ./configure "${params[@]}"
@@ -64,17 +71,16 @@ function install_dunelegacy() {
 function game_data_dunelegacy() {
     if [[ ! -f "$romdir/ports/dune2/data/DUNE2.EXE" ]]; then
 		if [[ ! -d "$romdir/ports/dune2/data" ]]; then mkdir "$romdir/ports/dune2/data"; fi
-		downloadAndExtract "https://github.com/Exarkuniv/game-data/raw/main/dune-II.zip" "$romdir/ports/dune2"
-		mv "$romdir/ports/dune2/dune-ii-the-building-of-a-dynasty/"* "$romdir/ports/dune2/data"
-		rmdir "$romdir/ports/dune2/dune-ii-the-building-of-a-dynasty/"
-		chown -R $user:$user "$romdir/ports/dune2"
+		downloadAndExtract "https://github.com/Exarkuniv/game-data/raw/main/dune-II.zip" "$romdir/ports/dune2/data"
+		if [[ -f "$romdir/ports/dune2/data/dune-II.zip" ]]; then rm "$romdir/ports/dune2/data/dune-II.zip"; fi
+		chown -R $__user:$__user "$romdir/ports/dune2"
 	fi
 }
 
 function configure_dunelegacy() {
     mkRomDir "ports/dune2/data"
     moveConfigDir "$home/.config/dunelegacy" "$md_conf_root/dunelegacy"
-    addPort "$md_id" "dunelegacy" "Dune Legacy" "XINIT: $md_inst/bin/dunelegacy"     	
+    addPort "$md_id" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/bin/dunelegacy"     	
     ln -s "/home/pi/RetroPie/roms/ports/dune2/data" "$home/.config/dunelegacy" 
 
     [[ "$md_mode" == "install" ]] && game_data_dunelegacy

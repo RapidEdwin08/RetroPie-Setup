@@ -9,22 +9,31 @@
 # See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/Exarkuniv/RetroPie-Extra/master/LICENSE
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
+
+# Additional Legacy Branch for Debian Buster and Below
+legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
 
 rp_module_id="chocolate-doom"
 rp_module_desc="Chocolate Doom - Enhanced port of the official DOOM source"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/chocolate-doom/chocolate-doom/sdl2-branch/COPYING"
-rp_module_help="Please add your iWAD files to $romdir/ports/doom/ and reinstall chocolate-doom to create entries for each game to EmulationStation. Run 'chocolate-doom-setup' to configure your controls and options."
+rp_module_help="Location of [iWAD] files:\n$romdir/ports/doom/\n \nRe-Install [chocolate-doom] to Auto-Create entries for each [iWAD] for EmulationStation.\nRun 'chocolate-doom-setup' to configure your Controls and Options."
 rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master"
-if [[ "$__os_debian_ver" -le 10 ]]; then rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master 15cfe539f9818152cecb14d9a0cda9aca40fa018"; fi
 rp_module_section="exp"
 rp_module_flags="!mali"
 
+if [[ "$legacy_branch" == '1' ]]; then
+   rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master 15cfe539f9818152cecb14d9a0cda9aca40fa018"
+fi
+
 function depends_chocolate-doom() {
     if [[ $(apt-cache search python3-pil) == '' ]]; then
-		getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python-pil automake autoconf
-	else
-		getDepends libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf freepats
-	fi
+      local depends=(libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python-pil automake autoconf freepats)
+   else
+      local depends=(libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf freepats)
+   fi
+   getDepends "${depends[@]}"
 }
 
 function sources_chocolate-doom() {
@@ -78,67 +87,67 @@ function configure_chocolate-doom() {
 
     # Temporary until the official RetroPie WAD selector is complete.
     if [[ -f "$romdir/ports/doom/doom1.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/doom1.wad"
+       chown $__user:$__user "$romdir/ports/doom/doom1.wad"
        addPort "$md_id" "chocolate-doom1" "Chocolate Doom Shareware" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/doom1.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/doom.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/doom.wad"
+       chown $__user:$__user "$romdir/ports/doom/doom.wad"
        addPort "$md_id" "chocolate-doom" "Chocolate Doom Registered" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/doom.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/freedoom1.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/freedoom1.wad"
+       chown $__user:$__user "$romdir/ports/doom/freedoom1.wad"
        addPort "$md_id" "chocolate-freedoom1" "Chocolate Free Doom: Phase 1" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/freedoom1.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/freedoom2.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/freedoom2.wad"
+       chown $__user:$__user "$romdir/ports/doom/freedoom2.wad"
        addPort "$md_id" "chocolate-freedoom2" "Chocolate Free Doom: Phase 2" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/freedoom2.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/doom2.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/doom2.wad"
+       chown $__user:$__user "$romdir/ports/doom/doom2.wad"
        addPort "$md_id" "chocolate-doom2" "Chocolate Doom II: Hell on Earth" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/doom2.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/doomu.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/doomu.wad"
+       chown $__user:$__user "$romdir/ports/doom/doomu.wad"
        addPort "$md_id" "chocolate-doomu" "Chocolate Ultimate Doom" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/doomu.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/tnt.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/tnt.wad"
+       chown $__user:$__user "$romdir/ports/doom/tnt.wad"
        addPort "$md_id" "chocolate-doomtnt" "Chocolate Final Doom - TNT: Evilution" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/tnt.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/plutonia.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/plutonia.wad"
+       chown $__user:$__user "$romdir/ports/doom/plutonia.wad"
        addPort "$md_id" "chocolate-doomplutonia" "Chocolate Final Doom - The Plutonia Experiment" "$md_inst/chocolate-doom -iwad $romdir/ports/doom/plutonia.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/heretic1.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/heretic1.wad"
+       chown $__user:$__user "$romdir/ports/doom/heretic1.wad"
        addPort "$md_id" "chocolate-heretic1" "Chocolate Heretic Shareware" "$md_inst/chocolate-heretic -iwad $romdir/ports/doom/heretic1.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/heretic.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/heretic.wad"
+       chown $__user:$__user "$romdir/ports/doom/heretic.wad"
        addPort "$md_id" "chocolate-heretic" "Chocolate Heretic Registered" "$md_inst/chocolate-heretic -iwad $romdir/ports/doom/heretic.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/hexen.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/hexen.wad"
+       chown $__user:$__user "$romdir/ports/doom/hexen.wad"
        addPort "$md_id" "chocolate-hexen" "Chocolate Hexen" "$md_inst/chocolate-hexen -iwad $romdir/ports/doom/hexen.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/hexdd.wad" && -f "$romdir/ports/doom/hexen.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/hexdd.wad"
+       chown $__user:$__user "$romdir/ports/doom/hexdd.wad"
        addPort "$md_id" "chocolate-hexdd" "Chocolate Hexen: Deathkings of the Dark Citadel" "$md_inst/chocolate-hexen -iwad $romdir/ports/doom/hexen.wad -file $romdir/ports/doom/hexdd.wad"
     fi
 
     if [[ -f "$romdir/ports/doom/strife1.wad" ]]; then
-       chown $user:$user "$romdir/ports/doom/strife1.wad"
+       chown $__user:$__user "$romdir/ports/doom/strife1.wad"
        addPort "$md_id" "chocolate-strife1" "Chocolate Strife" "$md_inst/chocolate-strife -iwad $romdir/ports/doom/strife1.wad"
     fi
 
