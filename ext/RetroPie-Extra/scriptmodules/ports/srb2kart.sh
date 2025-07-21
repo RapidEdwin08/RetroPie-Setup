@@ -9,10 +9,8 @@
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
 
-# Input Server Address and Port - Place [srb2kart-assets.tar.gz] in root of webSERVER
-webSERVER=127.0.0.1
-webPORT=8000
-srb2kVER=v1.3
+# Input version of srb2kart
+srb2kVER=v1.6
 
 rp_module_id="srb2kart"
 rp_module_desc="Sonic Robo Blast 2 Kart - 3D Sonic the Hedgehog fan-game based on Sonic Robo Blast 2 built using a modified version of the Doom Legacy source port of Doom"
@@ -25,7 +23,8 @@ function depends_srb2kart() {
 
 function sources_srb2kart() {
 	gitPullOrClone "$md_build" https://github.com/STJr/Kart-Public.git $srb2kVER
-    downloadAndExtract "$webSERVER:$webPORT/srb2kart-assets.tar.gz" "$md_build"
+    mkdir assets/installer
+    downloadAndExtract https://github.com/STJr/Kart-Public/releases/download/$srb2kVER/AssetsLinuxOnly.zip "$md_build/assets/installer/"
 }
 
 function build_srb2kart() {
@@ -39,20 +38,29 @@ function build_srb2kart() {
 function install_srb2kart() {
     # copy and dereference, so we get a srb2kart binary rather than a symlink to srb2kart-version
     cp -L 'build/bin/srb2kart' "$md_inst/srb2kart"
+    cp -R "assets/installer/mdls" "$md_inst"
     md_ret_files=(
         'assets/installer/bonuschars.kart'
         'assets/installer/chars.kart'
         'assets/installer/gfx.kart'
         'assets/installer/maps.kart'
         'assets/installer/music.kart'
-        'assets/installer/patch.kart'
         'assets/installer/sounds.kart'
-        'assets/installer/textures.kart'
         'assets/installer/srb2.srb'
+        'assets/installer/textures.kart'
+        'assets/installer/HISTORY.txt'
+        'assets/installer/LICENSE.txt'
+        'assets/installer/LICENSE-3RD-PARTY.txt'
+        'assets/installer/README.txt'
+        'assets/installer/mdls.dat'
     )
 }
 
 function configure_srb2kart() {
+    if [[ -f "$md_conf_root/$md_id/kartconfig.cfg" ]]; then rm "$md_conf_root/$md_id/kartconfig.cfg"; fi
+    if [[ -f "$md_conf_root/$md_id/kartdata.dat" ]]; then rm "$md_conf_root/$md_id/kartdata.dat"; fi
+    if [[ -f "$md_conf_root/$md_id/log.txt" ]]; then rm "$md_conf_root/$md_id/log.txt"; fi
+    
     addPort "$md_id" "srb2kart" "Sonic Robo Blast 2 Kart" "pushd $md_inst; ./srb2kart; popd"
     moveConfigDir "$home/.srb2kart"  "$md_conf_root/$md_id"
 }
