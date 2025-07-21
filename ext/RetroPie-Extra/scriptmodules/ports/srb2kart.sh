@@ -22,7 +22,7 @@ function depends_srb2kart() {
 }
 
 function sources_srb2kart() {
-	gitPullOrClone "$md_build" https://github.com/STJr/Kart-Public.git $srb2kVER
+    gitPullOrClone "$md_build" https://github.com/STJr/Kart-Public.git $srb2kVER
     mkdir assets/installer
     downloadAndExtract https://github.com/STJr/Kart-Public/releases/download/$srb2kVER/AssetsLinuxOnly.zip "$md_build/assets/installer/"
 }
@@ -36,8 +36,20 @@ function build_srb2kart() {
 }
 
 function install_srb2kart() {
-    # copy and dereference, so we get a srb2kart binary rather than a symlink to srb2kart-version
+    # Copy and dereference to get srb2kart [binary] rather than a symlink to srb2kart-version
     cp -L 'build/bin/srb2kart' "$md_inst/srb2kart"
+    # Clean up any 0lder srb2kart Config/Assets before Installing
+    if [[ -f "$md_conf_root/$md_id/kartconfig.cfg" ]]; then rm "$md_conf_root/$md_id/kartconfig.cfg"; fi
+    if [[ -f "$md_conf_root/$md_id/kartdata.dat" ]]; then rm "$md_conf_root/$md_id/kartdata.dat"; fi
+    if [[ -f "$md_conf_root/$md_id/log.txt" ]]; then rm "$md_conf_root/$md_id/log.txt"; fi
+    if [[ -d "$md_inst/mdls" ]]; then rm -Rf "$md_inst/mdls"; fi
+    if [[ -f "$md_inst/mdls.dat" ]]; then rm "$md_inst/mdls.dat"; fi
+    if [[ -f "$md_inst/srb2.srb" ]]; then rm "$md_inst/srb2.srb"; fi
+    if [[ -f "$md_inst/patch.kart" ]]; then rm "$md_inst/patch.kart"; fi
+    if [[ -f "$md_inst/README.txt" ]]; then rm "$md_inst/README.txt"; fi
+    if [[ ! $(ls "$md_inst/*.kart") == '' ]]; then rm "$md_inst/*.kart"; fi
+    if [[ ! $(ls "$md_inst/LICENSE*") == '' ]]; then rm "$md_inst/LICENSE*"; fi
+    # Copy srb2kart assets
     cp -R "assets/installer/mdls" "$md_inst"
     md_ret_files=(
         'assets/installer/bonuschars.kart'
@@ -57,10 +69,6 @@ function install_srb2kart() {
 }
 
 function configure_srb2kart() {
-    if [[ -f "$md_conf_root/$md_id/kartconfig.cfg" ]]; then rm "$md_conf_root/$md_id/kartconfig.cfg"; fi
-    if [[ -f "$md_conf_root/$md_id/kartdata.dat" ]]; then rm "$md_conf_root/$md_id/kartdata.dat"; fi
-    if [[ -f "$md_conf_root/$md_id/log.txt" ]]; then rm "$md_conf_root/$md_id/log.txt"; fi
-    
     addPort "$md_id" "srb2kart" "Sonic Robo Blast 2 Kart" "pushd $md_inst; ./srb2kart; popd"
     moveConfigDir "$home/.srb2kart"  "$md_conf_root/$md_id"
 }
