@@ -14,7 +14,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="hexen2-gl"
 rp_module_desc="Hexen II - Hammer of Thyrion source port +GL"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/svn2github/uhexen2/master/docs/COPYING"
-rp_module_repo="git https://github.com/jpernst/uhexen2-sdl2.git"
+rp_module_repo="git https://github.com/jpernst/uhexen2-sdl2.git master"
 rp_module_help="For registered version, please add your full version PAK files to $romdir/ports/hexen2/data1/ to play. These files for the registered version are required: pak0.pak, pak1.pak and strings.txt. The registered pak files must be patched to 1.11 for Hammer of Thyrion."
 rp_module_section="exp"
 rp_module_flags=""
