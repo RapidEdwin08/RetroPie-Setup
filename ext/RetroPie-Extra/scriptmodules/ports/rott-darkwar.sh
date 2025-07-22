@@ -49,6 +49,7 @@ function depends_rott-darkwar() {
 
 function sources_rott-darkwar() {
     gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rott-darkwar/rott-darkwar-qjoy.sh" "$md_build"
 }
 
 function build_rott-darkwar() {
@@ -67,12 +68,14 @@ function build_rott-darkwar() {
     fi
     md_ret_require=(
         "$md_build/$rott_bin"
+        "$md_build/rott-darkwar-qjoy.sh"
     )
 }
 
 function install_rott-darkwar() {
     md_ret_files=(
         "$rott_bin"
+        'rott-darkwar-qjoy.sh'
     )
 }
 
@@ -90,5 +93,9 @@ pushd "$rott_romdir"
 popd
 _EOF_
     chmod +x "$script"
+    chmod 755 "$md_inst/rott-darkwar-qjoy.sh"
     addPort "$md_id" "rott-darkwar" "Rise Of The Triad - Dark War" "$rott_prefix$script"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+        addPort "$md_id+qjoypad" "rott-darkwar" "Rise Of The Triad - Dark War +QJoyPad" "XINIT:$md_inst/rott-darkwar-qjoy.sh"
+    fi
 }

@@ -49,6 +49,7 @@ function depends_rott-huntbgin() {
 
 function sources_rott-huntbgin() {
     gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rott-huntbgin/rott-huntbgin-qjoy.sh" "$md_build"
 }
 
 function build_rott-huntbgin() {
@@ -67,12 +68,14 @@ function build_rott-huntbgin() {
     fi
     md_ret_require=(
         "$md_build/$rott_bin"
+        "$md_build/rott-huntbgin-qjoy.sh"
     )
 }
 
 function install_rott-huntbgin() {
     md_ret_files=(
         "$rott_bin"
+        "rott-huntbgin-qjoy.sh"
     )
 }
 
@@ -98,6 +101,10 @@ pushd "$rott_romdir"
 popd
 _EOF_
     chmod +x "$script"
+    chmod 755 "$md_inst/rott-huntbgin-qjoy.sh"
     addPort "$md_id" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware)" "$rott_prefix$script"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+        addPort "$md_id+qjoypad" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware) +QJoyPad" "XINIT:$md_inst/rott-huntbgin-qjoy.sh"
+    fi
     [[ "$md_mode" == "install" ]] && game_data_rott-huntbgin
 }

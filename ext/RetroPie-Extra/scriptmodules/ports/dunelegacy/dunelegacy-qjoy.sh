@@ -43,8 +43,8 @@ matchbox-window-manager -use_titlebar no &
 # Run qjoypad
 pkill -15 qjoypad > /dev/null 2>&1
 rm /tmp/qjoypad.pid > /dev/null 2>&1
-echo "qjoypad "Dune II" &" >> /dev/shm/runcommand.info
-qjoypad "Dune II" &
+echo "qjoypad "$qjoyLAYOUT" &" >> /dev/shm/runcommand.info
+qjoypad "$qjoyLAYOUT" &
 
 # Run Dune
 /opt/retropie/ports/dunelegacy/bin/dunelegacy

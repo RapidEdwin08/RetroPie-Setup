@@ -14,6 +14,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="dhewm3"
 rp_module_desc="dhewm3 - Doom 3"
 rp_module_licence="GPL3 https://github.com/dhewm/dhewm3/blob/master/COPYING.txt"
+rp_module_repo="git https://github.com/dhewm/dhewm3.git"
 rp_module_help="Please copybase/pak000.pk4\n\nbase/pak001.pk4\n\nbase/pak002.pk4\n\nbase/pak003.pk4\n\nbase/pak004.pk4\n\nbase/pak005.pk4\n\nbase/pak006.pk4\n\nbase/pak007.pk4\n\nbase/pak008.pk4\n\nand if you have the expansion:\n\nd3xp/pak000.pk4\n\nd3xp/pak001.pk4\n\nInto the $romdir/doom3/base and $romdir/doom3/d3xp directories"
 rp_module_section="exp"
 rp_module_flags=""
@@ -23,7 +24,7 @@ function depends_dhewm3() {
 }
 
 function sources_dhewm3() {
-    gitPullOrClone "$md_build" https://github.com/dhewm/dhewm3.git
+    gitPullOrClone
 }
 
 function build_dhewm3() {

@@ -25,16 +25,18 @@ rp_module_section="exp"
 rp_module_flags="!mali"
 
 function depends_dunelegacy() {
-    if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
-		local depends=(autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg matchbox-window-manager x11-xserver-utils libfluidsynth-dev libfluidsynth1 fluidsynth)
+    if [[ $(apt-cache search libfluidsynth3) == '' ]]; then # matchbox-window-manager
+		local depends=(matchbox autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg x11-xserver-utils libfluidsynth-dev libfluidsynth1 fluidsynth)
 	else
-		local depends=(autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg matchbox-window-manager x11-xserver-utils libfluidsynth-dev libfluidsynth3 fluidsynth)
+		local depends=(matchbox autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg x11-xserver-utils libfluidsynth-dev libfluidsynth3 fluidsynth)
 	fi
 	getDepends "${depends[@]}"
 }
 
 function sources_dunelegacy() {
-    gitPullOrClone 
+    gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/dunelegacy/dunelegacy-qjoy.sh" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/dunelegacy/Dune%20Legacy.ini" "$md_build"
 }
 
 function build_dunelegacy() {
@@ -60,12 +62,20 @@ function build_dunelegacy() {
 	echo [PARAMS]: ${params[@]}
     autoreconf --install
     ./configure "${params[@]}"
-    make -j4
-	md_ret_require="$md_build/src/dunelegacy"
+    make
+    md_ret_require=(
+        "$md_build/src/dunelegacy"
+        "$md_build/Dune%20Legacy.ini"
+        "$md_build/dunelegacy-qjoy.sh"
+    )
 }
 
 function install_dunelegacy() {
     make install
+    md_ret_files=(
+        'Dune%20Legacy.ini'
+        'dunelegacy-qjoy.sh'
+    )
 }
 
 function game_data_dunelegacy() {
@@ -78,10 +88,18 @@ function game_data_dunelegacy() {
 }
 
 function configure_dunelegacy() {
-    mkRomDir "ports/dune2/data"
     moveConfigDir "$home/.config/dunelegacy" "$md_conf_root/dunelegacy"
-    addPort "$md_id" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/bin/dunelegacy"     	
-    ln -s "/home/pi/RetroPie/roms/ports/dune2/data" "$home/.config/dunelegacy" 
-
+    mv "$md_inst/Dune%20Legacy.ini" "$md_inst/Dune Legacy.ini"
+	if [[ ! -f "$md_conf_root/dunelegacy/Dune Legacy.ini" ]]; then
+		cp "$md_inst/Dune Legacy.ini" "$md_conf_root/dunelegacy/Dune Legacy.ini"
+		chown -R $__user:$__user "$md_conf_root/dunelegacy/Dune Legacy.ini"
+	fi
+    mkRomDir "ports/dune2/data"
+    ln -s "$home/RetroPie/roms/ports/dune2/data" "$home/.config/dunelegacy"
+    chmod 755 "$md_inst/dunelegacy-qjoy.sh"
+    addPort "$md_id" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/bin/dunelegacy"
+	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+		addPort "$md_id+qjoypad" "dunelegacy" "Dune Legacy +QJoyPad" "XINIT:$md_inst/dunelegacy-qjoy.sh"
+	fi
     [[ "$md_mode" == "install" ]] && game_data_dunelegacy
 }
