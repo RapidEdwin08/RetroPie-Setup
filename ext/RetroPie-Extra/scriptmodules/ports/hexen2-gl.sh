@@ -34,7 +34,6 @@ function sources_hexen2-gl() {
 function build_hexen2-gl() {
     cd "$md_build/engine/hexen2"
     ./build_all.sh
-    md_ret_require=
     md_ret_require=(
         "$md_build/engine/hexen2/glhexen2"
         "$md_build/data1.config.cfg"
