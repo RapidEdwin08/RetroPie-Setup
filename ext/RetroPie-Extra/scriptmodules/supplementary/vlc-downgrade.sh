@@ -8,6 +8,9 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# RetroPie-Extra
+# https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
+#
 # Workaround for libvlc issue with video previews in ES by Suggested by Lolonois Converted to RetroPie Script by RapidEdwin08
 # https://retropie.org.uk/forum/topic/35717/emulationstation-video-previews-on-raspberry-pi-5/17
 
