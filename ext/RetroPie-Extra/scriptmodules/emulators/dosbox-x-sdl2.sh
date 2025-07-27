@@ -24,13 +24,13 @@ rp_module_flags="sdl2"
 
 function depends_dosbox-x-sdl2() {
     local depends=(
-        automake libncurses-dev nasm
-        libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev 
+        automake libncurses-dev nasm fluid-soundfont-gm
+        libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev
         libswscale-dev libavcodec-dev xorg matchbox)
     isPlatform "64bit" && depends+=(libavdevice59)
     isPlatform "32bit" && depends+=(libavdevice58)
     #depends+=(libsdl-net1.2-dev)
-    depends+=(libsdl2-dev libsdl2-mixer-dev)
+    depends+=(libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev)
     getDepends "${depends[@]}"
     echo "${depends[@]}"
 }
@@ -43,7 +43,6 @@ function sources_dosbox-x-sdl2() {
 }
 
 function build_dosbox-x-sdl2() {
-    #./build-debug --prefix="$md_inst"
     ./build-debug-sdl2 --prefix="$md_inst"
 }
 
@@ -53,18 +52,24 @@ function install_dosbox-x-sdl2() {
 
 function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$md_inst/share/dosbox-x/drivez"
+    if [[ ! -d "$romdir/pc/.games/DOOMSW" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/DOOM" "$romdir/pc/.games/DOOMSW"; chown -R $__user:$__user "$romdir/pc/.games/DOOMSW"; fi
+    sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/DOOM.conf"; mv "$md_inst/share/dosbox-x/drivez/DOOM.conf" "$romdir/pc/Doom (Shareware) v1.2.conf"; chown $__user:$__user "$romdir/pc/Doom (Shareware) v1.2.conf"
 }
 
 function configure_dosbox-x-sdl2() {
+    mkRomDir "pc"
+    mkRomDir "pc/.games"
+    moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
+    if [[ ! -d "$md_conf_root/pc/GAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/GAMES"; fi
+    chown -R $__user:$__user "$romdir/pc/.games"
+
     sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then rm /usr/share/applications/DOSBox-X.desktop; fi
     cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" /usr/share/applications/DOSBox-X.desktop
 
-    mkRomDir "pc"
     local script="$md_inst/$md_id.sh"
-
     cat > "$script" << _EOF_
 #!/bin/bash
 dos_exe=\$(basename "\$1")
@@ -76,23 +81,26 @@ short_name=\$(echo "\$dos_bat" | cut -c-6)
 short_num=\$(ls -1trp "\$dos_dir" | grep -v / | grep "\$short_name" | nl -w1 -s'+++' | grep "\$dos_exe" | rev | cut -d "+" -f4- | rev)
 if [[ \${#dos_bat} -ge 9 ]] ; then dos_bat=\$short_name~\$short_num; fi
 
+params+=(-defaultdir /opt/retropie/configs/pc)
+
 if [[ "\$1" == *"+Start DOSBox-X"* ]] || [[ "\$1" == '' ]]; then
     params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc");
 elif [[ "\$1" == *".EXE" ]] || [[ "\$1" == *".exe" ]]; then
-    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs -exit)
+    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs)
 elif [[ "\$1" == *".COM" ]] || [[ "\$1" == *".com" ]]; then
-    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs -exit)
+    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs)
 elif [[ "\$1" == *".BAT" ]] || [[ "\$1" == *".bat" ]]; then
-    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \$dos_bat -fs -exit)
+    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \$dos_bat -fs)
 elif [[ "\$1" == *".CONF" ]] || [[ "\$1" == *".conf" ]]; then
-    params=(-userconf -conf "\$1" -fs -exit)
+    params=(-userconf -conf "\$1" -fs)
 elif [[ "\$1" == *".SH" ]] || [[ "\$1" == *".sh" ]]; then
     bash "\$1"; exit
 else
-    params=(-c "@MOUNT C \"\$1\"" -c "@C:" -fs -exit)
+    params=(-c "@MOUNT C \"\$1\"" -c "@C:" -fs)
 fi
-if [[ ! "\$1" == *".CONF" ]] && [[ ! "\$1" == *".conf" ]]; then
-    params+=(-defaultdir /opt/retropie/configs/pc)
+
+if [[ ! "\$1" == *"+Start DOSBox-X"* ]] && [[ "\$1" == '' ]]; then
+    params+=(-exit)
 fi
 
 xset -dpms s off s noblank
@@ -102,15 +110,13 @@ _EOF_
 
     chmod +x "$script"
     launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
-    moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
-    if [[ ! -d "$romdir/pc/.games" ]]; then mkdir "$romdir/pc/.games"; fi
-    if [[ ! -d "$md_conf_root/pc/GAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/GAMES"; fi
     addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix:$script"
     mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"
     sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
     chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
-    chown -R $__user:$__user "$romdir/pc/.games"
+
     addEmulator "0" "$md_id" "pc" "$launch_prefix:$script %ROM%"
     addSystem "pc"
+
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
 }
