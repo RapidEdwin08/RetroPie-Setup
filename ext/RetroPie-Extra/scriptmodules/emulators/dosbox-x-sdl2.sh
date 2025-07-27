@@ -37,8 +37,8 @@ function depends_dosbox-x-sdl2() {
 
 function sources_dosbox-x-sdl2() {
     gitPullOrClone
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | EXIT/g' "$md_build/contrib/translations/en/en_US.lng"
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | EXIT"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | Type EXIT/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | Type EXIT"\)\;/g' "$md_build/src/shell/shell.cpp"
     sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
 }
 
@@ -73,6 +73,7 @@ function configure_dosbox-x-sdl2() {
     chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then rm /usr/share/applications/DOSBox-X.desktop; fi
     cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" /usr/share/applications/DOSBox-X.desktop
+    chown $__user:$__user /usr/share/applications/DOSBox-X.desktop
 
     local script="$md_inst/$md_id.sh"
     cat > "$script" << _EOF_
