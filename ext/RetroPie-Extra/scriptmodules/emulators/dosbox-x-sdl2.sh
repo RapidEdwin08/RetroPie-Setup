@@ -57,7 +57,7 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
 }
 
 function remove_dosbox-x-sdl2() {
-    rm /usr/share/applications/DOSBox-X.desktop
+    sudo rm -f /usr/share/applications/DOSBox-X.desktop
     rm "$romdir/pc/+Start DOSBox-X.sh"
 }
 
