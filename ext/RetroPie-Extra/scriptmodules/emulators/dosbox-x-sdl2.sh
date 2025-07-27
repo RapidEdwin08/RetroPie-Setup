@@ -37,8 +37,8 @@ function depends_dosbox-x-sdl2() {
 
 function sources_dosbox-x-sdl2() {
     gitPullOrClone
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | Type EXIT/g' "$md_build/contrib/translations/en/en_US.lng"
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | Type EXIT"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | cd GAMES~1/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | cd GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
     sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
 }
 
