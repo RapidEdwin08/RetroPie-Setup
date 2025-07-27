@@ -15,8 +15,8 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="dosbox-x-sdl2"
-rp_module_desc="DOSBox-X SDL2\n \nDOSBox-X is an open-source DOS emulator for running DOS applications and games +Support for DOS-based Windows such as Windows 3.x and Windows 9x."
-rp_module_help="ROM Extensions: .bat .com .exe .sh .conf\n\nCopy your DOS games to roms/pc\n \nOptionally Put DOS games in a Hidden Folder:\nroms/pc/.games"
+rp_module_desc="DOSBox-X (SDL2)\n \nDOSBox-X is an open-source DOS emulator for running DOS applications and games +Support for DOS-based Windows such as Windows 3.x and Windows 9x."
+rp_module_help="ROM Extensions: [.CONF] [.BAT] [.EXE] [.COM] [.SH]\n \n[.CONF] Files Recommended for Compatibility\n \nPut DOS Games in PC Folder: roms/pc\n \nHide DOS Games in a Hidden Folder: roms/pc/.games\n \nHidden Folder (Linux) /.games == GAMES~1 (DOS)\neg. cd GAMES~1"
 rp_module_licence="GNU https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING"
 rp_module_repo="git https://github.com/joncampbell123/dosbox-x.git master"
 rp_module_section="exp"
@@ -37,8 +37,8 @@ function depends_dosbox-x-sdl2() {
 
 function sources_dosbox-x-sdl2() {
     gitPullOrClone
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER/g' "$md_build/contrib/translations/en/en_US.lng"
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | EXIT/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | EXIT"\)\;/g' "$md_build/src/shell/shell.cpp"
     sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
 }
 
@@ -54,6 +54,11 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$md_inst/share/dosbox-x/drivez"
     if [[ ! -d "$romdir/pc/.games/DOOMSW" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/DOOM" "$romdir/pc/.games/DOOMSW"; chown -R $__user:$__user "$romdir/pc/.games/DOOMSW"; fi
     sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/DOOM.conf"; mv "$md_inst/share/dosbox-x/drivez/DOOM.conf" "$romdir/pc/Doom (Shareware) v1.2.conf"; chown $__user:$__user "$romdir/pc/Doom (Shareware) v1.2.conf"
+}
+
+function remove_dosbox-x-sdl2() {
+    sudo rm /usr/share/applications/DOSBox-X.desktop
+    rm "$romdir/pc/+Start DOSBox-X.sh"
 }
 
 function configure_dosbox-x-sdl2() {
