@@ -81,8 +81,8 @@ short_name=\$(echo "\$dos_bat" | cut -c-6)
 short_num=\$(ls -1trp "\$dos_dir" | grep -v / | grep "\$short_name" | nl -w1 -s'+++' | grep "\$dos_exe" | rev | cut -d "+" -f4- | rev)
 if [[ \${#dos_bat} -ge 9 ]] ; then dos_bat=\$short_name~\$short_num; fi
 
+# DOSBox-X Params
 params+=(-defaultdir /opt/retropie/configs/pc)
-
 if [[ "\$1" == *"+Start DOSBox-X"* ]] || [[ "\$1" == '' ]]; then
     params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc");
 elif [[ "\$1" == *".EXE" ]] || [[ "\$1" == *".exe" ]]; then
@@ -99,10 +99,12 @@ else
     params=(-c "@MOUNT C \"\$1\"" -c "@C:" -fs)
 fi
 
-if [[ ! "\$1" == *"+Start DOSBox-X"* ]] && [[ "\$1" == '' ]]; then
+if [[ ! "\$1" == *"+Start DOSBox-X"* ]] && [[ ! "\$1" == '' ]]; then
     params+=(-exit)
 fi
+echo "\${params[@]}" >> /dev/shm/runcommand.info
 
+# Start DOSBox-X
 xset -dpms s off s noblank
 matchbox-window-manager -use_titlebar no &
 /opt/retropie/emulators/dosbox-x-sdl2/bin/dosbox-x "\${params[@]}"
