@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+# This file is part of The RetroPie Project
+#
+# The RetroPie Project is the legal property of its developers, whose names are
+# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+#
+# See the LICENSE.md file at the top-level directory of this distribution and
+# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
+#
+# RetroPie-Extra
+# https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
+#
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
+
+rp_module_id="dosbox-x-sdl2"
+rp_module_desc="DOSBox-X SDL2\n \nDOSBox-X is an open-source DOS emulator for running DOS applications and games +Support for DOS-based Windows such as Windows 3.x and Windows 9x."
+rp_module_help="ROM Extensions: .bat .com .exe .sh .conf\n\nCopy your DOS games to roms/pc\n \nOptionally Put DOS games in a Hidden Folder:\nroms/pc/.games"
+rp_module_licence="GNU https://raw.githubusercontent.com/joncampbell123/dosbox-x/master/COPYING"
+rp_module_repo="git https://github.com/joncampbell123/dosbox-x.git master"
+rp_module_section="exp"
+rp_module_flags="sdl2"
+
+function depends_dosbox-x-sdl2() {
+    local depends=(
+        automake libncurses-dev nasm
+        libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev 
+        libswscale-dev libavcodec-dev xorg matchbox)
+    isPlatform "64bit" && depends+=(libavdevice59)
+    isPlatform "32bit" && depends+=(libavdevice58)
+    #depends+=(libsdl-net1.2-dev)
+    depends+=(libsdl2-dev libsdl2-mixer-dev)
+    getDepends "${depends[@]}"
+    echo "${depends[@]}"
+}
+
+function sources_dosbox-x-sdl2() {
+    gitPullOrClone
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
+}
+
+function build_dosbox-x-sdl2() {
+    #./build-debug --prefix="$md_inst"
+    ./build-debug-sdl2 --prefix="$md_inst"
+}
+
+function install_dosbox-x-sdl2() {
+    make install
+}
+
+function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$md_inst/share/dosbox-x/drivez"
+}
+
+function configure_dosbox-x-sdl2() {
+    sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then rm /usr/share/applications/DOSBox-X.desktop; fi
+    cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" /usr/share/applications/DOSBox-X.desktop
+
+    mkRomDir "pc"
+    local script="$md_inst/$md_id.sh"
+
+    cat > "$script" << _EOF_
+#!/bin/bash
+dos_exe=\$(basename "\$1")
+dos_dir=\$(dirname "\$1")
+
+# Attempt to pull DOS Short~1 Names~2 for 8-Character Limit
+dos_bat=\$(echo \$dos_exe | rev | cut -d "." -f2- | rev)
+short_name=\$(echo "\$dos_bat" | cut -c-6)
+short_num=\$(ls -1trp "\$dos_dir" | grep -v / | grep "\$short_name" | nl -w1 -s'+++' | grep "\$dos_exe" | rev | cut -d "+" -f4- | rev)
+if [[ \${#dos_bat} -ge 9 ]] ; then dos_bat=\$short_name~\$short_num; fi
+
+if [[ "\$1" == *"+Start DOSBox-X"* ]] || [[ "\$1" == '' ]]; then
+    params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc");
+elif [[ "\$1" == *".EXE" ]] || [[ "\$1" == *".exe" ]]; then
+    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs -exit)
+elif [[ "\$1" == *".COM" ]] || [[ "\$1" == *".com" ]]; then
+    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs -exit)
+elif [[ "\$1" == *".BAT" ]] || [[ "\$1" == *".bat" ]]; then
+    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \$dos_bat -fs -exit)
+elif [[ "\$1" == *".CONF" ]] || [[ "\$1" == *".conf" ]]; then
+    params=(-userconf -conf "\$1" -fs -exit)
+elif [[ "\$1" == *".SH" ]] || [[ "\$1" == *".sh" ]]; then
+    bash "\$1"; exit
+else
+    params=(-c "@MOUNT C \"\$1\"" -c "@C:" -fs -exit)
+fi
+if [[ ! "\$1" == *".CONF" ]] && [[ ! "\$1" == *".conf" ]]; then
+    params+=(-defaultdir /opt/retropie/configs/pc)
+fi
+
+xset -dpms s off s noblank
+matchbox-window-manager -use_titlebar no &
+/opt/retropie/emulators/dosbox-x-sdl2/bin/dosbox-x "\${params[@]}"
+_EOF_
+
+    chmod +x "$script"
+    launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
+    moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
+    if [[ ! -d "$romdir/pc/.games" ]]; then mkdir "$romdir/pc/.games"; fi
+    if [[ ! -d "$md_conf_root/pc/GAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/GAMES"; fi
+    addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix:$script"; mv "$md_conf_root/doxbox-x" "$md_conf_root/ports/"
+    mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"; chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
+    chown -R $__user:$__user "$romdir/pc/.games"
+    addEmulator "0" "$md_id" "pc" "$launch_prefix:$script %ROM%"
+    addSystem "pc"
+    [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
+}
