@@ -57,7 +57,7 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
 }
 
 function remove_dosbox-x-sdl2() {
-    sudo rm /usr/share/applications/DOSBox-X.desktop
+    rm /usr/share/applications/DOSBox-X.desktop
     rm "$romdir/pc/+Start DOSBox-X.sh"
 }
 
@@ -72,8 +72,7 @@ function configure_dosbox-x-sdl2() {
     sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then rm /usr/share/applications/DOSBox-X.desktop; fi
-    cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" /usr/share/applications/DOSBox-X.desktop
-    chown $__user:$__user /usr/share/applications/DOSBox-X.desktop
+    mv "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "/usr/share/applications/DOSBox-X.desktop"
 
     local script="$md_inst/$md_id.sh"
     cat > "$script" << _EOF_
