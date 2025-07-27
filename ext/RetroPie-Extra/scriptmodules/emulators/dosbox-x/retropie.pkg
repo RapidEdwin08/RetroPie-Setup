@@ -1,0 +1,8 @@
+pkg_origin="source"
+pkg_date="2025-07-26T19:42:17-04:00"
+pkg_repo_type="git"
+pkg_repo_url="https://github.com/joncampbell123/dosbox-x.git"
+pkg_repo_branch="master"
+pkg_repo_commit="3077039cdf7b4dab4e33a4765d06dcdec55d4501"
+pkg_repo_date="2025-06-25T06:00:15-07:00"
+pkg_repo_extra=""
