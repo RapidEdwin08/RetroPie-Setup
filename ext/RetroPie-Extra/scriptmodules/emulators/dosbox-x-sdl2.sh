@@ -105,8 +105,10 @@ _EOF_
     moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
     if [[ ! -d "$romdir/pc/.games" ]]; then mkdir "$romdir/pc/.games"; fi
     if [[ ! -d "$md_conf_root/pc/GAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/GAMES"; fi
-    addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix:$script"; mv "$md_conf_root/doxbox-x" "$md_conf_root/ports/"
-    mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"; chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
+    addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix:$script"
+    mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"
+    sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
+    chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
     chown -R $__user:$__user "$romdir/pc/.games"
     addEmulator "0" "$md_id" "pc" "$launch_prefix:$script %ROM%"
     addSystem "pc"
