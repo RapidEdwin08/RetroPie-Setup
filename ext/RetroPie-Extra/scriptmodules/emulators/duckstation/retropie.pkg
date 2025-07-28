@@ -1,0 +1,8 @@
+pkg_origin="source"
+pkg_date="2025-07-26T00:14:13-04:00"
+pkg_repo_type="git"
+pkg_repo_url="https://github.com/stenzek/duckstation.git"
+pkg_repo_branch="master"
+pkg_repo_commit="ad4a909aa45e20b477dcb20a53968d638ea02d22"
+pkg_repo_date="2025-07-28T07:20:28+00:00"
+pkg_repo_extra=""
