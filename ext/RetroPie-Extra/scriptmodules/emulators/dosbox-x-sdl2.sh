@@ -37,8 +37,8 @@ function depends_dosbox-x-sdl2() {
 
 function sources_dosbox-x-sdl2() {
     gitPullOrClone
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | cd GAMES~1/g' "$md_build/contrib/translations/en/en_US.lng"
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | cd GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\GAMES~1/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
     sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
 }
 
@@ -58,6 +58,7 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
 
 function remove_dosbox-x-sdl2() {
     sudo rm -f /usr/share/applications/DOSBox-X.desktop
+    if [[ -f "$home/Desktop/DOSBox-X.desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; fi
     rm "$romdir/pc/+Start DOSBox-X.sh"
 }
 
@@ -71,7 +72,7 @@ function configure_dosbox-x-sdl2() {
     sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
-    if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then rm /usr/share/applications/DOSBox-X.desktop; fi
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "$home/DOSBox-X.desktop"; chown $__user:$__user "$home/Desktop/DOSBox-X.desktop"; fi
     mv "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "/usr/share/applications/DOSBox-X.desktop"
 
     local script="$md_inst/$md_id.sh"
@@ -124,6 +125,9 @@ _EOF_
 
     addEmulator "0" "$md_id" "pc" "$launch_prefix:$script %ROM%"
     addSystem "pc"
+
+    if [[ $(cat /opt/retropie/configs/pc/emulators.cfg | grep -q 'default =' ; echo $?) == '1' ]]; then echo 'default = "dosbox-x-sdl2"' >> /opt/retropie/configs/pc/emulators.cfg; fi
+    sed -i 's/default\ =.*/default\ =\ \"dosbox-x-sdl2\"/g' /opt/retropie/configs/pc/emulators.cfg
 
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
 }
