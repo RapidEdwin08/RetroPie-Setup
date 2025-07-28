@@ -66,7 +66,7 @@ function install_duckstation() {
     moveConfigDir "$home/.local/share/duckstation" "$md_conf_root/psx/duckstation"
     chown -R $__user:$__user -R "$md_conf_root/psx/duckstation"
     mkRomDir "psx"
-    chmod 755 '+Start DuckStation.sh'; mv '+Start DuckStation.sh' "$romdir/psx"
+    chmod 755 '+Start DuckStation.m3u'; mv '+Start DuckStation.m3u' "$romdir/psx"
     if [[ ! -f "$home/RetroPie/roms/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; fi
     if [[ ! -d "$home/RetroPie/roms/psx/media" ]]; then mv 'media' "$romdir/psx"; fi
     chown -R $__user:$__user -R "$romdir/psx"
@@ -75,7 +75,7 @@ function install_duckstation() {
 function remove_duckstation() {
     sudo rm -f /usr/share/applications/DOSBox-X.desktop
     if [[ -f "$home/Desktop/DuckStation.desktop" ]]; then rm -f "$home/Desktop/DuckStation.desktop"; fi
-    rm "$romdir/psx/+Start DuckStation.sh"
+    rm "$romdir/psx/+Start DuckStation.m3u"
 }
 
 function configure_duckstation() {
