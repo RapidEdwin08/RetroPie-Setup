@@ -83,7 +83,7 @@ function configure_duckstation() {
     launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then launch_prefix=XINIT; fi
     addEmulator 0 "$md_id" "psx" "$launch_prefix:$md_inst/duckstation.sh %ROM%"
     launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
-    addEmulator 1 "$md_id-editor" "psx" "$launch_prefix:$md_inst/duckstation.sh %ROM%"
+    addEmulator 1 "$md_id-editor" "psx" "$launch_prefix:$md_inst/duckstation.sh"
     if [[ $(cat /opt/retropie/configs/psx/emulators.cfg | grep -q 'default =' ; echo $?) == '1' ]]; then echo 'default = "duckstation"' >> /opt/retropie/configs/psx/emulators.cfg; fi
     sed -i 's/default\ =.*/default\ =\ \"duckstation\"/g' /opt/retropie/configs/psx/emulators.cfg
 }
