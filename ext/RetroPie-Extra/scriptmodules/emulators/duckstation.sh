@@ -47,18 +47,20 @@ function install_duckstation() {
     mv "DuckStation-128.xpm" "$md_inst"; mv "PSXBIOSRequired.jpg" "$md_inst"
     if [[ ! -d "$home/.local/share/duckstation" ]]; then mkdir "$home/.local/share/duckstation"; fi
     sed -i s+'/home/pi/'+"$home/"+g "settings.ini"
-    if isPlatform "rpi5" || isPlatform "rpi4"; then
-        sed -i 's/Renderer\ =.*/Renderer\ =\ OpenGL/g' "settings.ini"
-        sed -i 's/Adapter\ =.*/Adapter\ =\ V3D\ 7.1.10/g' "settings.ini"
-        sed -i 's/VSync\ =.*/VSync\ =\ true/g' "settings.ini"
-        sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
-        sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 2/g' "settings.ini"
-        if isPlatform "rpi5"; then sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 3/g' "settings.ini"; fi
-    fi
     if [[ "$__platform_arch" == 'x86_64' ]]; then
         sed -i 's/VSync\ =.*/VSync\ =\ true/g' "settings.ini"
         sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
         sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 3/g' "settings.ini"
+    fi
+    if isPlatform "aarch64"; then
+        sed -i 's/VSync\ =.*/VSync\ =\ true/g' "settings.ini"
+        sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
+        sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 2/g' "settings.ini"
+    fi
+    if isPlatform "rpi5" || isPlatform "rpi4"; then
+        sed -i 's/Renderer\ =.*/Renderer\ =\ OpenGL/g' "settings.ini"
+        sed -i 's/Adapter\ =.*/Adapter\ =\ V3D\ 7.1.10/g' "settings.ini"
+        if isPlatform "rpi5"; then sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 3/g' "settings.ini"; fi
     fi
     if [[ ! -f "$home/.local/share/duckstation/settings.ini" ]]; then mv "settings.ini" "$home/.local/share/duckstation"; fi
     if [[ ! -d "$home/.local/share/duckstation/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.local/share/duckstation/bios"; fi
@@ -67,8 +69,8 @@ function install_duckstation() {
     chown -R $__user:$__user -R "$md_conf_root/psx/duckstation"
     mkRomDir "psx"
     chmod 755 '+Start DuckStation.m3u'; mv '+Start DuckStation.m3u' "$romdir/psx"
-    if [[ ! -f "$home/RetroPie/roms/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; fi
-    if [[ ! -d "$home/RetroPie/roms/psx/media" ]]; then mv 'media' "$romdir/psx"; fi
+    if [[ ! -f "$romdir/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; fi
+    if [[ ! -d "$romdir/psx/psx/media" ]]; then mv 'media' "$romdir/psx"; fi
     chown -R $__user:$__user -R "$romdir/psx"
 }
 
