@@ -37,8 +37,8 @@ function depends_dosbox-x-sdl2() {
 
 function sources_dosbox-x-sdl2() {
     gitPullOrClone
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\GAMES~1/g' "$md_build/contrib/translations/en/en_US.lng"
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\\\GAMES~1/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\\\GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
     sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
 }
 
@@ -72,7 +72,7 @@ function configure_dosbox-x-sdl2() {
     sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "$home/DOSBox-X.desktop"; chown $__user:$__user "$home/Desktop/DOSBox-X.desktop"; fi
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "$home/Desktop/DOSBox-X.desktop"; chown $__user:$__user "$home/Desktop/DOSBox-X.desktop"; fi
     mv "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "/usr/share/applications/DOSBox-X.desktop"
 
     local script="$md_inst/$md_id.sh"
