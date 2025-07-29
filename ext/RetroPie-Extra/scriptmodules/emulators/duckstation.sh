@@ -69,8 +69,11 @@ function install_duckstation() {
     chown -R $__user:$__user -R "$md_conf_root/psx/duckstation"
     mkRomDir "psx"
     chmod 755 '+Start DuckStation.m3u'; mv '+Start DuckStation.m3u' "$romdir/psx"
+    mkRomDir "psx/media"; mkRomDir "psx/media/image"; mkRomDir "psx/media/marquee"; mkRomDir "psx/media/video"
+    mv 'media/image/DuckStation.png' "$romdir/psx/media/image"
+    mv 'media/marquee/DuckStation.png' "$romdir/psx/media/marquee"
+    mv 'media/video/DuckStation.mp4' "$romdir/psx/media/video"
     if [[ ! -f "$romdir/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; fi
-    if [[ ! -f "$romdir/psx/media/DuckStation.png" ]]; then mv 'media' "$romdir/psx"; fi
     chown -R $__user:$__user -R "$romdir/psx"
 }
 

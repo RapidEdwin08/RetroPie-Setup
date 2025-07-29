@@ -54,7 +54,14 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$md_inst/share/dosbox-x/drivez"
     if [[ ! -d "$romdir/pc/.games/DOOMSW" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/DOOM" "$romdir/pc/.games/DOOMSW"; chown -R $__user:$__user "$romdir/pc/.games/DOOMSW"; fi
     sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/DOOM.conf"; mv "$md_inst/share/dosbox-x/drivez/DOOM.conf" "$romdir/pc/Doom (Shareware) v1.2.conf"; chown $__user:$__user "$romdir/pc/Doom (Shareware) v1.2.conf"
-    if [[ ! -f "$romdir/pc/media/DOSBox-X.png" ]]; then mv "$md_inst/share/dosbox-x/drivez/media" "$romdir/pc"; else rm -Rf "$md_inst/share/dosbox-x/drivez/media"; fi
+    mkRomDir "pc/media"; mkRomDir "pc/media/image"; mkRomDir "pc/media/marquee"; mkRomDir "pc/media/video"
+    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-X.png" "$romdir/pc/media/image"
+    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-Staging.png" "$romdir/pc/media/image"
+    mv "$md_inst/share/dosbox-x/drivez/media/image/Doom 1 (Shareware).jpg" "$romdir/pc/media/image"
+    mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-X.png" "$romdir/pc/media/marquee"
+    mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-Staging.png" "$romdir/pc/media/marquee"
+    mv "$md_inst/share/dosbox-x/drivez/media/marquee/Doom.png" "$romdir/pc/media/marquee"
+    rm -Rf "$md_inst/share/dosbox-x/drivez/media"
     if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/pc"; else rm -f "$md_inst/share/dosbox-x/drivez/gamelist.xml"; fi
     chown -R $__user:$__user -R "$romdir/pc"
 }
