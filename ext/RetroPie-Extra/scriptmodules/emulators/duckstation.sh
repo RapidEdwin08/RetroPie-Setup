@@ -70,7 +70,7 @@ function install_duckstation() {
     mkRomDir "psx"
     chmod 755 '+Start DuckStation.m3u'; mv '+Start DuckStation.m3u' "$romdir/psx"
     if [[ ! -f "$romdir/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; fi
-    mv 'media' "$romdir/psx"
+    if [[ ! -f "$romdir/psx/media/DuckStation.png" ]]; then mv 'media' "$romdir/psx"; fi
     chown -R $__user:$__user -R "$romdir/psx"
 }
 

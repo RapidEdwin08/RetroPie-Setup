@@ -54,7 +54,7 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$md_inst/share/dosbox-x/drivez"
     if [[ ! -d "$romdir/pc/.games/DOOMSW" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/DOOM" "$romdir/pc/.games/DOOMSW"; chown -R $__user:$__user "$romdir/pc/.games/DOOMSW"; fi
     sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/DOOM.conf"; mv "$md_inst/share/dosbox-x/drivez/DOOM.conf" "$romdir/pc/Doom (Shareware) v1.2.conf"; chown $__user:$__user "$romdir/pc/Doom (Shareware) v1.2.conf"
-    mv "$md_inst/share/dosbox-x/drivez/media" "$romdir/pc"
+    if [[ ! -f "$romdir/psx/media/DOSBox-X.png" ]]; then mv "$md_inst/share/dosbox-x/drivez/media" "$romdir/psx"; else rm -Rf "$md_inst/share/dosbox-x/drivez/media"; fi
     if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/psx"; else rm -f "$md_inst/share/dosbox-x/drivez/gamelist.xml"; fi
     chown -R $__user:$__user -R "$romdir/pc"
 }
