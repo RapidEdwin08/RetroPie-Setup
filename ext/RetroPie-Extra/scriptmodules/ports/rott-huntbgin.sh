@@ -18,7 +18,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
 
 rp_module_id="rott-huntbgin"
-rp_module_desc="Rise of the Triad - The Hunt Begins (Shareware)\n \nMaster Branch (Bullseye+):\nhttps://github.com/LTCHIPS/rottexpr.git\n \nLegacy Branch (Buster-):\nhttps://github.com/zerojay/RoTT"
+rp_module_desc="Rise of the Triad - The Hunt Begins (Shareware)\n \nMaster Branch (Bullseye+):\nhttps://github.com/LTCHIPS/rottexpr.git\n \nLegacy Branch (Buster-):\nhttps://github.com/RapidEdwin08/RoTT"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/LTCHIPS/rottexpr/master/LICENSE.DOC"
 rp_module_repo="git https://github.com/LTCHIPS/rottexpr.git master"
 rp_module_help="Location of ROTT Shareware files:\n$romdir/ports/rott-huntbgin"
@@ -30,8 +30,12 @@ rott_bin="src/rott"
 rott_prefix=''
 
 if [[ "$legacy_branch" == '1' ]]; then
-    rp_module_licence="GPL2 https://raw.githubusercontent.com/zerojay/RoTT/master/COPYING"
-    rp_module_repo="git https://github.com/zerojay/RoTT"
+    rp_module_licence="GPL2 https://raw.githubusercontent.com/RapidEdwin08/RoTT/master/COPYING"
+    rp_module_repo="git https://github.com/RapidEdwin08/RoTT"
+    #rp_module_repo="git https://github.com/zerojay/RoTT"
+    #rp_module_repo="git https://github.com/JohnnyonFlame/RoTT"
+    #rp_module_repo="git https://github.com/scooterpsu/RoTT"
+    #rp_module_repo="git https://github.com/podulator/RoTT"
     rott_bin="rott-huntbgin"
     rott_prefix='XINIT:'
 fi
@@ -106,7 +110,7 @@ _EOF_
     chmod 755 "$md_inst/rott-huntbgin-qjoy.sh"
     addPort "$md_id" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware)" "$rott_prefix$script"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addPort "$md_id+qjoypad" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware) +QJoyPad" "XINIT:$md_inst/rott-huntbgin-qjoy.sh"
+        addPort "$md_id+qjoypad" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware)" "XINIT:$md_inst/rott-huntbgin-qjoy.sh"
     fi
     [[ "$md_mode" == "install" ]] && game_data_rott-huntbgin
 }
