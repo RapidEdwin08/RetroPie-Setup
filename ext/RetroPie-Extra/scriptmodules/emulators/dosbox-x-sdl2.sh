@@ -55,21 +55,18 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     if [[ ! -d "$romdir/pc/.games/DOOMSW" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/DOOM" "$romdir/pc/.games/DOOMSW"; chown -R $__user:$__user "$romdir/pc/.games/DOOMSW"; fi
     sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/DOOM.conf"; mv "$md_inst/share/dosbox-x/drivez/DOOM.conf" "$romdir/pc/Doom (Shareware) v1.2.conf"; chown $__user:$__user "$romdir/pc/Doom (Shareware) v1.2.conf"
     mkRomDir "pc/media"; mkRomDir "pc/media/image"; mkRomDir "pc/media/marquee"; mkRomDir "pc/media/video"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-X.png" "$romdir/pc/media/image"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-Staging.png" "$romdir/pc/media/image"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/Doom 1 (Shareware).jpg" "$romdir/pc/media/image"
-    mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-X.png" "$romdir/pc/media/marquee"
-    mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-Staging.png" "$romdir/pc/media/marquee"
-    mv "$md_inst/share/dosbox-x/drivez/media/marquee/Doom.png" "$romdir/pc/media/marquee"
+    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-X.png" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-X.png" "$romdir/pc/media/marquee"
+    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-Staging.png" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-Staging.png" "$romdir/pc/media/marquee"
+    mv "$md_inst/share/dosbox-x/drivez/media/image/Doom 1 (Shareware).jpg" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/Doom.png" "$romdir/pc/media/marquee"
     rm -Rf "$md_inst/share/dosbox-x/drivez/media"
-    if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/pc"; else rm -f "$md_inst/share/dosbox-x/drivez/gamelist.xml"; fi
+    if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/pc"; else mv -f "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/pc/gamelist.xml.dosbox-x"; fi
     chown -R $__user:$__user -R "$romdir/pc"
 }
 
 function remove_dosbox-x-sdl2() {
-    sudo rm -f /usr/share/applications/DOSBox-X.desktop
+    if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then sudo rm -f /usr/share/applications/DOSBox-X.desktop; fi
     if [[ -f "$home/Desktop/DOSBox-X.desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; fi
-    rm "$romdir/pc/+Start DOSBox-X.sh"
+    if [[ -f "$romdir/pc/+Start DOSBox-X.sh" ]]; then rm "$romdir/pc/+Start DOSBox-X.sh"; fi
 }
 
 function configure_dosbox-x-sdl2() {
@@ -133,11 +130,9 @@ _EOF_
     sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
     chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
 
-    addEmulator "0" "$md_id" "pc" "$launch_prefix:$script %ROM%"
+    addEmulator "1" "$md_id" "pc" "$launch_prefix:$script %ROM%"
     addSystem "pc"
-
-    if [[ $(cat /opt/retropie/configs/pc/emulators.cfg | grep -q 'default =' ; echo $?) == '1' ]]; then echo 'default = "dosbox-x-sdl2"' >> /opt/retropie/configs/pc/emulators.cfg; fi
-    sed -i 's/default\ =.*/default\ =\ \"dosbox-x-sdl2\"/g' /opt/retropie/configs/pc/emulators.cfg
+    echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"
 
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
 }
