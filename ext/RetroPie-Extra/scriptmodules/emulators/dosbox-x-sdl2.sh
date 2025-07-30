@@ -24,7 +24,7 @@ rp_module_flags="sdl2"
 
 function depends_dosbox-x-sdl2() {
     local depends=(
-        automake libncurses-dev nasm fluid-soundfont-gm
+        automake libncurses-dev nasm fluid-soundfont-gm whiptail
         libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev
         libswscale-dev libavcodec-dev xorg matchbox)
     isPlatform "64bit" && depends+=(libavdevice59)
