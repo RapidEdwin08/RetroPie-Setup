@@ -67,6 +67,7 @@ function remove_dosbox-x-sdl2() {
     if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then sudo rm -f /usr/share/applications/DOSBox-X.desktop; fi
     if [[ -f "$home/Desktop/DOSBox-X.desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; fi
     if [[ -f "$romdir/pc/+Start DOSBox-X.sh" ]]; then rm "$romdir/pc/+Start DOSBox-X.sh"; fi
+    if [[ -f "$md_conf_root/dosbox-x/README.TXT" ]]; then rm -f "$md_conf_root/dosbox-x/README.TXT"; fi
 }
 
 function configure_dosbox-x-sdl2() {
