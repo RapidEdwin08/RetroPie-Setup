@@ -19,7 +19,7 @@ rp_module_desc="PS2 Emulator Optimized for ARM"
 rp_module_help="AetherSX2-v1.5-3606.AppImage \n \n http://web.archive.org/web/20240222085515/https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. You can view the licenses for this code by selecting \"Third-Party Notices\" \n \nROM Extensions: .bin .iso .img .mdf .z .z2 .bz2 .cso .chd .ima .gz\n\nCopy your PS2 roms to $romdir/ps2\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PS2\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="Aethersx2 https://aethersx2.net/terms-conditions"
 rp_module_section="exp"
-#rp_module_flags="!all arm aarch64 !x86"
+rp_module_flags="!all arm aarch64 !x86"
 
 function depends_aethersx2() {
     getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox
