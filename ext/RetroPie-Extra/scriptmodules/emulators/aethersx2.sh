@@ -27,8 +27,8 @@ function depends_aethersx2() {
 
 function install_bin_aethersx2() {
     # Tahleth Suspended Development 202301 - 0riginal site 404 Since 202403 - Pull from http://web.archive.org
-    download "http://web.archive.org/web/20240120140213/https://www.aethersx2.com/archive/desktop/linux/AetherSX2-v1.5-3606.AppImage" "$md_build"
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/aethersx2/aethersx2-rp-assets.tar.gz" "$md_build"
+    download "http://web.archive.org/web/20240120140213/https://www.aethersx2.com/archive/desktop/linux/AetherSX2-v1.5-3606.AppImage" "$md_build"
 
     pushd "$md_build"
     chmod 755 "AetherSX2-v1.5-3606.AppImage"; mv 'AetherSX2-v1.5-3606.AppImage' "$md_inst"
