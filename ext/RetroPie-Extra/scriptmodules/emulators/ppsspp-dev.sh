@@ -144,13 +144,12 @@ function build_ppsspp-dev() {
         params+=(-DCMAKE_CXX_FLAGS="${CXXFLAGS/-DGL_GLEXT_PROTOTYPES/}")
     elif isPlatform "tinker"; then
         params+=(-DCMAKE_TOOLCHAIN_FILE="$md_data/tinker.armv7.cmake")
-    elif isPlatform "vero4k"; then
-        params+=(-DCMAKE_TOOLCHAIN_FILE="cmake/Toolchains/vero4k.armv8.cmake")
     fi
-    if isPlatform "arm" && ! isPlatform "x11"; then
+    isPlatform "vero4k" && params+=(-DCMAKE_TOOLCHAIN_FILE="cmake/Toolchains/vero4k.armv8.cmake")
+    if isPlatform "arm" && ! isPlatform "vulkan"; then
         params+=(-DARM_NO_VULKAN=ON)
     fi
-    if [[ "$md_id" == "lr-ppsspp-dev" ]]; then
+    if [[ "$md_id" == "lr-ppsspp" ]]; then
         params+=(-DLIBRETRO=On)
         ppsspp_binary="lib/ppsspp_libretro.so"
     fi
