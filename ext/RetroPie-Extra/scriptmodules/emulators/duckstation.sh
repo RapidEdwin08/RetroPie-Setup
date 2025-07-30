@@ -15,15 +15,16 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 # Version + Platform put here to be displayed in Help
-#dtarget="v0.1-9226"; # Prior Version Reference
-dtarget="latest"
-ptarget=armhf
-if [[ "$__platform_arch" == 'x86_64' ]]; then ptarget=x64; fi
-if isPlatform "aarch64"; then ptarget=arm64; fi
+#duckstation_version="v0.1-9226"; # Prior Version Reference
+duckstation_version="latest"
+duckstation_platform=armhf
+if [[ "$__platform_arch" == 'x86_64' ]]; then duckstation_platform=x64; fi
+if isPlatform "aarch64"; then duckstation_platform=arm64; fi
+duckstation_appimage=DuckStation-"$duckstation_platform".AppImage
 
 rp_module_id="duckstation"
 rp_module_desc="DuckStation - PlayStation 1, aka. PSX Emulator"
-rp_module_help="DuckStation-$ptarget.AppImage ($dtarget) \n \n https://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
+rp_module_help="$duckstation_appimage ($duckstation_version) \n \n https://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="Duckstation https://raw.githubusercontent.com/stenzek/duckstation/master/LICENSE"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
@@ -34,16 +35,20 @@ function depends_duckstation() {
 
 function install_bin_duckstation() {
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/duckstation/duckstation-rp-assets.tar.gz" "$md_build"
-    download "https://github.com/stenzek/duckstation/releases/download/${dtarget}/DuckStation-${ptarget}.AppImage" "$md_build"
+    download "https://github.com/stenzek/duckstation/releases/download/${duckstation_version}/${duckstation_appimage}" "$md_build"
+
     pushd "$md_build"
-    chmod 755 "DuckStation-"$ptarget".AppImage"; mv "DuckStation-"$ptarget".AppImage" "$md_inst"
+    chmod 755 "$duckstation_appimage"; mv "$duckstation_appimage" "$md_inst"
+    sed -i "s+app_img=.*+app_img=$duckstation_appimage+g" "duckstation.sh"
+    sed -i "s+app_img=.*+app_img=$duckstation_appimage+g" "duckstation-qjoy.sh"
     sed -i s+'/home/pi/'+"$home/"+g "duckstation.sh"; chmod 755 "duckstation.sh"; mv "duckstation.sh" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "duckstation-qjoy.sh"; chmod 755 "duckstation-qjoy.sh"; mv "duckstation-qjoy.sh" "$md_inst"
-    sed -i "s+emu_AppImage=.*+emu_AppImage=DuckStation-$ptarget.AppImage+g" "duckstation.sh"
-    sed -i "s+Exec=.*+Exec=$md_inst/DuckStation-$ptarget.AppImage+g" "DuckStation.desktop"
+
+    sed -i "s+Exec=.*+Exec=$md_inst/$duckstation_appimage+g" "DuckStation.desktop"
     chmod 755 "DuckStation.desktop"; cp "DuckStation.desktop" "$md_inst"; cp "DuckStation.desktop" "/usr/share/applications/"
     if [[ -d "$home/Desktop" ]]; then mv -f "DuckStation.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/DuckStation.desktop"; fi
     mv "DuckStation-128.xpm" "$md_inst"; mv "PSXBIOSRequired.jpg" "$md_inst"
+
     if [[ ! -d "$home/.local/share/duckstation" ]]; then mkdir "$home/.local/share/duckstation"; fi
     sed -i s+'/home/pi/'+"$home/"+g "settings.ini"
     if [[ "$__platform_arch" == 'x86_64' ]]; then
@@ -66,6 +71,7 @@ function install_bin_duckstation() {
     if [[ ! -d "$md_conf_root/psx/duckstation" ]]; then mkdir "$md_conf_root/psx/duckstation"; fi
     moveConfigDir "$home/.local/share/duckstation" "$md_conf_root/psx/duckstation"
     chown -R $__user:$__user -R "$md_conf_root/psx/duckstation"
+
     mkRomDir "psx"
     chmod 755 '+Start DuckStation.m3u'; mv '+Start DuckStation.m3u' "$romdir/psx"
     mkRomDir "psx/media"; mkRomDir "psx/media/image"; mkRomDir "psx/media/marquee"; mkRomDir "psx/media/video"
@@ -86,9 +92,9 @@ function configure_duckstation() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psx_StartDuckStation = "duckstation"' ; echo $?) == '1' ]]; then echo 'psx_StartDuckStation = "duckstation"' >> /opt/retropie/configs/all/emulators.cfg; fi
     addSystem "psx"
-    launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then launch_prefix=XINIT; fi
+    local launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then local launch_prefix=XINIT; fi
     addEmulator 1 "$md_id" "psx" "$launch_prefix:$md_inst/duckstation.sh %ROM%"
-    launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
+    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
     addEmulator 0 "$md_id-editor" "psx" "$launch_prefix:$md_inst/duckstation.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "psx" "$launch_prefix:$md_inst/duckstation-qjoy.sh --editor"
