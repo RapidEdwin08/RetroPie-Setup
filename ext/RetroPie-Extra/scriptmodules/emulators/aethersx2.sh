@@ -19,7 +19,7 @@ rp_module_desc="PS2 Emulator Optimized for ARM"
 rp_module_help="AetherSX2-v1.5-3606.AppImage \n \n http://web.archive.org/web/20240222085515/https://www.aethersx2.com/archive/?dir=desktop/linux \n \n AetherSX2 uses third-party code. You can view the licenses for this code by selecting \"Third-Party Notices\" \n \nROM Extensions: .bin .iso .img .mdf .z .z2 .bz2 .cso .chd .ima .gz\n\nCopy your PS2 roms to $romdir/ps2\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PS2\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="Aethersx2 https://aethersx2.net/terms-conditions"
 rp_module_section="exp"
-rp_module_flags="!all arm aarch64 !x86"
+#rp_module_flags="!all arm aarch64 !x86"
 
 function depends_aethersx2() {
     getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox
@@ -63,7 +63,7 @@ function install_bin_aethersx2() {
     mkRomDir "ps2/media"; mkRomDir "ps2/media/image"; mkRomDir "ps2/media/marquee"; mkRomDir "ps2/media/video"
     mv 'media/image/AetherSX2.png' "$romdir/ps2/media/image"; mv 'media/marquee/AetherSX2.png' "$romdir/ps2/media/marquee"; mv 'media/video/AetherSX2.mp4' "$romdir/ps2/media/video"
     mv 'media/image/uLaunchELF.png' "$romdir/ps2/media/image"; mv 'media/marquee/uLaunchELF.png' "$romdir/ps2/media/marquee"; mv 'media/video/uLaunchELF.mp4' "$romdir/ps2/media/video"
-    if [[ ! -f "$romdir/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ps2"; else mv 'gamelist.xml' "$romdir/ps2/gamelist.xml.duckstation"; fi
+    if [[ ! -f "$romdir/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ps2"; else mv 'gamelist.xml' "$romdir/ps2/gamelist.xml.aethersx2"; fi
     chown -R $__user:$__user -R "$romdir/ps2"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi

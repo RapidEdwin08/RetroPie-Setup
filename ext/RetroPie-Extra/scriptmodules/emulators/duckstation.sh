@@ -14,15 +14,16 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
-# Version + Platform put here to be displayed in Help #vtarget="v0.1-9226"
-vtarget="latest"
+# Version + Platform put here to be displayed in Help
+#dtarget="v0.1-9226"; # Prior Version Reference
+dtarget="latest"
 ptarget=armhf
 if [[ "$__platform_arch" == 'x86_64' ]]; then ptarget=x64; fi
 if isPlatform "aarch64"; then ptarget=arm64; fi
 
 rp_module_id="duckstation"
 rp_module_desc="DuckStation - PlayStation 1, aka. PSX Emulator"
-rp_module_help="DuckStation-$ptarget.AppImage ($vtarget) \n \n https://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
+rp_module_help="DuckStation-$ptarget.AppImage ($dtarget) \n \n https://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="Duckstation https://raw.githubusercontent.com/stenzek/duckstation/master/LICENSE"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
@@ -32,9 +33,8 @@ function depends_duckstation() {
 }
 
 function install_bin_duckstation() {
-##function sources_duckstation() {
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/duckstation/duckstation-rp-assets.tar.gz" "$md_build"
-    download "https://github.com/stenzek/duckstation/releases/download/${vtarget}/DuckStation-${ptarget}.AppImage" "$md_build"
+    download "https://github.com/stenzek/duckstation/releases/download/${dtarget}/DuckStation-${ptarget}.AppImage" "$md_build"
     pushd "$md_build"
     chmod 755 "DuckStation-"$ptarget".AppImage"; mv "DuckStation-"$ptarget".AppImage" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "duckstation.sh"; chmod 755 "duckstation.sh"; mv "duckstation.sh" "$md_inst"

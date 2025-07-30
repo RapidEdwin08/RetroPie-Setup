@@ -34,12 +34,11 @@ function depends_pcsx2-x64() {
 }
 
 function install_bin_pcsx2-x64() {
-    download "https://github.com/PCSX2/pcsx2/releases/download/${vtarget}/pcsx2-${vtarget}-linux-appimage-x64-Qt.AppImage" "$md_build"
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/pcsx2/pcsx2-pc-assets.tar.gz" "$md_build"
+    download "https://github.com/PCSX2/pcsx2/releases/download/${vtarget}/pcsx2-${vtarget}-linux-appimage-x64-Qt.AppImage" "$md_build"
 
     pushd "$md_build"
-    app_img=pcsx2-linux-appimage-x64-Qt.AppImage
-    chmod 755 "pcsx2-${vtarget}-linux-appimage-x64-Qt.AppImage"; mv "pcsx2-${vtarget}-linux-appimage-x64-Qt.AppImage" "$md_inst/$app_img"
+    chmod 755 "pcsx2-${vtarget}-linux-appimage-x64-Qt.AppImage"; mv "pcsx2-${vtarget}-linux-appimage-x64-Qt.AppImage" "$md_inst/pcsx2-linux-appimage-x64-Qt.AppImage"
     sed -i s+'/home/pi/'+"$home/"+g "pcsx2.sh"; chmod 755 "pcsx2.sh"; mv "pcsx2.sh" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "pcsx2-qjoy.sh"; chmod 755 "pcsx2-qjoy.sh"; mv "pcsx2-qjoy.sh" "$md_inst"
 
@@ -68,7 +67,7 @@ function install_bin_pcsx2-x64() {
     mkRomDir "ps2/media"; mkRomDir "ps2/media/image"; mkRomDir "ps2/media/marquee"; mkRomDir "ps2/media/video"
     mv 'media/image/PCSX2.png' "$romdir/ps2/media/image"; mv 'media/marquee/PCSX2.png' "$romdir/ps2/media/marquee"; mv 'media/video/PCSX2.mp4' "$romdir/ps2/media/video"
     mv 'media/image/uLaunchELF.png' "$romdir/ps2/media/image"; mv 'media/marquee/uLaunchELF.png' "$romdir/ps2/media/marquee"; mv 'media/video/uLaunchELF.mp4' "$romdir/ps2/media/video"
-    if [[ ! -f "$romdir/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ps2"; else mv 'gamelist.xml' "$romdir/ps2/gamelist.xml.duckstation"; fi
+    if [[ ! -f "$romdir/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ps2"; else mv 'gamelist.xml' "$romdir/ps2/gamelist.xml.pcsx2"; fi
     chown -R $__user:$__user -R "$romdir/ps2"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
