@@ -124,7 +124,7 @@ matchbox-window-manager -use_titlebar no &
 _EOF_
 
     chmod +x "$script"
-    launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
+    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
     addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix:$script"
     mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"
     sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
