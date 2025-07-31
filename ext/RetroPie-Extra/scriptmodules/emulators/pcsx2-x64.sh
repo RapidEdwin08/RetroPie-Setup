@@ -30,7 +30,7 @@ function depends_pcsx2-x64() {
         #dialog --ok --msgbox "Installer is for a 64bit system Only!" 22 76 2>&1 >/dev/tty
         md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
     fi
-    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox
+    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox-window-manager
 }
 
 function install_bin_pcsx2-x64() {

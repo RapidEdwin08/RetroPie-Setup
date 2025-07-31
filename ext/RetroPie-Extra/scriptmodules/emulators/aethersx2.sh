@@ -22,7 +22,7 @@ rp_module_section="exp"
 rp_module_flags="!all arm aarch64 !x86"
 
 function depends_aethersx2() {
-    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox
+    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox-window-manager
 }
 
 function install_bin_aethersx2() {
@@ -81,9 +81,9 @@ function configure_aethersx2() {
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2"' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2"' >> /opt/retropie/configs/all/emulators.cfg; fi
 
     addSystem "ps2"
-    launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then launch_prefix=XINIT; fi
+    local launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then local launch_prefix=XINIT; fi
     addEmulator 1 "$md_id" "ps2" "$launch_prefix:$md_inst/aethersx2.sh %ROM%"
-    launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
+    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
     addEmulator 0 "$md_id-editor" "ps2" "$launch_prefix:$md_inst/aethersx2.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix:$md_inst/aethersx2-qjoy.sh --editor"
