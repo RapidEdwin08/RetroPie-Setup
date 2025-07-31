@@ -33,6 +33,8 @@ function _get_branch_amiberry() {
         echo "v5.7.1"
     elif isPlatform "x86"; then
         echo "preview-v6.3.3"
+    elif isPlatform "rpi4" || isPlatform "rpi5"; then # https://retropie.org.uk/forum/topic/37156/30-fps-can-t-get-games-running-smoothly-on-raspberry-pi-5-rodland-gods-new-zealand-story
+        echo "v5.7.1"
     else
         echo "v5.7.2"
     fi
