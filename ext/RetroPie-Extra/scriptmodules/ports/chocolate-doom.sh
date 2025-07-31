@@ -30,10 +30,11 @@ if [[ "$legacy_branch" == '1' ]]; then
 fi
 
 function depends_chocolate-doom() {
+    local depends=(libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev automake autoconf freepats)
     if [[ $(apt-cache search python3-pil) == '' ]]; then
-      local depends=(libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python-pil automake autoconf freepats)
+      depends+=(python-pil)
    else
-      local depends=(libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev python3-pil automake autoconf freepats)
+      depends+=(python3-pil)
    fi
    getDepends "${depends[@]}"
 }

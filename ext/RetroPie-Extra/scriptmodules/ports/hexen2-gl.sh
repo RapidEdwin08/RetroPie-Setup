@@ -72,8 +72,8 @@ function configure_hexen2-gl() {
     addPort "$md_id" "hexen2" "Hexen II" "XINIT:$md_inst/glhexen2 -f -conwidth 800"
     addPort "$md_id" "hexen2p" "Hexen II - Portals of Praevus" "XINIT:$md_inst/glhexen2 -f -conwidth 800 -portals"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addPort "$md_id+qjoypad" "hexen2" "Hexen II +QJoyPad" "XINIT:$md_inst/hexen2-qjoy.sh"
-        addPort "$md_id+qjoypad" "hexen2p" "Hexen II - Portals of Praevus +QJoyPad" "XINIT:$md_inst/hexen2-qjoy.sh -portals"
+        addPort "$md_id+qjoypad" "hexen2" "Hexen II" "XINIT:$md_inst/hexen2-qjoy.sh"
+        addPort "$md_id+qjoypad" "hexen2p" "Hexen II - Portals of Praevus" "XINIT:$md_inst/hexen2-qjoy.sh -portals"
     fi
     [[ "$md_mode" == "install" ]] && game_data_hexen2
 }

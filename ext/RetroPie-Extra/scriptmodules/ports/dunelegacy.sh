@@ -28,11 +28,12 @@ rp_module_section="exp"
 rp_module_flags="!mali"
 
 function depends_dunelegacy() {
-    if [[ $(apt-cache search libfluidsynth3) == '' ]]; then # matchbox-window-manager
-		local depends=(matchbox autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg x11-xserver-utils libfluidsynth-dev libfluidsynth1 fluidsynth)
-	else
-		local depends=(matchbox autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg x11-xserver-utils libfluidsynth-dev libfluidsynth3 fluidsynth)
-	fi
+    local depends=(matchbox-window-manager autotools-dev libsdl2-mixer-dev libopusfile0 libsdl2-mixer-2.0-0 libsdl2-ttf-dev xorg x11-xserver-utils libfluidsynth-dev fluidsynth)
+    if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
+    	depends+=(libfluidsynth1)
+    else
+    	depends+=(libfluidsynth3)
+    fi
 	getDepends "${depends[@]}"
 }
 
@@ -65,7 +66,7 @@ function build_dunelegacy() {
 	echo [PARAMS]: ${params[@]}
     autoreconf --install
     ./configure "${params[@]}"
-    make
+    make -j4
     md_ret_require=(
         "$md_build/src/dunelegacy"
         "$md_build/Dune%20Legacy.ini"
@@ -102,7 +103,7 @@ function configure_dunelegacy() {
     chmod 755 "$md_inst/dunelegacy-qjoy.sh"
     addPort "$md_id" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/bin/dunelegacy"
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-		addPort "$md_id+qjoypad" "dunelegacy" "Dune Legacy +QJoyPad" "XINIT:$md_inst/dunelegacy-qjoy.sh"
+		addPort "$md_id+qjoypad" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/dunelegacy-qjoy.sh"
 	fi
     [[ "$md_mode" == "install" ]] && game_data_dunelegacy
 }

@@ -34,7 +34,7 @@ rp_module_flags=""
 
 function depends_pcexhumed() {
    # libsdl1.2-dev libsdl-mixer1.2-dev
-   getDepends matchbox cmake xorg xinit x11-xserver-utils xinit build-essential nasm libgl1-mesa-dev libglu1-mesa-dev libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libvpx-dev libgtk2.0-dev freepats
+   getDepends matchbox-window-manager cmake xorg xinit x11-xserver-utils xinit build-essential nasm libgl1-mesa-dev libglu1-mesa-dev libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libvpx-dev libgtk2.0-dev freepats
 }
 
 function sources_pcexhumed() {
@@ -71,6 +71,6 @@ function configure_pcexhumed() {
 
 	addPort "$md_id" "pcexhumed" "PCExhumed - Powerslave Source Port" "XINIT:$md_inst/pcexhumed -j $home/RetroPie/roms/ports/ksbuild/pcexhumed"
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-		addPort "$md_id+qjoypad" "pcexhumed" "PCExhumed - Powerslave Source Port +QJoyPad" "XINIT:$md_inst/pcexhumed-qjoy.sh"
+		addPort "$md_id+qjoypad" "pcexhumed" "PCExhumed - Powerslave Source Port" "XINIT:$md_inst/pcexhumed-qjoy.sh"
 	fi
 }

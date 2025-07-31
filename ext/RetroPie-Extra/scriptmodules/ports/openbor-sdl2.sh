@@ -85,5 +85,4 @@ function configure_openbor-sdl2() {
     fi
     
     chown -R $__user:$__user "$md_conf_root/$md_id"
-
 }
