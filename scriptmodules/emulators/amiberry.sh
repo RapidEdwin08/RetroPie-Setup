@@ -14,6 +14,7 @@ rp_module_desc="Amiga emulator with JIT support (forked from uae4arm)"
 rp_module_help="ROM Extension: .adf .chd .ipf .lha .zip\n\nCopy your Amiga games to $romdir/amiga\n\nCopy the required BIOS files\nkick13.rom\nkick20.rom\nkick31.rom\nto $biosdir/amiga"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/BlitterStudio/amiberry/master/LICENSE"
 rp_module_repo="git https://github.com/BlitterStudio/amiberry :_get_branch_amiberry"
+#rp_module_repo="git https://github.com/BlitterStudio/amiberry-lite master" #https://retropie.org.uk/forum/topic/37156/30-fps-can-t-get-games-running-smoothly-on-raspberry-pi-5-rodland-gods-new-zealand-story/11
 rp_module_section="opt"
 rp_module_flags="!all arm rpi3 rpi4 rpi5 x86"
 
@@ -33,7 +34,7 @@ function _get_branch_amiberry() {
         echo "v5.7.1"
     elif isPlatform "x86"; then
         echo "preview-v6.3.3"
-    elif isPlatform "rpi4" || isPlatform "rpi5"; then # https://retropie.org.uk/forum/topic/37156/30-fps-can-t-get-games-running-smoothly-on-raspberry-pi-5-rodland-gods-new-zealand-story
+    elif isPlatform "arm"; then # v5.7.2 Performance Drop due to Disabled JIT support on arm
         echo "v5.7.1"
     else
         echo "v5.7.2"
@@ -72,7 +73,7 @@ function depends_amiberry() {
 function sources_amiberry() {
     gitPullOrClone
     if ! isPlatform "x86"; then
-        applyPatch "$md_data/01_preserve_env.diff"
+        applyPatch "$md_data/01_preserve_env.diff" #Not amiberry-lite
     fi
     # Dispmanx is locked on v5.7.1, apply some critical fixes on top of it
     if isPlatform "dispmanx"; then
