@@ -34,7 +34,7 @@ function _get_branch_amiberry() {
         echo "v5.7.1"
     elif isPlatform "x86"; then
         echo "preview-v6.3.3"
-    elif isPlatform "arm"; then # v5.7.2 Performance Drop due to Disabled JIT support on arm
+    elif isPlatform "arm" || isPlatform "rpi"; then # v5.7.2 Performance Drop due to Disabled JIT support on arm
         echo "v5.7.1"
     else
         echo "v5.7.2"
