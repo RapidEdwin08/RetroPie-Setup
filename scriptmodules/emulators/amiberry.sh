@@ -32,10 +32,10 @@ function _update_hook_amiberry() {
 function _get_branch_amiberry() {
     if isPlatform "dispmanx"; then
         echo "v5.7.1"
-    elif isPlatform "x86"; then
-        echo "preview-v6.3.3"
     elif isPlatform "arm" || isPlatform "rpi"; then # v5.7.2 Performance Drop due to Disabled JIT support on arm
         echo "v5.7.1"
+    elif isPlatform "x86"; then
+        echo "preview-v6.3.3"
     else
         echo "v5.7.2"
     fi
@@ -77,6 +77,9 @@ function sources_amiberry() {
     fi
     # Dispmanx is locked on v5.7.1, apply some critical fixes on top of it
     if isPlatform "dispmanx"; then
+        applyPatch "$md_data/02_fix_uae_config_load.diff"
+        applyPatch "$md_data/03_fix_crash_saving.diff"
+    elif isPlatform "arm" || isPlatform "rpi"; then # v5.7.1 fixes
         applyPatch "$md_data/02_fix_uae_config_load.diff"
         applyPatch "$md_data/03_fix_crash_saving.diff"
     fi
