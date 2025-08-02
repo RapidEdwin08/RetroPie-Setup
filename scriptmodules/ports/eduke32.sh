@@ -11,16 +11,17 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
-# Additional Legacy Branch for Debian Buster and Below
-legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
-
 rp_module_id="eduke32"
-rp_module_desc="Duke3D Source Port\n \nMaster Branch (Bullseye+):\nhttps://voidpoint.io/sirlemonhead/eduke32.git \nmaster 3191b5f41670ee9341f0298e155172c0ef760031\n \nLegacy Branch (Buster-):\nhttps://voidpoint.io/terminx/eduke32.git \nmaster dfc16b08"
+rp_module_desc="Duke3D Source Port\n \nMaster Branch (Bullseye+):\nhttps://voidpoint.io/sirlemonhead/eduke32.git \nmaster 3191b5f4\n \nLegacy Branch (Buster-):\nhttps://voidpoint.io/terminx/eduke32.git \nmaster dfc16b08"
 rp_module_licence="GPL2 https://voidpoint.io/terminx/eduke32/-/raw/master/package/common/gpl-2.0.txt?inline=false"
-rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f41670ee9341f0298e155172c0ef760031"
-#rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master 17844a2f651d4347258ae2fe59ec42dc3110506e"
-#rp_module_repo="git https://voidpoint.io/dgurney/eduke32.git master 76bc19e2e55023ea5a17c212eab0e1e5db217315"
-if [[ "$legacy_branch" == '1' ]]; then rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08"; fi
+if [[ "$__os_debian_ver" -le 10 ]]; then
+    rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08"
+else
+    rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f41670ee9341f0298e155172c0ef760031"
+    #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master 19c21b9ab10b0c17147c9ad951cc15279ed33f77"
+    #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master 17844a2f651d4347258ae2fe59ec42dc3110506e"
+    #rp_module_repo="git https://voidpoint.io/dgurney/eduke32.git master 76bc19e2e55023ea5a17c212eab0e1e5db217315"
+fi
 rp_module_section="opt"
 
 function depends_eduke32() {
@@ -38,7 +39,7 @@ function depends_eduke32() {
 function sources_eduke32() {
     gitPullOrClone
 
-    if [[ "$legacy_branch" == '0' ]]; then
+    if [[ "$__os_debian_ver" -le 10 ]]; then
         # r6918 causes a 20+ second delay on startup on ARM devices
         isPlatform "arm" && applyPatch "$md_data/0001-revert-r6918.patch"
         # r7424 gives a black skybox when r_useindexedcolortextures is 0
@@ -50,9 +51,9 @@ function sources_eduke32() {
         applyPatch "$md_data/0004-recast-function.patch"
         # cherry-picked commit fixing a game bug in E1M4 (shrinker ray stuck)
         applyPatch "$md_data/0005-e1m4-shrinker-bug.patch"
+        # two more commits r8241 + r8247 fixing a bug in E4M4 (instant death in water)
+        applyPatch "$md_data/0006-e4m4-water-bug.patch" # Already included in sirlemonhead's eduke32 fork
     fi
-    # two more commits r8241 + r8247 fixing a bug in E4M4 (instant death in water)
-    applyPatch "$md_data/0006-e4m4-water-bug.patch"
     # useindexedcolortextures 0FF
     sudo sed -i s+int32_t\ r_useindexedcolortextures\ =\ 1\;+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
 }
@@ -69,7 +70,7 @@ function build_eduke32() {
     isPlatform "arm" && params+=(NETCODE=0)
 
     make veryclean
-    CFLAGS+=" -DSDL_USEFOLDER" make "${params[@]}"
+    CFLAGS+=" -DSDL_USEFOLDER" make -j $(nproc) "${params[@]}"
 
     if [[ "$md_id" == "ionfury" ]]; then
         md_ret_require="$md_build/fury"
@@ -89,7 +90,7 @@ function install_eduke32() {
 }
 
 function game_data_eduke32() {
-    local dest="$romdir/ports/duke3d"
+    local dest="$romdir/ports/ksbuild/duke3d"
     if [[ "$md_id" == "eduke32" ]]; then
         mkUserDir "$dest"
         if [[ -z "$(find "$dest" -maxdepth 1 -iname duke3d.grp)" ]]; then
@@ -112,7 +113,8 @@ function configure_eduke32() {
     fi
     local config="$md_conf_root/$portname/settings.cfg"
 
-    mkRomDir "ports/$portname"
+    mkRomDir "ports/ksbuild"
+    mkRomDir "ports/ksbuild/$portname"
     moveConfigDir "$home/.config/$appname" "$md_conf_root/$portname"
 
     add_games_eduke32 "$portname" "$md_inst/$appname"
@@ -161,8 +163,8 @@ function add_games_eduke32() {
         game_path="game$game[1]"
         game_args="game$game[2]"
 
-        if [[ -d "$romdir/ports/$portname/${!game_path}" ]]; then
-           addPort "$md_id" "$portname" "${!game_launcher}" "pushd $md_conf_root/$portname; ${binary}.sh %ROM%; popd" "-j$romdir/ports/$portname/${game0[1]} -j$romdir/ports/$portname/${!game_path} ${!game_args}"
+        if [[ -d "$romdir/ports/ksbuild/$portname/${!game_path}" ]]; then
+           addPort "$md_id" "$portname" "${!game_launcher}" "pushd $md_conf_root/$portname; ${binary}.sh %ROM%; popd" "-j$romdir/ports/ksbuild/$portname/${game0[1]} -j$romdir/ports/ksbuild/$portname/${!game_path} ${!game_args}"
         fi
     done
 
