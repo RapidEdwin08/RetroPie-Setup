@@ -57,6 +57,9 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Chex Quest (Promotional).conf"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Heretic (Shareware).conf"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Wolfenstein 3D (Demo).conf"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Catacombs Abyss (Shareware).conf"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Rise Of The Triad The Hunt Begins (Shareware).conf"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Star Wars Dark Forces (Demo).conf"
     if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$romdir/pc/gamelist.xml.dosbox-x" "$romdir/pc/gamelist.xml"; fi
     chown -R $__user:$__user -R "$romdir/pc"
     if [[ ! -d "$md_inst/share/dosbox-x/drivez/DOOM" ]]; then cp -R "$romdir/pc/.games/DOOM" "$md_inst/share/dosbox-x/drivez/DOOM"; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM"; fi
