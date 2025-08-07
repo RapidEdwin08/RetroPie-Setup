@@ -51,20 +51,16 @@ function install_dosbox-x-sdl2() {
 }
 
 function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$md_inst/share/dosbox-x/drivez"
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-cqsmks.tar.gz" "$md_inst/share/dosbox-x/drivez/CHEX"
-    if [[ ! -d "$romdir/pc/.games/DOOMSW" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/DOOM" "$romdir/pc/.games/DOOMSW"; chown -R $__user:$__user "$romdir/pc/.games/DOOMSW"; fi; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM.BAT"
-    if [[ ! -d "$romdir/pc/.games/CHEX" ]]; then cp -R "$md_inst/share/dosbox-x/drivez/CHEX" "$romdir/pc/.games/CHEX"; chown -R $__user:$__user "$romdir/pc/.games/CHEX"; fi; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/CHEX"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/CHEX.BAT"
-    sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/DOOM.conf"; mv "$md_inst/share/dosbox-x/drivez/DOOM.conf" "$romdir/pc/Doom (Shareware).conf"; chown $__user:$__user "$romdir/pc/Doom (Shareware).conf"
-    sed -i s+'/home/pi/'+"$home/"+g "$md_inst/share/dosbox-x/drivez/CHEX.conf"; mv "$md_inst/share/dosbox-x/drivez/CHEX.conf" "$romdir/pc/Chex Quest (Promotional).conf"; chown $__user:$__user "$romdir/pc/Chex Quest (Promotional).conf"
-    mkRomDir "pc/media"; mkRomDir "pc/media/image"; mkRomDir "pc/media/marquee"; mkRomDir "pc/media/video"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-X.png" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-X.png" "$romdir/pc/media/marquee"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/DOSBox-Staging.png" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/DOSBox-Staging.png" "$romdir/pc/media/marquee"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/Doom (Shareware).png" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/Doom (Shareware).png" "$romdir/pc/media/marquee"
-    mv "$md_inst/share/dosbox-x/drivez/media/image/Chex Quest (Promotional).png" "$romdir/pc/media/image"; mv "$md_inst/share/dosbox-x/drivez/media/marquee/Chex Quest (Promotional).png" "$romdir/pc/media/marquee"
-    rm -Rf "$md_inst/share/dosbox-x/drivez/media"
-    if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/pc"; else mv -f "$md_inst/share/dosbox-x/drivez/gamelist.xml" "$romdir/pc/gamelist.xml.dosbox-x"; fi
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$romdir/pc"
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-cqsmks.tar.gz" "$romdir/pc/.games/CHEX"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Doom (Shareware).conf"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Chex Quest (Promotional).conf"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Heretic (Shareware).conf"
+    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Wolfenstein 3D (Demo).conf"
+    if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$romdir/pc/gamelist.xml.dosbox-x" "$romdir/pc/gamelist.xml"; fi
     chown -R $__user:$__user -R "$romdir/pc"
+    if [[ ! -d "$md_inst/share/dosbox-x/drivez/DOOM" ]]; then cp -R "$romdir/pc/.games/DOOM" "$md_inst/share/dosbox-x/drivez/DOOM"; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM"; fi
+    mv -f "$romdir/pc/.games/DOOM.BAT" "$md_inst/share/dosbox-x/drivez/DOOM.BAT"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM.BAT"
 }
 
 function remove_dosbox-x-sdl2() {
