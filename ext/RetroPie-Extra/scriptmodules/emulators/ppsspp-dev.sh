@@ -211,11 +211,11 @@ function configure_ppsspp-dev() {
 # Run PPSSPP
 pushd $md_inst
 if [[ "\$1" == *".gui" ]] || [[ "\$1" == *".GUI" ]]; then
-    $md_inst/PPSSPPSDL --fullscreen
-elif [[ "$1" == '' ]]; then
-    $md_inst/PPSSPPSDL --fullscreen
+    VC4_DEBUG=always_sync $md_inst/PPSSPPSDL --fullscreen
+elif [[ "\$1" == '' ]]; then
+    VC4_DEBUG=always_sync $md_inst/PPSSPPSDL --fullscreen
 else
-    $md_inst/PPSSPPSDL --fullscreen "\$1"
+    VC4_DEBUG=always_sync $md_inst/PPSSPPSDL --fullscreen "\$1"
 fi
 popd
 
