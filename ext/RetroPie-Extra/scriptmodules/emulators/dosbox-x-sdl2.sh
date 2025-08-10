@@ -141,4 +141,5 @@ _EOF_
     echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"
 
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
+    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
 }
