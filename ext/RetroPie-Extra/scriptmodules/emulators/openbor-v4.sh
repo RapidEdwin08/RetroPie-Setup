@@ -161,7 +161,7 @@ elif [[ "\$1" == "repak" ]]; then # borpak (Repack) .BOR/data Folders to .PAK Fi
         echo Restarting ES to Refresh GameList; touch /tmp/es-restart; pkill -f "/opt/retropie/supplementary/.*/emulationstation([^.]|$)" &
         exit 0
 else
-        pushd "\$app_dir"; \$app_dir/OpenBOR "\$1"; popd
+        pushd "\$app_dir"; \$app_dir/OpenBOR "\$@"; popd
 fi
 
 _EOF_

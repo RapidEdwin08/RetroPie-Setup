@@ -11,6 +11,8 @@
 # RetroPie-Extra
 # https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="ppsspp-dev"
 rp_module_desc="PlayStation Portable emulator PPSSPP - latest development version"
@@ -21,10 +23,11 @@ rp_module_section="exp"
 rp_module_flags=""
 
 function depends_ppsspp-dev() {
-    local depends=(cmake libsdl2-dev libsnappy-dev libzip-dev zlib1g-dev)
+    local depends=(cmake libsdl2-dev libsnappy-dev libzip-dev zlib1g-dev matchbox-window-manager)
     isPlatform "videocore" && depends+=(libraspberrypi-dev)
     isPlatform "mesa" && depends+=(libgles2-mesa-dev)
     isPlatform "vero4k" && depends+=(vero3-userland-dev-osmc)
+    isPlatform "vulkan" && depends+=(libvulkan-dev)
     getDepends "${depends[@]}"
 }
 
@@ -146,13 +149,15 @@ function build_ppsspp-dev() {
         params+=(-DCMAKE_TOOLCHAIN_FILE="$md_data/tinker.armv7.cmake")
     fi
     isPlatform "vero4k" && params+=(-DCMAKE_TOOLCHAIN_FILE="cmake/Toolchains/vero4k.armv8.cmake")
-    if isPlatform "arm" && ! isPlatform "vulkan"; then
-        params+=(-DARM_NO_VULKAN=ON)
+    ##if isPlatform "arm" && ! isPlatform "vulkan"; then
+    if ! isPlatform "vulkan"; then
+        isPlatform "arm" && params+=(-DARM_NO_VULKAN=ON)
     fi
     if [[ "$md_id" == "lr-ppsspp" ]]; then
         params+=(-DLIBRETRO=On)
         ppsspp_binary="lib/ppsspp_libretro.so"
     fi
+    echo Params: "${params[@]}"
     "$cmake" "${params[@]}" .
     make clean
     make
@@ -165,6 +170,12 @@ function install_ppsspp-dev() {
         'ppsspp/assets'
         'ppsspp/PPSSPPSDL'
     )
+}
+
+function remove_ppsspp-dev() {
+    if [[ -f /usr/share/applications/PPSSPP.desktop ]]; then sudo rm -f /usr/share/applications/PPSSPP.desktop; fi
+    if [[ -f "$home/Desktop/PPSSPP.desktop" ]]; then rm "$home/Desktop/PPSSPP.desktop"; fi
+    if [[ -f "$home/RetroPie/roms/psp/+Start PPSSPP.gui" ]]; then rm "$home/RetroPie/roms/psp/+Start PPSSPP.gui"; fi
 }
 
 function configure_ppsspp-dev() {
@@ -180,8 +191,12 @@ function configure_ppsspp-dev() {
         ln -snf "$romdir/psp" "$md_conf_root/psp/PSP/GAME"
     fi
 
-    addEmulator 0 "$md_id" "psp" "pushd $md_inst; $md_inst/PPSSPPSDL ${extra_params[*]} %ROM%; popd"
-    addSystem "psp"
+    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
+    ##addEmulator 0 "$md_id" "psp" "pushd $md_inst; $md_inst/PPSSPPSDL ${extra_params[*]} %ROM%; popd"
+    ##addEmulator 0 "$md_id" "psp" "$md_inst/$md_id.sh %ROM%"
+    ## Use XINIT to Prevent [runcommand.log] Vulkan with working device not detected. DEBUG: Vulkan is not available, not using Vulkan.
+    addEmulator 1 "$md_id" "psp" "$launch_prefix:$md_inst/$md_id.sh %ROM%"
+    addSystem "psp" "PSP" ".gui" # Additional .GUI Extension to hide +Start PPSSPP.gui from Game List + Load without Errors
 
     # if we are removing the last remaining psp emu - remove the symlink
     if [[ "$md_mode" == "remove" ]]; then
@@ -189,4 +204,50 @@ function configure_ppsspp-dev() {
             rm -f "$home/.config/ppsspp"
         fi
     fi
+
+    cat >"$md_inst/$md_id.sh" << _EOF_
+#!/bin/bash
+
+# Run PPSSPP
+pushd $md_inst
+if [[ "\$1" == *".gui" ]] || [[ "\$1" == *".GUI" ]]; then
+    $md_inst/PPSSPPSDL --fullscreen
+elif [[ "$1" == '' ]]; then
+    $md_inst/PPSSPPSDL --fullscreen
+else
+    $md_inst/PPSSPPSDL --fullscreen "\$1"
+fi
+popd
+
+_EOF_
+    chmod 755 "$md_inst/$md_id.sh"
+
+    cat >"$romdir/psp/+Start PPSSPP.gui" << _EOF_
+#!/bin/bash
+"/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _SYS_ "psp" ""
+_EOF_
+    chmod 755 "$romdir/psp/+Start PPSSPP.gui"
+    chown $__user:$__user "$romdir/psp/+Start PPSSPP.gui"
+    if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
+    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psp_StartPPSSPP = "ppsspp-dev"' ; echo $?) == '1' ]]; then echo 'psp_StartPPSSPP = "ppsspp-dev"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
+
+    cat >"$md_inst/PPSSPP.desktop" << _EOF_
+[Desktop Entry]
+Name=PPSSPP
+GenericName=PPSSPP
+Comment=PSP Emulator
+Exec=$md_inst/$md_id.sh
+Icon=$md_inst/assets/icon_regular_72.png
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=PSP;PlayStationPortable
+StartupWMClass=PPSSPP
+Name[en_US]=PPSSPP
+_EOF_
+    chmod 755 "$md_inst/PPSSPP.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/PPSSPP.desktop" "$home/Desktop/PPSSPP.desktop"; chown $__user:$__user "$home/Desktop/PPSSPP.desktop"; fi
+    mv "$md_inst/PPSSPP.desktop" "/usr/share/applications/PPSSPP.desktop"
+
+    [[ "$md_mode" == "remove" ]] && remove_ppsspp-dev
 }

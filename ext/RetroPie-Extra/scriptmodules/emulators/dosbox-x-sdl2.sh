@@ -26,7 +26,7 @@ function depends_dosbox-x-sdl2() {
     local depends=(
         automake libncurses-dev nasm fluid-soundfont-gm whiptail
         libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev
-        libswscale-dev libavcodec-dev xorg matchbox)
+        libswscale-dev libavcodec-dev xorg matchbox-window-manager)
     isPlatform "64bit" && depends+=(libavdevice59)
     isPlatform "32bit" && depends+=(libavdevice58)
     #depends+=(libsdl-net1.2-dev)

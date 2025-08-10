@@ -78,7 +78,7 @@ function remove_aethersx2() {
 
 function configure_aethersx2() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
-    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2"' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2"' >> /opt/retropie/configs/all/emulators.cfg; fi
+    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2"' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
     addSystem "ps2"
     local launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then local launch_prefix=XINIT; fi
