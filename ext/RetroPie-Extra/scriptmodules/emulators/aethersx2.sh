@@ -52,6 +52,7 @@ function install_bin_aethersx2() {
     if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20062_5E115FB6.ini" ]]; then mv "SLUS-20062_5E115FB6.ini" "$home/.config/aethersx2/gamesettings"; fi
     if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20552_248E6126.ini" ]]; then mv "SLUS-20552_248E6126.ini" "$home/.config/aethersx2/gamesettings"; fi
     if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20946_2C6BE434.ini" ]]; then mv "SLUS-20946_2C6BE434.ini" "$home/.config/aethersx2/gamesettings"; fi
+    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-46651_061F13D7.ini" ]]; then mv "SLUS-46651_061F13D7.ini" "$home/.config/aethersx2/gamesettings"; fi
     if [[ ! -d "$home/.config/aethersx2/covers" ]]; then mkdir "$home/.config/aethersx2/covers"; fi
     if [[ ! -f "$home/.config/aethersx2/covers/uLaunchELF 4.42d.png" ]]; then mv 'uLaunchELF 4.42d.png' "$home/.config/aethersx2/covers"; fi
     chown -R $__user:$__user -R "$home/.config/aethersx2"

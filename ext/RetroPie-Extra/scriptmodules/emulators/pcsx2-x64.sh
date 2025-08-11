@@ -56,6 +56,7 @@ function install_bin_pcsx2-x64() {
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -d "$home/.config/PCSX2/gamesettings" ]]; then mkdir "$home/.config/PCSX2/gamesettings"; fi
+    if [[ ! -f "$home/.config/PCSX2/gamesettings/SLUS-46651_061F13D7.ini" ]]; then mv "SLUS-46651_061F13D7.ini" "$home/.config/PCSX2/gamesettings"; fi
     if [[ ! -d "$home/.config/PCSX2/covers" ]]; then mkdir "$home/.config/PCSX2/covers"; fi
     if [[ ! -f "$home/.config/PCSX2/covers/uLaunchELF 4.42d.png" ]]; then mv 'uLaunchELF 4.42d.png' "$home/.config/PCSX2/covers"; fi
     chown -R $__user:$__user "$home/.config/PCSX2"
