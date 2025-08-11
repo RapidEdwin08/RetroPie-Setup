@@ -16,11 +16,11 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="openbor-v3"
 rp_module_desc="OpenBOR - Beat 'em Up Game Engine V3 (.BOR/SDL1)"
-rp_module_help="*OpenBOR.PAK games NEED to be EXTRACTED as .BOR Folders*\n \nOpenBOR.BOR folders can be placed in:\n $romdir/openbor/\n \n[openbor-unpak] + [openbor-repak] Utilities are included as Additional Emulator Entries accessible via runcommand\n \n* unapk/repak Utilities RESTART ES to Refresh GameList *\n \n    PAK EXTRACT v0.67 by cyperghost also Included\n    /opt/retropie/emulators/openbor-v3/extract.sh"
+rp_module_help="*OpenBOR.PAK games NEED to be EXTRACTED as .BOR Folders*\n \nOpenBOR.BOR folders can be placed in:\n $romdir/openbor/\n \n[openbor-unpak] + [openbor-repak] Utilities are included as Additional Emulator Entries accessible via runcommand\n \n * RESTART ES after [unpak/repak] to Refresh GameList * \n \n    PAK EXTRACT v0.67 by cyperghost also Included\n    /opt/retropie/emulators/openbor-v3/extract.sh"
 rp_module_licence="BSD https://raw.githubusercontent.com/rofl0r/openbor/master/LICENSE"
 rp_module_repo="git https://github.com/rofl0r/openbor.git master"
 rp_module_section="exp"
-rp_module_flags="sdl1 !mali !x11 !rpi5"
+#rp_module_flags="sdl1 !mali !x11 !rpi5"
 
 function depends_openbor() {
     getDepends libsdl1.2-dev libsdl-gfx1.2-dev libogg-dev libvorbisidec-dev libvorbis-dev libpng-dev zlib1g-dev
@@ -145,7 +145,7 @@ elif [[ "\$1" == "unpak" ]]; then # borpak (Extract) .PAK Files to .BOR/data Fol
         mkdir -p "\$bp_dir/\$newBOR"
         pushd "\$bp_dir"; printf "%s\n" "Y" | \$app_dir/borpak -d "\$newBOR" "\$(basename "\$2")"; popd
         echo New BOR: "\$bp_dir/\$newBOR"
-        echo Restarting ES to Refresh GameList; touch /tmp/es-restart; pkill -f "/opt/retropie/supplementary/.*/emulationstation([^.]|$)" &
+        ##echo Restarting ES to Refresh GameList; touch /tmp/es-restart; pkill -f "/opt/retropie/supplementary/.*/emulationstation([^.]|$)" &
         exit 0
 elif [[ "\$1" == "repak" ]]; then # borpak (Repack) .BOR/data Folders to .PAK Files
         newPAK=\$bp_name-PAK.pak
@@ -156,7 +156,7 @@ elif [[ "\$1" == "repak" ]]; then # borpak (Repack) .BOR/data Folders to .PAK Fi
         pushd "\$2"; printf "%s\n" "Y" | \$app_dir/borpak -b -d data "\$newPAK"
         mv "\$newPAK" "\$bp_dir"; #mv "\$2" "\$2.original"
         popd; echo New PAK: "\$bp_dir/\$newPAK"
-        echo Restarting ES to Refresh GameList; touch /tmp/es-restart; pkill -f "/opt/retropie/supplementary/.*/emulationstation([^.]|$)" &
+        ##echo Restarting ES to Refresh GameList; touch /tmp/es-restart; pkill -f "/opt/retropie/supplementary/.*/emulationstation([^.]|$)" &
         exit 0
 else
         pushd "\$app_dir"; \$app_dir/OpenBOR "\$@"; popd
