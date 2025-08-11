@@ -20,7 +20,7 @@ rp_module_help="*OpenBOR.PAK games NEED to be EXTRACTED as .BOR Folders*\n \nOpe
 rp_module_licence="BSD https://raw.githubusercontent.com/rofl0r/openbor/master/LICENSE"
 rp_module_repo="git https://github.com/rofl0r/openbor.git master"
 rp_module_section="exp"
-#rp_module_flags="sdl1 !mali !x11 !rpi5"
+rp_module_flags="sdl1 !mali !x11 !rpi5"
 
 function depends_openbor() {
     getDepends libsdl1.2-dev libsdl-gfx1.2-dev libogg-dev libvorbisidec-dev libvorbis-dev libpng-dev zlib1g-dev
