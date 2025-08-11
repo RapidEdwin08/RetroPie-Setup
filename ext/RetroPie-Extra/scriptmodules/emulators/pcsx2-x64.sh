@@ -49,6 +49,8 @@ function install_bin_pcsx2-x64() {
     if [[ ! -d "$home/.config/PCSX2" ]]; then mkdir "$home/.config/PCSX2"; fi
     if [[ ! -d "$home/.config/PCSX2/inis" ]]; then mkdir "$home/.config/PCSX2/inis"; fi
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini"; sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
+    sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini"; sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini"; sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.pcsx2"
     sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/PCSX2/inis"; fi
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2" ]]; then mv "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis"; fi
@@ -65,7 +67,7 @@ function install_bin_pcsx2-x64() {
     # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/PCSX2/bios] for PCSX2.ini
     sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini.pcsx2"
     sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini.PCSX2"
-    chown -R $__user:$__user -R "$md_conf_root/ps2/PCSX2"
+    chown -R $__user:$__user "$md_conf_root/ps2/PCSX2"
 
     mkRomDir "ps2"
     chmod 755 '+Start PCSX2.z2'; mv '+Start PCSX2.z2' "$romdir/ps2"
@@ -73,7 +75,15 @@ function install_bin_pcsx2-x64() {
     mv 'media/image/PCSX2.png' "$romdir/ps2/media/image"; mv 'media/marquee/PCSX2.png' "$romdir/ps2/media/marquee"; mv 'media/video/PCSX2.mp4' "$romdir/ps2/media/video"
     mv 'media/image/uLaunchELF.png' "$romdir/ps2/media/image"; mv 'media/marquee/uLaunchELF.png' "$romdir/ps2/media/marquee"; mv 'media/video/uLaunchELF.mp4' "$romdir/ps2/media/video"
     if [[ ! -f "$romdir/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ps2"; else mv 'gamelist.xml' "$romdir/ps2/gamelist.xml.pcsx2"; fi
-    chown -R $__user:$__user -R "$romdir/ps2"
+    chown -R $__user:$__user "$romdir/ps2"
+
+    mv "sx2mcmanager.sh" "$md_inst"; chmod 755 "$md_inst/sx2mcmanager.sh"
+    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onstart; fi #For Use With [sx2mcmanager]' > /dev/shm/runcommand-onstart.sh
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' >> /dev/shm/runcommand-onstart.sh; fi
+    mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' > /dev/shm/runcommand-onend.sh
+    if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' >> /dev/shm/runcommand-onend.sh; fi
+    mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
@@ -83,6 +93,14 @@ function remove_pcsx2-x64() {
     if [[ -f /usr/share/applications/PCSX2.desktop ]]; then sudo rm -f /usr/share/applications/PCSX2.desktop; fi
     if [[ -f "$home/Desktop/PCSX2.desktop" ]]; then rm -f "$home/Desktop/PCSX2.desktop"; fi
     if [[ -f "$romdir/ps2/+Start PCSX2.z2" ]]; then rm "$romdir/ps2/+Start PCSX2.z2"; fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then
+        cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
+        mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then
+        cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh
+        mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
+    fi
 }
 
 function configure_pcsx2-x64() {

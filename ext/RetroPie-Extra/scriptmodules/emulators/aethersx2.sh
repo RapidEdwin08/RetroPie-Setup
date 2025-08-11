@@ -42,26 +42,25 @@ function install_bin_aethersx2() {
     if [[ ! -d "$home/.config/aethersx2" ]]; then mkdir "$home/.config/aethersx2"; fi
     if [[ ! -d "$home/.config/aethersx2/inis" ]]; then mkdir "$home/.config/aethersx2/inis"; fi
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini"; sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.aethersx2"
-    if isPlatform "rpi5"; then sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1.25'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1.25'+g "PCSX2.ini.aethersx2"; fi
+    sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini"; sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.aethersx2"
+    sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini"; sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.aethersx2"
+    if isPlatform "rpi"; then sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1'+g "PCSX2.ini.aethersx2"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/aethersx2/inis"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2" ]]; then mv "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis"; fi
     if [[ ! -d "$home/.config/aethersx2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/aethersx2/bios"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -d "$home/.config/aethersx2/gamesettings" ]]; then mkdir "$home/.config/aethersx2/gamesettings"; fi
-    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20062_5E115FB6.ini" ]]; then mv "SLUS-20062_5E115FB6.ini" "$home/.config/aethersx2/gamesettings"; fi
-    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20552_248E6126.ini" ]]; then mv "SLUS-20552_248E6126.ini" "$home/.config/aethersx2/gamesettings"; fi
-    if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-20946_2C6BE434.ini" ]]; then mv "SLUS-20946_2C6BE434.ini" "$home/.config/aethersx2/gamesettings"; fi
     if [[ ! -f "$home/.config/aethersx2/gamesettings/SLUS-46651_061F13D7.ini" ]]; then mv "SLUS-46651_061F13D7.ini" "$home/.config/aethersx2/gamesettings"; fi
     if [[ ! -d "$home/.config/aethersx2/covers" ]]; then mkdir "$home/.config/aethersx2/covers"; fi
     if [[ ! -f "$home/.config/aethersx2/covers/uLaunchELF 4.42d.png" ]]; then mv 'uLaunchELF 4.42d.png' "$home/.config/aethersx2/covers"; fi
-    chown -R $__user:$__user -R "$home/.config/aethersx2"
+    chown -R $__user:$__user "$home/.config/aethersx2"
     if [[ ! -d "$md_conf_root/ps2/aethersx2" ]]; then mkdir "$md_conf_root/ps2/aethersx2"; fi
     moveConfigDir "$home/.config/aethersx2" "$md_conf_root/ps2/aethersx2"
     # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/aethersx2/bios] for PCSX2.ini
     sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini.aethersx2"
     sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini.aethersx2"
-    chown -R $__user:$__user -R "$md_conf_root/ps2/aethersx2"
+    chown -R $__user:$__user "$md_conf_root/ps2/aethersx2"
 
     mkRomDir "ps2"
     chmod 755 '+Start AetherSX2.z2'; mv '+Start AetherSX2.z2' "$romdir/ps2"
@@ -69,7 +68,15 @@ function install_bin_aethersx2() {
     mv 'media/image/AetherSX2.png' "$romdir/ps2/media/image"; mv 'media/marquee/AetherSX2.png' "$romdir/ps2/media/marquee"; mv 'media/video/AetherSX2.mp4' "$romdir/ps2/media/video"
     mv 'media/image/uLaunchELF.png' "$romdir/ps2/media/image"; mv 'media/marquee/uLaunchELF.png' "$romdir/ps2/media/marquee"; mv 'media/video/uLaunchELF.mp4' "$romdir/ps2/media/video"
     if [[ ! -f "$romdir/ps2/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ps2"; else mv 'gamelist.xml' "$romdir/ps2/gamelist.xml.aethersx2"; fi
-    chown -R $__user:$__user -R "$romdir/ps2"
+    chown -R $__user:$__user "$romdir/ps2"
+
+    mv "sx2mcmanager.sh" "$md_inst"; chmod 755 "$md_inst/sx2mcmanager.sh"
+    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/aethersx2/sx2mcmanager.sh onstart; fi #For Use With [sx2mcmanager]' > /dev/shm/runcommand-onstart.sh
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' >> /dev/shm/runcommand-onstart.sh; fi
+    mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/aethersx2/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' > /dev/shm/runcommand-onend.sh
+    if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' >> /dev/shm/runcommand-onend.sh; fi
+    mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
@@ -79,6 +86,14 @@ function remove_aethersx2() {
     if [[ -f /usr/share/applications/AetherSX2.desktop ]]; then sudo rm -f /usr/share/applications/AetherSX2.desktop; fi
     if [[ -f "$home/Desktop/AetherSX2.desktop" ]]; then rm -f "$home/Desktop/AetherSX2.desktop"; fi
     if [[ -f "$romdir/ps2/+Start AetherSX2.z2" ]]; then rm "$romdir/ps2/+Start AetherSX2.z2"; fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then
+        cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
+        mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then
+        cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh
+        mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
+    fi
 }
 
 function configure_aethersx2() {
