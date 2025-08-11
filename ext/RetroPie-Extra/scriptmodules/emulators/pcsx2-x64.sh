@@ -49,6 +49,7 @@ function install_bin_pcsx2-x64() {
     if [[ ! -d "$home/.config/PCSX2" ]]; then mkdir "$home/.config/PCSX2"; fi
     if [[ ! -d "$home/.config/PCSX2/inis" ]]; then mkdir "$home/.config/PCSX2/inis"; fi
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini"; sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
+    sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/PCSX2/inis"; fi
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2" ]]; then mv "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis"; fi
     if [[ ! -d "$home/.config/PCSX2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/PCSX2/bios"; fi
@@ -58,9 +59,12 @@ function install_bin_pcsx2-x64() {
     if [[ ! -d "$home/.config/PCSX2/covers" ]]; then mkdir "$home/.config/PCSX2/covers"; fi
     if [[ ! -f "$home/.config/PCSX2/covers/uLaunchELF 4.42d.png" ]]; then mv 'uLaunchELF 4.42d.png' "$home/.config/PCSX2/covers"; fi
     chown -R $__user:$__user "$home/.config/PCSX2"
-    if [[ ! -d "$md_conf_root/ps2/pcsx2" ]]; then mkdir "$md_conf_root/ps2/pcsx2"; fi
-    moveConfigDir "$home/.config/pcsx2" "$md_conf_root/ps2/pcsx2"
-    chown -R $__user:$__user -R "$md_conf_root/ps2/pcsx2"
+    if [[ ! -d "$md_conf_root/ps2/PCSX2" ]]; then mkdir "$md_conf_root/ps2/PCSX2"; fi
+    moveConfigDir "$home/.config/PCSX2" "$md_conf_root/ps2/PCSX2"
+    # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/PCSX2/bios] for PCSX2.ini
+    sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini.pcsx2"
+    sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini.PCSX2"
+    chown -R $__user:$__user -R "$md_conf_root/ps2/PCSX2"
 
     mkRomDir "ps2"
     chmod 755 '+Start PCSX2.z2'; mv '+Start PCSX2.z2' "$romdir/ps2"
@@ -92,4 +96,6 @@ function configure_pcsx2-x64() {
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix:$md_inst/pcsx2-qjoy.sh --editor"
     fi
+
+    [[ "$md_mode" == "remove" ]] && remove_pcsx2-x64
 }

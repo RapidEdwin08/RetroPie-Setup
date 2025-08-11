@@ -42,6 +42,7 @@ function install_bin_aethersx2() {
     if [[ ! -d "$home/.config/aethersx2" ]]; then mkdir "$home/.config/aethersx2"; fi
     if [[ ! -d "$home/.config/aethersx2/inis" ]]; then mkdir "$home/.config/aethersx2/inis"; fi
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini"; sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.aethersx2"
+    if isPlatform "rpi5"; then sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1.25'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1.25'+g "PCSX2.ini.aethersx2"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/aethersx2/inis"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2" ]]; then mv "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis"; fi
     if [[ ! -d "$home/.config/aethersx2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/aethersx2/bios"; fi
@@ -56,6 +57,9 @@ function install_bin_aethersx2() {
     chown -R $__user:$__user -R "$home/.config/aethersx2"
     if [[ ! -d "$md_conf_root/ps2/aethersx2" ]]; then mkdir "$md_conf_root/ps2/aethersx2"; fi
     moveConfigDir "$home/.config/aethersx2" "$md_conf_root/ps2/aethersx2"
+    # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/aethersx2/bios] for PCSX2.ini
+    sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini.aethersx2"
+    sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/aethersx2/bios/PCSX2.ini.aethersx2"
     chown -R $__user:$__user -R "$md_conf_root/ps2/aethersx2"
 
     mkRomDir "ps2"
@@ -88,4 +92,6 @@ function configure_aethersx2() {
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix:$md_inst/aethersx2-qjoy.sh --editor"
     fi
+
+    [[ "$md_mode" == "remove" ]] && remove_aethersx2
 }

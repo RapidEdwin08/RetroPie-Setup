@@ -100,4 +100,6 @@ function configure_duckstation() {
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "psx" "$launch_prefix:$md_inst/duckstation-qjoy.sh --editor"
     fi
+
+    [[ "$md_mode" == "remove" ]] && remove_duckstation
 }
