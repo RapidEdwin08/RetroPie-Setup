@@ -35,11 +35,6 @@ Joystick 1 {
 # Create QJoyPad.lyt if needed
 if [ ! -f "$HOME/.qjoypad3/$qjoyLAYOUT.lyt" ]; then echo "$qjoyLYT" > "$HOME/.qjoypad3/$qjoyLAYOUT.lyt"; fi
 
-# Run Window Manager
-echo 'xset -dpms s off s noblank; matchbox-window-manager -use_titlebar no &' >> /dev/shm/runcommand.info
-xset -dpms s off s noblank
-matchbox-window-manager -use_titlebar no &
-
 # Run qjoypad
 pkill -15 qjoypad > /dev/null 2>&1
 rm /tmp/qjoypad.pid > /dev/null 2>&1
