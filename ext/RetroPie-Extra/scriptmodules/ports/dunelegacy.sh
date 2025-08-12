@@ -66,11 +66,9 @@ function build_dunelegacy() {
 	echo [PARAMS]: ${params[@]}
     autoreconf --install
     ./configure "${params[@]}"
-    make -j4
+    make -j"$(nproc)"
     md_ret_require=(
         "$md_build/src/dunelegacy"
-        "$md_build/Dune%20Legacy.ini"
-        "$md_build/dunelegacy-qjoy.sh"
     )
 }
 
@@ -79,16 +77,22 @@ function install_dunelegacy() {
     md_ret_files=(
         'Dune%20Legacy.ini'
         'dunelegacy-qjoy.sh'
+        'dunelegacy.svg'
     )
 }
 
 function game_data_dunelegacy() {
-    if [[ ! -f "$romdir/ports/dune2/data/DUNE2.EXE" ]]; then
-		if [[ ! -d "$romdir/ports/dune2/data" ]]; then mkdir "$romdir/ports/dune2/data"; fi
-		downloadAndExtract "https://github.com/Exarkuniv/game-data/raw/main/dune-II.zip" "$romdir/ports/dune2/data"
-		if [[ -f "$romdir/ports/dune2/data/dune-II.zip" ]]; then rm "$romdir/ports/dune2/data/dune-II.zip"; fi
+    if [[ ! -f "$romdir/ports/dune2/data/DUNE2.EXE" ]] && [[ ! -f "$romdir/ports/dune2/data/Dune2.EXE" ]]; then
+		mkRomDir "ports/dune2/data"
+		downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/dunelegacy/dunelegacy-rp-assets.tar.gz" "$romdir/ports/dune2/data"
 		chown -R $__user:$__user "$romdir/ports/dune2"
 	fi
+}
+
+function remove_dunelegacy() {
+    if [[ -f "/usr/share/applications/Dune II.desktop" ]]; then sudo rm -f "/usr/share/applications/Dune II.desktop"; fi
+    if [[ -f "$home/Desktop/Dune II.desktop" ]]; then rm -f "$home/Desktop/Dune II.desktop"; fi
+    if [[ -f "$romdir/ports/Dune II.sh" ]]; then rm "$romdir/ports/Dune II.sh"; fi
 }
 
 function configure_dunelegacy() {
@@ -101,9 +105,30 @@ function configure_dunelegacy() {
     mkRomDir "ports/dune2/data"
     ln -s "$home/RetroPie/roms/ports/dune2/data" "$home/.config/dunelegacy"
     chmod 755 "$md_inst/dunelegacy-qjoy.sh"
-    addPort "$md_id" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/bin/dunelegacy"
+    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
+    addPort "$md_id" "dunelegacy" "Dune Legacy" "$launch_prefix:$md_inst/bin/dunelegacy"
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-		addPort "$md_id+qjoypad" "dunelegacy" "Dune Legacy" "XINIT:$md_inst/dunelegacy-qjoy.sh"
+		addPort "$md_id+qjoypad" "dunelegacy" "Dune Legacy" "$launch_prefix:$md_inst/dunelegacy-qjoy.sh"
 	fi
+
+    cat >"$md_inst/Dune II.desktop" << _EOF_
+[Desktop Entry]
+Name=Dune II
+GenericName=Dune II
+Comment=Dune Legacy
+Exec=$md_inst/bin/dunelegacy
+Icon=$md_inst/dunelegacy.svg
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=D2;DuneII
+StartupWMClass=Dune II
+Name[en_US]=Dune II
+_EOF_
+    chmod 755 "$md_inst/Dune II.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Dune II.desktop" "$home/Desktop/Dune II.desktop"; chown $__user:$__user "$home/Desktop/Dune II.desktop"; fi
+    mv "$md_inst/Dune II.desktop" "/usr/share/applications/Dune II.desktop"
+
     [[ "$md_mode" == "install" ]] && game_data_dunelegacy
+    [[ "$md_mode" == "remove" ]] && remove_dunelegacy
 }
