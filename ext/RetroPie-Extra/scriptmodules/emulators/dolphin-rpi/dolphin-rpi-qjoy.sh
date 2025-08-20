@@ -42,7 +42,7 @@ echo "qjoypad "$qjoyLAYOUT" &" >> /dev/shm/runcommand.info
 qjoypad "$qjoyLAYOUT" &
 
 # Run Dolphin
-VC4_DEBUG=always_sync /opt/retropie/emulators/dolphin-rpi/bin/dolphin-emu
+VC4_DEBUG=always_sync /opt/retropie/emulators/dolphin-rpi/bin/dolphin-emu -u $HOME/.local/share/dolphin-rpi/
 
 # Kill qjoypad
 pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
