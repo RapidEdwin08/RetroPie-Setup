@@ -35,7 +35,6 @@ function sources_dolphin-rpi() {
     gitPullOrClone
     # Hide Font Error: Trying to access Windows-1252 fonts but they are not loaded. /Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp
     applyPatch "$md_data/01_font_alerts.diff"
-    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dolphin-rpi/dolphin-rpi-qjoy.sh" "$md_build"
 }
  
 function build_dolphin-rpi() {
@@ -81,7 +80,6 @@ function install_dolphin-rpi() {
     mv ../Data/Sys/wiitdb-zh_CN.txt $home/.local/share/dolphin-rpi/
     mv ../Data/Sys/wiitdb-zh_TW.txt $home/.local/share/dolphin-rpi/
     mv ../Data/dolphin-emu.svg $md_inst
-    mv "$md_build/dolphin-rpi-qjoy.sh" "$md_inst"; chmod 755 "$md_inst/dolphin-rpi-qjoy.sh"
 }
  
 function remove_dolphin-rpi() {
@@ -121,7 +119,7 @@ function remove_dolphin-rpi() {
  
 function configure_dolphin-rpi() {
     moveConfigDir "$home/.local/share/dolphin-rpi" "$md_conf_root/gc/dolphin-rpi"
-    chown -R $__user:$__user -R "$md_conf_root/gc/dolphin-rpi"
+    chown -R $__user:$__user "$md_conf_root/gc/dolphin-rpi"
     # Symbolic Link to Address Error: Could not find resource: /usr/local/share/dolphin-emu/sys/Resources/nobanner.png
     if [ ! -d /usr/local/share/dolphin-emu ]; then mkdir /usr/local/share/dolphin-emu; fi
     if [ ! -d /usr/local/share/dolphin-emu/sys ]; then ln -s $md_conf_root/gc/dolphin-rpi /usr/local/share/dolphin-emu/sys; fi
@@ -130,18 +128,18 @@ function configure_dolphin-rpi() {
     mkRomDir "wii"
 
     local launch_prefix
-    launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then launch_prefix=XINIT; fi
-    addEmulator 0 "$md_id" "gc" "$launch_prefix:$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
-    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix:$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
-    addEmulator 0 "$md_id" "wii" "$launch_prefix:$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
-    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix:$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    isPlatform "kms" && launch_prefix="XINIT-WM:"
+    addEmulator 0 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    addEmulator 0 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
 
-    launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then launch_prefix=XINIT; fi
-    addEmulator 0 "$md_id-editor" "gc" "$launch_prefix:$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/"
-    addEmulator 0 "$md_id-editor" "wii" "$launch_prefix:$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/"
+    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    addEmulator 0 "$md_id-editor" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/"
+    addEmulator 0 "$md_id-editor" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addEmulator 0 "$md_id-editor+qjoypad" "gc" "$launch_prefix:$md_inst/dolphin-rpi-qjoy.sh"
-        addEmulator 0 "$md_id-editor+qjoypad" "wii" "$launch_prefix:$md_inst/dolphin-rpi-qjoy.sh"
+        addEmulator 0 "$md_id-editor+qjoypad" "gc" "$launch_prefix$md_inst/dolphin-rpi-qjoy.sh"
+        addEmulator 0 "$md_id-editor+qjoypad" "wii" "$launch_prefix$md_inst/dolphin-rpi-qjoy.sh"
     fi
 
     addSystem "gc"
@@ -363,4 +361,57 @@ _EOF_
     chmod 755 "$md_inst/Dolphin-rpi.desktop"
     if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Dolphin-rpi.desktop" "$home/Desktop/Dolphin-rpi.desktop"; chown $__user:$__user "$home/Desktop/Dolphin-rpi.desktop"; fi
     mv "$md_inst/Dolphin-rpi.desktop" "/usr/share/applications/Dolphin-rpi.desktop"
+
+   cat >"$md_inst/dolphin-rpi-qjoy.sh" << _EOF_
+#!/bin/bash
+# https://github.com/RapidEdwin08/
+
+qjoyLAYOUT="Dolphin"
+qjoyLYT=\$(
+echo '# QJoyPad 4.3 Layout File
+
+Joystick 1 {
+    Axis 1: gradient, dZone 5768, maxSpeed 3, tCurve 0, mouse+h
+    Axis 2: gradient, dZone 4615, maxSpeed 3, tCurve 0, mouse+v
+    Axis 3: +key 111, -key 0
+    Axis 4: gradient, dZone 5076, maxSpeed 3, tCurve 0, mouse+h
+    Axis 5: gradient, dZone 4615, maxSpeed 3, tCurve 0, mouse+v
+    Axis 6: +key 116, -key 0
+    Axis 7: gradient, maxSpeed 2, tCurve 0, mouse+h
+    Axis 8: gradient, maxSpeed 2, tCurve 0, mouse+v
+    Button 1: mouse 1
+    Button 2: mouse 3
+    Button 3: mouse 1
+    Button 4: mouse 3
+    Button 5: mouse 1
+    Button 6: mouse 3
+    Button 7: key 9
+    Button 8: key 36
+    Button 9: key 9
+    Button 10: mouse 1
+    Button 11: mouse 3
+    Button 12: key 113
+    Button 13: key 114
+    Button 14: key 111
+    Button 15: key 116
+}
+')
+
+# Create QJoyPad.lyt if needed
+if [ ! -f "\$HOME/.qjoypad3/\$qjoyLAYOUT.lyt" ]; then echo "\$qjoyLYT" > "\$HOME/.qjoypad3/\$qjoyLAYOUT.lyt"; fi
+
+# Run qjoypad
+pkill -15 qjoypad > /dev/null 2>&1
+rm /tmp/qjoypad.pid > /dev/null 2>&1
+echo "qjoypad "\$qjoyLAYOUT" &" >> /dev/shm/runcommand.info
+qjoypad "\$qjoyLAYOUT" &
+
+# Run Dolphin
+VC4_DEBUG=always_sync /opt/retropie/emulators/dolphin-rpi/bin/dolphin-emu -u \$HOME/.local/share/dolphin-rpi/
+
+# Kill qjoypad
+pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
+exit 0
+_EOF_
+    chmod 755 "$md_inst/dolphin-rpi-qjoy.sh"
 }
