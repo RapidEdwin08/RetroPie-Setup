@@ -23,7 +23,7 @@ rp_module_help="ROM Extensions: .elf .dol .gcm .iso .rvz .wbfs .ciso .gcz .wad .
 rp_module_licence="GPL2 https://github.com/gvx64/dolphin-rpi/blob/master/license.txt"
 rp_module_repo="git https://github.com/gvx64/dolphin-rpi.git master"
 rp_module_section="exp"
-rp_module_flags="!all 64bit"
+rp_module_flags="!all aarch64"
 
 function depends_dolphin-rpi() {
     local depends=(cmake gcc-11 g++-11 pkg-config libasound2-dev libopenal-dev libevdev-dev libgtk2.0-dev qtbase5-private-dev libxxf86vm-dev x11proto-xinerama-dev libsdl2-dev)
