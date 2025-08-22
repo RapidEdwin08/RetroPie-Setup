@@ -14,20 +14,17 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
-# Additional Legacy Branch for Debian Buster and Below
-legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
-
 rp_module_id="chocolate-doom"
 rp_module_desc="Chocolate Doom - Enhanced port of the official DOOM source"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/chocolate-doom/chocolate-doom/sdl2-branch/COPYING"
 rp_module_help="Location of [iWAD] files:\n$romdir/ports/doom/\n \nRe-Install [chocolate-doom] to Auto-Create entries for each [iWAD] for EmulationStation.\nRun 'chocolate-doom-setup' to configure your Controls and Options."
-rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master"
+if [[ "$__os_debian_ver" -le 10 ]]; then
+   rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master 15cfe539f9818152cecb14d9a0cda9aca40fa018"
+else
+   rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master"
+fi
 rp_module_section="exp"
 rp_module_flags="!mali"
-
-if [[ "$legacy_branch" == '1' ]]; then
-   rp_module_repo="git https://github.com/chocolate-doom/chocolate-doom.git master 15cfe539f9818152cecb14d9a0cda9aca40fa018"
-fi
 
 function depends_chocolate-doom() {
     local depends=(libsdl2-dev libsdl2-net-dev libsdl2-mixer-dev libsamplerate0-dev libpng-dev automake autoconf freepats)
@@ -46,7 +43,7 @@ function sources_chocolate-doom() {
 function build_chocolate-doom() {
     ./autogen.sh
     ./configure --prefix="$md_inst"
-    make
+    make -j"$(nproc)"
     md_ret_require="$md_build/src/chocolate-doom"
     md_ret_require="$md_build/src/chocolate-hexen"
     md_ret_require="$md_build/src/chocolate-heretic"
@@ -85,8 +82,8 @@ function game_data_chocolate-doom() {
 }
 
 function configure_chocolate-doom() {
-    mkUserDir "$home/.config"
-    moveConfigDir "$home/.chocolate-doom" "$md_conf_root/chocolate-doom"
+    moveConfigDir "$home/.local/share/chocolate-doom" "$md_conf_root/ports/chocolate-doom"
+    chown -R $__user:$__user "$md_conf_root/ports/chocolate-doom"
 
     # Temporary until the official RetroPie WAD selector is complete.
     if [[ -f "$romdir/ports/doom/doom1.wad" ]]; then
