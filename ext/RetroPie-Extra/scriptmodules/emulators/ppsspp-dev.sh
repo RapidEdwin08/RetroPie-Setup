@@ -23,11 +23,12 @@ rp_module_section="exp"
 rp_module_flags=""
 
 function depends_ppsspp-dev() {
-    local depends=(cmake libsdl2-dev libsnappy-dev libzip-dev zlib1g-dev matchbox-window-manager)
+    local depends=(cmake libsdl2-dev libsnappy-dev libzip-dev zlib1g-dev)
     isPlatform "videocore" && depends+=(libraspberrypi-dev)
     isPlatform "mesa" && depends+=(libgles2-mesa-dev)
     isPlatform "vero4k" && depends+=(vero3-userland-dev-osmc)
     isPlatform "vulkan" && depends+=(libvulkan-dev)
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
 
@@ -191,11 +192,12 @@ function configure_ppsspp-dev() {
         ln -snf "$romdir/psp" "$md_conf_root/psp/PSP/GAME"
     fi
 
-    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
+    local launch_prefix
+    isPlatform "kms" && launch_prefix="XINIT-WMC:"
     ##addEmulator 0 "$md_id" "psp" "pushd $md_inst; $md_inst/PPSSPPSDL ${extra_params[*]} %ROM%; popd"
     ##addEmulator 0 "$md_id" "psp" "$md_inst/$md_id.sh %ROM%"
     ## Use XINIT to Prevent [runcommand.log] Vulkan with working device not detected. DEBUG: Vulkan is not available, not using Vulkan.
-    addEmulator 1 "$md_id" "psp" "$launch_prefix:$md_inst/$md_id.sh %ROM%"
+    addEmulator 1 "$md_id" "psp" "$launch_prefix$md_inst/$md_id.sh %ROM%"
     addSystem "psp" "PSP" ".gui" # Additional .GUI Extension to hide +Start PPSSPP.gui from Game List + Load without Errors
 
     # if we are removing the last remaining psp emu - remove the symlink
