@@ -30,7 +30,9 @@ rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
 
 function depends_duckstation() {
-    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox-window-manager
+    local depends=(libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    getDepends "${depends[@]}"
 }
 
 function install_bin_duckstation() {
@@ -93,12 +95,13 @@ function configure_duckstation() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psx_StartDuckStation = "duckstation"' ; echo $?) == '1' ]]; then echo 'psx_StartDuckStation = "duckstation"' >> /opt/retropie/configs/all/emulators.cfg; fi
     addSystem "psx"
-    local launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then local launch_prefix=XINIT; fi
-    addEmulator 1 "$md_id" "psx" "$launch_prefix:$md_inst/duckstation.sh %ROM%"
-    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
-    addEmulator 0 "$md_id-editor" "psx" "$launch_prefix:$md_inst/duckstation.sh --editor"
+    local launch_prefix
+    isPlatform "kms" && launch_prefix="XINIT-WM:"
+    addEmulator 1 "$md_id" "psx" "$launch_prefix$md_inst/duckstation.sh %ROM%"
+    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    addEmulator 0 "$md_id-editor" "psx" "$launch_prefix$md_inst/duckstation.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addEmulator 0 "$md_id-editor+qjoypad" "psx" "$launch_prefix:$md_inst/duckstation-qjoy.sh --editor"
+        addEmulator 0 "$md_id-editor+qjoypad" "psx" "$launch_prefix$md_inst/duckstation-qjoy.sh --editor"
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_duckstation
