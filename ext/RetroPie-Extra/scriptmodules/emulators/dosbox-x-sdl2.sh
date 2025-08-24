@@ -26,7 +26,8 @@ function depends_dosbox-x-sdl2() {
     local depends=(
         automake libncurses-dev nasm fluid-soundfont-gm whiptail
         libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev
-        libswscale-dev libavcodec-dev xorg matchbox-window-manager)
+        libswscale-dev libavcodec-dev)
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     isPlatform "64bit" && depends+=(libavdevice59)
     isPlatform "32bit" && depends+=(libavdevice58)
     #depends+=(libsdl-net1.2-dev)
@@ -55,11 +56,6 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-cqsmks.tar.gz" "$romdir/pc/.games/CHEX"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Doom (Shareware).conf"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Chex Quest (Promotional).conf"
-    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Heretic (Shareware).conf"
-    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Wolfenstein 3D (Demo).conf"
-    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Catacombs Abyss (Shareware).conf"
-    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Rise Of The Triad The Hunt Begins (Shareware).conf"
-    sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Star Wars Dark Forces (Demo).conf"
     if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$romdir/pc/gamelist.xml.dosbox-x" "$romdir/pc/gamelist.xml"; fi
     chown -R $__user:$__user -R "$romdir/pc"
     if [[ ! -d "$md_inst/share/dosbox-x/drivez/DOOM" ]]; then cp -R "$romdir/pc/.games/DOOM" "$md_inst/share/dosbox-x/drivez/DOOM"; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM"; fi
@@ -130,13 +126,14 @@ matchbox-window-manager -use_titlebar no &
 _EOF_
 
     chmod +x "$script"
-    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
-    addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix:$script"
+    local launch_prefix
+    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix$script"
     mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"
     sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
     chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
 
-    addEmulator "1" "$md_id" "pc" "$launch_prefix:$script %ROM%"
+    addEmulator "1" "$md_id" "pc" "$launch_prefix$script %ROM%"
     addSystem "pc"
     echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"
 
