@@ -30,7 +30,9 @@ function depends_pcsx2-x64() {
         #dialog --ok --msgbox "Installer is for a 64bit system Only!" 22 76 2>&1 >/dev/tty
         md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
     fi
-    getDepends libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev matchbox-window-manager
+    local depends=(libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    getDepends "${depends[@]}"
 }
 
 function install_bin_pcsx2-x64() {
@@ -48,10 +50,18 @@ function install_bin_pcsx2-x64() {
 
     if [[ ! -d "$home/.config/PCSX2" ]]; then mkdir "$home/.config/PCSX2"; fi
     if [[ ! -d "$home/.config/PCSX2/inis" ]]; then mkdir "$home/.config/PCSX2/inis"; fi
+    # Basic Settings
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini"; sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
     sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini"; sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
-    sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini"; sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.pcsx2"
+    sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini"; sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.pcsx2" # I don't care what anyone says...
     sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
+    sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini"; sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini"; sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini"; sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini.pcsx2"
+    sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini"; sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini.pcsx2"
+    # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/PCSX2/bios] for PCSX2.ini
+    sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini.pcsx2"
+    sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini.pcsx2"
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/PCSX2/inis"; fi
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2" ]]; then mv "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis"; fi
     if [[ ! -d "$home/.config/PCSX2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/PCSX2/bios"; fi
@@ -64,9 +74,6 @@ function install_bin_pcsx2-x64() {
     chown -R $__user:$__user "$home/.config/PCSX2"
     if [[ ! -d "$md_conf_root/ps2/PCSX2" ]]; then mkdir "$md_conf_root/ps2/PCSX2"; fi
     moveConfigDir "$home/.config/PCSX2" "$md_conf_root/ps2/PCSX2"
-    # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/PCSX2/bios] for PCSX2.ini
-    sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini.pcsx2"
-    sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "$md_conf_root/ps2/PCSX2/bios/PCSX2.ini.PCSX2"
     chown -R $__user:$__user "$md_conf_root/ps2/PCSX2"
 
     mkRomDir "ps2"
@@ -78,11 +85,11 @@ function install_bin_pcsx2-x64() {
     chown -R $__user:$__user "$romdir/ps2"
 
     mv "sx2mcmanager.sh" "$md_inst"; chmod 755 "$md_inst/sx2mcmanager.sh"
-    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onstart; fi #For Use With [sx2mcmanager]' > /dev/shm/runcommand-onstart.sh
-    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' >> /dev/shm/runcommand-onstart.sh; fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh; fi
+    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onstart; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onstart.sh
     mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
-    echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' > /dev/shm/runcommand-onend.sh
-    if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' >> /dev/shm/runcommand-onend.sh; fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh; fi
+    echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onend.sh
     mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
@@ -108,12 +115,13 @@ function configure_pcsx2-x64() {
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartPCSX2 = "pcsx2"' ; echo $?) == '1' ]]; then echo 'ps2_StartPCSX2 = "pcsx2"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
     addSystem "ps2"
-    local launch_prefix=XINIT-WM; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WM)" == '' ]]; then local launch_prefix=XINIT; fi
-    addEmulator 1 "$md_id" "ps2" "$launch_prefix:$md_inst/pcsx2.sh %ROM%"
-    local launch_prefix=XINIT-WMC; if [[ "$(cat $home/RetroPie-Setup/scriptmodules/supplementary/runcommand/runcommand.sh | grep XINIT-WMC)" == '' ]]; then local launch_prefix=XINIT; fi
-    addEmulator 0 "$md_id-editor" "ps2" "$launch_prefix:$md_inst/pcsx2.sh --editor"
+    local launch_prefix
+    isPlatform "kms" && launch_prefix="XINIT-WM:"
+    addEmulator 1 "$md_id" "ps2" "$launch_prefix$md_inst/pcsx2.sh %ROM%"
+    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    addEmulator 0 "$md_id-editor" "ps2" "$launch_prefix$md_inst/pcsx2.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix:$md_inst/pcsx2-qjoy.sh --editor"
+        addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix$md_inst/pcsx2-qjoy.sh --editor"
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_pcsx2-x64
