@@ -51,18 +51,18 @@ function install_bin_pcsx2-x64() {
     if [[ ! -d "$home/.config/PCSX2" ]]; then mkdir "$home/.config/PCSX2"; fi
     if [[ ! -d "$home/.config/PCSX2/inis" ]]; then mkdir "$home/.config/PCSX2/inis"; fi
     # Basic Settings
-    sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini"; sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
-    sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini"; sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
-    sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini"; sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.pcsx2" # I don't care what anyone says...
-    sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini"; sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
-    sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini"; sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini.pcsx2"
-    sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini"; sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini.pcsx2"
-    sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini"; sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini.pcsx2"
-    sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini"; sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
+    sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.pcsx2" # I don't care what anyone says...
+    sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
+    sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini.pcsx2"
+    sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini.pcsx2"
+    sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini.pcsx2"
     # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/PCSX2/bios] for PCSX2.ini
-    sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini"; sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini.pcsx2"
-    sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini"; sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini.pcsx2"
-    if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/PCSX2/inis"; fi
+    sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini.pcsx2"
+    sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini.pcsx2"
+    if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini" ]]; then cp "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis/PCSX2.ini"; fi
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2" ]]; then mv "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis"; fi
     if [[ ! -d "$home/.config/PCSX2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/PCSX2/bios"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
