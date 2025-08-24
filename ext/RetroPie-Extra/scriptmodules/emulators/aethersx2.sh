@@ -69,7 +69,7 @@ function install_bin_aethersx2() {
         sed -i s+'SyncToHostRefreshRate =.*'+'SyncToHostRefreshRate = true'+g "PCSX2.ini"; sed -i s+'SyncToHostRefreshRate =.*'+'SyncToHostRefreshRate = true'+g "PCSX2.ini.aethersx2"
         sed -i s+'VsyncEnable =.*'+'VsyncEnable = 2'+g "PCSX2.ini"; sed -i s+'VsyncEnable =.*'+'VsyncEnable = 2'+g "PCSX2.ini.aethersx2"
         sed -i s+'VsyncQueueSize =.*'+'VsyncQueueSize = 2'+g "PCSX2.ini"; sed -i s+'VsyncQueueSize =.*'+'VsyncQueueSize = 2'+g "PCSX2.ini.aethersx2"
-        sed -i s+'FramerateNTSC =.*'+'FramerateNTSC = 50'+g "PCSX2.ini"; sed -i s+'FramerateNTSC =.*'+'FramerateNTSC = 50'+g "PCSX2.ini.aethersx2" # Default is FramerateNTSC = 59.94
+        #sed -i s+'FramerateNTSC =.*'+'FramerateNTSC = 50'+g "PCSX2.ini"; #sed -i s+'FramerateNTSC =.*'+'FramerateNTSC = 50'+g "PCSX2.ini.aethersx2" # Default is FramerateNTSC = 59.94
     fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini" ]]; then mv "PCSX2.ini" "$home/.config/aethersx2/inis"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2" ]]; then mv "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis"; fi
