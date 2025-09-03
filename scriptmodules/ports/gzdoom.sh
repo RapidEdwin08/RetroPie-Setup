@@ -84,7 +84,7 @@ function install_gzdoom() {
         'release/game_widescreen_gfx.pk3'
         'release/soundfonts'
         "release/zmusic/lib/libzmusic.so.1"
-        "release/zmusic/lib/libzmusic.so.1.1.14"
+        "release/zmusic/lib/libzmusic.so.1.2.0"
         'README.md'
     )
 }
