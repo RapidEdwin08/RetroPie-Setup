@@ -91,7 +91,7 @@ function build_sdl2() {
     isPlatform "mali" && conf_flags+=("--enable-video-mali" "--disable-video-opengl")
     isPlatform "dispmanx" && conf_flags+=("--enable-video-rpi") || conf_flags+=("--disable-video-rpi")
     isPlatform "kms" || isPlatform "rpi" && conf_flags+=("--enable-video-kmsdrm")
-	isPlatform "gles" || isPlatform "gl" && conf_flags+=("--enable-video-opengl")
+	#isPlatform "gles" || isPlatform "gl" && conf_flags+=("--enable-video-opengl")
 
     # format debian package dependencies into comma-separated list
     conf_depends=( "${conf_depends[@]/%/,}" )
