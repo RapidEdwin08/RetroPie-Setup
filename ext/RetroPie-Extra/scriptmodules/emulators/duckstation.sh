@@ -14,17 +14,9 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
-# Version + Platform put here to be displayed in Help
-#duckstation_version="v0.1-9226"; # Prior Version Reference
-duckstation_version="latest"
-duckstation_platform=armhf
-if [[ "$__platform_arch" == 'x86_64' ]]; then duckstation_platform=x64; fi
-if isPlatform "aarch64"; then duckstation_platform=arm64; fi
-duckstation_appimage=DuckStation-"$duckstation_platform".AppImage
-
 rp_module_id="duckstation"
 rp_module_desc="DuckStation - PlayStation 1, aka. PSX Emulator"
-rp_module_help="$duckstation_appimage ($duckstation_version) \n \n https://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
+rp_module_help="[DuckStation.AppImage]\nhttps://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="Duckstation https://raw.githubusercontent.com/stenzek/duckstation/master/LICENSE"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
@@ -36,6 +28,13 @@ function depends_duckstation() {
 }
 
 function install_bin_duckstation() {
+    #local duckstation_version="v0.1-9226"
+    local duckstation_version="latest"
+    local duckstation_platform=armhf
+    if [[ "$__platform_arch" == 'x86_64' ]]; then duckstation_platform=x64; fi
+    if isPlatform "aarch64"; then duckstation_platform=arm64; fi
+    local duckstation_appimage=DuckStation-"$duckstation_platform".AppImage
+
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/duckstation/duckstation-rp-assets.tar.gz" "$md_build"
     download "https://github.com/stenzek/duckstation/releases/download/${duckstation_version}/${duckstation_appimage}" "$md_build"
 
@@ -73,6 +72,7 @@ function install_bin_duckstation() {
     if [[ ! -d "$home/.local/share/duckstation/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.local/share/duckstation/bios"; fi
     if [[ ! -d "$md_conf_root/psx/duckstation" ]]; then mkdir "$md_conf_root/psx/duckstation"; fi
     moveConfigDir "$home/.local/share/duckstation" "$md_conf_root/psx/duckstation"
+    moveConfigDir "$home/.config/duckstation" "$md_conf_root/psx/duckstation"
     chown -R $__user:$__user -R "$md_conf_root/psx/duckstation"
 
     mkRomDir "psx"
