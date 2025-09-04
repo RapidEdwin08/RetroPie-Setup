@@ -59,7 +59,7 @@ function sources_eduke32() {
 }
 
 function build_eduke32() {
-    local params=(LTO=0 SDL_TARGET=2)
+    local params=(LTO=0 SDL_TARGET=2 STARTUP_WINDOW=0)
 
     [[ "$md_id" == "ionfury" ]] && params+=(FURY=1)
     ! isPlatform "x86" && params+=(NOASM=1)
@@ -70,7 +70,7 @@ function build_eduke32() {
     isPlatform "arm" && params+=(NETCODE=0)
 
     make veryclean
-    CFLAGS+=" -DSDL_USEFOLDER" make -j $(nproc) "${params[@]}"
+    CFLAGS+=" -DSDL_USEFOLDER" make -j"$(nproc)" "${params[@]}"
 
     if [[ "$md_id" == "ionfury" ]]; then
         md_ret_require="$md_build/fury"
