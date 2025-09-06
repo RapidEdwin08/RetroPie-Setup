@@ -64,7 +64,7 @@ function install_bin_duckstation() {
         sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 2/g' "settings.ini"
     fi
     if isPlatform "rpi5" || isPlatform "rpi4"; then
-        sed -i 's/Renderer\ =.*/Renderer\ =\ OpenGL/g' "settings.ini"
+        sed -i 's/Renderer\ =.*/Renderer\ =\ Vulkan/g' "settings.ini"
         sed -i 's/Adapter\ =.*/Adapter\ =\ V3D\ 7.1.10/g' "settings.ini"
         #if isPlatform "rpi5"; then sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 3/g' "settings.ini"; fi
     fi
