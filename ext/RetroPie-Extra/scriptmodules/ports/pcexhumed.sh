@@ -15,19 +15,10 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="pcexhumed"
-rp_module_desc="PCExhumed - Powerslave source port"
+rp_module_desc="Powerslave/Exhumed source port - Ken Silverman's Build Engine"
 rp_module_licence="GPL3 https://github.com/OpenMW/osg/blob/3.4/LICENSE.txt"
 rp_module_repo="git https://github.com/nukeykt/NBlood.git master"
-rp_module_help="you need to put the 
-STUFF.DAT
-DEMO.VCR
-BOOK.MOV
-in the ports/ksbuild/pcexhumed folder
-
-Recommended (but optional) - Add the games CD audio tracks as OGG files in the format exhumedXX.ogg or trackXX.ogg (where XX is the track number) 
-to the same folder as pcexhumed.exe. The game includes tracks 02 to 19. These will provide the game with its music soundtrack 
-and add storyline narration by the King Ramses NPC.
-"
+rp_module_help="Place Game Files in [ports/ksbuild/pcexhumed]: \nSTUFF.DAT\nDEMO.VCR\nBOOK.MOV\n \nOptional [CD Audio]:\ntrack02.ogg...track19.ogg\nexhumed02.ogg...exhumed19.ogg"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -43,6 +34,7 @@ function depends_pcexhumed() {
 
 function sources_pcexhumed() {
 	gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/pcexhumed/Powerslave_48x48.xpm" "$md_build"
 }
 
 function build_pcexhumed() {
@@ -68,9 +60,15 @@ function install_pcexhumed() {
         'pcexhumed'
         'pcexhumed.pk3'
 		'nblood.pk3'
+		'Powerslave_48x48.xpm'
     )
 }
-	
+
+function remove_pcexhumed() {
+    if [[ -f "/usr/share/applications/Powerslave (Exhumed).desktop" ]]; then sudo rm -f "/usr/share/applications/Powerslave (Exhumed).desktop"; fi
+    if [[ -f "$home/Desktop/Powerslave (Exhumed).desktop" ]]; then rm -f "$home/Desktop/Powerslave (Exhumed).desktop"; fi
+}
+
 function configure_pcexhumed() {
 	if [[ ! -d "$home/.config/pcexhumed" ]]; then mkdir "$home/.config/pcexhumed"; fi
 	if [[ ! -f "$home/.config/pcexhumed/pcexhumed_cvars.cfg" ]]; then touch "$home/.config/pcexhumed/pcexhumed_cvars.cfg"; fi
@@ -81,6 +79,10 @@ function configure_pcexhumed() {
 	fi
 	chown -R $__user:$__user "$home/.config/pcexhumed"
     moveConfigDir "$home/.config/pcexhumed" "$md_conf_root/$md_id"
+    # [WARN| Could not find main data file "nblood.pk3"!
+    ln -s "$md_inst/nblood.pk3" "$md_conf_root/$md_id/nblood.pk3"
+    ln -s "$md_inst/pcexhumed.pk3" "$md_conf_root/$md_id/pcexhumed.pk3"
+    ln -s "$md_inst/dn64widescreen.pk3" "$md_conf_root/$md_id/dn64widescreen.pk3"
     chown -R $__user:$__user "$md_conf_root/$md_id"
 	chmod 755 $md_inst/pcexhumed-qjoy.sh
 
@@ -88,10 +90,22 @@ function configure_pcexhumed() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-	addPort "$md_id" "pcexhumed" "PCExhumed - Powerslave Source Port" "$launch_prefix$md_inst/pcexhumed -j $home/RetroPie/roms/ports/ksbuild/pcexhumed"
+	addPort "$md_id" "pcexhumed" "PCExhumed - Powerslave Source Port" "$launch_prefix$md_inst/pcexhumed.sh"
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
 		addPort "$md_id+qjoypad" "pcexhumed" "PCExhumed - Powerslave Source Port" "$launch_prefix$md_inst/pcexhumed-qjoy.sh"
 	fi
+
+   cat >"$md_inst/$md_id.sh" << _EOF_
+#!/bin/bash
+
+# Run $md_id
+pushd /opt/retropie/configs/ports/$md_id
+VC4_DEBUG=always_sync /opt/retropie/ports/$md_id/$md_id  -j \$HOME/RetroPie/roms/ports/ksbuild/$md_id
+popd
+
+exit 0
+_EOF_
+    chmod 755 "$md_inst/$md_id.sh"
 
     cat >"$md_inst/pcexhumed.cfg" << _EOF_
 [Setup]
@@ -334,4 +348,24 @@ pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
 exit 0
 _EOF_
     chmod 755 "$md_inst/pcexhumed-qjoy.sh"
+
+    cat >"$md_inst/Powerslave (Exhumed).desktop" << _EOF_
+[Desktop Entry]
+Name=Powerslave (Exhumed)
+GenericName=Powerslave (Exhumed)
+Comment=Powerslave (Exhumed)
+Exec=$md_inst/$md_id.sh
+Icon=$md_inst/Powerslave_48x48.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Powerslave;Exhumed
+StartupWMClass=PowerslaveExhumed
+Name[en_US]=Powerslave (Exhumed)
+_EOF_
+    chmod 755 "$md_inst/Powerslave (Exhumed).desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Powerslave (Exhumed).desktop" "$home/Desktop/Powerslave (Exhumed).desktop"; chown $__user:$__user "$home/Desktop/Powerslave (Exhumed).desktop"; fi
+    mv "$md_inst/Powerslave (Exhumed).desktop" "/usr/share/applications/Powerslave (Exhumed).desktop"
+
+    [[ "$md_mode" == "remove" ]] && remove_pcexhumed
 }

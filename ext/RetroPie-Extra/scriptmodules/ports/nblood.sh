@@ -15,12 +15,10 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="nblood"
-rp_module_desc="Nblood - Blood source port"
+rp_module_desc="Blood source port - Ken Silverman's Build Engine"
 rp_module_licence="GPL3 https://github.com/OpenMW/osg/blob/3.4/LICENSE.txt"
 rp_module_repo="git https://github.com/nukeykt/NBlood.git master"
-rp_module_help="you need to put the \n\BLOOD.INI, \n\BLOOD.RFF, \n\BLOOD000.DEM, ..., BLOOD003.DEM (optional), \n\GUI.RFF, \n\SOUNDS.RFF, \n\SURFACE.DAT, \n\TILES000.ART, ..., TILES017.ART, \n\VOXEL.DAT in ports/ksbuild/blood
-,\n\Cryptic Passage,\n\
-CP01.MAP, ..., CP09.MAP,\n\CPART07.AR_,\n\CPART15.AR_,\n\CPBB01.MAP, ..., CPBB04.MAP,\n\CPSL.MAP,\n\CRYPTIC.INI\n\CRYPTIC.SMK \n\CRYPTIC.WAV"
+rp_module_help="Place Game Files in [ports/ksbuild/blood]: \nBLOOD.INI\nBLOOD.RFF\nBLOOD000.DEM...BLOOD003.DEM (optional)\nGUI.RFF\nSOUNDS.RFF\nSURFACE.DAT\nTILES000.ART...TILES017.ART\nVOXEL.DAT\n \n[Cryptic Passage]:\nCRYPTIC.INI\nCRYPTIC.SMK\nCRYPTIC.WAV\nCP01.MAP...CP09.MAP\nCPART07.AR_\nCPART15.AR_\nCPBB01.MAP...CPBB04.MAP\nCPSL.MAP"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -36,6 +34,8 @@ function depends_nblood() {
 
 function sources_nblood() {
 	gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/nblood/Blood_48x48.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/nblood/BloodCP_32x64.xpm" "$md_build"
 }
 
 function build_nblood() {
@@ -60,9 +60,18 @@ function install_nblood() {
 		'dn64widescreen.pk3'
 		'nblood'
 		'nblood.pk3'
+		'Blood_48x48.xpm'
+		'BloodCP_32x64.xpm'
     )
 }
-	
+
+function remove_nblood() {
+    if [[ -f "/usr/share/applications/Blood.desktop" ]]; then sudo rm -f "/usr/share/applications/Blood.desktop"; fi
+    if [[ -f "$home/Desktop/Blood.desktop" ]]; then rm -f "$home/Desktop/Blood.desktop"; fi
+    if [[ -f "/usr/share/applications/Blood Cryptic Passage.desktop" ]]; then sudo rm -f "/usr/share/applications/Blood Cryptic Passage.desktop"; fi
+    if [[ -f "$home/Desktop/Blood Cryptic Passage.desktop" ]]; then rm -f "$home/Desktop/Blood Cryptic Passage.desktop"; fi
+}
+
 function configure_nblood() {
 	if [[ ! -d "$home/.config/nblood" ]]; then mkdir "$home/.config/nblood"; fi
 	if [[ ! -f "$home/.config/nblood/nblood_cvars.cfg" ]]; then touch "$home/.config/nblood/nblood_cvars.cfg"; fi
@@ -73,19 +82,38 @@ function configure_nblood() {
 	fi
 	chown -R $__user:$__user "$home/.config/nblood"
     moveConfigDir "$home/.config/nblood" "$md_conf_root/nblood"
-    chown -R $__user:$__user "$md_conf_root/nblood"
+    # [WARN| Could not find main data file "nblood.pk3"!
+    ln -s "$md_inst/nblood.pk3" "$md_conf_root/$md_id/nblood.pk3"
+    ln -s "$md_inst/dn64widescreen.pk3" "$md_conf_root/$md_id/dn64widescreen.pk3"
+    chown -R $__user:$__user "$md_conf_root/$md_id"
 
 	mkRomDir "ports/ksbuild/blood"
 	
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-	addPort "$md_id" "nblood" "Nblood - Blood Source Port" "$launch_prefix$md_inst/nblood -ini blood.ini -j $home/RetroPie/roms/ports/ksbuild/blood"
-	addPort "$md_id" "nblood-cp" "NBlood - Blood Cryptic Passage Source Port" "$launch_prefix$md_inst/nblood -ini CRYPTIC.INI -j $home/RetroPie/roms/ports/ksbuild/blood"
+	addPort "$md_id" "nblood" "Nblood - Blood Source Port" "$launch_prefix$md_inst/nblood.sh"
+	addPort "$md_id" "nblood-cp" "NBlood - Blood Cryptic Passage Source Port" "$launch_prefix$md_inst/nblood.sh cryptic"
 
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
 		addPort "$md_id+qjoypad" "nblood" "Nblood - Blood Source Port" "$launch_prefix$md_inst/nblood-qjoy.sh"
 		addPort "$md_id+qjoypad" "nblood-cp" "NBlood - Blood Cryptic Passage Source Port" "$launch_prefix$md_inst/nblood-qjoy.sh cryptic"
 	fi
+
+   cat >"$md_inst/$md_id.sh" << _EOF_
+#!/bin/bash
+
+# Run $md_id
+pushd /opt/retropie/configs/ports/$md_id
+if [[ "\$1" == 'cryptic' ]]; then
+	VC4_DEBUG=always_sync /opt/retropie/ports/$md_id/$md_id -ini CRYPTIC.INI -j=\$HOME/RetroPie/roms/ports/ksbuild/blood/
+else
+	VC4_DEBUG=always_sync /opt/retropie/ports/$md_id/$md_id -ini blood.ini -j=\$HOME/RetroPie/roms/ports/ksbuild/blood/
+fi
+popd
+
+exit 0
+_EOF_
+    chmod 755 "$md_inst/$md_id.sh"
 
     cat >"$md_inst/nblood.cfg" << _EOF_
 [Setup]
@@ -204,4 +232,42 @@ pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
 exit 0
 _EOF_
     chmod 755 "$md_inst/nblood-qjoy.sh"
+
+    cat >"$md_inst/Blood.desktop" << _EOF_
+[Desktop Entry]
+Name=Blood
+GenericName=Blood
+Comment=Blood
+Exec=$md_inst/$md_id.sh
+Icon=$md_inst/Blood_48x48.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Blood
+StartupWMClass=Blood
+Name[en_US]=Blood
+_EOF_
+    chmod 755 "$md_inst/Blood.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Blood.desktop" "$home/Desktop/Blood.desktop"; chown $__user:$__user "$home/Desktop/Blood.desktop"; fi
+    mv "$md_inst/Blood.desktop" "/usr/share/applications/Blood.desktop"
+
+    cat >"$md_inst/Blood Cryptic Passage.desktop" << _EOF_
+[Desktop Entry]
+Name=Blood Cryptic Passage
+GenericName=Blood Cryptic Passage
+Comment=Blood Cryptic Passage
+Exec=$md_inst/$md_id.sh cryptic
+Icon=$md_inst/BloodCP_32x64.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Blood;Cryptic;Passage
+StartupWMClass=BloodCrypticPassage
+Name[en_US]=Blood Cryptic Passage
+_EOF_
+    chmod 755 "$md_inst/Blood Cryptic Passage.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Blood Cryptic Passage.desktop" "$home/Desktop/Blood Cryptic Passage.desktop"; chown $__user:$__user "$home/Desktop/Blood Cryptic Passage.desktop"; fi
+    mv "$md_inst/Blood Cryptic Passage.desktop" "/usr/share/applications/Blood Cryptic Passage.desktop"
+
+    [[ "$md_mode" == "remove" ]] && remove_nblood
 }

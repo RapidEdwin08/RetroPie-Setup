@@ -15,8 +15,8 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="jfsw"
-rp_module_desc="JFSW - Shadow Warrior source port by Jonathon Fowler"
-rp_module_help="Place Game files + Expansion Episodes in:\n$romdir/ports/ksbuild/shadowwarrior \n \nShadow Warrior [sw.grp] [sw.rts]\n \nTwin Dragon [dragon.zip] \n \nWanton Destruction [wt.grp]"
+rp_module_desc="Shadow Warrior source port by Jonathon Fowler - Ken Silverman's Build Engine"
+rp_module_help="Place Game files + Expansion Episodes in:\n$romdir/ports/ksbuild/shadowwarrior \n \n[Shadow Warrior]:\nsw.grp\nsw.rts\n \n[Twin Dragon]:\ndragon.zip\n \n[Wanton Destruction]:\nwt.grp"
 rp_module_licence="GPL https://github.com/jonof/jfsw/blob/master/GPL.TXT"
 rp_module_repo="git https://github.com/jonof/jfsw.git master"
 rp_module_section="exp"
@@ -34,6 +34,7 @@ function depends_jfsw() {
 
 function sources_jfsw() {
     gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/jfsw/ShadowWarrior_48x48.xpm" "$md_build"
 }
 
 function build_jfsw() {
@@ -49,7 +50,10 @@ function build_jfsw() {
 }
 
 function install_jfsw() {
-    md_ret_files='sw'
+    md_ret_files=(        
+        'sw'
+        'ShadowWarrior_48x48.xpm'
+    )
 }
 
 function gamedata_jfsw() {
@@ -67,6 +71,11 @@ function gamedata_jfsw() {
         rm -rf "$tempdir"
     fi
     chown -R $__user:$__user "$dest"
+}
+
+function remove_jfsw() {
+    if [[ -f "/usr/share/applications/Shadow Warrior.desktop" ]]; then sudo rm -f "/usr/share/applications/Shadow Warrior.desktop"; fi
+    if [[ -f "$home/Desktop/Shadow Warrior.desktop" ]]; then rm -f "$home/Desktop/Shadow Warrior.desktop"; fi
 }
 
 function configure_jfsw() {
@@ -358,4 +367,24 @@ _EOF_
         cp "$md_inst/sw.cfg" "$home/.jfsw/sw.cfg"
         chown -R $__user:$__user "$home/.jfsw/sw.cfg"
     fi
+
+    cat >"$md_inst/Shadow Warrior.desktop" << _EOF_
+[Desktop Entry]
+Name=Shadow Warrior
+GenericName=Shadow Warrior
+Comment=Shadow Warrior
+Exec=$md_inst/sw
+Icon=$md_inst/ShadowWarrior_48x48.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Shadow Warrior
+StartupWMClass=ShadowWarrior
+Name[en_US]=Shadow Warrior
+_EOF_
+    chmod 755 "$md_inst/Shadow Warrior.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Shadow Warrior.desktop" "$home/Desktop/Shadow Warrior.desktop"; chown $__user:$__user "$home/Desktop/Shadow Warrior.desktop"; fi
+    mv "$md_inst/Shadow Warrior.desktop" "/usr/share/applications/Shadow Warrior.desktop"
+
+    [[ "$md_mode" == "remove" ]] && remove_jfsw
 }

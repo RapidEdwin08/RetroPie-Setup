@@ -15,16 +15,19 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="rednukem"
-rp_module_desc="Rednukem - Redneck Rampage source port"
+rp_module_desc="Redneck Rampage source port - Ken Silverman's Build Engine"
 rp_module_licence="GPL3 https://github.com/OpenMW/osg/blob/3.4/LICENSE.txt"
 #rp_module_repo="https://github.com/Exarkuniv/NBlood.git"
 rp_module_repo="git https://github.com/nukeykt/NBlood.git master"
 rp_module_help="you need to put the REDNECK.GRP, REDNECK.RTS, optionally CD audio tracks as OGG file in the format trackXX.ogg (where XX is the track number)
-ports/ksbuild/rednukem"
+ports/ksbuild/redneck
+ports/ksbuild/ridesagain
+ports/ksbuild/route66"
+rp_module_help="Place Game Files in [ports/ksbuild/redneck]:\nREDNECK.GRP\nREDNECK.RTS\n \nOptional [CD Audio]:\ntrack02.ogg...track09.ogg\ntrack02.flac...track09.flac"
 rp_module_section="exp"
 rp_module_flags=""
 
-function depends_rednukemd() {
+function depends_rednukem() {
 	# libsdl1.2-dev libsdl-mixer1.2-dev xorg xinit x11-xserver-utils
 	local depends=(cmake build-essential libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libvpx-dev freepats)
     isPlatform "x86" && depends+=(nasm)
@@ -36,6 +39,7 @@ function depends_rednukemd() {
 
 function sources_rednukem() {
 	gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rednukem/RedneckRampage_48x48.xpm" "$md_build"
 }
 
 function build_rednukem() {
@@ -60,9 +64,15 @@ function install_rednukem() {
 		'dn64widescreen.pk3'
 		'nblood.pk3'
 		'rednukem'
+		'RedneckRampage_48x48.xpm'
     )
 }
-	
+
+function remove_rednukem() {
+    if [[ -f "/usr/share/applications/Redneck Rampage.desktop" ]]; then sudo rm -f "/usr/share/applications/Redneck Rampage.desktop"; fi
+    if [[ -f "$home/Desktop/Redneck Rampage.desktop" ]]; then rm -f "$home/Desktop/Redneck Rampage.desktop"; fi
+}
+
 function configure_rednukem() {
 	if [[ ! -d "$home/.config/rednukem" ]]; then mkdir "$home/.config/rednukem"; fi
 	if [[ ! -f "$home/.config/rednukem/rednukem_cvars.cfg" ]]; then touch "$home/.config/rednukem/rednukem_cvars.cfg"; fi
@@ -73,6 +83,9 @@ function configure_rednukem() {
 	fi
 	chown -R $__user:$__user "$home/.config/rednukem"
     moveConfigDir "$home/.config/rednukem" "$md_conf_root/$md_id-redneck"
+    #[WARN| Could not find main data file "nblood.pk3"!
+    ln -s "$md_inst/nblood.pk3" "$md_conf_root/$md_id-redneck/nblood.pk3"
+    ln -s "$md_inst/dn64widescreen.pk3" "$md_conf_root/$md_id-redneck/dn64widescreen.pk3"
     chown -R $__user:$__user "$md_conf_root/$md_id-redneck"
 	
 	mkRomDir "ports/ksbuild/redneck"
@@ -81,9 +94,30 @@ function configure_rednukem() {
 	
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-	addPort "$md_id-redneck" "rednukem-redneck" "Rednukem - Redneck Rampage Source Port" "$launch_prefix$md_inst/rednukem -j $home/RetroPie/roms/ports/ksbuild/redneck"
-	addPort "$md_id-ridesagain" "rednukem-ridesagain" "Rednukem - Redneck Rampage Rides Again Source Port" "$launch_prefix$md_inst/rednukem -j $home/RetroPie/roms/ports/ksbuild/ridesagain"
-	addPort "$md_id-route66" "rednukem-route66" "Rednukem - Redneck Rampage Route 66 Source Port" "$launch_prefix$md_inst/rednukem -j $home/RetroPie/roms/ports/ksbuild/route66 -g $home/RetroPie/roms/ports/ksbuild/route66/RT66.GRP -mx $home/RetroPie/roms/ports/ksbuild/route66/RT66.CON -j $home/RetroPie/roms/ports/ksbuild/redneck"
+	addPort "$md_id-redneck" "rednukem-redneck" "Rednukem - Redneck Rampage Source Port" "$launch_prefix$md_inst/$md_id.sh"
+	addPort "$md_id-ridesagain" "rednukem-ridesagain" "Rednukem - Redneck Rampage Rides Again Source Port" "$launch_prefix$md_inst/$md_id.sh ridesagain"
+	addPort "$md_id-route66" "rednukem-route66" "Rednukem - Redneck Rampage Route 66 Source Port" "$launch_prefix$md_inst/$md_id.sh route66"
+
+   cat >"$md_inst/$md_id.sh" << _EOF_
+#!/bin/bash
+
+# Run $md_id
+##pushd /opt/retropie/configs/ports/$md_id-redneck
+if [[ "\$1" == 'ridesagain' ]]; then
+	pushd \$HOME/RetroPie/roms/ports/ksbuild/ridesagain/
+	VC4_DEBUG=always_sync /opt/retropie/ports/$md_id/$md_id -j=\$HOME/RetroPie/roms/ports/ksbuild/ridesagain/
+elif [[ "\$1" == 'route66' ]]; then
+	pushd \$HOME/RetroPie/roms/ports/ksbuild/route66/
+	VC4_DEBUG=always_sync /opt/retropie/ports/$md_id/$md_id -j=\$HOME/RetroPie/roms/ports/ksbuild/route66/ -g \$HOME/RetroPie/roms/ports/ksbuild/route66/RT66.GRP -mx \$HOME/RetroPie/roms/ports/ksbuild/route66/RT66.CON -j \$HOME/RetroPie/roms/ports/ksbuild/redneck
+else
+	pushd \$HOME/RetroPie/roms/ports/ksbuild/redneck/
+	VC4_DEBUG=always_sync /opt/retropie/ports/$md_id/$md_id -j=\$HOME/RetroPie/roms/ports/ksbuild/redneck/
+fi
+popd
+
+exit 0
+_EOF_
+    chmod 755 "$md_inst/$md_id.sh"
 
     cat >"$md_inst/rednukem.cfg" << _EOF_
 [Misc]
@@ -170,4 +204,24 @@ _EOF_
 		cp "$md_inst/rednukem.cfg" "$home/.config/rednukem/rednukem.cfg"
 		chown -R $__user:$__user "$home/.config/rednukem/rednukem.cfg"
 	fi
+
+    cat >"$md_inst/Redneck Rampage.desktop" << _EOF_
+[Desktop Entry]
+Name=Redneck Rampage
+GenericName=Redneck Rampage
+Comment=Redneck Rampage
+Exec=$md_inst/$md_id.sh
+Icon=$md_inst/RedneckRampage_48x48.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Redneck;Rampage
+StartupWMClass=RedneckRampage
+Name[en_US]=Redneck Rampage
+_EOF_
+    chmod 755 "$md_inst/Redneck Rampage.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Redneck Rampage.desktop" "$home/Desktop/Redneck Rampage.desktop"; chown $__user:$__user "$home/Desktop/Redneck Rampage.desktop"; fi
+    mv "$md_inst/Redneck Rampage.desktop" "/usr/share/applications/Redneck Rampage.desktop"
+
+    [[ "$md_mode" == "remove" ]] && remove_rednukem
 }

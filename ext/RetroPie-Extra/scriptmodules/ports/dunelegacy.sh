@@ -159,7 +159,7 @@ Maximum Number of Units Override = -1   # Override the maximum number of units e
 _EOF_
 	if [[ ! -f "$md_conf_root/dunelegacy/Dune Legacy.ini" ]]; then
 		cp "$md_inst/Dune Legacy.ini" "$md_conf_root/dunelegacy/Dune Legacy.ini"
-		chown -R $__user:$__user "$md_conf_root/dunelegacy/Dune Legacy.ini"
+		chown $__user:$__user "$md_conf_root/dunelegacy/Dune Legacy.ini"
 	fi
 
     cat >"$md_inst/Dune II.desktop" << _EOF_
