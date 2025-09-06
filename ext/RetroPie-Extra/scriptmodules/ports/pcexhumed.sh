@@ -64,6 +64,14 @@ function install_pcexhumed() {
     )
 }
 
+function game_data_pcexhumed() {
+    if [[ ! -f "$romdir/ports/ksbuild/pcexhumed/STUFF.DAT" ]] && [[ ! -f "$romdir/ports/ksbuild/pcexhumed/BOOK.MOV" ]]; then
+		mkRomDir "ports/ksbuild/pcexhumed"
+		downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/pcexhumed/pcexhumed-rp-assets.tar.gz" "$romdir/ports/ksbuild/pcexhumed"
+		chown -R $__user:$__user "$romdir/ports/ksbuild/pcexhumed"
+	fi
+}
+
 function remove_pcexhumed() {
     if [[ -f "/usr/share/applications/Powerslave (Exhumed).desktop" ]]; then sudo rm -f "/usr/share/applications/Powerslave (Exhumed).desktop"; fi
     if [[ -f "$home/Desktop/Powerslave (Exhumed).desktop" ]]; then rm -f "$home/Desktop/Powerslave (Exhumed).desktop"; fi
@@ -367,5 +375,6 @@ _EOF_
     if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Powerslave (Exhumed).desktop" "$home/Desktop/Powerslave (Exhumed).desktop"; chown $__user:$__user "$home/Desktop/Powerslave (Exhumed).desktop"; fi
     mv "$md_inst/Powerslave (Exhumed).desktop" "/usr/share/applications/Powerslave (Exhumed).desktop"
 
+    [[ "$md_mode" == "install" ]] && game_data_pcexhumed
     [[ "$md_mode" == "remove" ]] && remove_pcexhumed
 }
