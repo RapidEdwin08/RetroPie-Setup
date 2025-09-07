@@ -32,16 +32,20 @@ rp_module_section="exp"
 rp_module_flags="!mali"
 
 function depends_rott-darkwar() {
+    local depends=(fluidsynth libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm zip unzip)
     if [[ "$__os_debian_ver" -le 10 ]]; then
-        local depends=(libsdl1.2-dev libsdl-mixer1.2-dev automake autoconf unzip)
+        depends+=(libsdl1.2-dev libsdl-mixer1.2-dev automake autoconf)
     else
-        if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
-            local depends=(libsdl2-dev libsdl2-mixer-dev fluidsynth libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm libfluidsynth1)
-        else
-            local depends=(libsdl2-dev libsdl2-mixer-dev fluidsynth libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm libfluidsynth3)
-        fi
+        depends+=(autotools-dev libopusfile0 libsdl2-dev libsdl2-mixer-dev libsdl2-mixer-2.0-0 libsdl2-ttf-dev)
+    fi
+    if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
+        depends+=(libfluidsynth1)
+    else
+        depends+=(libfluidsynth3)
     fi
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+
+    echo DEPENDS: "${depends[@]}"
     getDepends "${depends[@]}"
 }
 
@@ -58,7 +62,7 @@ function build_rott-darkwar() {
         make -j"$(nproc)" rott-darkwar
         make -j"$(nproc)" rott-darkwar
         make -j"$(nproc)" rott-darkwar
-        md_ret_require=('rott-darkwar')
+        md_ret_require=("$md_build/rott-darkwar")
     else
         #sed -i 's/SHAREWARE   ?= 0/SHAREWARE   ?= 1/g' "$md_build/rott/Makefile"
         #sed -i 's/SUPERROTT   ?= 1/SUPERROTT   ?= 0/g' "$md_build/rott/Makefile"
