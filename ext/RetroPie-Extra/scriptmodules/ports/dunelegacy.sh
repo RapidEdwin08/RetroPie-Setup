@@ -39,6 +39,7 @@ function depends_dunelegacy() {
 
 function sources_dunelegacy() {
     gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/dunelegacy/DuneII_48x48.ico" "$md_build"
 }
 
 function build_dunelegacy() {
@@ -74,6 +75,7 @@ function install_dunelegacy() {
     make install
     md_ret_files=(
         'dunelegacy.svg'
+        'DuneII_48x48.ico'
     )
 }
 

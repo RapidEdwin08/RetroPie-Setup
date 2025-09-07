@@ -95,7 +95,7 @@ _EOF_
 [Desktop Entry]
 Name=SRB2 Kart
 GenericName=SRB2 Kart
-Comment=SRB2 Kart
+Comment=Sonic Robo Blast 2 Kart
 Exec=$md_inst/srb2kart.sh
 Icon=$md_inst/SDL_icon.xpm
 Terminal=false

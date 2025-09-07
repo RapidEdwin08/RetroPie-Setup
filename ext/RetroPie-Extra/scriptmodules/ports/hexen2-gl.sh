@@ -292,7 +292,7 @@ Name=HeXen II
 GenericName=HeXen II
 Comment=HeXen II
 Exec=$md_inst/glhexen2 -f -conwidth 800
-Icon=$md_inst/hexen2.icns
+Icon=$md_inst/hexen2.ico
 Terminal=false
 Type=Application
 Categories=Game;Emulator
@@ -308,9 +308,9 @@ _EOF_
 [Desktop Entry]
 Name=HeXen II Portals Of Praevus
 GenericName=HeXen II Portals Of Praevus
-Comment=HeXen II
+Comment=HeXen II Portals Of Praevus
 Exec=$md_inst/glhexen2 -f -conwidth 800 -portals
-Icon=$md_inst/hexenworld.ico
+Icon=$md_inst/hexen2.icns
 Terminal=false
 Type=Application
 Categories=Game;Emulator

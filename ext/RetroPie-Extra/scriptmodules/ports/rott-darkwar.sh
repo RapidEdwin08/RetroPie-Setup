@@ -14,35 +14,26 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
-# Additional Legacy Branch for Debian Buster and Below
-legacy_branch=0; if [[ "$__os_debian_ver" -le 10 ]]; then legacy_branch=1; fi
-
 rp_module_id="rott-darkwar"
-rp_module_desc="ROTT - Rise of the Triad - Dark War\n \nMaster Branch (Bullseye+):\nhttps://github.com/LTCHIPS/rottexpr.git\n \nLegacy Branch (Buster-):\nhttps://github.com/RapidEdwin08/RoTT"
-rp_module_licence="GPL2 https://raw.githubusercontent.com/LTCHIPS/rottexpr/master/LICENSE.DOC"
-rp_module_repo="git https://github.com/LTCHIPS/rottexpr.git master"
+rp_module_desc="Source Port for Rise of the Triad Dark War\n \nMaster Branch (Bullseye+):\nhttps://github.com/LTCHIPS/rottexpr.git\n \nLegacy Branch (Buster-):\nhttps://github.com/RapidEdwin08/RoTT"
+if [[ "$__os_debian_ver" -le 10 ]]; then
+    rp_module_licence="GPL2 https://raw.githubusercontent.com/RapidEdwin08/RoTT/master/COPYING"
+    rp_module_repo="git https://github.com/RapidEdwin08/RoTT"
+    #rp_module_repo="git https://github.com/zerojay/RoTT" # Retired #
+    #rp_module_repo="git https://github.com/JohnnyonFlame/RoTT"
+    #rp_module_repo="git https://github.com/scooterpsu/RoTT"
+    #rp_module_repo="git https://github.com/podulator/RoTT"
+else
+    rp_module_licence="GPL2 https://raw.githubusercontent.com/LTCHIPS/rottexpr/master/LICENSE.DOC"
+    rp_module_repo="git https://github.com/LTCHIPS/rottexpr.git master"
+fi
 rp_module_help="Location of ROTT Darkwar files:\n$romdir/ports/rott-darkwar"
 rp_module_section="exp"
 rp_module_flags="!mali"
 
-rott_romdir="$romdir/ports/rott-darkwar"
-rott_bin="src/rott"
-rott_prefix=''
-
-if [[ "$legacy_branch" == '1' ]]; then
-    rp_module_licence="GPL2 https://raw.githubusercontent.com/RapidEdwin08/RoTT/master/COPYING"
-    rp_module_repo="git https://github.com/RapidEdwin08/RoTT"
-    #rp_module_repo="git https://github.com/zerojay/RoTT"
-    #rp_module_repo="git https://github.com/JohnnyonFlame/RoTT"
-    #rp_module_repo="git https://github.com/scooterpsu/RoTT"
-    #rp_module_repo="git https://github.com/podulator/RoTT"
-    rott_bin="rott-darkwar"
-    rott_prefix='XINIT:'
-fi
-
 function depends_rott-darkwar() {
-    if [[ "$legacy_branch" == '1' ]]; then
-        local depends=(libsdl1.2-dev libsdl-mixer1.2-dev automake autoconf unzip xorg)
+    if [[ "$__os_debian_ver" -le 10 ]]; then
+        local depends=(libsdl1.2-dev libsdl-mixer1.2-dev automake autoconf unzip)
     else
         if [[ $(apt-cache search libfluidsynth3) == '' ]]; then
             local depends=(libsdl2-dev libsdl2-mixer-dev fluidsynth libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm libfluidsynth1)
@@ -50,58 +41,735 @@ function depends_rott-darkwar() {
             local depends=(libsdl2-dev libsdl2-mixer-dev fluidsynth libfluidsynth-dev fluid-soundfont-gs fluid-soundfont-gm libfluidsynth3)
         fi
     fi
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
 
 function sources_rott-darkwar() {
     gitPullOrClone
-    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rott-darkwar/rott-darkwar-qjoy.sh" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rott-darkwar/ROTTDW_48x48.xpm" "$md_build"
 }
 
 function build_rott-darkwar() {
-    if [[ "$legacy_branch" == '1' ]]; then
+    if [[ "$__os_debian_ver" -le 10 ]]; then
         #sed -i 's/SHAREWARE   ?= 0/SHAREWARE   ?= 1/g' "$md_build/rott/Makefile"
         sed -i 's/SUPERROTT   ?= 1/SUPERROTT   ?= 0/g' "$md_build/rott/Makefile"
         make clean
-        make rott-darkwar
-        make rott-darkwar
-        make rott-darkwar
+        make -j"$(nproc)" rott-darkwar
+        make -j"$(nproc)" rott-darkwar
+        make -j"$(nproc)" rott-darkwar
+        md_ret_require=('rott-darkwar')
     else
         #sed -i 's/SHAREWARE   ?= 0/SHAREWARE   ?= 1/g' "$md_build/rott/Makefile"
         #sed -i 's/SUPERROTT   ?= 1/SUPERROTT   ?= 0/g' "$md_build/rott/Makefile"
         cd src
-        make rott
+        make -j"$(nproc)" rott
+        md_ret_require=("$md_build/src/rott")
     fi
-    md_ret_require=(
-        "$md_build/$rott_bin"
-        "$md_build/rott-darkwar-qjoy.sh"
-    )
 }
 
 function install_rott-darkwar() {
+    if [[ "$__os_debian_ver" -le 10 ]]; then local rott_bin="rott-darkwar"; else local rott_bin="src/rott"; fi
     md_ret_files=(
-        "$rott_bin"
-        'rott-darkwar-qjoy.sh'
+           "$rott_bin"
+           'ROTTDW_48x48.xpm'
     )
 }
 
+function remove_rott-darkwar() {
+    if [[ -f "/usr/share/applications/Rise Of The Triad Dark War.desktop" ]]; then sudo rm -f "/usr/share/applications/Rise Of The Triad Dark War.desktop"; fi
+    if [[ -f "$home/Desktop/Rise Of The Triad Dark War.desktop" ]]; then rm -f "$home/Desktop/Rise Of The Triad Dark War.desktop"; fi
+    if [[ -f "$romdir/ports/Rise Of The Triad - Dark War.sh" ]]; then rm "$romdir/ports/Rise Of The Triad - Dark War.sh"; fi
+}
+
 function configure_rott-darkwar() {
-    local script="$md_inst/$md_id.sh"
     mkRomDir "ports"
-    mkRomDir "$rott_romdir"
-    chown -R $__user:$__user "$rott_romdir"
+    mkRomDir "$romdir/ports/rott-darkwar"
+    chown -R $__user:$__user "$romdir/ports/rott-darkwar"
     moveConfigDir "$home/.rott" "$md_conf_root/rott"
+
+    if [[ "$__os_debian_ver" -le 10 ]]; then local rott_bin="rott-darkwar"; else local rott_bin="src/rott"; fi
+    local script="$md_inst/$md_id.sh"
     #create buffer script for launch
  cat > "$script" << _EOF_
 #!/bin/bash
-pushd "$rott_romdir"
-"$md_inst/$(basename $rott_bin)" \$*
+# Detect/Run ROTT P0RT
+rottROMdir="\$HOME/RetroPie/roms/ports/rott" #rottexpr
+if [[ -d "\$HOME/RetroPie/roms/ports/rott-darkwar" ]]; then rottROMdir="\$HOME/RetroPie/roms/ports/rott-darkwar"; fi #rott/rottexpr
+if [[ -d "/dev/shm/rott-darkwar" ]]; then rottROMdir="/dev/shm/rott-darkwar"; fi #rott-darkwar-plus
+
+rottBIN=/opt/retropie/ports/rott-darkwar/rott # rottexpr
+if [[ -f /opt/retropie/ports/rott-darkwar/rott-darkwar ]]; then rottBIN=/opt/retropie/ports/rott-darkwar/rott-darkwar; fi #rott
+
+pushd "\$rottROMdir"
+"\$rottBIN" \$*
 popd
 _EOF_
-    chmod +x "$script"
-    chmod 755 "$md_inst/rott-darkwar-qjoy.sh"
-    addPort "$md_id" "rott-darkwar" "Rise Of The Triad - Dark War" "$rott_prefix$script"
+    chmod 755 "$script"
+
+    local launch_prefix
+    isPlatform "kms" && launch_prefix="XINIT-WM:"
+    if (isPlatform "kms") && [[ "$__os_debian_ver" -le 10 ]]; then launch_prefix="XINIT:"; fi
+    addPort "$md_id" "rott-darkwar" "Rise Of The Triad - Dark War" "$launch_prefix$script"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addPort "$md_id+qjoypad" "rott-darkwar" "Rise Of The Triad - Dark War" "XINIT:$md_inst/rott-darkwar-qjoy.sh"
+        addPort "$md_id+qjoypad" "rott-darkwar" "Rise Of The Triad - Dark War" "$launch_prefix$md_inst/rott-darkwar-qjoy.sh"
     fi
+
+    if [[ ! -d "$md_conf_root/rott/darkwar" ]]; then mkdir "$md_conf_root/rott/darkwar"; chown -R $__user:$__user "$md_conf_root/rott/darkwar"; fi
+    if [[ "$__os_debian_ver" -le 10 ]]; then
+        cat >"$md_inst/config.rot" << _EOF_
+;Rise of the Triad Configuration File
+;                  (c) 1995
+
+Version            14
+
+;
+; 1 - Mouse Enabled
+; 0 - Mouse Disabled
+MouseEnabled       1
+
+;
+; 1 - UseMouseLook Enabled
+; 0 - UseMouseLook Disabled
+UseMouseLook       0
+
+;
+; 1 - Normal Mouse Enabled
+; -1 - Inverse Mouse Enabled
+InverseMouse       1
+
+;
+; 1 - usejump Enabled
+; 0 - usejump Disabled
+UseJump            1
+
+;
+; 1 - CrossHair Enabled
+; 0 - CrossHair Disabled
+CrossHair          1
+
+;
+; 1 - Joystick Enabled
+; 0 - Joystick Disabled
+JoystickEnabled    0
+
+;
+; 1 - Joypad Enabled
+; 0 - Joypad Disabled
+JoypadEnabled      0
+
+;
+; 0 - Use Joystick Port 1
+; 1 - Use Joystick Port 2
+JoystickPort       0
+
+;
+; 0 - Start in windowed mode
+; 1 - Start in fullscreen mode
+FullScreen         1
+
+;
+; Screen Resolution, supported resolutions: 
+; 320x200, 640x480 and 800x600
+ScreenWidth        800
+ScreenHeight       600
+
+;
+; Size of View port.
+; (smallest) 0 - 10 (largest)
+ViewSize           7
+
+;
+; Size of Weaponscale.
+; (smallest) 150 - 600 (largest)
+Weaponscale           357
+
+;
+; Sensitivity of Mouse
+; (lowest) 0 - 11 (highest)
+MouseAdjustment    4
+
+;
+; Threshold of Mouse and Joystick
+; (smallest) 1 - 15 (largest)
+Threshold          1
+
+;
+; 1 - Auto Detail on
+; 0 - Auto Detail off
+AutoDetail         1
+
+;
+; 1 - Light Diminishing on
+; 0 - Light Diminishing off
+LightDim           0
+
+;
+; 1 - Bobbing on
+; 0 - Bobbing off
+BobbingOn          1
+
+;
+; (slowest) 50 - 5 (fastest)
+DoubleClickSpeed   20
+
+;
+; Menu Flip Speed
+; (slowest) 100 - 5 (fastest)
+MenuFlipSpeed      15
+
+;
+; 0 - Detail Level Low
+; 1 - Detail Level Medium
+; 2 - Detail Level High
+DetailLevel        2
+
+;
+; 1 - Floor and Ceiling on
+; 0 - Floor and Ceiling off
+FloorCeiling       1
+
+;
+; 1 - Messages on
+; 0 - Messages off
+Messages           1
+
+;
+; 1 - AutoRun on
+; 0 - AutoRun off
+AutoRun            1
+
+;
+; 0 - Gamma Correction level 1
+; 1 - Gamma Correction level 2
+; 2 - Gamma Correction level 3
+; 3 - Gamma Correction level 4
+; 4 - Gamma Correction level 5
+GammaIndex         0
+
+;
+; Minutes before screen blanking
+BlankTime          2
+
+;
+; Scan codes for keyboard buttons
+Fire               29
+Strafe             56
+Run                54
+Use                57
+LookUp             73
+LookDn             81
+Swap               28
+Drop               83
+TargetUp           71
+TargetDn           79
+SelPistol          2
+SelDualPistol      3
+SelMP40            4
+SelMissile         5
+AutoRun            58
+LiveRemRid         88
+StrafeLeft         51
+StrafeRight        52
+VolteFace          14
+Aim                30
+Forward            72
+Right              77
+Backward           80
+Left               75
+Map                15
+SendMessage        20
+DirectMessage      44
+
+;
+; Mouse buttons
+MouseButton0       0
+MouseButton1       1
+MouseButton2       20
+DblClickB0         -1
+DblClickB1         3
+DblClickB2         -1
+
+;
+; Joystick buttons
+JoyButton0         3
+JoyButton1         3
+JoyButton2         5
+JoyButton3         4
+JoyButton4         6
+JoyButton5         0
+JoyButton6         7
+JoyButton7         14
+JoyButton8         18
+JoyButton9         2
+JoyButton10         19
+JoyButton11         23
+JoyButton12         21
+JoyButton13         20
+JoyButton14         22
+JoyButton15         -1
+JoyAxis0         2
+JoyAxis1         0
+JoyAxis2         -1
+JoyAxis3         1
+JoyAxis4         3
+JoyAxis5         -1
+JoyAxis6         0
+JoyAxis7         0
+
+;
+; Joystick calibration coordinates
+JoyMaxX            230
+JoyMaxY            230
+JoyMinX            25
+JoyMinY            25
+AimAssist          1
+
+;
+; Easy             -   0
+; Medium           -   1
+; Hard             -   2
+; Crezzy           -   3
+DefaultDifficulty      2
+
+;
+; Taradino Cassatt   -   0
+; Thi Barrett        -   1
+; Doug Wendt         -   2
+; Lorelei Ni         -   3
+; Ian Paul Freeley   -   4
+DefaultPlayerCharacter   1
+
+;
+; Gray             -   0
+; Brown            -   1
+; Black            -   2
+; Tan              -   3
+; Red              -   4
+; Olive            -   5
+; Blue             -   6
+; White            -   7
+; Green            -   8
+; Purple           -   9
+; Orange           -   10
+DefaultPlayerColor     0
+
+;
+SecretPassword         7d7e4a2d3b6a0319554654231c
+_EOF_
+    else
+        cat >"$md_inst/config.rot" << _EOF_
+;Rise of the Triad Configuration File
+;                  (c) 1995
+
+Version            14
+
+;
+; 1 - Allows Blitzguards to have Random Missile weapons
+; 0 - Disallows the above (ROTT Default)
+AllowBlitzguardMoreMissileWeps      1
+
+;
+; 1 - Allows players to refill their missile weapons by running over one a matching one on the ground
+; 0 - Disables the above (ROTT default)
+EnableAmmoPickups       1
+
+;
+; 1 - Bullet weapons will automatically target enemies. (ROTT default)
+; 0 - Disables the above.
+AutoAim     1
+
+;
+; 1 - Missile weapons will be automatically aimed at targets like bullet weapons.
+; 0 - Missile weapons are not automatically aimed at targets. (ROTT default)
+AutoAimMissileWeps      1
+
+;
+; 1 - Enemies equipped with pistols have a chance of dropping an extra pistol when killed.
+; 0 - Enemies will not drop extra pistols at all. (Default)
+EnableExtraPistolDrops       1
+
+;
+; Field Of View offset
+FocalWidthOffset       0
+
+;
+; 1 - Mouse Enabled
+; 0 - Mouse Disabled
+MouseEnabled       1
+
+;
+; 1 - UseMouseLook Enabled
+; 0 - UseMouseLook Disabled
+UseMouseLook       0
+
+;
+; 1 - Normal Mouse Enabled
+; -1 - Inverse Mouse Enabled
+InverseMouse       1
+
+;
+; 1 - Allows X and Y movement with Mouse. (Default)
+; 0 - Allow only X movement with Mouse.
+allowMovementWithMouseYAxis      1
+
+;
+; 1 - usejump Enabled
+; 0 - usejump Disabled
+UseJump            1
+
+;
+; 1 - CrossHair Enabled
+; 0 - CrossHair Disabled
+CrossHair          1
+
+;
+; 1 - Joystick Enabled
+; 0 - Joystick Disabled
+JoystickEnabled    0
+
+;
+; 1 - Joypad Enabled
+; 0 - Joypad Disabled
+JoypadEnabled      0
+
+;
+; 0 - Use Joystick Port 1
+; 1 - Use Joystick Port 2
+JoystickPort       0
+
+;
+; 0 - Start in windowed mode
+; 1 - Start in fullscreen mode
+FullScreen         1
+
+;
+; 0 - Don't start in bordered window mode
+; 1 - Start in bordered window mode
+BorderWindow        0
+
+;
+; 0 - Don't start in borderless window mode
+; 1 - Start in borderless window mode
+BorderlessWindow        0
+
+;
+; Screen Resolution, supported resolutions: 
+; 320x200, 640x480 and 800x600
+ScreenWidth        1920
+ScreenHeight       1080
+
+;
+; Size of View port.
+; (smallest) 0 - 10 (largest)
+ViewSize           7
+
+;
+; Size of Weaponscale.
+; (smallest) 150 - 600 (largest)
+Weaponscale           906
+
+;
+; HUD Scale.
+HUDScale              2
+
+;
+; Sensitivity of Mouse
+; (lowest) 0 - 11 (highest)
+MouseAdjustment    5
+
+;
+; Threshold of Mouse and Joystick
+; (smallest) 1 - 15 (largest)
+Threshold          1
+
+;
+; 1 - Auto Detail on
+; 0 - Auto Detail off
+AutoDetail         1
+
+;
+; 1 - Light Diminishing on
+; 0 - Light Diminishing off
+LightDim           0
+
+;
+; 1 - Bobbing on
+; 0 - Bobbing off
+BobbingOn          1
+
+;
+; (slowest) 50 - 5 (fastest)
+DoubleClickSpeed   20
+
+;
+; Menu Flip Speed
+; (slowest) 100 - 5 (fastest)
+MenuFlipSpeed      15
+
+;
+; 0 - Detail Level Low
+; 1 - Detail Level Medium
+; 2 - Detail Level High
+DetailLevel        2
+
+;
+; 1 - Floor and Ceiling on
+; 0 - Floor and Ceiling off
+FloorCeiling       1
+
+;
+; 1 - Messages on
+; 0 - Messages off
+Messages           1
+
+;
+; 1 - AutoRun on
+; 0 - AutoRun off
+AutoRun            1
+
+;
+; 0 - Gamma Correction level 1
+; 1 - Gamma Correction level 2
+; 2 - Gamma Correction level 3
+; 3 - Gamma Correction level 4
+; 4 - Gamma Correction level 5
+GammaIndex         0
+
+;
+; Minutes before screen blanking
+BlankTime          2
+
+;
+; Scan codes for keyboard buttons
+Fire               29
+Strafe             56
+Run                54
+Use                57
+LookUp             73
+LookDn             81
+Swap               83
+Drop               28
+TargetUp           71
+TargetDn           79
+SelPistol          2
+SelDualPistol      3
+SelMP40            4
+SelMissile         5
+AutoRun            58
+LiveRemRid         88
+StrafeLeft         51
+StrafeRight        52
+VolteFace          14
+Aim                30
+Forward            72
+Right              77
+Backward           80
+Left               75
+Map                15
+SendMessage        20
+DirectMessage      44
+
+;
+; Mouse buttons
+MouseButton0       0
+MouseButton1       1
+MouseButton2       20
+DblClickB0         -1
+DblClickB1         3
+DblClickB2         -1
+
+;
+; Joystick buttons
+JoyButton0         0
+JoyButton1         1
+JoyButton2         2
+JoyButton3         3
+DblClickJB0        -1
+DblClickJB1        -1
+DblClickJB2        -1
+DblClickJB3        -1
+
+;
+; Joystick calibration coordinates
+JoyMaxX            0
+JoyMaxY            0
+JoyMinX            0
+JoyMinY            0
+
+;
+; Easy             -   0
+; Medium           -   1
+; Hard             -   2
+; Crezzy           -   3
+DefaultDifficulty      2
+
+;
+; Taradino Cassatt   -   0
+; Thi Barrett        -   1
+; Doug Wendt         -   2
+; Lorelei Ni         -   3
+; Ian Paul Freeley   -   4
+DefaultPlayerCharacter   1
+
+;
+; Gray             -   0
+; Brown            -   1
+; Black            -   2
+; Tan              -   3
+; Red              -   4
+; Olive            -   5
+; Blue             -   6
+; White            -   7
+; Green            -   8
+; Purple           -   9
+; Orange           -   10
+DefaultPlayerColor     0
+
+;
+SecretPassword         7d7e4a2d3b6a0319554654231c
+_EOF_
+    fi
+    if [[ ! -f "$md_conf_root/rott/darkwar/config.rot" ]]; then
+        cp "$md_inst/config.rot" "$md_conf_root/rott/darkwar/config.rot"
+        chown $__user:$__user "$md_conf_root/rott/darkwar/config.rot"
+    fi
+
+    cat >"$md_inst/sound.rot" << _EOF_
+;Rise of the Triad Sound File
+;                  (c) 1995
+
+Version            14
+
+;
+; Music Modes
+; 0  -  Off
+; 6  -  On
+MusicMode          6
+
+;
+; FX Modes
+; 0  -  Off
+; 6  -  On
+FXMode             6
+
+;
+; Music Volume
+; (low) 0 - 255 (high)
+MusicVolume      52
+
+;
+; FX Volume
+; (low) 0 - 255 (high)
+FXVolume         196
+
+;
+; Number of Voices
+; 1 - 8
+NumVoices          8
+
+;
+; Stereo or Mono
+; 1 - Mono
+; 2 - Stereo
+NumChannels        2
+
+;
+; Resolution
+; 8 bit
+; 16 bit
+NumBits            16
+
+;
+; ReverseStereo
+; 0 no reversal
+; 1 reverse stereo
+StereoReverse        0
+_EOF_
+    if [[ ! -f "$md_conf_root/rott/darkwar/sound.rot" ]]; then
+        cp "$md_inst/sound.rot" "$md_conf_root/rott/darkwar/sound.rot"
+        chown $__user:$__user "$md_conf_root/rott/darkwar/sound.rot"
+    fi
+
+    cat >"$md_inst/Rise Of The Triad Dark War.desktop" << _EOF_
+[Desktop Entry]
+Name=Rise Of The Triad Dark War
+GenericName=Rise Of The Triad Dark War
+Comment=RoTT Dark War
+Exec=$md_inst/$md_id.sh
+Icon=$md_inst/ROTTDW_48x48.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=D2;ROTT;Dark;War
+StartupWMClass=RiseOfTheTriadDarkWar
+Name[en_US]=Rise Of The Triad Dark War
+_EOF_
+    chmod 755 "$md_inst/Rise Of The Triad Dark War.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Rise Of The Triad Dark War.desktop" "$home/Desktop/Rise Of The Triad Dark War.desktop"; chown $__user:$__user "$home/Desktop/Rise Of The Triad Dark War.desktop"; fi
+    mv "$md_inst/Rise Of The Triad Dark War.desktop" "/usr/share/applications/Rise Of The Triad Dark War.desktop"
+
+   cat >"$md_inst/rott-darkwar-qjoy.sh" << _EOF_
+#!/bin/bash
+# https://github.com/RapidEdwin08/
+
+qjoyLAYOUT="Rise Of The Triad"
+qjoyLYT=\$(
+echo '# QJoyPad 4.3 Layout File
+
+Joystick 1 {
+    Axis 1: gradient, dZone 5538, xZone 29536, +key 60, -key 59
+    Axis 2: gradient, dZone 9230, xZone 28382, +key 116, -key 111
+    Axis 3: gradient, dZone 6691, +key 66, -key 0
+    Axis 4: gradient, dZone 5307, xZone 28382, maxSpeed 20, mouse+h
+    Axis 5: dZone 8768, +key 115, -key 110
+    Axis 6: gradient, throttle+, +key 105, -key 0
+    Axis 7: +key 114, -key 113
+    Axis 8: +key 116, -key 111
+    Button 1: key 119
+    Button 2: key 65
+    Button 3: key 37
+    Button 4: key 36
+    Button 5: key 117
+    Button 6: key 112
+    Button 7: key 9
+    Button 8: key 36
+    Button 9: key 22
+    Button 10: key 50
+    Button 11: key 38
+    Button 12: key 113
+    Button 13: key 114
+    Button 14: key 111
+    Button 15: key 116
+}
+')
+
+# Create QJoyPad.lyt if needed
+if [ ! -f "\$HOME/.qjoypad3/\$qjoyLAYOUT.lyt" ]; then echo "\$qjoyLYT" > "\$HOME/.qjoypad3/\$qjoyLAYOUT.lyt"; fi
+
+# Run qjoypad
+pkill -15 qjoypad > /dev/null 2>&1
+rm /tmp/qjoypad.pid > /dev/null 2>&1
+echo "qjoypad "\$qjoyLAYOUT" &" >> /dev/shm/runcommand.info
+qjoypad "\$qjoyLAYOUT" &
+
+# Detect/Run ROTT P0RT
+rottROMdir="\$HOME/RetroPie/roms/ports/rott" #rottexpr
+if [[ -d "\$HOME/RetroPie/roms/ports/rott-darkwar" ]]; then rottROMdir="\$HOME/RetroPie/roms/ports/rott-darkwar"; fi #rott/rottexpr
+if [[ -d "/dev/shm/rott-darkwar" ]]; then rottROMdir="/dev/shm/rott-darkwar"; fi #rott-darkwar-plus
+
+rottBIN=/opt/retropie/ports/rott-darkwar/rott # rottexpr
+if [[ -f /opt/retropie/ports/rott-darkwar/rott-darkwar ]]; then rottBIN=/opt/retropie/ports/rott-darkwar/rott-darkwar; fi #rott
+
+pushd "\$rottROMdir"
+"\$rottBIN" \$*
+popd
+
+# Kill qjoypad
+pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
+exit 0
+_EOF_
+    chmod 755 "$md_inst/rott-darkwar-qjoy.sh"
+
+    [[ "$md_mode" == "remove" ]] && remove_rott-darkwar
 }

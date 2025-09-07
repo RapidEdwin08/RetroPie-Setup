@@ -47,10 +47,12 @@ function build_chocolate-doom() {
     ./autogen.sh
     ./configure --prefix="$md_inst"
     make -j"$(nproc)"
-    md_ret_require="$md_build/src/chocolate-doom"
-    md_ret_require="$md_build/src/chocolate-hexen"
-    md_ret_require="$md_build/src/chocolate-heretic"
-    md_ret_require="$md_build/src/chocolate-strife"
+    md_ret_require=(
+      "$md_build/src/chocolate-doom"
+      "$md_build/src/chocolate-hexen"
+      "$md_build/src/chocolate-heretic"
+      "$md_build/src/chocolate-strife"
+    )
 }
 
 function install_chocolate-doom() {
