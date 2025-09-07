@@ -99,8 +99,8 @@ function build_eduke32() {
 }
 
 function install_eduke32() {
-    md_ret_files=('mapster32')
     md_ret_files=(
+        'mapster32'
         'Duke3D_48x48.xpm'
         'IonFury_64x64.ico'
         'eduke32_48x48.xpm'
