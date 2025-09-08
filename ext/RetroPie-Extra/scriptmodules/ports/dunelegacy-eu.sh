@@ -152,7 +152,7 @@ MetaServer = http://dunelegacy.sourceforge.net/metaserver/metaserver.php
 Campaign AI = qBotMedium
 
 [Game Options]
-Game Speed = 16                         # The default speed of the game: 32 = very slow, 8 = very fast, 16 = default
+Game Speed = 26                         # The default speed of the game: 32 = very slow, 8 = very fast, 16 = default
 Concrete Required = true                # If true building on bare rock will result in 50% structure health penalty
 Structures Degrade On Concrete = true   # If true structures will degrade on power shortage even if built on concrete
 Fog of War = false                      # If true explored terrain will become foggy when no unit or structure is next to it
