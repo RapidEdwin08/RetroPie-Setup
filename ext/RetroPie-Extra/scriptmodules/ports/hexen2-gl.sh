@@ -31,6 +31,10 @@ function depends_hexen2-gl() {
 
 function sources_hexen2-gl() {
     gitPullOrClone
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/HexenII_64x64.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/HexenII_70x70.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/HexenIIPortal_64x64.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/HexenIIPraevus_70x70.xpm" "$md_build"
 }
 
 function build_hexen2-gl() {
@@ -48,6 +52,10 @@ function install_hexen2-gl() {
        'engine/resource/h2mp.ico'
        'engine/resource/hexen2.icns'
        'engine/resource/hexenworld.ico'
+       'HexenII_64x64.xpm'
+       'HexenII_70x70.xpm'
+       'HexenIIPortal_64x64.xpm'
+       'HexenIIPraevus_70x70.xpm'
     )
 }
 
@@ -61,8 +69,8 @@ function game_data_hexen2-gl() {
 function remove_hexen2-gl() {
     if [[ -f "/usr/share/applications/HeXen II.desktop" ]]; then sudo rm -f "/usr/share/applications/HeXen II.desktop"; fi
     if [[ -f "$home/Desktop/HeXen II.desktop" ]]; then rm -f "$home/Desktop/HeXen II.desktop"; fi
-    if [[ -f "/usr/share/applications/HeXen II Portals Of Praevus.desktop" ]]; then sudo rm -f "/usr/share/applications/HeXen II Portals Of Praevus.desktop"; fi
-    if [[ -f "$home/Desktop/HeXen II Portals Of Praevus.desktop" ]]; then rm -f "$home/Desktop/HeXen II Portals Of Praevus.desktop"; fi
+    if [[ -f "/usr/share/applications/HeXen II Portal Of Praevus.desktop" ]]; then sudo rm -f "/usr/share/applications/HeXen II Portal Of Praevus.desktop"; fi
+    if [[ -f "$home/Desktop/HeXen II Portal Of Praevus.desktop" ]]; then rm -f "$home/Desktop/HeXen II Portal Of Praevus.desktop"; fi
 }
 
 function configure_hexen2-gl() {
@@ -73,10 +81,10 @@ function configure_hexen2-gl() {
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addPort "$md_id" "hexen2" "Hexen II" "$launch_prefix$md_inst/glhexen2 -f -conwidth 800"
-    addPort "$md_id" "hexen2p" "Hexen II - Portals Of Praevus" "$launch_prefix$md_inst/glhexen2 -f -conwidth 800 -portals"
+    addPort "$md_id" "hexen2p" "Hexen II - Portal Of Praevus" "$launch_prefix$md_inst/glhexen2 -f -conwidth 800 -portals"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addPort "$md_id+qjoypad" "hexen2" "Hexen II" "$launch_prefix$md_inst/hexen2-qjoy.sh"
-        addPort "$md_id+qjoypad" "hexen2p" "Hexen II - Portals Of Praevus" "$launch_prefix$md_inst/hexen2-qjoy.sh -portals"
+        addPort "$md_id+qjoypad" "hexen2p" "Hexen II - Portal Of Praevus" "$launch_prefix$md_inst/hexen2-qjoy.sh -portals"
     fi
 
     cat >"$md_inst/data1.config.cfg" << _EOF_
@@ -292,7 +300,7 @@ Name=HeXen II
 GenericName=HeXen II
 Comment=HeXen II
 Exec=$md_inst/glhexen2 -f -conwidth 800
-Icon=$md_inst/hexen2.ico
+Icon=$md_inst/HexenII_70x70.xpm
 Terminal=false
 Type=Application
 Categories=Game;Emulator
@@ -304,23 +312,23 @@ _EOF_
     if [[ -d "$home/Desktop" ]]; then cp "$md_inst/HeXen II.desktop" "$home/Desktop/HeXen II.desktop"; chown $__user:$__user "$home/Desktop/HeXen II.desktop"; fi
     mv "$md_inst/HeXen II.desktop" "/usr/share/applications/HeXen II.desktop"
 
-    cat >"$md_inst/HeXen II Portals Of Praevus.desktop" << _EOF_
+    cat >"$md_inst/HeXen II Portal Of Praevus.desktop" << _EOF_
 [Desktop Entry]
-Name=HeXen II Portals Of Praevus
-GenericName=HeXen II Portals Of Praevus
-Comment=HeXen II Portals Of Praevus
+Name=HeXen II Portal Of Praevus
+GenericName=HeXen II Portal Of Praevus
+Comment=HeXen II Portal Of Praevus
 Exec=$md_inst/glhexen2 -f -conwidth 800 -portals
-Icon=$md_inst/hexen2.icns
+Icon=$md_inst/HexenIIPraevus_70x70.xpm
 Terminal=false
 Type=Application
 Categories=Game;Emulator
-Keywords=HX2P;HeXenIIPortals
-StartupWMClass=HeXenIIPortals
-Name[en_US]=HeXen II Portals Of Praevus
+Keywords=HX2P;HeXenIIPortal
+StartupWMClass=HeXenIIPortal
+Name[en_US]=HeXen II Portal Of Praevus
 _EOF_
-    chmod 755 "$md_inst/HeXen II Portals Of Praevus.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/HeXen II Portals Of Praevus.desktop" "$home/Desktop/HeXen II Portals Of Praevus.desktop"; chown $__user:$__user "$home/Desktop/HeXen II Portals Of Praevus.desktop"; fi
-    mv "$md_inst/HeXen II Portals Of Praevus.desktop" "/usr/share/applications/HeXen II Portals Of Praevus.desktop"
+    chmod 755 "$md_inst/HeXen II Portal Of Praevus.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/HeXen II Portal Of Praevus.desktop" "$home/Desktop/HeXen II Portal Of Praevus.desktop"; chown $__user:$__user "$home/Desktop/HeXen II Portal Of Praevus.desktop"; fi
+    mv "$md_inst/HeXen II Portal Of Praevus.desktop" "/usr/share/applications/HeXen II Portal Of Praevus.desktop"
 
     [[ "$md_mode" == "install" ]] && game_data_hexen2-gl
     [[ "$md_mode" == "remove" ]] && remove_hexen2-gl
