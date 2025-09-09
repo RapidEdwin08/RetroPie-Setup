@@ -10,6 +10,18 @@ diff -ur a/src/am_map.cpp b/src/am_map.cpp
  CVAR(Bool, am_customcolors, true, CVAR_ARCHIVE);
  CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
  CVAR(Int, am_drawmapback, 1, CVAR_ARCHIVE);
+ diff -ur a/src/common/audio/music/i_music.cpp b/src/common/audio/music/i_music.cpp
+--- a/src/common/audio/music/i_music.cpp	2025-06-15 20:12:44.689600019 -0400
++++ b/src/common/audio/music/i_music.cpp	2025-09-08 23:10:25.789334634 -0400
+@@ -70,7 +70,7 @@
+ // Maximum volume of MOD/stream music.
+ //==========================================================================
+ 
+-CUSTOM_CVARD(Float, snd_musicvolume, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
++CUSTOM_CVARD(Float, snd_musicvolume, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
 --- a/src/common/console/c_console.cpp	2025-06-15 20:12:44.693600019 -0400
 +++ b/src/common/console/c_console.cpp	2025-06-15 21:20:21.029596578 -0400
