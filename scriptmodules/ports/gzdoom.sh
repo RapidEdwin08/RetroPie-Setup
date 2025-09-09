@@ -113,7 +113,7 @@ function add_games_gzdoom() {
     fi
     
     # Music Volume
-    params+=("+snd_musicvolume 1")
+    #params+=("+snd_musicvolume 1") # Moved to 03_Preferences.diff
     
     # when using the 32bit version on GLES platforms, pre-set the renderer
     if isPlatform "32bit" && hasFlag "gles"; then
