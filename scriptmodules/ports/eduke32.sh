@@ -29,7 +29,7 @@ rp_module_section="opt"
 function depends_eduke32() {
     local depends=(
         flac libflac-dev libvorbis-dev libpng-dev libvpx-dev freepats
-        libsdl2-dev libsdl2-mixer-dev
+        libsdl2-dev libsdl2-mixer-dev zip unzip
     )
 
     isPlatform "x86" && depends+=(nasm)
