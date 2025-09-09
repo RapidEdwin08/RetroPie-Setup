@@ -81,10 +81,10 @@ function configure_hexen2-gl() {
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addPort "$md_id" "hexen2" "Hexen II" "$launch_prefix$md_inst/glhexen2 -f -conwidth 800"
-    addPort "$md_id" "hexen2p" "Hexen II - Portal Of Praevus" "$launch_prefix$md_inst/glhexen2 -f -conwidth 800 -portals"
+    addPort "$md_id" "hexen2p" "Hexen II Portal Of Praevus" "$launch_prefix$md_inst/glhexen2 -f -conwidth 800 -portals"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addPort "$md_id+qjoypad" "hexen2" "Hexen II" "$launch_prefix$md_inst/hexen2-qjoy.sh"
-        addPort "$md_id+qjoypad" "hexen2p" "Hexen II - Portal Of Praevus" "$launch_prefix$md_inst/hexen2-qjoy.sh -portals"
+        addPort "$md_id+qjoypad" "hexen2p" "Hexen II Portal Of Praevus" "$launch_prefix$md_inst/hexen2-qjoy.sh -portals"
     fi
 
     cat >"$md_inst/data1.config.cfg" << _EOF_

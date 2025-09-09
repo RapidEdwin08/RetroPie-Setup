@@ -83,7 +83,7 @@ function install_rott-darkwar() {
 function remove_rott-darkwar() {
     if [[ -f "/usr/share/applications/Rise Of The Triad Dark War.desktop" ]]; then sudo rm -f "/usr/share/applications/Rise Of The Triad Dark War.desktop"; fi
     if [[ -f "$home/Desktop/Rise Of The Triad Dark War.desktop" ]]; then rm -f "$home/Desktop/Rise Of The Triad Dark War.desktop"; fi
-    if [[ -f "$romdir/ports/Rise Of The Triad - Dark War.sh" ]]; then rm "$romdir/ports/Rise Of The Triad - Dark War.sh"; fi
+    if [[ -f "$romdir/ports/Rise Of The Triad Dark War.sh" ]]; then rm "$romdir/ports/Rise Of The Triad - Dark War.sh"; fi
 }
 
 function configure_rott-darkwar() {
@@ -114,9 +114,9 @@ _EOF_
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
     if (isPlatform "kms") && [[ "$__os_debian_ver" -le 10 ]]; then launch_prefix="XINIT:"; fi
-    addPort "$md_id" "rott-darkwar" "Rise Of The Triad - Dark War" "$launch_prefix$script"
+    addPort "$md_id" "rott-darkwar" "Rise Of The Triad Dark War" "$launch_prefix$script"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addPort "$md_id+qjoypad" "rott-darkwar" "Rise Of The Triad - Dark War" "$launch_prefix$md_inst/rott-darkwar-qjoy.sh"
+        addPort "$md_id+qjoypad" "rott-darkwar" "Rise Of The Triad Dark War" "$launch_prefix$md_inst/rott-darkwar-qjoy.sh"
     fi
 
     if [[ ! -d "$md_conf_root/rott/darkwar" ]]; then mkdir "$md_conf_root/rott/darkwar"; chown -R $__user:$__user "$md_conf_root/rott/darkwar"; fi

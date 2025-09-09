@@ -89,7 +89,7 @@ function game_data_rott-huntbgin() {
 function remove_rott-huntbgin() {
     if [[ -f "/usr/share/applications/Rise Of The Triad Hunt Begins.desktop" ]]; then sudo rm -f "/usr/share/applications/Rise Of The Triad Hunt Begins.desktop"; fi
     if [[ -f "$home/Desktop/Rise Of The Triad Hunt Begins.desktop" ]]; then rm -f "$home/Desktop/Rise Of The Triad Hunt Begins.desktop"; fi
-    if [[ -f "$romdir/ports/Rise Of The Triad - The Hunt Begins (Shareware).sh" ]]; then rm "$romdir/ports/Rise Of The Triad - The Hunt Begins (Shareware).sh"; fi
+    if [[ -f "$romdir/ports/Rise Of The Triad The Hunt Begins (Shareware).sh" ]]; then rm "$romdir/ports/Rise Of The Triad The Hunt Begins (Shareware).sh"; fi
 }
 
 function configure_rott-huntbgin() {
@@ -119,9 +119,9 @@ _EOF_
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
     if (isPlatform "kms") && [[ "$__os_debian_ver" -le 10 ]]; then launch_prefix="XINIT:"; fi
-    addPort "$md_id" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware)" "$launch_prefix$script"
+    addPort "$md_id" "rott-huntbgin" "Rise Of The Triad The Hunt Begins (Shareware)" "$launch_prefix$script"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        addPort "$md_id+qjoypad" "rott-huntbgin" "Rise Of The Triad - The Hunt Begins (Shareware)" "$launch_prefix$md_inst/rott-huntbgin-qjoy.sh"
+        addPort "$md_id+qjoypad" "rott-huntbgin" "Rise Of The Triad The Hunt Begins (Shareware)" "$launch_prefix$md_inst/rott-huntbgin-qjoy.sh"
     fi
 
     if [[ "$__os_debian_ver" -le 10 ]]; then

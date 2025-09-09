@@ -98,9 +98,9 @@ function configure_pcexhumed() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-	addPort "$md_id" "pcexhumed" "PCExhumed - Powerslave Source Port" "$launch_prefix$md_inst/pcexhumed.sh"
+	addPort "$md_id" "pcexhumed" "Powerslave (PCExhumed)" "$launch_prefix$md_inst/pcexhumed.sh"
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-		addPort "$md_id+qjoypad" "pcexhumed" "PCExhumed - Powerslave Source Port" "$launch_prefix$md_inst/pcexhumed-qjoy.sh"
+		addPort "$md_id+qjoypad" "pcexhumed" "Powerslave (PCExhumed)" "$launch_prefix$md_inst/pcexhumed-qjoy.sh"
 	fi
 
    cat >"$md_inst/$md_id.sh" << _EOF_

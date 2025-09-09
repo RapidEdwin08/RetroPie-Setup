@@ -17,13 +17,8 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="rednukem"
 rp_module_desc="Redneck Rampage source port - Ken Silverman's Build Engine"
 rp_module_licence="GPL3 https://github.com/OpenMW/osg/blob/3.4/LICENSE.txt"
-#rp_module_repo="https://github.com/Exarkuniv/NBlood.git"
 rp_module_repo="git https://github.com/nukeykt/NBlood.git master"
-rp_module_help="you need to put the REDNECK.GRP, REDNECK.RTS, optionally CD audio tracks as OGG file in the format trackXX.ogg (where XX is the track number)
-ports/ksbuild/redneck
-ports/ksbuild/ridesagain
-ports/ksbuild/route66"
-rp_module_help="Place Game Files in [ports/ksbuild/redneck]:\nREDNECK.GRP\nREDNECK.RTS\n \nOptional [CD Audio]:\ntrack02.ogg...track09.ogg\ntrack02.flac...track09.flac"
+rp_module_help="Place Game Files in [ports/ksbuild/redneck]:\nREDNECK.GRP\nREDNECK.RTS\n \nOptional [CD Audio]:\ntrack02.ogg...track09.ogg\ntrack02.flac...track09.flac\n \nPlace AddOn File in [ports/ksbuild/@AddOn]:\nports/ksbuild/ridesagain\nports/ksbuild/route66"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -40,6 +35,8 @@ function depends_rednukem() {
 function sources_rednukem() {
 	gitPullOrClone
     download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rednukem/RedneckRampage_48x48.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rednukem/RidesAgain_70x70.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rednukem/Route66_70x70.xpm" "$md_build"
 }
 
 function build_rednukem() {
@@ -65,12 +62,20 @@ function install_rednukem() {
 		'nblood.pk3'
 		'rednukem'
 		'RedneckRampage_48x48.xpm'
+		'RidesAgain_70x70.xpm'
+		'Route66_70x70.xpm'
     )
 }
 
 function remove_rednukem() {
     if [[ -f "/usr/share/applications/Redneck Rampage.desktop" ]]; then sudo rm -f "/usr/share/applications/Redneck Rampage.desktop"; fi
     if [[ -f "$home/Desktop/Redneck Rampage.desktop" ]]; then rm -f "$home/Desktop/Redneck Rampage.desktop"; fi
+
+    if [[ -f "/usr/share/applications/Redneck Rampage Route 66.desktop" ]]; then sudo rm -f "/usr/share/applications/Redneck Rampage Route 66.desktop"; fi
+    if [[ -f "$home/Desktop/Redneck Rampage Route 66.desktop" ]]; then rm -f "$home/Desktop/Redneck Rampage Route 66.desktop"; fi
+
+    if [[ -f "/usr/share/applications/Redneck Rampage Rides Again.desktop" ]]; then sudo rm -f "/usr/share/applications/Redneck Rampage Rides Again.desktop"; fi
+    if [[ -f "$home/Desktop/Redneck Rampage Rides Again.desktop" ]]; then rm -f "$home/Desktop/Redneck Rampage Rides Again.desktop"; fi
 }
 
 function configure_rednukem() {
@@ -94,9 +99,9 @@ function configure_rednukem() {
 	
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-	addPort "$md_id-redneck" "rednukem-redneck" "Rednukem - Redneck Rampage Source Port" "$launch_prefix$md_inst/$md_id.sh"
-	addPort "$md_id-ridesagain" "rednukem-ridesagain" "Rednukem - Redneck Rampage Rides Again Source Port" "$launch_prefix$md_inst/$md_id.sh ridesagain"
-	addPort "$md_id-route66" "rednukem-route66" "Rednukem - Redneck Rampage Route 66 Source Port" "$launch_prefix$md_inst/$md_id.sh route66"
+	addPort "$md_id-redneck" "rednukem-redneck" "Redneck Rampage (Rednukem)" "$launch_prefix$md_inst/$md_id.sh"
+	addPort "$md_id-ridesagain" "rednukem-ridesagain" "Redneck Rampage Rides Again (Rednukem)" "$launch_prefix$md_inst/$md_id.sh ridesagain"
+	addPort "$md_id-route66" "rednukem-route66" "Redneck Rampage Route 66 (Rednukem)" "$launch_prefix$md_inst/$md_id.sh route66"
 
    cat >"$md_inst/$md_id.sh" << _EOF_
 #!/bin/bash
@@ -222,6 +227,42 @@ _EOF_
     chmod 755 "$md_inst/Redneck Rampage.desktop"
     if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Redneck Rampage.desktop" "$home/Desktop/Redneck Rampage.desktop"; chown $__user:$__user "$home/Desktop/Redneck Rampage.desktop"; fi
     mv "$md_inst/Redneck Rampage.desktop" "/usr/share/applications/Redneck Rampage.desktop"
+
+    cat >"$md_inst/Redneck Rampage Route 66.desktop" << _EOF_
+[Desktop Entry]
+Name=Redneck Rampage Route 66
+GenericName=Redneck Rampage Route 66
+Comment=Suckin' Grits on Route 66
+Exec=$md_inst/$md_id.sh route66
+Icon=$md_inst/Route66_70x70.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Redneck;Rampage;Suckin;Grits;Route66
+StartupWMClass=RedneckRampageRoute66
+Name[en_US]=Redneck Rampage Route 66
+_EOF_
+    chmod 755 "$md_inst/Redneck Rampage Route 66.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Redneck Rampage Route 66.desktop" "$home/Desktop/Redneck Rampage Route 66.desktop"; chown $__user:$__user "$home/Desktop/Redneck Rampage Route 66.desktop"; fi
+    mv "$md_inst/Redneck Rampage Route 66.desktop" "/usr/share/applications/Redneck Rampage Route 66.desktop"
+
+    cat >"$md_inst/Redneck Rampage Rides Again.desktop" << _EOF_
+[Desktop Entry]
+Name=Redneck Rampage Rides Again
+GenericName=Redneck Rampage Rides Again
+Comment=Redneck Rampage Rides Again
+Exec=$md_inst/$md_id.sh ridesagain
+Icon=$md_inst/RidesAgain_70x70.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Redneck;Rampage;Rides;Again
+StartupWMClass=RedneckRampageRidesAgain
+Name[en_US]=Redneck Rampage Rides Again
+_EOF_
+    chmod 755 "$md_inst/Redneck Rampage Rides Again.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Redneck Rampage Rides Again.desktop" "$home/Desktop/Redneck Rampage Rides Again.desktop"; chown $__user:$__user "$home/Desktop/Redneck Rampage Rides Again.desktop"; fi
+    mv "$md_inst/Redneck Rampage Rides Again.desktop" "/usr/share/applications/Redneck Rampage Rides Again.desktop"
 
     [[ "$md_mode" == "remove" ]] && remove_rednukem
 }

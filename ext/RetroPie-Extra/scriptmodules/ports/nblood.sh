@@ -91,12 +91,12 @@ function configure_nblood() {
 	
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-	addPort "$md_id" "nblood" "Nblood - Blood Source Port" "$launch_prefix$md_inst/nblood.sh"
-	addPort "$md_id" "nblood-cp" "NBlood - Blood Cryptic Passage Source Port" "$launch_prefix$md_inst/nblood.sh cryptic"
+	addPort "$md_id" "nblood" "Blood (NBlood)" "$launch_prefix$md_inst/nblood.sh"
+	addPort "$md_id" "nblood-cp" "Blood Cryptic Passage (NBlood)" "$launch_prefix$md_inst/nblood.sh cryptic"
 
 	if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-		addPort "$md_id+qjoypad" "nblood" "Nblood - Blood Source Port" "$launch_prefix$md_inst/nblood-qjoy.sh"
-		addPort "$md_id+qjoypad" "nblood-cp" "NBlood - Blood Cryptic Passage Source Port" "$launch_prefix$md_inst/nblood-qjoy.sh cryptic"
+		addPort "$md_id+qjoypad" "nblood" "Blood (NBlood)" "$launch_prefix$md_inst/nblood-qjoy.sh"
+		addPort "$md_id+qjoypad" "nblood-cp" "Blood Cryptic Passage (NBlood)" "$launch_prefix$md_inst/nblood-qjoy.sh cryptic"
 	fi
 
    cat >"$md_inst/$md_id.sh" << _EOF_
