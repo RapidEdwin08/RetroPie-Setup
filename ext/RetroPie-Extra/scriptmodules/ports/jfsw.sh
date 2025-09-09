@@ -16,7 +16,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="jfsw"
 rp_module_desc="Shadow Warrior Source Port by Jonathon Fowler - Ken Silverman's Build Engine"
-rp_module_help="Place Game files + Expansion Episodes in:\n$romdir/ports/ksbuild/shadowwarrior \n \n[Shadow Warrior]:\nsw.grp\nsw.rts\n \n[Twin Dragon]:\ndragon.zip\n \n[Wanton Destruction]:\nwt.grp"
+rp_module_help="Place Game files in [ports/ksbuild/shadowwarrior]:\n$romdir/ports/ksbuild/shadowwarrior \n \n[Shadow Warrior]: sw.grp  sw.rts\n \n[Wanton Destruction]: wantdest.grp\n \n[Twin Dragon]: tdragon.zip (Leave ZIP'd)\n \n NOTE: Twin Dragon might not appear in the SW Main Menu\n Select the Code of Honor Episode instead if applicable\n \n*Expansions Require the Full Version of Shadow Warrior*"
 rp_module_licence="GPL https://github.com/jonof/jfsw/blob/master/GPL.TXT"
 rp_module_repo="git https://github.com/jonof/jfsw.git master"
 rp_module_section="exp"
