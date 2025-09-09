@@ -15,7 +15,7 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="jfsw"
-rp_module_desc="Shadow Warrior source port by Jonathon Fowler - Ken Silverman's Build Engine"
+rp_module_desc="Shadow Warrior Source Port by Jonathon Fowler - Ken Silverman's Build Engine"
 rp_module_help="Place Game files + Expansion Episodes in:\n$romdir/ports/ksbuild/shadowwarrior \n \n[Shadow Warrior]:\nsw.grp\nsw.rts\n \n[Twin Dragon]:\ndragon.zip\n \n[Wanton Destruction]:\nwt.grp"
 rp_module_licence="GPL https://github.com/jonof/jfsw/blob/master/GPL.TXT"
 rp_module_repo="git https://github.com/jonof/jfsw.git master"
@@ -24,7 +24,7 @@ rp_module_flags=""
 
 function depends_jfsw() {
     # libsdl1.2-dev libsdl-mixer1.2-dev xorg xinit x11-xserver-utils xinit libgl1-mesa-dev libsdl2-dev libvorbis-dev rename
-    local depends=(cmake build-essential libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libvpx-dev freepats rename)
+    local depends=(cmake build-essential libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libvpx-dev freepats zip unzip rename)
     isPlatform "x86" && depends+=(nasm)
     isPlatform "gl" || isPlatform "mesa" && depends+=(libgl1-mesa-dev libglu1-mesa-dev)
     isPlatform "x11" && depends+=(libgtk2.0-dev)
@@ -35,6 +35,8 @@ function depends_jfsw() {
 function sources_jfsw() {
     gitPullOrClone
     download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/jfsw/ShadowWarrior_48x48.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/jfsw/ShadowWarrior_68x68.xpm" "$md_build"
+    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/jfsw/ShadowWarrior_70x56.xpm" "$md_build"
 }
 
 function build_jfsw() {
@@ -53,41 +55,58 @@ function install_jfsw() {
     md_ret_files=(        
         'sw'
         'ShadowWarrior_48x48.xpm'
+        'ShadowWarrior_68x68.xpm'
+        'ShadowWarrior_70x56.xpm'
     )
 }
 
 function gamedata_jfsw() {
     local dest="$romdir/ports/ksbuild/shadowwarrior"
     mkUserDir "$dest"
-    pushd "$dest"
-    rename 'y/A-Z/a-z/' *
-    popd
-    if [[ ! -f "$dest/sw.grp" ]]; then
-        # download shareware data
+
+    if [[ ! -f "$dest/sw.grp" ]]; then # Download Shareware Data from JonoF's GIT
+        downloadAndExtract "https://www.jonof.id.au/files/jfsw/swsw12.zip" "$dest"
+        pushd "$dest"; rename 'y/A-Z/a-z/' *; popd
+    fi
+
+    if [[ ! -f "$dest/tdragon.zip" ]] || [[ ! -f "$dest/wantdest.grp" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/$md_id-rp-assets.tar.gz" "$dest"
+    fi
+
+    if [[ ! -f "$dest/sw.grp" ]]; then # Download Shareware Data from 3DRealms FTP
         local tempdir="$(mktemp -d)"
         download ftp://ftp.3drealms.com/share/3dsw12.zip "$tempdir"
         unzip -Lo "$tempdir/3dsw12.zip" swsw12.shr -d "$tempdir"
         unzip -Lo "$tempdir/swsw12.shr" sw.grp sw.rts -d "$dest"
         rm -rf "$tempdir"
+        pushd "$dest"; rename 'y/A-Z/a-z/' *; popd
     fi
+
     chown -R $__user:$__user "$dest"
 }
 
 function remove_jfsw() {
     if [[ -f "/usr/share/applications/Shadow Warrior.desktop" ]]; then sudo rm -f "/usr/share/applications/Shadow Warrior.desktop"; fi
     if [[ -f "$home/Desktop/Shadow Warrior.desktop" ]]; then rm -f "$home/Desktop/Shadow Warrior.desktop"; fi
+
+    if [[ -f "/usr/share/applications/Shadow Warrior Twin Dragon.desktop" ]]; then sudo rm -f "/usr/share/applications/Shadow Warrior Twin Dragon.desktop"; fi
+    if [[ -f "$home/Desktop/Shadow Warrior Twin Dragon.desktop" ]]; then rm -f "$home/Desktop/Shadow Warrior Twin Dragon.desktop"; fi
+
+    if [[ -f "/usr/share/applications/Shadow Warrior Wanton Destruction.desktop" ]]; then sudo rm -f "/usr/share/applications/Shadow Warrior Wanton Destruction.desktop"; fi
+    if [[ -f "$home/Desktop/Shadow Warrior Wanton Destruction.desktop" ]]; then rm -f "$home/Desktop/Shadow Warrior Wanton Destruction.desktop"; fi
 }
 
 function configure_jfsw() {
+    mkRomDir "ports/ksbuild"
+    chown -R $__user:$__user "$romdir/ports/ksbuild"
     moveConfigDir "$home/.jfsw" "$md_conf_root/sw"
-    [[ "$md_mode" == "install" ]] && gamedata_jfsw
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
     addPort "$md_id" "sw" "Shadow Warrior" "$launch_prefix$md_inst/sw %ROM%" ""
     #local gamedir="$romdir/ports/ksbuild/shadowwarrior"
-    addPort "$md_id" "sw" "Shadow Warrior Twin Dragon" "$launch_prefix$md_inst/sw %ROM%" "-gdragon.zip" #[[ -f "$gamedir/dragon.zip" ]] &&
-    addPort "$md_id" "sw" "Shadow Warrior Wanton Destruction" "$launch_prefix$md_inst/sw %ROM%" "-gwt.grp" #[[ -f "$gamedir/wt.grp" ]] &&
+    addPort "$md_id" "sw" "Shadow Warrior Twin Dragon (JFSW)" "$launch_prefix$md_inst/sw %ROM%" "-gtdragon.zip" #[[ -f "$gamedir/dragon.zip" ]] &&
+    addPort "$md_id" "sw" "Shadow Warrior Wanton Destruction (JFSW)" "$launch_prefix$md_inst/sw %ROM%" "-gwantdest.grp" #[[ -f "$gamedir/wt.grp" ]] &&
 
     cat >"$md_inst/sw.cfg" << _EOF_
 [Screen Setup]
@@ -283,7 +302,7 @@ PanelScale = 5
 Bobbing = 1
 Tilting = 0
 Shadows = 1
-AutoRun = 0
+AutoRun = 1
 Crosshair = 1
 AutoAim = 1
 Messages = 1
@@ -378,7 +397,7 @@ Icon=$md_inst/ShadowWarrior_48x48.xpm
 Terminal=false
 Type=Application
 Categories=Game;Emulator
-Keywords=Shadow Warrior
+Keywords=Shadow;Warrior
 StartupWMClass=ShadowWarrior
 Name[en_US]=Shadow Warrior
 _EOF_
@@ -386,5 +405,42 @@ _EOF_
     if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Shadow Warrior.desktop" "$home/Desktop/Shadow Warrior.desktop"; chown $__user:$__user "$home/Desktop/Shadow Warrior.desktop"; fi
     mv "$md_inst/Shadow Warrior.desktop" "/usr/share/applications/Shadow Warrior.desktop"
 
+    cat >"$md_inst/Shadow Warrior Twin Dragon.desktop" << _EOF_
+[Desktop Entry]
+Name=Shadow Warrior Twin Dragon
+GenericName=Shadow Warrior Twin Dragon
+Comment=Shadow Warrior Twin Dragon
+Exec=$md_inst/sw -gtdragon.zip
+Icon=$md_inst/ShadowWarrior_68x68.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Shadow;Warrior;Twin;Dragon
+StartupWMClass=ShadowWarriorTwinDragon
+Name[en_US]=Shadow Warrior Twin Dragon
+_EOF_
+    chmod 755 "$md_inst/Shadow Warrior Twin Dragon.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Shadow Warrior Twin Dragon.desktop" "$home/Desktop/Shadow Warrior Twin Dragon.desktop"; chown $__user:$__user "$home/Desktop/Shadow Warrior Twin Dragon.desktop"; fi
+    mv "$md_inst/Shadow Warrior Twin Dragon.desktop" "/usr/share/applications/Shadow Warrior Twin Dragon.desktop"
+
+    cat >"$md_inst/Shadow Warrior Wanton Destruction.desktop" << _EOF_
+[Desktop Entry]
+Name=Shadow Warrior Wanton Destruction
+GenericName=Shadow Warrior Wanton Destruction
+Comment=Shadow Warrior Wanton Destruction
+Exec=$md_inst/sw -gwantdest.grp
+Icon=$md_inst/ShadowWarrior_70x56.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Shadow;Warrior;Wanton;Destruction
+StartupWMClass=ShadowWarriorWantonDestruction
+Name[en_US]=Shadow Warrior Wanton Destruction
+_EOF_
+    chmod 755 "$md_inst/Shadow Warrior Wanton Destruction.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Shadow Warrior Wanton Destruction.desktop" "$home/Desktop/Shadow Warrior Wanton Destruction.desktop"; chown $__user:$__user "$home/Desktop/Shadow Warrior Wanton Destruction.desktop"; fi
+    mv "$md_inst/Shadow Warrior Wanton Destruction.desktop" "/usr/share/applications/Shadow Warrior Wanton Destruction.desktop"
+
+    [[ "$md_mode" == "install" ]] && gamedata_jfsw
     [[ "$md_mode" == "remove" ]] && remove_jfsw
 }

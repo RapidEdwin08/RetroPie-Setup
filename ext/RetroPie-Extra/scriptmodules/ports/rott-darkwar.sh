@@ -87,8 +87,7 @@ function remove_rott-darkwar() {
 }
 
 function configure_rott-darkwar() {
-    mkRomDir "ports"
-    mkRomDir "$romdir/ports/rott-darkwar"
+    mkRomDir "ports/rott-darkwar"
     chown -R $__user:$__user "$romdir/ports/rott-darkwar"
     moveConfigDir "$home/.rott" "$md_conf_root/rott"
 

@@ -93,8 +93,7 @@ function remove_rott-huntbgin() {
 }
 
 function configure_rott-huntbgin() {
-    mkRomDir "ports"
-    mkRomDir "$romdir/ports/rott-huntbgin"
+    mkRomDir "ports/rott-huntbgin"
     chown -R $__user:$__user "$romdir/ports/rott-huntbgin"
     moveConfigDir "$home/.rott" "$md_conf_root/rott"
 
