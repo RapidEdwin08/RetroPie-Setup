@@ -316,8 +316,9 @@ General/Reset = Back&\`Button S\`
 _EOF_
 
    chown -R $__user:$__user "$md_conf_root/gc/Config/"
-
-   cat >"$md_inst/Dolphin.desktop" << _EOF_
+   local shortcut_name
+   shortcut_name="Dolphin"
+   cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Dolphin
 GenericName=Dolphin
@@ -331,9 +332,9 @@ Keywords=GC;Wii
 StartupWMClass=Dolphin
 Name[en_US]=Dolphin
 _EOF_
-    chmod 755 "$md_inst/Dolphin.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Dolphin.desktop" "$home/Desktop/Dolphin.desktop"; chown $__user:$__user "$home/Desktop/Dolphin.desktop"; fi
-    mv "$md_inst/Dolphin.desktop" "/usr/share/applications/Dolphin.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
    cat >"$md_inst/dolphin-qjoy.sh" << _EOF_
 #!/bin/bash

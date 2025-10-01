@@ -147,6 +147,6 @@ StartupWMClass=DOSBox-Staging
 Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
     mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 }
