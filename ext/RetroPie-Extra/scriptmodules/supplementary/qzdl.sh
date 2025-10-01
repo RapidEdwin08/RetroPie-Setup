@@ -67,7 +67,9 @@ function configure_qzdl() {
     addPort "$md_id" "zdl" "+Start ZDL" "$launch_prefix$md_inst/zdl"
     sed -i s'+_PORT_+_SYS_+g' "$romdir/ports/+Start ZDL.sh"
 
-    cat >"$md_inst/ZDL.desktop" << _EOF_
+    local shortcut_name
+    shortcut_name="ZDL"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=ZDL
 GenericName=ZDL
@@ -81,9 +83,9 @@ Keywords=ZDL;ZDoom;WAD;Launcher
 StartupWMClass=ZDL
 Name[en_US]=ZDL
 _EOF_
-    chmod 755 "$md_inst/ZDL.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/ZDL.desktop" "$home/Desktop/ZDL.desktop"; chown $__user:$__user "$home/Desktop/ZDL.desktop"; fi
-    mv "$md_inst/ZDL.desktop" "/usr/share/applications/ZDL.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
     [[ "$md_mode" == "remove" ]] && remove_qzdl
 }
