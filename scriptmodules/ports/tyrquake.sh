@@ -8,9 +8,12 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="tyrquake"
 rp_module_desc="Quake 1 engine - TyrQuake port"
+rp_module_help="Place Quake I Game Folders in [ports/quake]:\nid1\nhipnotic\nrogue\ndopa"
 rp_module_licence="GPL2 https://disenchant.net/git/tyrquake.git/plain/gnu.txt"
 rp_module_repo="git https://github.com/RetroPie/tyrquake.git master"
 rp_module_section="opt"
@@ -68,4 +71,9 @@ function configure_tyrquake() {
     add_games_tyrquake
 
     moveConfigDir "$home/.tyrquake" "$md_conf_root/quake/tyrquake"
+
+    #[[ "$md_mode" == "remove" ]] && remove_lr-tyrquake
+    if [[ ! -d "/opt/retropie/libretrocores/lr-tyrquake" ]] && [[ "$md_mode" == "remove" ]]; then remove_lr-tyrquake; fi
+    [[ "$md_mode" == "remove" ]] && return
+    [[ "$md_mode" == "install" ]] && shortcuts_icons_lr-tyrquake
 }
