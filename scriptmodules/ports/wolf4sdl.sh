@@ -214,7 +214,7 @@ _EOF_
 
     episode_name="$romdir/ports/wolf3d/vswap.sdm"
     if [[ -f "$romdir/ports/wolf3d/vswap.sod" ]]; then episode_name="$romdir/ports/wolf3d/vswap.sod"; fi
-    if [[ -f "$romdir/ports/wolf3d/vswap.sod" ]]; then episode_name="$romdir/ports/wolf3d/vswap.sd1"; fi
+    if [[ -f "$romdir/ports/wolf3d/vswap.sd1" ]]; then episode_name="$romdir/ports/wolf3d/vswap.sd1"; fi
 
     shortcut_name="Wolfenstein 3D Spear Of Destiny Ep1"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
