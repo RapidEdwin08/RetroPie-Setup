@@ -89,7 +89,9 @@ _EOF_
     chmod 755 "$romdir/openbor/+Start OpenBOR.sh"
     chown $__user:$__user "$romdir/openbor/+Start OpenBOR.sh"
 
-    cat >"$md_inst/OpenBOR.desktop" << _EOF_
+    local shortcut_name
+    shortcut_name="OpenBOR"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=OpenBOR
 GenericName=OpenBOR
@@ -103,9 +105,9 @@ Keywords=BOR;BeatsOfRage
 StartupWMClass=OpenBOR
 Name[en_US]=OpenBOR
 _EOF_
-    chmod 755 "$md_inst/OpenBOR.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/OpenBOR.desktop" "$home/Desktop/OpenBOR.desktop"; chown $__user:$__user "$home/Desktop/OpenBOR.desktop"; fi
-    mv "$md_inst/OpenBOR.desktop" "/usr/share/applications/OpenBOR.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
     cat >"$md_inst/$md_id.sh" << _EOF_
 #!/bin/bash

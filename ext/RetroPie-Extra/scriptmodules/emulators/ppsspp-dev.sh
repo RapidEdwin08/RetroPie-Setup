@@ -233,7 +233,9 @@ _EOF_
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psp_StartPPSSPP = "ppsspp-dev"' ; echo $?) == '1' ]]; then echo 'psp_StartPPSSPP = "ppsspp-dev"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
-    cat >"$md_inst/PPSSPP.desktop" << _EOF_
+    local shortcut_name
+    shortcut_name="PPSSPP"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=PPSSPP
 GenericName=PPSSPP
@@ -247,9 +249,9 @@ Keywords=PSP;PlayStationPortable
 StartupWMClass=PPSSPP
 Name[en_US]=PPSSPP
 _EOF_
-    chmod 755 "$md_inst/PPSSPP.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/PPSSPP.desktop" "$home/Desktop/PPSSPP.desktop"; chown $__user:$__user "$home/Desktop/PPSSPP.desktop"; fi
-    mv "$md_inst/PPSSPP.desktop" "/usr/share/applications/PPSSPP.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
     [[ "$md_mode" == "remove" ]] && remove_ppsspp-dev
 }

@@ -344,7 +344,9 @@ _EOF_
 
    chown -R $__user:$__user "$home/.local/share/dolphin-rpi"
 
-   cat >"$md_inst/Dolphin-rpi.desktop" << _EOF_
+   local shortcut_name
+   shortcut_name="Dolphin-rpi"
+   cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Dolphin-rpi
 GenericName=Dolphin-rpi
@@ -358,9 +360,9 @@ Keywords=GC;Wii
 StartupWMClass=Dolphin-rpi
 Name[en_US]=Dolphin-rpi
 _EOF_
-    chmod 755 "$md_inst/Dolphin-rpi.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Dolphin-rpi.desktop" "$home/Desktop/Dolphin-rpi.desktop"; chown $__user:$__user "$home/Desktop/Dolphin-rpi.desktop"; fi
-    mv "$md_inst/Dolphin-rpi.desktop" "/usr/share/applications/Dolphin-rpi.desktop"
+   chmod 755 "$md_inst/$shortcut_name.desktop"
+   if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+   mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
    cat >"$md_inst/dolphin-rpi-qjoy.sh" << _EOF_
 #!/bin/bash
