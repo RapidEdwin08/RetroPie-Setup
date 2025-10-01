@@ -1,7 +1,7 @@
 diff -ur a/source/duke3d/src/config.cpp b/source/duke3d/src/config.cpp
---- a/source/duke3d/src/config.cpp	(sirlemonhead)
+--- a/source/duke3d/src/config.cpp	(emileb)
 +++ b/source/duke3d/src/config.cpp	(UpdatedControls)
-@@ -622,36 +622,38 @@
+@@ -604,36 +604,38 @@
  
      static GameControllerButtonSetting const buttons[] =
      {

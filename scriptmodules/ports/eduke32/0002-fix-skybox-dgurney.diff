@@ -1,0 +1,21 @@
+diff -ur a/polymost.cpp b/polymost.cpp
+--- a/source/build/src/polymost.cpp	(dgurney)
++++ b/source/build/src/polymost.cpp	(fixed)
+@@ -5467,7 +5467,7 @@
+         else if ((nextsectnum < 0) || (!(sector[nextsectnum].floorstat&1)))
+         {
+             //Parallaxing sky... hacked for Ken's mountain texture
+-            if (!polymost_usetileshades() || (usehightile && hicfindsubst(globalpicnum, globalpal, hictinting[globalpal].f & HICTINT_ALWAYSUSEART)))
++            if (!r_useindexedcolortextures || (usehightile && hicfindsubst(globalpicnum, globalpal, hictinting[globalpal].f & HICTINT_ALWAYSUSEART)))
+                 calc_and_apply_fog_factor(sec->floorshade, sec->visibility, sec->floorpal, 0.005f);
+ 
+             globvis2 = globalpisibility;
+@@ -5881,7 +5881,7 @@
+         else if ((nextsectnum < 0) || (!(sector[nextsectnum].ceilingstat&1)))
+         {
+             //Parallaxing sky... hacked for Ken's mountain texture
+-            if (!polymost_usetileshades() || (usehightile && hicfindsubst(globalpicnum, globalpal, hictinting[globalpal].f & HICTINT_ALWAYSUSEART)))
++            if (!r_useindexedcolortextures || (usehightile && hicfindsubst(globalpicnum, globalpal, hictinting[globalpal].f & HICTINT_ALWAYSUSEART)))
+                 calc_and_apply_fog_factor(sec->ceilingshade, sec->visibility, sec->ceilingpal, 0.005f);
+ 
+             globvis2 = globalpisibility;

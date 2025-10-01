@@ -1,0 +1,13 @@
+diff -ur a/source/duke3d/src/menus.cpp b/source/duke3d/src/menus.cpp
+--- a/source/duke3d/src/menus.cpp	2021-07-05 Disable midi driver menu items when music is off
++++ b/source/duke3d/src/menus.cpp	2025-09-22 Fix Retail Menu error ME_SOUND_MIDIDRIVER was not declared in this scope
+@@ -2320,8 +2320,8 @@
+         MenuEntry_DisableOnCondition(&ME_SOUND_VOLUME_MUSIC, !ud.config.MusicToggle);
+         MenuEntry_DisableOnCondition(&ME_SOUND_DUKETALK, !ud.config.SoundToggle);
+         MenuEntry_DisableOnCondition(&ME_SOUND_SAMPLINGRATE, !ud.config.SoundToggle && !ud.config.MusicToggle);
+-        MenuEntry_DisableOnCondition(&ME_SOUND_MIDIDRIVER, !ud.config.MusicToggle);
+ #ifndef EDUKE32_RETAIL_MENU
++        MenuEntry_DisableOnCondition(&ME_SOUND_MIDIDRIVER, !ud.config.MusicToggle);
+         MenuEntry_DisableOnCondition(&ME_SOUND_NUMVOICES, !ud.config.SoundToggle);
+ #ifdef __linux__
+         MenuEntry_DisableOnCondition(&ME_SOUND_ALSADEVICE, !ud.config.MusicToggle);
