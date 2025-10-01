@@ -52,25 +52,32 @@ function install_dosbox-x-sdl2() {
 }
 
 function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-assets.tar.gz" "$romdir/pc"
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/dosbox-x/dosbox-x-rp-cqsmks.tar.gz" "$romdir/pc/.games/CHEX"
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/$md_id/dosbox-x-rp-assets.tar.gz" "$romdir/pc"
+    if [[ ! -f "$romdir/pc/.games/CHEX/INTRO.SMK" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/$md_id/dosbox-x-rp-cqsmks.tar.gz" "$romdir/pc/.games/CHEX"
+    fi
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Doom (Shareware).conf"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Chex Quest (Promotional).conf"
-    if [[ ! -f "$romdir/pc/gamelist.xml" ]]; then mv "$romdir/pc/gamelist.xml.dosbox-x" "$romdir/pc/gamelist.xml"; fi
+    if [[ ! -f "$romdir/pc/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/pc/gamelist.xml" ]]; then mv "$romdir/pc/gamelist.xml.dosbox-x" "$romdir/pc/gamelist.xml"; fi
     chown -R $__user:$__user -R "$romdir/pc"
     if [[ ! -d "$md_inst/share/dosbox-x/drivez/DOOM" ]]; then cp -R "$romdir/pc/.games/DOOM" "$md_inst/share/dosbox-x/drivez/DOOM"; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM"; fi
     mv -f "$romdir/pc/.games/DOOM.BAT" "$md_inst/share/dosbox-x/drivez/DOOM.BAT"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM.BAT"
+    mv -f "$romdir/pc/.games/DEBUG.COM" "$md_inst/share/dosbox-x/drivez/DEBUG.COM"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DEBUG.COM"
+    mv -f "$romdir/pc/.games/DELTREE.COM" "$md_inst/share/dosbox-x/drivez/DELTREE.COM"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DELTREE.COM"
+    mv -f "$romdir/pc/.games/XCOPY.EXE" "$md_inst/share/dosbox-x/drivez/XCOPY.EXE"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/XCOPY.EXE"
 }
 
 function remove_dosbox-x-sdl2() {
-    if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then sudo rm -f /usr/share/applications/DOSBox-X.desktop; fi
-    if [[ -f "$home/Desktop/DOSBox-X.desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; fi
-    if [[ -f "$romdir/pc/+Start DOSBox-X.sh" ]]; then rm "$romdir/pc/+Start DOSBox-X.sh"; fi
-    if [[ -f "$md_conf_root/dosbox-x/README.TXT" ]]; then rm -f "$md_conf_root/dosbox-x/README.TXT"; fi
+    local shortcut_name="DOSBox-X"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
+    rm -f "$romdir/pc/+Start $shortcut_name.sh"; rm -f "$md_conf_root/dosbox-x/README.TXT"
 }
 
 function configure_dosbox-x-sdl2() {
-    mkRomDir "pc"
+    if [[ -d "$romdir/pc" ]]; then chown -R $__user:$__user "$romdir/pc"; fi
+    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
+    [[ "$md_mode" == "remove" ]] && return
+
     mkRomDir "pc/.games"
     moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
     if [[ ! -d "$md_conf_root/pc/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/DOSGAMES"; fi
@@ -120,8 +127,6 @@ fi
 echo "\${params[@]}" >> /dev/shm/runcommand.info
 
 # Start DOSBox-X
-xset -dpms s off s noblank
-matchbox-window-manager -use_titlebar no &
 /opt/retropie/emulators/dosbox-x-sdl2/bin/dosbox-x "\${params[@]}"
 _EOF_
 
@@ -138,5 +143,4 @@ _EOF_
     echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"
 
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
-    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
 }

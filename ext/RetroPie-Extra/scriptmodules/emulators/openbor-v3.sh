@@ -58,11 +58,11 @@ function install_openbor-v3() {
 }
 
 function remove_openbor-v3() {
-    if [[ -f /usr/share/applications/OpenBOR-V3.desktop ]]; then sudo rm -f /usr/share/applications/OpenBOR-V3.desktop; fi
-    if [[ -f "$home/Desktop/OpenBOR-V3.desktop" ]]; then rm "$home/Desktop/OpenBOR-V3.desktop"; fi
-    if [[ -f "$home/RetroPie/roms/openbor/+Start OpenBOR.sh" ]]; then rm "$home/RetroPie/roms/openbor/+Start OpenBOR.sh"; fi
-    if [[ -f "$home/RetroPie/retropiemenu/OpenBOR PAK Extract.sh" ]]; then rm "$home/RetroPie/retropiemenu/OpenBOR PAK Extract.sh"; fi
-    if [[ -f "$romdir/openbor/extract-pak/README.txt" ]]; then rm -f "$romdir/openbor/extract-pak/README.txt"; fi
+    rm -f /usr/share/applications/OpenBOR-V3.desktop
+    rm -f "$home/Desktop/OpenBOR-V3.desktop"
+    rm -f "$home/RetroPie/roms/openbor/+Start OpenBOR.sh"
+    rm -f "$home/RetroPie/retropiemenu/OpenBOR PAK Extract.sh"
+    rm -f "$romdir/openbor/extract-pak/README.txt"
 }
 
 function configure_openbor-v3() {

@@ -174,9 +174,9 @@ function install_ppsspp-dev() {
 }
 
 function remove_ppsspp-dev() {
-    if [[ -f /usr/share/applications/PPSSPP.desktop ]]; then sudo rm -f /usr/share/applications/PPSSPP.desktop; fi
-    if [[ -f "$home/Desktop/PPSSPP.desktop" ]]; then rm "$home/Desktop/PPSSPP.desktop"; fi
-    if [[ -f "$home/RetroPie/roms/psp/+Start PPSSPP.gui" ]]; then rm "$home/RetroPie/roms/psp/+Start PPSSPP.gui"; fi
+    rm -f /usr/share/applications/PPSSPP.desktop
+    rm -f "$home/Desktop/PPSSPP.desktop"
+    rm -f "$home/RetroPie/roms/psp/+Start PPSSPP.gui"
 }
 
 function configure_ppsspp-dev() {

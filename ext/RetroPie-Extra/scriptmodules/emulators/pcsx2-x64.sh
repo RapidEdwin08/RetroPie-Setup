@@ -97,9 +97,9 @@ function install_bin_pcsx2-x64() {
 }
 
 function remove_pcsx2-x64() {
-    if [[ -f /usr/share/applications/PCSX2.desktop ]]; then sudo rm -f /usr/share/applications/PCSX2.desktop; fi
-    if [[ -f "$home/Desktop/PCSX2.desktop" ]]; then rm -f "$home/Desktop/PCSX2.desktop"; fi
-    if [[ -f "$romdir/ps2/+Start PCSX2.z2" ]]; then rm "$romdir/ps2/+Start PCSX2.z2"; fi
+    rm -f /usr/share/applications/PCSX2.desktop
+    rm -f "$home/Desktop/PCSX2.desktop"
+    rm -f "$romdir/ps2/+Start PCSX2.z2"
     if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then
         cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
         mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh

@@ -53,9 +53,9 @@ function install_openbor-v4() {
 }
 
 function remove_openbor-v4() {
-    if [[ -f /usr/share/applications/OpenBOR.desktop ]]; then sudo rm -f /usr/share/applications/OpenBOR.desktop; fi
-    if [[ -f "$home/Desktop/OpenBOR.desktop" ]]; then rm "$home/Desktop/OpenBOR.desktop"; fi
-    if [[ -f "$home/RetroPie/roms/openbor/+Start OpenBOR.sh" ]]; then rm "$home/RetroPie/roms/openbor/+Start OpenBOR.sh"; fi
+    rm -f /usr/share/applications/OpenBOR.desktop
+    rm -f "$home/Desktop/OpenBOR.desktop"
+    rm -f "$home/RetroPie/roms/openbor/+Start OpenBOR.sh"
 }
 
 function configure_openbor-v4() {

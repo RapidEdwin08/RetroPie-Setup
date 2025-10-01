@@ -108,10 +108,10 @@ function remove_dolphin-rpi() {
 #    rm -r $home/.local/share/dolphin-rpi/Wii/
 #    rm -r $home/.local/share/dolphin-rpi/
 
-    if [[ -f /usr/share/applications/Dolphin-rpi.desktop ]]; then sudo rm -f /usr/share/applications/Dolphin-rpi.desktop; fi
-    if [[ -f "$home/Desktop/Dolphin-rpi.desktop" ]]; then rm "$home/Desktop/Dolphin-rpi.desktop"; fi
-    if [[ -f "$home/RetroPie/roms/gc/+Start RPi-Dolphin.m3u" ]]; then rm "$home/RetroPie/roms/gc/+Start RPi-Dolphin.m3u"; fi
-    if [[ -f "$home/RetroPie/roms/wii/+Start RPi-Dolphin.wad" ]]; then rm "$home/RetroPie/roms/wii/+Start RPi-Dolphin.wad"; fi
+    rm -f /usr/share/applications/Dolphin-rpi.desktop
+    rm -f "$home/Desktop/Dolphin-rpi.desktop"
+    rm -f "$home/RetroPie/roms/gc/+Start RPi-Dolphin.m3u"
+    rm -f "$home/RetroPie/roms/wii/+Start RPi-Dolphin.wad"
 
     # Remove Symbolic Link to Address Error: Could not find resource: /usr/local/share/dolphin-emu/sys/Resources/nobanner.png
     rm -Rf /usr/local/share/dolphin-emu
