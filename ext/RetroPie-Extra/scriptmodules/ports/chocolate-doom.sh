@@ -103,32 +103,32 @@ function game_data_chocolate-doom() {
 }
 
 function remove_chocolate-doom() {
-    if [[ -f "/usr/share/applications/Chocolate Doom.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate Doom.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate Doom.desktop" ]]; then rm -f "$home/Desktop/Chocolate Doom.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate Doom.desktop"
+    rm -f "$home/Desktop/Chocolate Doom.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate Heretic.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate Heretic.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate Heretic.desktop" ]]; then rm -f "$home/Desktop/Chocolate Heretic.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate Heretic.desktop"
+    rm -f "$home/Desktop/Chocolate Heretic.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate HeXen.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate HeXen.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate HeXen.desktop" ]]; then rm -f "$home/Desktop/Chocolate HeXen.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate HeXen.desktop"
+    rm -f "$home/Desktop/Chocolate HeXen.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate Strife.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate Strife.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate Strife.desktop" ]]; then rm -f "$home/Desktop/Chocolate Strife.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate Strife.desktop"
+    rm -f "$home/Desktop/Chocolate Strife.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate Doom Setup.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate Doom Setup.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate Doom Setup.desktop" ]]; then rm -f "$home/Desktop/Chocolate Doom Setup.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate Doom Setup.desktop"
+    rm -f "$home/Desktop/Chocolate Doom Setup.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate Heretic Setup.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate Heretic Setup.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate Heretic Setup.desktop" ]]; then rm -f "$home/Desktop/Chocolate Heretic Setup.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate Heretic Setup.desktop"
+    rm -f "$home/Desktop/Chocolate Heretic Setup.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate HeXen Setup.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate HeXen Setup.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate HeXen Setup.desktop" ]]; then rm -f "$home/Desktop/Chocolate HeXen Setup.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate HeXen Setup.desktop"
+    rm -f "$home/Desktop/Chocolate HeXen Setup.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate Strife Setup.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate Strife Setup.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate Strife Setup.desktop" ]]; then rm -f "$home/Desktop/Chocolate Strife Setup.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate Strife Setup.desktop"
+    rm -f "$home/Desktop/Chocolate Strife Setup.desktop"
 
-    if [[ -f "/usr/share/applications/Chocolate D00M Setup.desktop" ]]; then sudo rm -f "/usr/share/applications/Chocolate D00M Setup.desktop"; fi
-    if [[ -f "$home/Desktop/Chocolate D00M Setup.desktop" ]]; then rm -f "$home/Desktop/Chocolate D00M Setup.desktop"; fi
+    rm -f "/usr/share/applications/Chocolate D00M Setup.desktop"
+    rm -f "$home/Desktop/Chocolate D00M Setup.desktop"
 }
 
 function configure_chocolate-doom() {
@@ -503,7 +503,9 @@ _EOF_
        addPort "$md_id" "chocolate-strife1" "Chocolate Strife" "$md_inst/chocolate-strife -iwad $romdir/ports/doom/strife1.wad"
     fi
 
-    cat >"$md_inst/Chocolate Doom.desktop" << _EOF_
+    local shortcut_name
+    shortcut_name="Chocolate Doom"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate Doom
 GenericName=Chocolate Doom
@@ -517,11 +519,12 @@ Keywords=Chocolate;Doom
 StartupWMClass=ChocolateDoom
 Name[en_US]=Chocolate Doom
 _EOF_
-    chmod 755 "$md_inst/Chocolate Doom.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate Doom.desktop" "$home/Desktop/Chocolate Doom.desktop"; chown $__user:$__user "$home/Desktop/Chocolate Doom.desktop"; fi
-    mv "$md_inst/Chocolate Doom.desktop" "/usr/share/applications/Chocolate Doom.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate Heretic.desktop" << _EOF_
+    shortcut_name="Chocolate Heretic"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate Heretic
 GenericName=Chocolate Heretic
@@ -535,11 +538,12 @@ Keywords=Chocolate;Heretic
 StartupWMClass=ChocolateHeretic
 Name[en_US]=Chocolate Heretic
 _EOF_
-    chmod 755 "$md_inst/Chocolate Heretic.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate Heretic.desktop" "$home/Desktop/Chocolate Heretic.desktop"; chown $__user:$__user "$home/Desktop/Chocolate Heretic.desktop"; fi
-    mv "$md_inst/Chocolate Heretic.desktop" "/usr/share/applications/Chocolate Heretic.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate HeXen.desktop" << _EOF_
+    shortcut_name="Chocolate HeXen"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate HeXen
 GenericName=Chocolate HeXen
@@ -553,11 +557,12 @@ Keywords=Chocolate;HeXen
 StartupWMClass=ChocolateHeXen
 Name[en_US]=Chocolate HeXen
 _EOF_
-    chmod 755 "$md_inst/Chocolate HeXen.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate HeXen.desktop" "$home/Desktop/Chocolate HeXen.desktop"; chown $__user:$__user "$home/Desktop/Chocolate HeXen.desktop"; fi
-    mv "$md_inst/Chocolate HeXen.desktop" "/usr/share/applications/Chocolate HeXen.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate Strife.desktop" << _EOF_
+    shortcut_name="Chocolate Strife"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate Strife
 GenericName=Chocolate Strife
@@ -571,11 +576,12 @@ Keywords=Chocolate;Strife
 StartupWMClass=ChocolateStrife
 Name[en_US]=Chocolate Strife
 _EOF_
-    chmod 755 "$md_inst/Chocolate Strife.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate Strife.desktop" "$home/Desktop/Chocolate Strife.desktop"; chown $__user:$__user "$home/Desktop/Chocolate Strife.desktop"; fi
-    mv "$md_inst/Chocolate Strife.desktop" "/usr/share/applications/Chocolate Strife.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate Doom Setup.desktop" << _EOF_
+    shortcut_name="Chocolate Doom Setup"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate Doom Setup
 GenericName=Chocolate Doom Setup
@@ -589,11 +595,12 @@ Keywords=Chocolate;Doom;Setup
 StartupWMClass=ChocolateDoomSetup
 Name[en_US]=Chocolate Doom Setup
 _EOF_
-    chmod 755 "$md_inst/Chocolate Doom Setup.desktop"
-    ##if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate Doom Setup.desktop" "$home/Desktop/Chocolate Doom Setup.desktop"; chown $__user:$__user "$home/Desktop/Chocolate Doom Setup.desktop"; fi
-    ##mv "$md_inst/Chocolate Doom Setup.desktop" "/usr/share/applications/Chocolate Doom Setup.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate Heretic Setup.desktop" << _EOF_
+    shortcut_name="Chocolate Heretic Setup"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate Heretic Setup
 GenericName=Chocolate Heretic Setup
@@ -607,11 +614,12 @@ Keywords=Chocolate;Heretic;Setup
 StartupWMClass=ChocolateHereticSetup
 Name[en_US]=Chocolate Heretic Setup
 _EOF_
-    chmod 755 "$md_inst/Chocolate Heretic Setup.desktop"
-    ##if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate Heretic Setup.desktop" "$home/Desktop/Chocolate Heretic Setup.desktop"; chown $__user:$__user "$home/Desktop/Chocolate Heretic Setup.desktop"; fi
-    ##mv "$md_inst/Chocolate Heretic Setup.desktop" "/usr/share/applications/Chocolate Heretic Setup.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate HeXen Setup.desktop" << _EOF_
+    shortcut_name="Chocolate HeXen Setup"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate HeXen Setup
 GenericName=Chocolate HeXen Setup
@@ -625,11 +633,12 @@ Keywords=Chocolate;HeXen;Setup
 StartupWMClass=ChocolateHeXenSetup
 Name[en_US]=Chocolate HeXen Setup
 _EOF_
-    chmod 755 "$md_inst/Chocolate HeXen Setup.desktop"
-    ##if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate HeXen Setup.desktop" "$home/Desktop/Chocolate HeXen Setup.desktop"; chown $__user:$__user "$home/Desktop/Chocolate HeXen Setup.desktop"; fi
-    ##mv "$md_inst/Chocolate HeXen Setup.desktop" "/usr/share/applications/Chocolate HeXen Setup.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate Strife Setup.desktop" << _EOF_
+    shortcut_name="Chocolate Strife Setup"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate Strife Setup
 GenericName=Chocolate Strife Setup
@@ -643,11 +652,12 @@ Keywords=Chocolate;Strife;Setup
 StartupWMClass=ChocolateStrifeSetup
 Name[en_US]=Chocolate Strife Setup
 _EOF_
-    chmod 755 "$md_inst/Chocolate Strife Setup.desktop"
-    ##if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate Strife Setup.desktop" "$home/Desktop/Chocolate Strife Setup.desktop"; chown $__user:$__user "$home/Desktop/Chocolate Strife Setup.desktop"; fi
-    ##mv "$md_inst/Chocolate Strife Setup.desktop" "/usr/share/applications/Chocolate Strife Setup.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
-    cat >"$md_inst/Chocolate D00M Setup.desktop" << _EOF_
+    shortcut_name="Chocolate D00M Setup"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=Chocolate D00M Setup
 GenericName=Chocolate D00M Setup
@@ -661,9 +671,9 @@ Keywords=Chocolate;D00M;Setup
 StartupWMClass=ChocolateD00MSetup
 Name[en_US]=Chocolate D00M Setup
 _EOF_
-    chmod 755 "$md_inst/Chocolate D00M Setup.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Chocolate D00M Setup.desktop" "$home/Desktop/Chocolate D00M Setup.desktop"; chown $__user:$__user "$home/Desktop/Chocolate D00M Setup.desktop"; fi
-    mv "$md_inst/Chocolate D00M Setup.desktop" "/usr/share/applications/Chocolate D00M Setup.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
     [[ "$md_mode" == "install" ]] && game_data_chocolate-doom
     [[ "$md_mode" == "remove" ]] && remove_chocolate-doom

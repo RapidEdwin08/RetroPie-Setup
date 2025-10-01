@@ -91,7 +91,9 @@ pushd $md_inst; ./srb2kart; popd
 _EOF_
     chmod 755 "$md_inst/srb2kart.sh"
 
-    cat >"$md_inst/SRB2 Kart.desktop" << _EOF_
+    local shortcut_name
+    shortcut_name="SRB2 Kart"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=SRB2 Kart
 GenericName=SRB2 Kart
@@ -105,9 +107,9 @@ Keywords=SRB2;SRB2Kart
 StartupWMClass=SRB2 Kart
 Name[en_US]=SRB2 Kart
 _EOF_
-    chmod 755 "$md_inst/SRB2 Kart.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/SRB2 Kart.desktop" "$home/Desktop/SRB2 Kart.desktop"; chown $__user:$__user "$home/Desktop/SRB2 Kart.desktop"; fi
-    mv "$md_inst/SRB2 Kart.desktop" "/usr/share/applications/SRB2 Kart.desktop"
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
 
     [[ "$md_mode" == "remove" ]] && remove_srb2kart
 }
