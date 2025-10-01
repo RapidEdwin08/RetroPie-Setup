@@ -8,16 +8,18 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="lr-scummvm"
-rp_module_desc="ScummVM port for libretro"
-rp_module_help="Copy your ScummVM games to $romdir/scummvm\n\nThe name of your game directories must be suffixed with '.svm' for direct launch in EmulationStation."
+rp_module_desc="ScummVM - Script Creation Utility for Maniac Mansion Port for libretro"
+rp_module_help="Place your ScummVM games in: $romdir/scummvm\n\nThe name of your game directories must be suffixed with '.svm' for direct launch in EmulationStation"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/libretro/scummvm/master/COPYING"
 rp_module_repo="git https://github.com/libretro/scummvm.git master"
 rp_module_section="exp"
 
 function depends_lr-scummvm() {
-    getDepends zip
+    getDepends zip fluid-soundfont-gm
 }
 
 function sources_lr-scummvm() {
@@ -42,9 +44,20 @@ function install_lr-scummvm() {
     )
 }
 
+function remove_lr-scummvm() {
+    local shortcut_name="Full Throttle"
+    if [[ -d "/opt/retropie/emulators/scummvm" ]]; then
+        sed -i s+Icon=.*+Icon=/opt/retropie/emulators/scummvm/FullThrottle_74x74.xpm+ "/usr/share/applications/$shortcut_name.desktop"
+        if [[ -f "$home/Desktop/$shortcut_name.desktop" ]]; then sed -i s+Icon=.*+Icon=/opt/retropie/emulators/scummvm/FullThrottle_74x74.xpm+ "$home/Desktop/$shortcut_name.desktop"; fi
+    else
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
+    fi
+}
+
 function configure_lr-scummvm() {
     addEmulator 0 "$md_id" "scummvm" "$md_inst/romdir-launcher.sh %ROM%"
     addSystem "scummvm"
+    [[ "$md_mode" == "remove" ]] && remove_lr-scummvm
     [[ "$md_mode" == "remove" ]] && return
 
     # ensure rom dir and system retroconfig
@@ -53,20 +66,65 @@ function configure_lr-scummvm() {
 
     # unpack the data files to system dir
     runCmd unzip -q -o "$md_inst/scummvm.zip" -d "$biosdir"
-    chown -R "$__user":"$__group" "$biosdir/scummvm"
+    mkdir -p "$biosdir/scummvm/icons"
+    mkdir -p "$biosdir/scummvm/saves"
+    chown -R "$__user":"$__user" "$biosdir/scummvm"
 
     # basic initial configuration (if config file not found)
+    local sound_font="$biosdir/scummvm/extra/Roland_SC-55.sf2"
+    if [[ -f "/usr/share/sounds/sf2/FluidR3_GM.sf2" ]]; then sound_font="/usr/share/sounds/sf2/FluidR3_GM.sf2"; fi
     if [[ ! -f "$biosdir/scummvm.ini" ]]; then
         echo "[scummvm]" > "$biosdir/scummvm.ini"
         iniConfig "=" "" "$biosdir/scummvm.ini"
         iniSet "extrapath" "$biosdir/scummvm/extra"
         iniSet "themepath" "$biosdir/scummvm/theme"
-        iniSet "soundfont" "$biosdir/scummvm/extra/Roland_SC-55.sf2"
-        iniSet "gui_theme" "scummremastered"
+        iniSet "iconspath" "$biosdir/scummvm/icons"
+        iniSet "savepath" "$biosdir/scummvm/saves"
+        iniSet "browser_lastpath" "$home/RetroPie/roms/scummvm"
+        iniSet "soundfont" "$sound_font"
+        iniSet "gui_theme" "residualvm"
+        iniSet "gui_launcher_chooser" "grid"
+        iniSet "gui_scale" "175"
+        iniSet "fullscreen" "true"
+        iniSet "aspect_ratio" "true"
         iniSet "subtitles" "true"
         iniSet "multi_midi" "true"
         iniSet "gm_device" "fluidsynth"
-        chown "$__user":"$__group" "$biosdir/scummvm.ini"
+        iniSet "sfx_volume" "169"
+        iniSet "music_volume" "179"
+        iniSet "speech_volume" "192"
+        iniSet "music_driver" "auto"
+        iniSet "mt32_device" "mt32"
+        iniSet "midi_gain" "100"
+        iniSet "kbdmouse_speed" "3"
+        iniSet "confirm_exit" "false"
+        iniSet "gfx_mode" "opengl"
+        chown "$__user":"$__user" "$biosdir/scummvm.ini"
+    fi
+
+    if ! grep -q 'extra=LucasArts' "$biosdir/scummvm.ini"; then
+        cat >>"$biosdir/scummvm.ini" << _EOF_
+
+
+[FullThrottle]
+description=FullThrottle
+extra=LucasArts
+path=$home/RetroPie/roms/scummvm/FullThrottle.svm
+extrapath=$biosdir/scummvm/extra
+engineid=scumm
+enhancements=1
+gameid=ft
+original_gui=true
+original_gui_text_status=1
+language=en
+dimuse_low_latency_mode=false
+shader=default
+platform=pc
+aspect_ratio=true
+stretch_mode=stretch
+guioptions=sndNoMIDI vga gameOption4 gameOption5 lang_English
+_EOF_
+        chown "$__user":"$__user" "$biosdir/scummvm.ini"
     fi
 
     # enable speed hack core option if running in arm platform
@@ -89,4 +147,7 @@ $emudir/retroarch/bin/retroarch \\
     "\$ROM" "\$@"
 _EOF_
     chmod +x "$md_inst/romdir-launcher.sh"
+
+    [[ "$md_mode" == "install" ]] && game_data_scummvm
+    [[ "$md_mode" == "install" ]] && shortcuts_icons_scummvm
 }
