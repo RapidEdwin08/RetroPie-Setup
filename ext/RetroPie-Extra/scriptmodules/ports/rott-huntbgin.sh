@@ -51,7 +51,6 @@ function depends_rott-huntbgin() {
 
 function sources_rott-huntbgin() {
     gitPullOrClone
-    download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rott-huntbgin/ROTTHB_48x48.xpm" "$md_build"
 }
 
 function build_rott-huntbgin() {
@@ -76,7 +75,6 @@ function install_rott-huntbgin() {
     if [[ "$__os_debian_ver" -le 10 ]]; then local rott_bin="rott-huntbgin"; else local rott_bin="src/rott"; fi
     md_ret_files=(
            "$rott_bin"
-           'ROTTHB_48x48.xpm'
     )
 }
 
@@ -87,9 +85,10 @@ function game_data_rott-huntbgin() {
 }
 
 function remove_rott-huntbgin() {
-    if [[ -f "/usr/share/applications/Rise Of The Triad Hunt Begins.desktop" ]]; then sudo rm -f "/usr/share/applications/Rise Of The Triad Hunt Begins.desktop"; fi
-    if [[ -f "$home/Desktop/Rise Of The Triad Hunt Begins.desktop" ]]; then rm -f "$home/Desktop/Rise Of The Triad Hunt Begins.desktop"; fi
-    if [[ -f "$romdir/ports/Rise Of The Triad The Hunt Begins (Shareware).sh" ]]; then rm "$romdir/ports/Rise Of The Triad The Hunt Begins (Shareware).sh"; fi
+    local shortcut_name
+    shortcut_name="Rise Of The Triad Hunt Begins"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
+    rm -f "$romdir/ports/$shortcut_name (Shareware).sh"
 }
 
 function configure_rott-huntbgin() {
@@ -117,7 +116,7 @@ _EOF_
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    if (isPlatform "kms") && [[ "$__os_debian_ver" -le 10 ]]; then launch_prefix="XINIT:"; fi
+    if (isPlatform "rpi") && [[ "$__os_debian_ver" -le 10 ]]; then launch_prefix="XINIT:"; fi
     addPort "$md_id" "rott-huntbgin" "Rise Of The Triad The Hunt Begins (Shareware)" "$launch_prefix$script"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addPort "$md_id+qjoypad" "rott-huntbgin" "Rise Of The Triad The Hunt Begins (Shareware)" "$launch_prefix$md_inst/rott-huntbgin-qjoy.sh"
@@ -698,24 +697,6 @@ _EOF_
         chown $__user:$__user "$md_conf_root/rott/sound.rot"
     fi
 
-    cat >"$md_inst/Rise Of The Triad Hunt Begins.desktop" << _EOF_
-[Desktop Entry]
-Name=Rise Of The Triad Hunt Begins
-GenericName=Rise Of The Triad Hunt Begins
-Comment=RoTT Hunt Begins
-Exec=$md_inst/$md_id.sh
-Icon=$md_inst/ROTTHB_48x48.xpm
-Terminal=false
-Type=Application
-Categories=Game;Emulator
-Keywords=D2;ROTT;Hunt;Begins
-StartupWMClass=RiseOfTheTriadHuntBegins
-Name[en_US]=Rise Of The Triad Hunt Begins
-_EOF_
-    chmod 755 "$md_inst/Rise Of The Triad Hunt Begins.desktop"
-    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/Rise Of The Triad Hunt Begins.desktop" "$home/Desktop/Rise Of The Triad Hunt Begins.desktop"; chown $__user:$__user "$home/Desktop/Rise Of The Triad Hunt Begins.desktop"; fi
-    mv "$md_inst/Rise Of The Triad Hunt Begins.desktop" "/usr/share/applications/Rise Of The Triad Hunt Begins.desktop"
-
    cat >"$md_inst/rott-huntbgin-qjoy.sh" << _EOF_
 #!/bin/bash
 # https://github.com/RapidEdwin08/
@@ -777,6 +758,284 @@ exit 0
 _EOF_
     chmod 755 "$md_inst/rott-huntbgin-qjoy.sh"
 
-    [[ "$md_mode" == "install" ]] && game_data_rott-huntbgin
     [[ "$md_mode" == "remove" ]] && remove_rott-huntbgin
+    [[ "$md_mode" == "remove" ]] && return
+    [[ "$md_mode" == "install" ]] && game_data_rott-huntbgin
+    [[ "$md_mode" == "install" ]] && shortcuts_icons_rott-huntbgin
+}
+
+function shortcuts_icons_rott-huntbgin() {
+    local shortcut_name
+    shortcut_name="Rise Of The Triad Hunt Begins"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+[Desktop Entry]
+Name=$shortcut_name
+GenericName=$shortcut_name
+Comment=RoTT Hunt Begins
+Exec=$md_inst/$md_id.sh
+Icon=$md_inst/ROTTHB_48x48.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=D2;ROTT;Hunt;Begins
+StartupWMClass=RiseOfTheTriadHuntBegins
+Name[en_US]=$shortcut_name
+_EOF_
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+
+    cat >"$md_inst/ROTTHB_48x48.xpm" << _EOF_
+/* XPM */
+static char * ROTTHB_48x48_xpm[] = {
+"48 48 200 2",
+"   c None",
+".  c #FF8700",
+"+  c #F6820C",
+"@  c #B7603D",
+"#  c #F6820F",
+"\$     c #432056",
+"%  c #B8603D",
+"&  c #00005B",
+"*  c #F6820D",
+"=  c #442056",
+"-  c #B9603D",
+";  c #F7820D",
+">  c #462156",
+",  c #BA613C",
+"'  c #361957",
+")  c #944C48",
+"!  c #C76A35",
+"~  c #F7820C",
+"{  c #482256",
+"]  c #0F045A",
+"^  c #EB9018",
+"/  c #BB623B",
+"(  c #683451",
+"_  c #FAAC00",
+":  c #F7830C",
+"<  c #492356",
+"[  c #AC5941",
+"}  c #F8BD00",
+"|  c #BC623B",
+"1  c #01005B",
+"2  c #D9722A",
+"3  c #F6CC00",
+"4  c #F6CD00",
+"5  c #F7830B",
+"6  c #4B2456",
+"7  c #2F1557",
+"8  c #F88608",
+"9  c #F4D900",
+"0  c #8B474B",
+"a  c #FD9600",
+"b  c #F3DF00",
+"c  c #4B2455",
+"d  c #C26538",
+"e  c #FBAA00",
+"f  c #BE633B",
+"g  c #06025A",
+"h  c #E87B1D",
+"i  c #F9BB00",
+"j  c #F8830A",
+"k  c #4D2555",
+"l  c #5A2C53",
+"m  c #FD8600",
+"n  c #F6CA00",
+"o  c #BD633A",
+"p  c #A55644",
+"q  c #FF8800",
+"r  c #F4D800",
+"s  c #F8830C",
+"t  c #4E2655",
+"u  c #D36F2E",
+"v  c #FE9400",
+"w  c #F3DE00",
+"x  c #BE633A",
+"y  c #210D58",
+"z  c #F5820D",
+"A  c #FBA700",
+"B  c #F88309",
+"C  c #4F2655",
+"D  c #80414D",
+"E  c #F9B900",
+"F  c #BF643A",
+"G  c #BC623C",
+"H  c #F7C800",
+"I  c #F9840B",
+"J  c #502755",
+"K  c #02015B",
+"L  c #E37822",
+"M  c #F5D600",
+"N  c #C06439",
+"O  c #FC8601",
+"P  c #FE9100",
+"Q  c #F98408",
+"R  c #522855",
+"S  c #914B48",
+"T  c #FD9900",
+"U  c #F3DD00",
+"V  c #C16539",
+"W  c #1B0A5A",
+"X  c #C96A34",
+"Y  c #FCA500",
+"Z  c #F4DC00",
+"\`     c #FCA600",
+" . c #F9840A",
+".. c #532854",
+"+. c #B45E3D",
+"@. c #FD9E00",
+"#. c #512755",
+"\$.    c #C16538",
+"%. c #0B035B",
+"&. c #FBAB00",
+"*. c #E8811F",
+"=. c #5B2D54",
+"-. c #B35D3F",
+";. c #FD8601",
+">. c #FD9700",
+",. c #0A035B",
+"'. c #542955",
+"). c #B25D3E",
+"!. c #FAB200",
+"~. c #F6CF00",
+"{. c #EF8818",
+"]. c #6A3552",
+"^. c #A25444",
+"/. c #FC8603",
+"(. c #C26539",
+"_. c #A45543",
+":. c #FAAB02",
+"<. c #FAB000",
+"[. c #D06D2E",
+"}. c #08025B",
+"|. c #954D48",
+"1. c #F98409",
+"2. c #552A54",
+"3. c #F9A402",
+"4. c #F5D500",
+"5. c #F79F08",
+"6. c #AC5940",
+"7. c #17075A",
+"8. c #F79D08",
+"9. c #F5D400",
+"0. c #C26638",
+"a. c #85444C",
+"b. c #F79D07",
+"c. c #F4DB00",
+"d. c #F8C100",
+"e. c #E07E26",
+"f. c #693452",
+"g. c #E07C26",
+"h. c #F8BF00",
+"i. c #562A54",
+"j. c #773C50",
+"k. c #F5960E",
+"l. c #F7A507",
+"m. c #B15C3F",
+"n. c #200C5A",
+"o. c #F8A107",
+"p. c #F5960D",
+"q. c #C46638",
+"r. c #663352",
+"s. c #F18F14",
+"t. c #F4D600",
+"u. c #F7C700",
+"v. c #E38423",
+"w. c #6F3850",
+"x. c #E48023",
+"y. c #F8C200",
+"z. c #FA8407",
+"A. c #582B54",
+"B. c #552955",
+"C. c #EC881B",
+"D. c #F6CE00",
+"E. c #F7AC04",
+"F. c #B55F3D",
+"G. c #250F59",
+"H. c #F8A504",
+"I. c #F6CB00",
+"J. c #C36637",
+"K. c #432057",
+"L. c #E68121",
+"M. c #F9BA00",
+"N. c #E48921",
+"O. c #753B4F",
+"P. c #E58321",
+"Q. c #462157",
+"R. c #FA8408",
+"S. c #592C54",
+"T. c #321658",
+"U. c #DE7627",
+"V. c #FA9804",
+"W. c #BA643B",
+"X. c #2B1259",
+"Y. c #FB8E04",
+"Z. c #DF7527",
+"\`.    c #C56737",
+" + c #250F5A",
+".+ c #D6702D",
+"++ c #E97B1F",
+"@+ c #7A3E4E",
+"#+ c #592B54",
+"\$+    c #10045A",
+"%+ c #C76834",
+"&+ c #BF6439",
+"*+ c #07025B",
+"=+ c #A05341",
+"-+ c #5C2D53",
+";+ c #371956",
+">+ c #341758",
+",+ c #C66836",
+"'+ c #CF6D2D",
+")+ c #BE6438",
+"                                              . .                                               ",
+"                                              . .                                               ",
+"                                            . + + .                                             ",
+"                                            . @ @ .                                             ",
+"                                          . # \$ \$ # .                                           ",
+"                                          . % & & % .                                           ",
+"                                        . * = & & = * .                                         ",
+"                                        . - & & & & - .                                         ",
+"                                      . ; > & & & & > ; .                                       ",
+"                                      . , & & ' ' & & , .                                       ",
+"                                    . + > & & ) ) & & > + .                                     ",
+"                                    . , & & & ! ! & & & , .                                     ",
+"                                  . ~ { & & ] ^ ^ ] & & { ~ .                                   ",
+"                                  . / & & & ( _ _ ( & & & / .                                   ",
+"                                . : < & & & [ } } [ & & & < : .                                 ",
+"                                . | & & & 1 2 3 4 2 1 & & & | .                                 ",
+"                              . 5 6 & & & 7 8 9 9 8 7 & & & 6 5 .                               ",
+"                              . | & & & & 0 a b b a 0 & & & & | .                               ",
+"                            . : c & & & & d e b b e d & & & & c : .                             ",
+"                            . f & & & & g h i b b i h g & & & & f .                             ",
+"                          . j k & & & & l m n b b n m l & & & & k j .                           ",
+"                          . o & & & & & p q r b b r q p & & & & & o .                           ",
+"                        . s t & & & & & u v w b b w v u & & & & & t s .                         ",
+"                        . x & & & & & y z A b b b b A z y & & & & & x .                         ",
+"                      . B C & & & & & D . E b b b b E . D & & & & & C B .                       ",
+"                      . F & & & & & & G . H b b b b H . G & & & & & & F .                       ",
+"                    . I J & & & & & K L q M b b b b M q L K & & & & & J I .                     ",
+"                    . N & & & & & & k O P w b b b b w P O k & & & & & & N .                     ",
+"                  . Q R & & & & & & S . T U b b b b U T . S & & & & & & R Q .                   ",
+"                  . V & & & & & & & W X . Y Z b b Z \` . X W & & & & & & & V .                   ",
+"                .  ...& & & & & & ] +.J | . @.9 9 @.. | #.+.] & & & & & & .. ..                 ",
+"                . \$.& & & & & & %.\$.&.*.=.-.;.>.>.;.-.=.*.&.\$.,.& & & & & & \$..                 ",
+"              . Q '.& & & & & & ).!.w ~.{.].^././.^.].{.~.w !.).& & & & & & '.Q .               ",
+"              . (.& & & & & 1 _.:.w b w <.[.}.|.|.}.[.<.w b w :._.1 & & & & & (..               ",
+"            . 1.2.& & & & & |.3.U b 4.5.6.7.& & & & 7.6.8.9.b U 3.|.& & & & & 2.1..             ",
+"            . 0.& & & & & a.b.c.b d.e.f.& & & & & & & & f.g.h.w c.b.a.& & & & & 0..             ",
+"          . Q i.& & & & j.k.9 r l.m.n.& & & & & & & & & & n.m.o.M 9 p.j.& & & & i.Q .           ",
+"          . q.& & & & r.s.t.u.v.w.& & & & & & & & & & & & & & w.x.y.M s.r.& & & & q..           ",
+"        . z.A.& & & B.C.D.E.F.G.& & & & & & & & & & & & & & & & G.F.H.I.C.B.& & & A.z..         ",
+"        . J.& & & K.L.M.N.O.& & & & & & & & & & & & & & & & & & & & O.P.!.L.Q.& & & J..         ",
+"      . R.S.& & T.U.V.W.X.& & & & & & & & & & & & & & & & & & & & & & X./ Y.Z.T.& & S.R..       ",
+"      . \`.& &  +.+++@+& & & & & & & & & & & & & & & & & & & & & & & & & & @+++.+G.& & \`..       ",
+"    . z.#+& \$+%+&+T.& & & & & & & & & & & & & & & & & & & & & & & & & & & & T.&+%+\$+& #+z..     ",
+"    . \`.& *+=+D & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & D =+*+& \`..     ",
+"  . R.-+& ;+>+& & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & >+;+& -+R..   ",
+"  . ,+& & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & & ,+.   ",
+". . '+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+)+'+. . ",
+". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "};
+_EOF_
 }
