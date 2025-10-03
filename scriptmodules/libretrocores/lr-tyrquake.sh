@@ -150,7 +150,7 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     local addon_name
     addon_name=dopa
@@ -172,7 +172,7 @@ _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -f "$romdir/ports/quake/$addon_name/pak0.pak" ]]; then
         if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-        mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
 
     addon_name=hipnotic
@@ -194,7 +194,7 @@ _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -f "$romdir/ports/quake/$addon_name/pak0.pak" ]]; then
         if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-        mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
 
     addon_name=rogue
@@ -216,7 +216,7 @@ _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -f "$romdir/ports/quake/$addon_name/pak0.pak" ]]; then
         if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-        mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
 
     cat >"$md_inst/Quake_70x70.xpm" << _EOF_
