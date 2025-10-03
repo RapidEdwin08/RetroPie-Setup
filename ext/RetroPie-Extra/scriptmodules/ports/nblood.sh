@@ -73,6 +73,24 @@ function remove_nblood() {
     rm -f "$home/Desktop/$shortcut_name.desktop"
 }
 
+function gui_nblood() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            shortcuts_icons_nblood
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+}
+
 function configure_nblood() {
 	if [[ ! -d "$home/.config/nblood" ]]; then mkdir "$home/.config/nblood"; fi
 	if [[ ! -f "$home/.config/nblood/nblood_cvars.cfg" ]]; then touch "$home/.config/nblood/nblood_cvars.cfg"; fi
