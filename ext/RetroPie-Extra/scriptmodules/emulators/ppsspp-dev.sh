@@ -18,7 +18,9 @@ rp_module_id="ppsspp-dev"
 rp_module_desc="PlayStation Portable emulator PPSSPP - latest development version"
 rp_module_help="ROM Extensions: .iso .pbp .cso\n\nCopy your PlayStation Portable roms to $romdir/psp"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/hrydgard/ppsspp/master/LICENSE.TXT"
-rp_module_repo="git https://github.com/hrydgard/ppsspp.git master"
+#rp_module_repo="git https://github.com/hrydgard/ppsspp.git master"
+#rp_module_repo="git https://github.com/hrydgard/ppsspp.git master 40a53315" # 20250910 Delete reference to prebuilt libfreetype, pull in the source instead - CMake Error at ext/freetype/CMakeLists.txt:223 (message): In-source builds are not permitted! Make a separate folder for building
+rp_module_repo="git https://github.com/hrydgard/ppsspp.git master 28f8ce64" # 20250910 Add freetype as a submodule (2.14.0) - Last Commit Before CMake Error
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -154,7 +156,7 @@ function build_ppsspp-dev() {
     if ! isPlatform "vulkan"; then
         isPlatform "arm" && params+=(-DARM_NO_VULKAN=ON)
     fi
-    if [[ "$md_id" == "lr-ppsspp" ]]; then
+    if [[ "$md_id" == "lr-ppsspp-dev" ]]; then
         params+=(-DLIBRETRO=On)
         ppsspp_binary="lib/ppsspp_libretro.so"
     fi
@@ -233,15 +235,16 @@ _EOF_
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psp_StartPPSSPP = "ppsspp-dev"' ; echo $?) == '1' ]]; then echo 'psp_StartPPSSPP = "ppsspp-dev"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
-    local shortcut_name
-    shortcut_name="PPSSPP"
+    local shortcut_name="PPSSPP"
+    local icon_name=$md_inst/assets/icon_regular_72.png
+    if [[ -f $md_inst/assets/ui_images/icon.png ]]; then icon_name=$md_inst/assets/ui_images/icon.png; fi
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=PPSSPP
 GenericName=PPSSPP
 Comment=PSP Emulator
 Exec=$md_inst/$md_id.sh
-Icon=$md_inst/assets/icon_regular_72.png
+Icon=$icon_name
 Terminal=false
 Type=Application
 Categories=Game;Emulator
