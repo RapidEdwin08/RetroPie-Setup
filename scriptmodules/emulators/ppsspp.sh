@@ -31,7 +31,7 @@ function depends_ppsspp() {
     isPlatform "videocore" && depends+=(libraspberrypi-dev)
     isPlatform "mesa" && depends+=(libgles2-mesa-dev)
     isPlatform "vero4k" && depends+=(vero3-userland-dev-osmc)
-    isPlatform "vulkan" && depends+=(mesa-vulkan-drivers)
+    isPlatform "vulkan" && depends+=(libvulkan-dev)
     getDepends "${depends[@]}"
 }
 
@@ -84,8 +84,7 @@ function build_ffmpeg_ppsspp() {
     elif isPlatform "aarch64"; then
         arch="aarch64"
     fi
-    # force to arm arch on arm - fixes building on 32bit arm userland with aarch64 kernel
-    isPlatform "arm" && local extra_params='--arch=arm'
+    isPlatform "vero4k" && local extra_params='--arch=arm'
 
     local MODULES
     local VIDEO_DECODERS
@@ -150,14 +149,6 @@ function build_ppsspp() {
         fi
     elif isPlatform "mesa"; then
         params+=(-DUSING_GLES2=ON -DUSING_EGL=OFF)
-        # force arm target on arm platforms to fix building on arm 32bit userland with aarch64 kernel
-        if isPlatform "arm"; then
-            if isPlatform "armv6"; then
-                params+=(-DFORCED_CPU=armv6)
-            else
-                params+=(-DFORCED_CPU=armv7)
-            fi
-        fi
     elif isPlatform "mali"; then
         params+=(-DUSING_GLES2=ON -DUSING_FBDEV=ON)
         # remove -DGL_GLEXT_PROTOTYPES on odroid-xu/tinker to avoid errors due to header prototype differences
