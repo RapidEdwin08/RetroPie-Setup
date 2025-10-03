@@ -95,6 +95,25 @@ function remove_dunelegacy-eu() {
     rm -f "$romdir/ports/$shortcut_name.sh"
 }
 
+function gui_dunelegacy-eu() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            game_data_dunelegacy-eu
+            shortcuts_icons_dunelegacy-eu
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+}
+
 function configure_dunelegacy-eu() {
     mkRomDir "ports/dune2/$md_id"
     chown -R $__user:$__user "$romdir/ports/dune2"
@@ -248,7 +267,7 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     cat >"$md_inst/DuneII_48x48.xpm" << _EOF_
 /* XPM */

@@ -118,9 +118,9 @@ function configure_jfsw() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addPort "$md_id" "sw" "Shadow Warrior (JFSW)" "$launch_prefix$md_inst/sw %ROM%" ""
-    addPort "$md_id" "sw" "Shadow Warrior Twin Dragon (JFSW)" "$launch_prefix$md_inst/sw %ROM%" "-gtdragon.zip"
-    addPort "$md_id" "sw" "Shadow Warrior Wanton Destruction (JFSW)" "$launch_prefix$md_inst/sw %ROM%" "-gwantdest.grp"
+    addPort "$md_id" "sw" "Shadow Warrior (jfsw)" "$launch_prefix$md_inst/sw %ROM%" ""
+    addPort "$md_id" "sw" "Shadow Warrior Twin Dragon (jfsw)" "$launch_prefix$md_inst/sw %ROM%" "-gtdragon.zip"
+    addPort "$md_id" "sw" "Shadow Warrior Wanton Destruction (jfsw)" "$launch_prefix$md_inst/sw %ROM%" "-gwantdest.grp"
 
     cat >"$md_inst/sw.cfg" << _EOF_
 [Screen Setup]
@@ -426,7 +426,7 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Shadow Warrior Twin Dragon"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -445,7 +445,7 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Shadow Warrior Wanton Destruction"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -464,7 +464,7 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     cat >"$md_inst/ShadowWarrior_48x48.xpm" << _EOF_
 /* XPM */

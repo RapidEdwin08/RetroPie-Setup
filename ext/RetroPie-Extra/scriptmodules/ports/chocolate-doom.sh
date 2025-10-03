@@ -100,6 +100,14 @@ function game_data_chocolate-doom() {
         rm -rf freedoom-0.13.0
         rm freedoom-0.13.0.zip
     fi
+
+    if [[ ! -f "$md_inst/chocolate_doom_setup" ]]; then
+        download https://raw.githubusercontent.com/RapidEdwin08/chocolate-doom-plus/main/Chocolate%20Doom%20Setup.sh "$md_build"
+        mv "$md_inst/Chocolate%20Doom%20Setup.sh" "$md_inst/chocolate_doom_setup"; chmod 755 "$md_inst/chocolate_doom_setup"
+    fi
+    if [[ ! -f "$md_inst/chocolate-doom-setup_64x64.xpm" ]]; then
+        download https://raw.githubusercontent.com/RapidEdwin08/chocolate-doom-plus/main/chocolate-doom-setup_64x64.xpm "$md_build"
+    fi
 }
 
 function remove_chocolate-doom() {
@@ -129,6 +137,25 @@ function remove_chocolate-doom() {
 
     rm -f "/usr/share/applications/Chocolate D00M Setup.desktop"
     rm -f "$home/Desktop/Chocolate D00M Setup.desktop"
+}
+
+function gui_chocolate-doom() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            game_data_chocolate-doom
+            shortcuts_icons_chocolate-doom
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
 }
 
 function configure_chocolate-doom() {
@@ -503,6 +530,13 @@ _EOF_
        addPort "$md_id" "chocolate-strife1" "Chocolate Strife" "$md_inst/chocolate-strife -iwad $romdir/ports/doom/strife1.wad"
     fi
 
+    [[ "$md_mode" == "remove" ]] && remove_chocolate-doom
+    [[ "$md_mode" == "remove" ]] && return
+    [[ "$md_mode" == "install" ]] && game_data_chocolate-doom
+    [[ "$md_mode" == "install" ]] && shortcuts_icons_chocolate-doom
+}
+
+function shortcuts_icons_chocolate-doom() {
     local shortcut_name
     shortcut_name="Chocolate Doom"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -521,7 +555,7 @@ Name[en_US]=Chocolate Doom
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate Heretic"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -540,7 +574,7 @@ Name[en_US]=Chocolate Heretic
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate HeXen"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -559,7 +593,7 @@ Name[en_US]=Chocolate HeXen
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate Strife"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -578,7 +612,7 @@ Name[en_US]=Chocolate Strife
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate Doom Setup"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -597,7 +631,7 @@ Name[en_US]=Chocolate Doom Setup
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    ##rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate Heretic Setup"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -616,7 +650,7 @@ Name[en_US]=Chocolate Heretic Setup
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    ##rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate HeXen Setup"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -635,7 +669,7 @@ Name[en_US]=Chocolate HeXen Setup
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    ##rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate Strife Setup"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -654,7 +688,7 @@ Name[en_US]=Chocolate Strife Setup
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    ##mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    ##rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Chocolate D00M Setup"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -673,8 +707,5 @@ Name[en_US]=Chocolate D00M Setup
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
-
-    [[ "$md_mode" == "install" ]] && game_data_chocolate-doom
-    [[ "$md_mode" == "remove" ]] && remove_chocolate-doom
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 }
