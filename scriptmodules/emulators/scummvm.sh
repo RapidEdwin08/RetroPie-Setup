@@ -260,7 +260,7 @@ Name[en_US]=$shortcut_name
 _EOF_
         chmod 755 "$md_inst/$shortcut_name.desktop"
         if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-        mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
 
     shortcut_name="Full Throttle"
@@ -280,7 +280,7 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    mv "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     cat >"$md_inst/FullThrottle_74x74.xpm" << _EOF_
 /* XPM */
