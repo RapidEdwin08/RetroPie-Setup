@@ -24,7 +24,7 @@ rp_module_flags=""
 
 function depends_jfsw() {
     # libsdl1.2-dev libsdl-mixer1.2-dev xorg xinit x11-xserver-utils xinit libgl1-mesa-dev libsdl2-dev libvorbis-dev rename
-    local depends=(cmake build-essential libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libvpx-dev freepats zip unzip rename)
+    local depends=(cmake build-essential libsdl2-dev libsdl2-mixer-dev flac libflac-dev libvorbis-dev libfluidsynth-dev libvpx-dev freepats zip unzip rename)
     isPlatform "x86" && depends+=(nasm)
     isPlatform "gl" || isPlatform "mesa" && depends+=(libgl1-mesa-dev libglu1-mesa-dev)
     isPlatform "x11" && depends+=(libgtk2.0-dev)
