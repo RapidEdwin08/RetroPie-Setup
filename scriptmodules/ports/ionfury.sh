@@ -47,6 +47,24 @@ function remove_ionfury() {
     rm -f "$romdir/ports/$shortcut_name.sh"
 }
 
+function gui_ionfury() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            shortcuts_icons_ionfury
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+}
+
 function configure_ionfury() {
     configure_eduke32
     if [[ ! -f "$md_conf_root/$md_id/aftershock_settings.cfg" ]]; then cp "$md_conf_root/$md_id/ionfury_settings.cfg" "$md_conf_root/$md_id/aftershock_settings.cfg"; fi

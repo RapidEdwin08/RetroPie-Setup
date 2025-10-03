@@ -133,6 +133,25 @@ function remove_yquake2() {
     rm -f "$romdir/ports/$shortcut_name.sh"
 }
 
+function gui_yquake2() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            add_games_yquake2
+            shortcuts_icons_yquake2
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+}
+
 function configure_yquake2() {
     local config="$md_conf_root/quake2/yquake2/baseq2/yq2.cfg"
     local renderer="soft"

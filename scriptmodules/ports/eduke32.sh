@@ -93,10 +93,10 @@ function sources_eduke32() {
 function build_eduke32() {
     local params=(LTO=0 SDL_TARGET=2 STARTUP_WINDOW=0)
 
-    #[[ "$md_id" == "ionfury" ]] && params+=(FURY=1) # Do Not Let Source Determine POLYMER=0
+    #[[ "$md_id" == "ionfury" ]] && params+=(FURY=1)
     if [[ "$md_id" == "ionfury" ]]; then
-        params+=(APPBASENAME=fury APPNAME=IonFury NETCODE=0 STANDALONE=1 USE_LIBVPX=0 RETAIL_MENU=1)
-        isPlatform "rpi" && params+=(POLYMER=0 USE_OPENGL=0) # e5aad188
+        params+=(APPBASENAME=fury APPNAME=IonFury NETCODE=0 STANDALONE=1 USE_LIBVPX=0 RETAIL_MENU=1 POLYMER=0)
+        isPlatform "rpi" && params+=(USE_OPENGL=0) # e5aad188
     fi
     ! isPlatform "x86" && params+=(NOASM=1)
     ! isPlatform "x11" && params+=(HAVE_GTK2=0)
@@ -156,6 +156,26 @@ function remove_eduke32() {
         cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'eduke32+' > /dev/shm/runcommand-onend.sh
         mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
     fi
+}
+
+function gui_eduke32() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            game_data_eduke32
+            add_games_eduke32
+            shortcuts_icons_eduke32
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
 }
 
 function configure_eduke32() {
@@ -322,7 +342,7 @@ _EOF_
         chmod 755 "${binary}.sh"
     fi
 
-    if [[ "$md_id" == "eduke32" ]]; then
+    if [[ "$md_id" == "eduke32" ]] && [[ "$md_mode" == "install" ]]; then
         cat > "$md_inst/eduke32_plus.sh" << _EOF_
 #!/bin/bash
 
