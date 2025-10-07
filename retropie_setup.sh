@@ -14,3 +14,4 @@ scriptdir="$(cd "$scriptdir" && pwd)"
 
 "$scriptdir/retropie_packages.sh" setup gui
 
+if [[ -f /usr/bin/sysinfo ]]; then sysinfo; fi
