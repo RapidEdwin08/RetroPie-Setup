@@ -56,7 +56,12 @@ function depends_kodi() {
     fi
 
     # required for reboot/shutdown options. Don't try and remove if removing dependencies
-    [[ "$md_mode" == "install" ]] && getDepends policykit-1
+    #[[ "$md_mode" == "install" ]] && getDepends policykit-1 # Yeah well...
+    if [[ $(apt-cache search policykit-1 | grep 'policykit-1 ') == '' ]]; then
+        [[ "$md_mode" == "install" ]] && getDepends polkitd
+    else
+        [[ "$md_mode" == "install" ]] && getDepends policykit-1
+    fi
 
     addUdevInputRules
 }
