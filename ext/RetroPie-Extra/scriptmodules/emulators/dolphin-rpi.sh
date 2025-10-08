@@ -26,7 +26,12 @@ rp_module_section="exp"
 rp_module_flags="!all aarch64"
 
 function depends_dolphin-rpi() {
-    local depends=(cmake gcc-11 g++-11 pkg-config libasound2-dev libopenal-dev libevdev-dev libgtk2.0-dev qtbase5-private-dev libxxf86vm-dev x11proto-xinerama-dev libsdl2-dev)
+    local platform
+    local gcc_ver
+    local gpp_ver
+    gcc_ver=gcc-11; gpp_ver=g++-11
+    if [[ ! "$(apt-cache search gcc-14 | grep 'gcc-14 ')" == '' ]]; then gcc_ver=gcc-14; gpp_ver=g++-14; fi
+    local depends=(cmake pkg-config libasound2-dev libopenal-dev libevdev-dev libgtk2.0-dev qtbase5-private-dev libxxf86vm-dev x11proto-xinerama-dev libsdl2-dev $gcc_ver $gpp_ver)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
@@ -35,15 +40,23 @@ function sources_dolphin-rpi() {
     gitPullOrClone
     # Hide Font Error: Trying to access Windows-1252 fonts but they are not loaded. /Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp
     applyPatch "$md_data/01_font_alerts.diff"
+    # CMake Deprecation Warning at CMakeLists.txt:4 (cmake_minimum_required):
+    sed -i s'+cmake_minimum_required.*+cmake_minimum_required\(VERSION 3\.13\)'+ $md_build/CMakeLists.txt
 }
  
 function build_dolphin-rpi() {
+    local gcc_ver
+    local gpp_ver
+    gcc_ver=gcc-11; gpp_ver=g++-11
+    if [[ ! "$(apt-cache search gcc-14 | grep 'gcc-14 ')" == '' ]]; then gcc_ver=gcc-14; gpp_ver=g++-14; fi
+    echo GCC: $gcc_ver  G++: $gpp_ver
+
     mkdir build
     cd build
     # use the bundled 'speexdsp' libs, distro versions before 1.2.1 trigger a 'cmake' error
-    cmake .. -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DBUNDLE_SPEEX=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_ANALYTICS=OFF  -DUSE_DISCORD_PRESENCE=O -DENABLE_PULSEAUDIO=ON
+    cmake .. -DCMAKE_C_COMPILER=$gcc_ver -DCMAKE_CXX_COMPILER=$gpp_ver -DBUNDLE_SPEEX=ON -DENABLE_AUTOUPDATE=OFF -DENABLE_ANALYTICS=OFF  -DUSE_DISCORD_PRESENCE=O -DENABLE_PULSEAUDIO=ON
     make clean
-    make
+    make -j"$(nproc)"
     md_ret_require="$md_build/build/Binaries/dolphin-emu"
 }
  
@@ -344,26 +357,6 @@ _EOF_
 
    chown -R $__user:$__user "$home/.local/share/dolphin-rpi"
 
-   local shortcut_name
-   shortcut_name="Dolphin-rpi"
-   cat >"$md_inst/$shortcut_name.desktop" << _EOF_
-[Desktop Entry]
-Name=Dolphin-rpi
-GenericName=Dolphin-rpi
-Comment=Wii/GameCube Emulator
-Exec=$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/
-Icon=$md_inst/dolphin-emu.svg
-Terminal=false
-Type=Application
-Categories=Game;Emulator
-Keywords=GC;Wii
-StartupWMClass=Dolphin-rpi
-Name[en_US]=Dolphin-rpi
-_EOF_
-   chmod 755 "$md_inst/$shortcut_name.desktop"
-   if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-   rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
-
    cat >"$md_inst/dolphin-rpi-qjoy.sh" << _EOF_
 #!/bin/bash
 # https://github.com/RapidEdwin08/
@@ -416,4 +409,317 @@ pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
 exit 0
 _EOF_
     chmod 755 "$md_inst/dolphin-rpi-qjoy.sh"
+
+    [[ "$md_mode" == "install" ]] && shortcuts_icons_dolphin-rpi
+}
+
+function shortcuts_icons_dolphin-rpi() {
+   local shortcut_name
+   shortcut_name="Dolphin-rpi"
+   cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+[Desktop Entry]
+Name=Dolphin-rpi
+GenericName=Dolphin-rpi
+Comment=Wii/GameCube Emulator
+Exec=$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/
+Icon=$md_inst/DolphinRPi_74x74.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=GC;Wii
+StartupWMClass=Dolphin-rpi
+Name[en_US]=Dolphin-rpi
+_EOF_
+   chmod 755 "$md_inst/$shortcut_name.desktop"
+   if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+   rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+
+    cat >"$md_inst/DolphinRPi_74x74.xpm" << _EOF_
+/* XPM */
+static char * DolphinRPi_74x74_xpm[] = {
+"74 74 209 2",
+"   c None",
+".  c #9D254D",
+"+  c #9C254C",
+"@  c #9A254B",
+"#  c #98244A",
+"\$     c #C32E5F",
+"%  c #C22E5E",
+"&  c #C12E5E",
+"*  c #C02E5D",
+"=  c #BF2D5D",
+"-  c #BE2D5C",
+";  c #BB2D5B",
+">  c #BA2C5B",
+",  c #B92C5A",
+"'  c #B82C5A",
+")  c #B72C59",
+"!  c #B52B58",
+"~  c #B42B58",
+"{  c #B32B57",
+"]  c #B22A56",
+"^  c #B12A56",
+"/  c #AF2A55",
+"(  c #A2264F",
+"_  c #A1264E",
+":  c #A0264E",
+"<  c #9F264D",
+"[  c #C72F61",
+"}  c #CC3063",
+"|  c #C52F60",
+"1  c #942348",
+"2  c #C62F60",
+"3  c #C42F5F",
+"4  c #CC3163",
+"5  c #D13F6E",
+"6  c #D44977",
+"7  c #D6537D",
+"8  c #D75680",
+"9  c #D75881",
+"0  c #D5507B",
+"a  c #D54D79",
+"b  c #D34573",
+"c  c #CF3567",
+"d  c #B02A56",
+"e  c #AE2954",
+"f  c #AC2954",
+"g  c #AB2953",
+"h  c #A82852",
+"i  c #A3274F",
+"j  c #D24371",
+"k  c #DA6289",
+"l  c #DF7799",
+"m  c #E07C9C",
+"n  c #E07B9C",
+"o  c #DF799A",
+"p  c #D03A6B",
+"q  c #CA3062",
+"r  c #C83061",
+"s  c #D0396A",
+"t  c #D7557F",
+"u  c #DB698E",
+"v  c #E287A5",
+"w  c #E389A7",
+"x  c #E389A6",
+"y  c #E387A5",
+"z  c #E286A4",
+"A  c #E284A3",
+"B  c #E284A2",
+"C  c #E283A2",
+"D  c #E182A1",
+"E  c #E1809F",
+"F  c #DD7194",
+"G  c #D96087",
+"H  c #D44A77",
+"I  c #CB3063",
+"J  c #A92852",
+"K  c #A62751",
+"L  c #A52750",
+"M  c #B02A55",
+"N  c #D6547E",
+"O  c #DF789A",
+"P  c #DF7899",
+"Q  c #DE7698",
+"R  c #DE7597",
+"S  c #DE7496",
+"T  c #DE7396",
+"U  c #D24472",
+"V  c #DA648B",
+"W  c #E17F9F",
+"X  c #E388A6",
+"Y  c #E183A2",
+"Z  c #E181A1",
+"\`     c #E181A0",
+" . c #E180A0",
+".. c #E07E9E",
+"+. c #E07C9D",
+"@. c #D95F87",
+"#. c #D24271",
+"\$.    c #DD7195",
+"%. c #DE7295",
+"&. c #CD3164",
+"*. c #D75781",
+"=. c #DF7A9B",
+"-. c #E285A4",
+";. c #E07D9E",
+">. c #DD7094",
+",. c #DD7093",
+"'. c #DD6F93",
+"). c #DD6E92",
+"!. c #DC6E92",
+"~. c #DC6D91",
+"{. c #DC6C90",
+"]. c #D13D6D",
+"^. c #DE7395",
+"/. c #DC6B90",
+"(. c #D44976",
+"_. c #E07D9D",
+":. c #DB688E",
+"<. c #DB678C",
+"[. c #DB668C",
+"}. c #DA668C",
+"|. c #902246",
+"1. c #D44B77",
+"2. c #DA658B",
+"3. c #DA648A",
+"4. c #DA638A",
+"5. c #DA6389",
+"6. c #D96188",
+"7. c #D95E86",
+"8. c #BC2D5B",
+"9. c #8E2245",
+"0. c #8B2144",
+"a. c #DA6189",
+"b. c #932348",
+"c. c #892143",
+"d. c #DC6B8F",
+"e. c #D95D85",
+"f. c #D85C85",
+"g. c #D85B84",
+"h. c #D6517C",
+"i. c #AA2953",
+"j. c #872042",
+"k. c #D85A83",
+"l. c #D75982",
+"m. c #841F40",
+"n. c #A72851",
+"o. c #CF3466",
+"p. c #831F40",
+"q. c #811F3F",
+"r. c #DC6C91",
+"s. c #D96088",
+"t. c #D85D85",
+"u. c #D6547F",
+"v. c #D54E7A",
+"w. c #CE3265",
+"x. c #B82C59",
+"y. c #D6537E",
+"z. c #D6527D",
+"A. c #862041",
+"B. c #7E1E3D",
+"C. c #D24170",
+"D. c #D13E6E",
+"E. c #852041",
+"F. c #7C1D3C",
+"G. c #D54F7B",
+"H. c #972449",
+"I. c #962449",
+"J. c #D44C79",
+"K. c #D13C6C",
+"L. c #821F3F",
+"M. c #99244B",
+"N. c #D44B78",
+"O. c #D03869",
+"P. c #7D1E3D",
+"Q. c #B62B59",
+"R. c #912246",
+"S. c #D34875",
+"T. c #D34674",
+"U. c #751C39",
+"V. c #952348",
+"W. c #D34473",
+"X. c #D24372",
+"Y. c #BB2C5B",
+"Z. c #721B37",
+"\`.    c #A2274F",
+" + c #8A2143",
+".+ c #D1406F",
+"++ c #701B36",
+"@+ c #D34472",
+"#+ c #AD2954",
+"\$+    c #882042",
+"%+ c #D13C6D",
+"&+ c #D03B6C",
+"*+ c #6C1A34",
+"=+ c #CF3668",
+"-+ c #771C3A",
+";+ c #D0386A",
+">+ c #9B254B",
+",+ c #CE3366",
+"'+ c #651831",
+")+ c #CE3164",
+"!+ c #CD3163",
+"~+ c #CB3062",
+"{+ c #7F1E3E",
+"]+ c #7C1E3C",
+"^+ c #C42F60",
+"/+ c #6E1A36",
+"(+ c #BD2D5C",
+"_+ c #BA2C5A",
+":+ c #A42750",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                    . + + @ #                                       ",
+"                                        \$ % & * = - ; > , ' ) ! ~ { ] ^ /                   ( _ : < ^ * [ } | ; + 1                                 ",
+"                                [ 2 | 3 % & 4 5 6 7 7 8 9 8 0 a b c 3 d e f g g h       i ( / j k l m n n o o o l k p                               ",
+"                          q r [ 2 s t u o v w x x y v z z z A B B C D E F G H I J K L i M N l o o o O P Q Q Q R S T T                               ",
+"                      q q r U V W w x X v z z z A B B C Y Z \` \`  .W ......+.m n Q @.#.U \$.P Q Q Q R R T T T %.%.                                    ",
+"                    } &.*.=.y v z z -.B B C Y Z \` \`  .W ......;.m m n n o o o P P Q Q R R T T T %.F F >.,.,.                                        ",
+"                  } 8 ..z A B B C D Z \`  .E ......;.m m n n o o o O P Q Q Q R S T T T F F F >.'.).!.~.{.{.                                          ",
+"              &.].^.C Y Z \` \`  .W ......m m n n =.o o O P Q Q Q R S T T T %.F F >.,.).!.!.~.{./././.u u #.                                          ",
+"              (._. .W ......;.m m n n o o o P P Q Q R R T T T %.F F >.,.).!.!.~.{./././.u u :.:.<.[.[.}.].|.                                        ",
+"            1._.;.m m n n o o o O P Q Q Q R S T T T %.F F F >.'.).!.~.{././.u u :.:.<.[.[.}.2.3.4.4.5.6.7.8.9.0.                                    ",
+"          U o =.o o O P Q Q Q R R T T T %.F F                                 [.}.V 3.4.4.a.6.6.G G G 7.7.7.5 b.c.                                  ",
+"          d.P Q Q R R T T T %.F F >.,.).).                                            6.G 7.7.7.e.e.e.f.f.f.g.h.i.j.                                ",
+"        7.S T T T F F F >.).!.!.~.{././.                                                    f.f.g.g.g.k.k.l.l.l.8 & m.                              ",
+"        /.F >.,.).!.!.~.{./././.u u :.    { ] ^ M e f g g h n.K L                               l.l.9 9 9 8 8 8 t t o.p.q.                          ",
+"        r.~.{./././.u u :.:.<.[.[.}.s.8 9 l.6.6.6.6.G t.u.v.#.w.x.( _ : .                           t t t u.u.u.y.y.z.p A.B.                        ",
+"        u u :.:.<.[.[.}.2.3.4.4.5.6.6.6.G G G 7.7.e.e.e.f.f.f.g.g.u.C.= . + @                           y.z.z.h.h.h.0 0 D.E.F.                      ",
+"        [.[.}.V 3.4.4.a.6.6.G G G 7.7.7.e.e.f.f.f.g.g.g.k.k.k.l.l.9 9 9 G.&._ H.I.                        0 0 v.v.a a a J.K.L.                      ",
+"      4.4.a.6.6.6.G G 7.7.7.e.e.e.f.f.f.g.g.k.k.k.l.l.l.9 9 8 8 8 t t t u.u.0 q M.1                           J.N.N.N.H H (.O.P.                    ",
+"    6.G G G 7.7.e.e.e.f.f.f.g.g.g.k.k.l.l.l.9 9 9 8 8 t t t u.u.u.y.y.z.z.z.h.h.(.Q.R.|.                        (.(.S.S.S.T.T.q U.                  ",
+"  7.7.e.e.f.f.f.g.g.g.k.k.k.l.l.9 9 9 8 8 8 t t u.u.u.y.y.y.z.z.h.h.h.0 0 0 v.v.a a o.V.9.                        T.b b W.W.W.X.Y.Z.                ",
+"f.f.f.g.g.k.k.k.l.l.l.9 9 9 8 8               y.z.z.z.h.h.0 0 0 v.v.a a a J.J.N.N.N.H C.\`. +                        X.#.#.#.C.C..+( ++              ",
+"k.k.l.l.l.9 9 9 8 8 8                         h.0 0 v.v.v.a a J.J.    N.H H H (.(.S.S.S.@+#+\$+                        .+.+D.D.D.].s m.              ",
+"  9 8 8 8 t t t                                 a a J.J.N.N.H H H           S.T.T.b b W.W.#.~ E.                        ].%+%+&+&+&+[ *+            ",
+"                                                  H H (.(.(.S.S.T.                X.#.#.#.C.C.{ p.                          s s s O.O.K             ",
+"                                                    S.T.T.b b b W.                    .+D.D.D.].h q.                        O.=+c c c &.-+          ",
+"                                                      W.W.X.X.#.#.C.                      %+&+&+;+>+                          o.,+,+w.w.{ '+        ",
+"                                                        C.C..+.+.+D.                        s s O.)+\$+                          )+)+!+!+~+{+        ",
+"                                                          D.].].%+%+%+                          c c &                             I q q q {         ",
+"                                                              &+p p s s                             w.K                             r r [ 2 ]+      ",
+"                                                                    O.=+=+                            2                               2 ^+^+g       ",
+"                                                                                                                                      \$ % % = /+    ",
+"                                                                                                                                        & & & >+    ",
+"                                                                                                                                          & * !     ",
+"                                                                                                                                          = = = B.  ",
+"                                                                                                                                            - - :   ",
+"                                                                                                                                            (+(+/   ",
+"                                                                                                                                              8.;   ",
+"                                                                                                                                                _+# ",
+"                                                                                                                                                , :+",
+"                                                                                                                                                  f ",
+"                                                                                                                                                  J ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    ",
+"                                                                                                                                                    "};
+_EOF_
 }

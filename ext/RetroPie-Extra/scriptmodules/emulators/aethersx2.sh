@@ -22,8 +22,13 @@ rp_module_section="exp"
 rp_module_flags="!all arm aarch64 !x86"
 
 function depends_aethersx2() {
-    local depends=(libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
+    local depends=(mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    if [[ $(apt-cache search libfuse2t64 | grep 'libfuse2t64 ') == '' ]]; then
+        depends+=(libfuse2)
+    else
+        depends+=(libfuse2t64)
+    fi
     getDepends "${depends[@]}"
 }
 

@@ -30,8 +30,13 @@ function depends_pcsx2-x64() {
         #dialog --ok --msgbox "Installer is for a 64bit system Only!" 22 76 2>&1 >/dev/tty
         md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
     fi
-    local depends=(libfuse2 mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
+    local depends=(mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    if [[ $(apt-cache search libfuse2t64 | grep 'libfuse2t64 ') == '' ]]; then
+        depends+=(libfuse2)
+    else
+        depends+=(libfuse2t64)
+    fi
     getDepends "${depends[@]}"
 }
 
