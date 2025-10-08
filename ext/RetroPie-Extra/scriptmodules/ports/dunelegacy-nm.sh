@@ -120,8 +120,12 @@ function configure_dunelegacy-nm() {
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/$md_id"
     if [[ ! -d "$md_conf_root/$md_id/dunelegacy" ]]; then mkdir "$md_conf_root/$md_id/dunelegacy"; fi
-    chown -R $__user:$__user "$md_conf_root/$md_id/dunelegacy"
-    if [[ ! -d "$home/RetroPie/roms/ports/dune2/$md_id" ]]; then ln -s "$home/RetroPie/roms/ports/dune2/$md_id" "$md_conf_root/$md_id/dunelegacy/data"; fi
+    if [[ -d "$md_conf_root/$md_id/dunelegacy/data" ]] && [[ "$(readlink "$md_conf_root/$md_id/dunelegacy/data")" == '' ]]; then # Move files if Not symbolic link
+		mv "$md_conf_root/$md_id/dunelegacy/data/*" "$home/RetroPie/roms/ports/dune2/$md_id"
+		chown -R $__user:$__user "$romdir/ports/dune2/$md_id"
+		rm -Rf "$md_conf_root/$md_id/dunelegacy/data"
+	fi
+    if [[ ! -d "$md_conf_root/$md_id/dunelegacy/data" ]]; then ln -s "$home/RetroPie/roms/ports/dune2/$md_id" "$md_conf_root/$md_id/dunelegacy/data"; fi
     chown -R $__user:$__user "$md_conf_root/$md_id"
 
     local launch_prefix

@@ -21,9 +21,15 @@ rp_module_repo="git https://github.com/coelckers/prboom-plus.git master"
 rp_module_section="exp"
 
 function depends_prboom-plus() {
-    getDepends libsdl2-dev libsdl2-net-dev libsdl2-image-dev libpcre3-dev libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev libmad0-dev libdumb1-dev libvorbis-dev
+    #local depends=(libsdl2-dev libsdl2-net-dev libsdl2-image-dev libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev libmad0-dev libdumb1-dev libvorbis-dev)
+    local depends=(libsdl2-dev libsdl2-net-dev libsdl2-image-dev libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev libmad0-dev libdumb1-dev libvorbis-dev zlib1g-dev libogg-dev)
+    if [[ $(apt-cache search libpcre3-dev | grep 'libpcre3-dev ') == '' ]]; then
+        depends+=(libpcre2-dev)
+    else
+        depends+=(libpcre3-dev)
+    fi
+    getDepends "${depends[@]}"
 }
-
 
 function sources_prboom-plus() {
     gitPullOrClone
