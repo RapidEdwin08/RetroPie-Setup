@@ -23,6 +23,11 @@ function depends_lr-dolphin() {
 
 function sources_lr-dolphin() {
     gitPullOrClone
+    if [[ "$__os_debian_ver" -ge 13 ]]; then # 20251002 (Temp) Workaround for ERROR on Trixie: type_is_unformattable has incomplete type
+        # [lr-dolphin] Remove Line 275 [FileSystemProxy.cpp] LogResult(result, "Seek({}, 0x{:08x}, {})", handle.name.data(), request.offset, request.mode);
+        sed -i s+LogResult\(result,\ \"Seek\(\{\},\ 0x\{:08x\},\ \{\}\)\",\ handle.name.data\(\),\ request.offset,\ request.mode\)\;+\ + "$md_build/Source/Core/Core/IOS/FS/FileSystemProxy.cpp" # Very Specific...
+        #sed -i s+LogResult\(result,\ \"Seek\(\{\},\ 0x\{:08x\},\ \{\}\)\",\ handle.name.data\(\),.*+\ + "$md_build/Source/Core/Core/IOS/FS/FileSystemProxy.cpp" # Not so Specific...
+    fi
 }
 
 function build_lr-dolphin() {
