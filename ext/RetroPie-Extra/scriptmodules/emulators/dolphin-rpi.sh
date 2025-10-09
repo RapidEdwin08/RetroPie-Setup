@@ -142,10 +142,10 @@ function configure_dolphin-rpi() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addEmulator 0 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
-    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
-    addEmulator 0 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
-    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    addEmulator 1 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    ##addEmulator 0 "$md_id-nogui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    addEmulator 1 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM% -u $home/.local/share/dolphin-rpi/"
+    ##addEmulator 0 "$md_id-nogui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM% -u $home/.local/share/dolphin-rpi/"
 
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator 0 "$md_id-editor" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -u $home/.local/share/dolphin-rpi/"
