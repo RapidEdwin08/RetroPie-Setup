@@ -92,10 +92,10 @@ function configure_dolphin() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addEmulator 0 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
-    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
-    addEmulator 0 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
-    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
+    addEmulator 1 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
+    ##addEmulator 0 "$md_id-nogui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
+    addEmulator 1 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
+    ##addEmulator 0 "$md_id-nogui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
 
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator 0 "$md_id-editor" "gc" "$launch_prefix$md_inst/bin/dolphin-emu"
@@ -117,13 +117,13 @@ function configure_dolphin() {
     moveConfigDir "$home/.config/dolphin-emu" "$md_conf_root/gc/Config"
     mkUserDir "$md_conf_root/gc/Config"
  
-   cat >"$romdir/gc/+Start Dolphin.m3u" << _EOF_
+    cat >"$romdir/gc/+Start Dolphin.m3u" << _EOF_
 #!/bin/bash
 "/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _SYS_ "gc" ""
 _EOF_
-   chown $__user:$__user "$romdir/gc/+Start Dolphin.m3u"
+    chown $__user:$__user "$romdir/gc/+Start Dolphin.m3u"
 
-   cat >"$romdir/wii/+Start Dolphin.wad" << _EOF_
+    cat >"$romdir/wii/+Start Dolphin.wad" << _EOF_
 #!/bin/bash
 "/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _SYS_ "wii" ""
 _EOF_
@@ -133,8 +133,10 @@ _EOF_
    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'gc_StartDolphin = "dolphin-editor"' ; echo $?) == '1' ]]; then echo 'gc_StartDolphin = "dolphin-editor"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'wii_StartDolphin = "dolphin-editor"' ; echo $?) == '1' ]]; then echo 'wii_StartDolphin = "dolphin-editor"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
-    # preset a few options on a first installation
-    if [[ ! -f "$md_conf_root/gc/Config/Dolphin.ini" ]]; then cat >"$md_conf_root/gc/Config/Dolphin.ini" <<_EOF_; fi
+   # preset a few options on a first installation
+   #if [[ ! -f "$md_conf_root/gc/Config/Dolphin.ini" ]]; then cat >"$md_conf_root/gc/Config/Dolphin.ini" <<_EOF_; fi
+   if [[ ! -f "$md_conf_root/gc/Config/Dolphin.ini" ]]; then
+        cat >"$md_conf_root/gc/Config/Dolphin.ini" <<_EOF_
 [Display]
 FullscreenDisplayRes = Auto
 Fullscreen = True
@@ -148,14 +150,21 @@ ISOPath1 = "$home/RetroPie/roms/wii"
 ISOPaths = 2
 [Core]
 AutoDiscChange = True
+CPUThread = True
 _EOF_
-
+        if isPlatform "vulkan"; then echo 'GFXBackend = Vulkan' >> $md_conf_root/gc/Config/Dolphin.ini; fi # [Core]
+        if [[ ! "$(dpkg --list | grep -i pulseaudio)" == '' ]]; then cat >>"$md_conf_root/gc/Config/Dolphin.ini" <<_EOF_; fi
+[DSP]
+Backend = Pulse
+DSPThread = True
+_EOF_
+   fi
    if [ ! -f $md_conf_root/gc/Config/GFX.ini ]; then cat >"$md_conf_root/gc/Config/GFX.ini" <<_EOF_; if isPlatform "gles3"; then echo 'PreferGLES = True' >> $md_conf_root/gc/Config/GFX.ini; fi; fi
 [Settings]
 AspectRatio = 3
 _EOF_
 
-    if [ ! -f $md_conf_root/gc/Config/GCPadNew.ini ]; then cat >"$md_conf_root/gc/Config/GCPadNew.ini" <<_EOF_; fi
+   if [ ! -f $md_conf_root/gc/Config/GCPadNew.ini ]; then cat >"$md_conf_root/gc/Config/GCPadNew.ini" <<_EOF_; fi
 [GCPad1]
 Device = SDL/0/X360 Wireless Controller
 Buttons/A = \`Button S\`
@@ -192,7 +201,7 @@ Device = XInput2/0/Virtual core pointer
 Device = XInput2/0/Virtual core pointer
 _EOF_
 
-    if [ ! -f $md_conf_root/gc/Config/WiimoteNew.ini ]; then cat >"$md_conf_root/gc/Config/WiimoteNew.ini" <<_EOF_; fi
+   if [ ! -f $md_conf_root/gc/Config/WiimoteNew.ini ]; then cat >"$md_conf_root/gc/Config/WiimoteNew.ini" <<_EOF_; fi
 [Wiimote1]
 Device = evdev/0/Xbox 360 Wireless Receiver (XBOX)
 Buttons/A = SOUTH
@@ -264,7 +273,7 @@ Device = XInput2/0/Virtual core pointer
 Source = 0
 _EOF_
 
-    if [ ! -f $md_conf_root/gc/Config/Hotkeys.ini ]; then cat >"$md_conf_root/gc/Config/Hotkeys.ini" <<_EOF_; fi
+   if [ ! -f $md_conf_root/gc/Config/Hotkeys.ini ]; then cat >"$md_conf_root/gc/Config/Hotkeys.ini" <<_EOF_; fi
 [Hotkeys]
 Device = SDL/0/X360 Wireless Controller
 General/Open = @(Ctrl+O)
