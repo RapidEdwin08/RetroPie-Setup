@@ -51,7 +51,7 @@ function _video_exts_splashscreen() {
 }
 
 function depends_splashscreen() {
-	getDepends fbi fim mpv vlc insserv vorbis-tools
+	getDepends fbi mpv vlc vorbis-tools; # fim insserv
 	if [ ! -f /etc/mpv/mpv.conf ]; then echo "$mpvIMAGESreference" > /etc/mpv/mpv.conf; fi
 	if [ ! -f ~/.config/mpv/mpv.conf ]; then mkdir ~/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > ~/.config/mpv/mpv.conf; fi
 	if [ ! -f /home/pi/.config/mpv/mpv.conf ]; then mkdir /home/pi/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > /home/pi/.config/mpv/mpv.conf; fi
