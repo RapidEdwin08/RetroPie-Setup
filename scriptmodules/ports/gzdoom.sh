@@ -77,7 +77,11 @@ function build_gzdoom() {
 }
 
 function install_gzdoom() {
-    md_ret_files=(
+    # 20251010 I'm tired of updating the libzmusic.so.1.* version...
+    local libzmusic_ver=libzmusic.so.1.3.0
+    if [[ ! -f "$md_build/release/zmusic/lib/$libzmusic_ver" ]]; then libzmusic_ver="$(basename $(ls $md_build/release/zmusic/lib/libzmusic.so.1.*))"; fi
+    echo LIBZMUSIC.SO: [$libzmusic_ver]
+	md_ret_files=(
         'release/brightmaps.pk3'
         'release/gzdoom'
         'release/gzdoom.pk3'
@@ -86,7 +90,7 @@ function install_gzdoom() {
         'release/game_widescreen_gfx.pk3'
         'release/soundfonts'
         "release/zmusic/lib/libzmusic.so.1"
-        "release/zmusic/lib/libzmusic.so.1.2.0"
+        "release/zmusic/lib/$libzmusic_ver"
         'README.md'
     )
 }
