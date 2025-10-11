@@ -366,9 +366,10 @@ function gui_emulationstation() {
 
         case "$choice" in
             1)
-                if dialog --defaultno --yesno "Are you sure you want to reset the Emulation Station controller configuration ? This will wipe all controller configs for ES and it will prompt to reconfigure on next start" 22 76 2>&1 >/dev/tty; then
+                if dialog --defaultno --yesno "Are you sure you want to reset the Emulation Station controller configuration ? This will wipe all controller configs for ES/RetroArch and it will prompt to reconfigure on next start" 22 76 2>&1 >/dev/tty; then
                     clear_input_emulationstation
-                    printMsgs "dialog" "$(_get_input_cfg_emulationstation) has been reset to default values."
+					rm /opt/retropie/configs/all/retroarch/autoconfig/*
+                    printMsgs "dialog" "$(_get_input_cfg_emulationstation) + /opt/retropie/configs/all/retroarch/autoconfig/* have been reset to default values."
                 fi
                 ;;
             2)
