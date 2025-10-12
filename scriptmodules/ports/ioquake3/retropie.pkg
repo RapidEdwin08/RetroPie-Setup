@@ -1,0 +1,8 @@
+pkg_origin="source"
+pkg_date="2025-10-11T15:25:41-04:00"
+pkg_repo_type="git"
+pkg_repo_url="https://github.com/ioquake/ioq3"
+pkg_repo_branch="main"
+pkg_repo_commit="c49d4d96bff00cd7366d3557e850765e25c3676e"
+pkg_repo_date="2025-10-11T13:58:48+01:00"
+pkg_repo_extra=""
