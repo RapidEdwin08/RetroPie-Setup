@@ -72,7 +72,8 @@ function configure_ioquake3() {
 
     addPort "$md_id" "quake3" "Quake III Arena" "${launcher[*]}"
 
-    launcher+=("map chronic deathmatch 1")
+    # [+set g_gametype] 0 = deathmatch # 1 = one on one (tournament) # 2 = single player deathmatch # 3 = team deathmatch # 4 = capture the flag
+    launcher+=("+map chronic +set g_gametype 0 +bot_enable 1 +addbot eminem 3 red +addbot dre blue")
     addPort "$md_id-chronic" "quake3-chronic" "Quake III Chronic" "${launcher[*]}"
 
     mkRomDir "ports/quake3"
@@ -138,14 +139,16 @@ bind PAD0_A "+moveup"
 bind PAD0_B "centerview"
 bind PAD0_X "+movedown"
 bind PAD0_Y "+speed"
+bind PAD0_BACK "+scores"
+bind PAD0_START "togglemenu"
 bind PAD0_LEFTSTICK_CLICK "+movedown"
 bind PAD0_RIGHTSTICK_CLICK "centerview"
-bind PAD0_LEFTSHOULDER "weapprev"
+bind PAD0_LEFTSHOULDER "+zoom"
 bind PAD0_RIGHTSHOULDER "weapnext"
 bind PAD0_DPAD_UP "+button3"
 bind PAD0_DPAD_DOWN "+button2"
-bind PAD0_DPAD_LEFT "+scores"
-bind PAD0_DPAD_RIGHT "+scores"
+bind PAD0_DPAD_LEFT "weapprev"
+bind PAD0_DPAD_RIGHT "weapnext"
 bind PAD0_LEFTSTICK_LEFT "+moveleft"
 bind PAD0_LEFTSTICK_RIGHT "+moveright"
 bind PAD0_LEFTSTICK_UP "+forward"
@@ -224,7 +227,7 @@ seta cl_maxPing "800"
 seta cl_lanForcePackets "1"
 seta cl_guidServerUniq "1"
 seta cl_consoleKeys "~ \` 0x7e 0x60"
-seta name "UnnamedPlayer"
+seta name "Quake Guy"
 seta rate "25000"
 seta snaps "20"
 seta model "sarge"
@@ -486,8 +489,10 @@ seta in_joystickUseAnalog "0"
 seta com_zoneMegs "24"
 _EOF_
     if [[ ! -f "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg" ]]; then cp "$md_inst/q3config.cfg" "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg"; fi
+    if [[ ! -f "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg.ioquake3" ]]; then cp "$md_inst/q3config.cfg" "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg.ioquake3"; fi
     sed -i s+seta\ in_joystick.*+seta\ in_joystick\ \"1\"+ "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg"
     chown $__user:$__user "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg"
+    chown $__user:$__user "$md_conf_root/quake3/ioquake3/baseq3/q3config.cfg.ioquake3"
 
     [[ "$md_mode" == "install" ]] && game_data_ioquake3
     [[ "$md_mode" == "install" ]] && shortcuts_icons_ioquake3
@@ -519,13 +524,14 @@ _EOF_
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
     rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
-    launcher+=("map chronic deathmatch 1")
+    # [+set g_gametype] 0 = deathmatch # 1 = one on one (tournament) # 2 = single player deathmatch # 3 = team deathmatch # 4 = capture the flag
+    launcher+=("+map chronic +set g_gametype 0 +bot_enable 1 +addbot eminem 3 red +addbot dre blue")
     shortcut_name="Quake III Chronic"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
-Comment=map chronic
+Comment=A Single Map featuring Eminem & Dr. Dre
 Exec=${launcher[*]}
 Icon=$md_inst/quake3chronic_72x72.xpm
 Terminal=false
