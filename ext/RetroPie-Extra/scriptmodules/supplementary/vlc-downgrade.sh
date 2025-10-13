@@ -21,7 +21,7 @@ vlc_version=$(dpkg -l | grep libvlc-bin | awk '{print $3}')
 rp_module_id="vlc-downgrade"
 rp_module_desc="Downgrade VLC for ES Video Snap Delay Issue        Related to libvlc: [v1:3.0.21-0]                         Current Version of libvlc: [v$vlc_version]"
 rp_module_section="config"
-rp_module_flags="rpi"
+rp_module_flags="rpi !:\$__os_debian_ver:-gt:12 !:\$__os_debian_ver:-lt:11"
 
 function _downgrade_libvlc() {
     if [[ ! -d /dev/shm/vlc-downgrade ]]; then mkdir /dev/shm/vlc-downgrade; fi
