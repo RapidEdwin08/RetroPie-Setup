@@ -46,8 +46,8 @@ function install_bin_aethersx2() {
     if [[ -d "$home/Desktop" ]]; then mv -f "AetherSX2.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/AetherSX2.desktop"; fi
     mv "AetherSX2-128.xpm" "$md_inst"; mv "PS2BIOSRequired.jpg" "$md_inst"
 
-    if [[ ! -d "$home/.config/aethersx2" ]]; then mkdir "$home/.config/aethersx2"; fi
-    if [[ ! -d "$home/.config/aethersx2/inis" ]]; then mkdir "$home/.config/aethersx2/inis"; fi
+    mkdir -p "$home/.config/aethersx2/inis"
+    mkdir -p "$md_conf_root/ps2/aethersx2"
     # Basic Settings
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.aethersx2"
     sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.aethersx2" # I don't care what anyone says...
@@ -88,7 +88,6 @@ function install_bin_aethersx2() {
     if [[ ! -d "$home/.config/aethersx2/covers" ]]; then mkdir "$home/.config/aethersx2/covers"; fi
     if [[ ! -f "$home/.config/aethersx2/covers/uLaunchELF 4.42d.png" ]]; then mv 'uLaunchELF 4.42d.png' "$home/.config/aethersx2/covers"; fi
     chown -R $__user:$__user "$home/.config/aethersx2"
-    if [[ ! -d "$md_conf_root/ps2/aethersx2" ]]; then mkdir "$md_conf_root/ps2/aethersx2"; fi
     moveConfigDir "$home/.config/aethersx2" "$md_conf_root/ps2/aethersx2"
     chown -R $__user:$__user "$md_conf_root/ps2/aethersx2"
 
