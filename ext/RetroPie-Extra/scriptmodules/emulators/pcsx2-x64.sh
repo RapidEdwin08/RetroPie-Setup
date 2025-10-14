@@ -41,7 +41,7 @@ function depends_pcsx2-x64() {
 }
 
 function install_bin_pcsx2-x64() {
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/pcsx2/pcsx2-pc-assets.tar.gz" "$md_build"
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/pcsx2-x64/pcsx2-x64-rp-assets.tar.gz" "$md_build"
     download "https://github.com/PCSX2/pcsx2/releases/download/${pcsx2_ver}/pcsx2-${pcsx2_ver}-linux-appimage-x64-Qt.AppImage" "$md_build"
 
     pushd "$md_build"
@@ -53,8 +53,8 @@ function install_bin_pcsx2-x64() {
     if [[ -d "$home/Desktop" ]]; then mv -f "PCSX2.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/PCSX2.desktop"; fi
     mv "PCSX2-128.xpm" "$md_inst"; mv "PS2BIOSRequired.jpg" "$md_inst"
 
-    if [[ ! -d "$home/.config/PCSX2" ]]; then mkdir "$home/.config/PCSX2"; fi
-    if [[ ! -d "$home/.config/PCSX2/inis" ]]; then mkdir "$home/.config/PCSX2/inis"; fi
+    mkdir -p "$home/.config/PCSX2/inis"
+    mkdir -p "$md_conf_root/ps2/PCSX2"
     # Basic Settings
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
     sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
@@ -77,7 +77,6 @@ function install_bin_pcsx2-x64() {
     if [[ ! -d "$home/.config/PCSX2/covers" ]]; then mkdir "$home/.config/PCSX2/covers"; fi
     if [[ ! -f "$home/.config/PCSX2/covers/uLaunchELF 4.42d.png" ]]; then mv 'uLaunchELF 4.42d.png' "$home/.config/PCSX2/covers"; fi
     chown -R $__user:$__user "$home/.config/PCSX2"
-    if [[ ! -d "$md_conf_root/ps2/PCSX2" ]]; then mkdir "$md_conf_root/ps2/PCSX2"; fi
     moveConfigDir "$home/.config/PCSX2" "$md_conf_root/ps2/PCSX2"
     chown -R $__user:$__user "$md_conf_root/ps2/PCSX2"
 
