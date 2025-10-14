@@ -1,0 +1,8 @@
+pkg_origin="binary"
+pkg_date="2024-10-26T10:46:16-04:00"
+pkg_repo_type="git"
+pkg_repo_url="https://github.com/PCSX2/pcsx2/releases/download/v2.4.0/pcsx2-v2.4.0-linux-appimage-x64-Qt.AppImage"
+pkg_repo_branch="2.4.0"
+pkg_repo_commit="e4af1c424451c6b65c5c387404315cef77e9901b"
+pkg_repo_date="2025-06-29T07:20:28+00:00"
+pkg_repo_extra=""
