@@ -66,12 +66,14 @@ function install_bin_aethersx2() {
         sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1'+g "PCSX2.ini.aethersx2"
         sed -i s+'accurate_blending_unit =.*'+'accurate_blending_unit = 0'+g "PCSX2.ini.aethersx2" # Maybe 0 is too low...
         sed -i s+'EECycleRate =.*'+'EECycleRate = -2'+g "PCSX2.ini.aethersx2"
-        sed -i s+'EECycleSkip =.*'+'EECycleSkip = 3'+g "PCSX2.ini.aethersx2"
+        sed -i s+'EECycleSkip =.*'+'EECycleSkip = 2'+g "PCSX2.ini.aethersx2"
         sed -i s+'vuThread =.*'+'vuThread = true'+g "PCSX2.ini.aethersx2"
         sed -i s+'vu1Instant =.*'+'vu1Instant = false'+g "PCSX2.ini.aethersx2" # Don't use Instant VU1 + Multi-Threaded VU1 Simultaneously
-        sed -i s+'paltex =.*'+'paltex = true'+g "PCSX2.ini.aethersx2"
-        sed -i s+'Interpolation =.*'+'Interpolation = 1'+g "PCSX2.ini.aethersx2"
-        sed -i s+'SyncToHostRefreshRate =.*'+'SyncToHostRefreshRate = true'+g "PCSX2.ini.aethersx2"
+        sed -i s+'paltex =.*'+'paltex = false'+g "PCSX2.ini.aethersx2"
+        sed -i s+'IntegerScaling =.*'+'IntegerScaling = false'+g "PCSX2.ini.aethersx2"
+        sed -i s+'filter =.*'+'filter = 1'+g "PCSX2.ini.aethersx2"
+        sed -i s+'Interpolation =.*'+'Interpolation = 4'+g "PCSX2.ini.aethersx2"
+        sed -i s+'SyncToHostRefreshRate =.*'+'SyncToHostRefreshRate = false'+g "PCSX2.ini.aethersx2"
         sed -i s+'VsyncEnable =.*'+'VsyncEnable = 2'+g "PCSX2.ini.aethersx2"
         sed -i s+'VsyncQueueSize =.*'+'VsyncQueueSize = 2'+g "PCSX2.ini.aethersx2"
         #sed -i s+'FramerateNTSC =.*'+'FramerateNTSC = 50'+g "PCSX2.ini.aethersx2" # Default is FramerateNTSC = 59.94
@@ -126,7 +128,7 @@ function remove_aethersx2() {
 
 function configure_aethersx2() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
-    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2"' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
+    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2-editor' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2-editor"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
     addSystem "ps2"
     local launch_prefix
