@@ -54,6 +54,25 @@ function game_data_ioquake3() {
     chown -R "$__user":"$__group" "$romdir/ports/quake3"
 }
 
+function gui_ioquake3() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            game_data_ioquake3
+            shortcuts_icons_ioquake3
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+}
+
 function remove_ioquake3() {
     local shortcut_name
     shortcut_name="Quake III Arena"
