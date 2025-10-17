@@ -41,7 +41,7 @@ function sources_dolphin-rpi() {
     # Hide Font Error: Trying to access Windows-1252 fonts but they are not loaded. /Source/Core/Core/HW/EXI/EXI_DeviceIPL.cpp
     applyPatch "$md_data/01_font_alerts.diff"
     # CMake Deprecation Warning at CMakeLists.txt:4 (cmake_minimum_required):
-    sed -i s'+cmake_minimum_required.*+cmake_minimum_required\(VERSION 3\.13\)'+ $md_build/CMakeLists.txt
+    ##sed -i s'+cmake_minimum_required.*+cmake_minimum_required\(VERSION 3\.13\)'+ $md_build/CMakeLists.txt
 }
  
 function build_dolphin-rpi() {
