@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-# This file is part of The RetroPie Project
+# This file is part of RetroPie-Extra, a supplement to RetroPie.
+# For more information, please visit:
 #
-# The RetroPie Project is the legal property of its developers, whose names are
-# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+# https://github.com/RetroPie/RetroPie-Setup
+# https://github.com/Exarkuniv/RetroPie-Extra
+# https://github.com/RapidEdwin08/RetroPie-Setup
 #
-# See the LICENSE.md file at the top-level directory of this distribution and
-# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
-#
-# RetroPie-Extra
+# See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
 # If no user is specified (for RetroPie below v4.8.9)
@@ -50,7 +49,7 @@ rp_module_section="exp"
 rp_module_flags=""
 
 function depends_hexen2-gl() {
-    # libsdl1.2-dev libsdl-net1.2-dev libsdl-sound1.2-dev libsdl-mixer1.2-dev libsdl-image1.2-dev
+    # libsdl1.2-dev libsdl-net1.2-dev libsdl-sound1.2-dev libsdl-mixer1.2-dev libsdl-image1.2-dev timidity freepats
     depends+=(cmake timidity freepats libmad0-dev libogg-dev libflac-dev libmpg123-dev libsdl2-dev libsdl2-mixer-dev)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
