@@ -43,6 +43,7 @@ function build_lr-mame2003() {
     make ARCH="$CFLAGS" "${params[@]}"
     rpSwap off
     md_ret_require="$md_build/$(_get_so_name_${md_id})_libretro.so"
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
 
 function install_lr-mame2003() {
