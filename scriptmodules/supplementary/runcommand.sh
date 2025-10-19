@@ -21,7 +21,9 @@ function _update_hook_runcommand() {
         [[ -f "$md_inst/joy2key.py" ]] && rp_callModule "joy2key"
         install_bin_runcommand
     fi
-    if hasFlag "armv6" && [[ "$__os_debian_ver" -le 12 ]]; then
+    ##if hasFlag "armv6" && [[ "$__os_debian_ver" -le 12 ]]; then
+    # https://retropie.org.uk/forum/topic/35798/retropie-setup-menu-runcommand-crashing-in-es-on-ubuntu/18
+    if [[ "$__os_debian_ver" -le 12 ]] || compareVersions "$__os_ubuntu_ver" gt 23.04; then
         iniConfig " = " '"' "$configdir/all/runcommand.cfg"
         iniSet "legacy_joy2key" "1"
     fi
