@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 
-# This file is part of The RetroPie Project
+# This file is part of RetroPie-Extra, a supplement to RetroPie.
+# For more information, please visit:
 #
-# The RetroPie Project is the legal property of its developers, whose names are
-# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+# https://github.com/RetroPie/RetroPie-Setup
+# https://github.com/Exarkuniv/RetroPie-Extra
+# https://github.com/RapidEdwin08/RetroPie-Setup
 #
-# See the LICENSE.md file at the top-level directory of this distribution and
-# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
-#
-# RetroPie-Extra
+# See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
 # [lr-genesis-plus-gx-EX + Expanded Rom Size Support] https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size.git +P4PR1UM Compatibility (202507)
+#
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="lr-genesis-plus-gx-EX"
 rp_module_desc="Fork of lr-genesis-plus-gx + Expanded Rom Size Support"
