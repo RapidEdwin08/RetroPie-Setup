@@ -56,6 +56,7 @@ function build_lzdoom() {
     cmake "${params[@]}" ..
     make
     md_ret_require="$md_build/release/$md_id"
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
 
 function install_lzdoom() {
