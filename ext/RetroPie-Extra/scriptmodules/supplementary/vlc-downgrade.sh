@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-# This file is part of The RetroPie Project
+# This file is part of RetroPie-Extra, a supplement to RetroPie.
+# For more information, please visit:
 #
-# The RetroPie Project is the legal property of its developers, whose names are
-# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+# https://github.com/RetroPie/RetroPie-Setup
+# https://github.com/Exarkuniv/RetroPie-Extra
+# https://github.com/RapidEdwin08/RetroPie-Setup
 #
-# See the LICENSE.md file at the top-level directory of this distribution and
-# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
-#
-# RetroPie-Extra
+# See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
 # Workaround for libvlc issue with video previews in ES by Suggested by Lolonois Converted to RetroPie Script by RapidEdwin08
 # https://retropie.org.uk/forum/topic/35717/emulationstation-video-previews-on-raspberry-pi-5/17
+#
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 pkgs=(libvlc5 libvlc-bin libvlccore9 vlc-bin vlc-data vlc-plugin-base)
 ver="3.0.20-0+rpt6+deb12u1"
