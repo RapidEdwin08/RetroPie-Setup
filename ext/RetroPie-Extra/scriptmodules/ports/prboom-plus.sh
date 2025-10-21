@@ -15,18 +15,33 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="prboom-plus"
 rp_module_desc="Doom/Doom II engine - Enhanced PRBoom Port"
-rp_module_help="*[libpcre3-dev] HAS BEEN DEPRECATED SINCE 202503*\n \n[libpcre3-dev] is Required for PRBoom-Plus\n \nTHIS SCRIPT CAN/WILL INSTALL [libpcre3-dev] FROM .DEBs\n \n[libpcre3-dev]*.DEBs CAN BE UNINSTALLED MANUALLY WITH:\n \nsudo dpkg -r libpcre3-dbg libpcre16-3 libpcrecpp0v5 libpcre32-3 libpcre3-dev"
+rp_module_help="*[libpcre3-dev] HAS BEEN DEPRECATED SINCE 202503*\n \n[libpcre3-dev] is Required for PRBoom-Plus\n \nTHIS SCRIPT CAN/WILL INSTALL [libpcre3-dev] FROM .DEBs\n \n[libpcre3-dev]*.DEBs CAN BE UNINSTALLED MANUALLY WITH:\n \nsudo dpkg -r libpcre3-dbg libpcre16-3 libpcrecpp0v5 libpcre32-3 libpcre3-dev libpcre3"
 rp_module_licence="https://github.com/coelckers/prboom-plus"
 rp_module_repo="git https://github.com/coelckers/prboom-plus.git master"
 rp_module_section="exp"
 
 function depends_prboom-plus() {
-    #local depends=(libsdl2-dev libsdl2-net-dev libsdl2-image-dev libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev libmad0-dev libdumb1-dev libvorbis-dev)
-    local depends=(libsdl2-dev libsdl2-net-dev libsdl2-image-dev libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev libmad0-dev libdumb1-dev libvorbis-dev zlib1g-dev libogg-dev)
-    # pcre3 was Removed from Trixie in between February-March of 2025
-    if [[ $(apt-cache search libpcre3-dev | grep 'libpcre3-dev ') == '' ]]; then
+    #local depends=(libsdl2-dev libsdl2-net-dev libsdl2-image-dev libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev libmad0-dev libdumb1-dev libvorbis-dev zlib1g-dev libogg-dev)
+    local depends=(
+        cmake libsdl2-dev libsdl2-net-dev libsdl2-image-dev
+        libsdl2-mixer-dev libfluidsynth-dev libportmidi-dev
+        libmad0-dev libdumb1-dev libvorbis-dev zlib1g-dev libogg-dev)
+
+    if [[ "$__os_debian_ver" -le 12 ]]; then
+        depends+=(libpcre3-dev)
+    fi
+    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
+    getDepends "${depends[@]}"
+
+    if [[ "$md_mode" == "install" ]] && [[ $(dpkg -l | grep libpcre3) == '' ]]; then deb_pcre3_prboom-plus; fi
+}
+
+function deb_pcre3_prboom-plus() {
+    # pcre3 was Removed between February-March of 2025
+    if [[ "$__os_debian_ver" -ge 13 ]]; then
         #depends+=(libpcre2-dev)
         local pcre3_arch=$(dpkg --print-architecture)
+        wget http://http.us.debian.org/debian/pool/main/p/pcre3/libpcre3_8.39-15_$pcre3_arch.deb -P /tmp
         wget http://http.us.debian.org/debian/pool/main/p/pcre3/libpcrecpp0v5_8.39-15_$pcre3_arch.deb -P /tmp
         wget http://http.us.debian.org/debian/pool/main/p/pcre3/libpcre3-dbg_8.39-15_$pcre3_arch.deb -P /tmp
         wget http://http.us.debian.org/debian/pool/main/p/pcre3/libpcre16-3_8.39-15_$pcre3_arch.deb -P /tmp
@@ -34,12 +49,14 @@ function depends_prboom-plus() {
         wget http://http.us.debian.org/debian/pool/main/p/pcre3/libpcre3-dev_8.39-15_$pcre3_arch.deb -P /tmp
 
         # Retain this Installation 0rder...
+        dpkg -i /tmp/libpcre3_8.39-15_$pcre3_arch.deb
         dpkg -i /tmp/libpcrecpp0v5_8.39-15_$pcre3_arch.deb
         dpkg -i /tmp/libpcre3-dbg_8.39-15_$pcre3_arch.deb
         dpkg -i /tmp/libpcre16-3_8.39-15_$pcre3_arch.deb
         dpkg -i /tmp/libpcre32-3_8.39-15_$pcre3_arch.deb
         dpkg -i /tmp/libpcre3-dev_8.39-15_$pcre3_arch.deb
 
+        rm -f /tmp/libpcre3_8.39-15_$pcre3_arch.deb
         rm -f /tmp/libpcrecpp0v5_8.39-15_$pcre3_arch.deb
         rm -f /tmp/libpcre3-dbg_8.39-15_$pcre3_arch.deb
         rm -f /tmp/libpcre16-3_8.39-15_$pcre3_arch.deb
@@ -47,12 +64,8 @@ function depends_prboom-plus() {
         rm -f /tmp/libpcre3-dev_8.39-15_$pcre3_arch.deb
 
         echo *PCRE3 HAS BEEN REMOVED FROM TRIXIE AND WILL NO LONGER BE UPDATED*
-        echo LIBPCRE3*.DEBs CAN BE UNINSTALLED MANUALLY WITH: [sudo dpkg -r libpcre3-dbg libpcre16-3 libpcrecpp0v5 libpcre32-3 libpcre3-dev]
-    else
-        depends+=(libpcre3-dev)
+        echo LIBPCRE3*.DEBs CAN BE UNINSTALLED MANUALLY WITH: [sudo dpkg -r libpcre3-dbg libpcre16-3 libpcrecpp0v5 libpcre32-3 libpcre3-dev libpcre3]
     fi
-    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
-    getDepends "${depends[@]}"
 }
 
 function sources_prboom-plus() {
@@ -105,6 +118,32 @@ function _add_games_prboom-plus() {
 
 function add_games_prboom-plus() {
     _add_games_prboom-plus "pushd $md_inst; $md_inst/prboom-plus -iwad %ROM%; popd"
+}
+
+function gui_prboom-plus() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      ADD or REMOVE DEPRECATED LIBPCRE3*.DEBs\n\nsudo dpkg -r libpcre3-dbg libpcre16-3 libpcrecpp0v5 libpcre32-3 libpcre3-dev libpcre3\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "INSTALL libpcre3*.deb PKGs" \
+        "2" "REMOVE libpcre3*.deb PKGs" \
+        "3" "apt --fix-broken install" \
+        "4" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            deb_pcre3_prboom-plus
+            ;;
+        2)
+            sudo dpkg -r libpcre3-dbg libpcre16-3 libpcrecpp0v5 libpcre32-3 libpcre3-dev libpcre3
+            ;;
+        3)
+            sudo apt --fix-broken install
+            ;;
+        4)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
 }
 
 function configure_prboom-plus() {
