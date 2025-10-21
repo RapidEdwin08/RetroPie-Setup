@@ -26,7 +26,7 @@ function _get_so_name_lr-mame2003() {
 
 function depends_lr-mame2003() {
     local depends
-    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
+    ##[[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
     getDepends "${depends[@]}"
 }
 
@@ -39,11 +39,11 @@ function build_lr-mame2003() {
     make clean
     local params=()
     isPlatform "arm" && params+=("ARM=1")
-    if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
+    ##if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
     make ARCH="$CFLAGS" "${params[@]}"
     rpSwap off
     md_ret_require="$md_build/$(_get_so_name_${md_id})_libretro.so"
-    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
+    ##if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
 
 function install_lr-mame2003() {
