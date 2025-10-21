@@ -27,12 +27,17 @@ function depends_dosbox-x-sdl2() {
         libpcap-dev libfluidsynth-dev ffmpeg libavformat-dev
         libswscale-dev libavcodec-dev)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
-    isPlatform "64bit" && depends+=(libavdevice59)
-    isPlatform "32bit" && depends+=(libavdevice58)
+    if [[ ! $(apt-cache search libavdevice61 | grep 'libavdevice61 ') == '' ]]; then
+        depends+=(libavdevice61)
+    elif [[ ! $(apt-cache search libavdevice60 | grep 'libavdevice60 ') == '' ]]; then
+        depends+=(libavdevice60)
+    else
+        isPlatform "64bit" && depends+=(libavdevice59)
+        isPlatform "32bit" && depends+=(libavdevice58)
+    fi
     #depends+=(libsdl-net1.2-dev)
     depends+=(libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev)
     getDepends "${depends[@]}"
-    echo "${depends[@]}"
 }
 
 function sources_dosbox-x-sdl2() {
@@ -43,6 +48,7 @@ function sources_dosbox-x-sdl2() {
 }
 
 function build_dosbox-x-sdl2() {
+    autoupdate
     ./build-debug-sdl2 --prefix="$md_inst"
 }
 
