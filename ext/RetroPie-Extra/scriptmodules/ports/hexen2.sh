@@ -53,7 +53,6 @@ function depends_hexen2() {
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
-}
 
 function sources_hexen2() {
     gitPullOrClone "$md_build" https://github.com/svn2github/uhexen2.git
