@@ -58,7 +58,7 @@ function configure_lr-ppsspp-dev() {
     fi
 
     addEmulator 1 "$md_id" "psp" "$md_inst/ppsspp_libretro.so"
-    addSystem "psp"
+    addSystem "psp" "PSP" ".gui"
 
     # if we are removing the last remaining psp emu - remove the symlink
     if [[ "$md_mode" == "remove" ]]; then
