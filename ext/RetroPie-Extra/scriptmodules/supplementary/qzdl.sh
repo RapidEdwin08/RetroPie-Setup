@@ -28,7 +28,6 @@ function depends_qzdl() {
         depends+=(qt5-default)
     fi
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
-    echo DEPENDS: "${depends[@]}"
     getDepends "${depends[@]}"
 }
 
