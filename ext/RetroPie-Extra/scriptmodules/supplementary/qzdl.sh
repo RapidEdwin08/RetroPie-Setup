@@ -23,7 +23,7 @@ rp_module_flags=""
 
 function depends_qzdl() {
     #local depends=(qtcreator qtdeclarative5-dev)
-    local depends=(cmake qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser)
+    local depends=(cmake qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser whiptail)
     if [[ ! $(apt-cache search qt5-default) == '' ]]; then
         depends+=(qt5-default)
     fi
