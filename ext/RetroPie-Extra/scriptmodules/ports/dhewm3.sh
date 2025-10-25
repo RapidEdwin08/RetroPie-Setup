@@ -59,8 +59,8 @@ function remove_dhewm3() {
 }
 
 function configure_dhewm3() {
-    mkdir -p "$home/.config/dhewm3/base"; fi
-    mkdir -p "$home/.config/dhewm3/d3xp"; fi
+    mkdir -p "$home/.config/dhewm3/base"
+    mkdir -p "$home/.config/dhewm3/d3xp"
     chown -R $__user:$__user "$home/.config/dhewm3"
     moveConfigDir "$home/.config/dhewm3" "$md_conf_root/$md_id"
     chown -R $__user:$__user "$md_conf_root/$md_id"
