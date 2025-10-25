@@ -62,8 +62,8 @@ function configure_dhewm3() {
     mkdir -p "$home/.config/dhewm3/base"
     mkdir -p "$home/.config/dhewm3/d3xp"
     chown -R $__user:$__user "$home/.config/dhewm3"
-    moveConfigDir "$home/.config/dhewm3" "$md_conf_root/$md_id"
-    chown -R $__user:$__user "$md_conf_root/$md_id"
+    moveConfigDir "$home/.config/dhewm3" "$md_conf_root/doom3"
+    chown -R $__user:$__user "$md_conf_root/doom3"
 
     local launch_prefix
     if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT-WMC:"; fi
@@ -96,7 +96,7 @@ bind "7" "_impulse6"
 bind "8" "_impulse7"
 bind "9" "_impulse8"
 bind "[" "_impulse15"
-bind "\" "_mlook"
+bind "\\" "_mlook"
 bind "]" "_impulse14"
 bind "a" "_moveleft"
 bind "c" "_movedown"
