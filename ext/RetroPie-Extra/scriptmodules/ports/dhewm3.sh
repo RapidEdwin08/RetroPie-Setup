@@ -16,7 +16,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="dhewm3"
 rp_module_desc="dhewm3 - Doom 3 GPL Source Port"
 rp_module_licence="GPL3 https://github.com/dhewm/dhewm3/blob/master/COPYING.txt"
-rp_module_repo="git https://github.com/dhewm/dhewm3.git"
+rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
 rp_module_help="Place Game Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Expansion Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4"
 rp_module_section="exp"
 rp_module_flags=""
@@ -24,7 +24,7 @@ rp_module_flags=""
 function depends_dhewm3() {
     #getDepends cmake libsdl2-dev libopenal-dev libogg-dev libvorbis-dev zlib1g-dev libcurl4-openssl-dev xorg
     local depends=(cmake libsdl2-dev libopenal-dev libogg-dev libvorbis-dev zlib1g-dev libcurl4-openssl-dev)
-    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
 
