@@ -80,7 +80,7 @@ function configure_dhewm3() {
     chown -R $__user:$__user "$romdir/ports/doom3"
 
     local launch_prefix
-    if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT-WMC:"; fi
+    if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT:"; fi
     addPort "$md_id" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3"
     addPort "$md_id-d3xp" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp"
 
