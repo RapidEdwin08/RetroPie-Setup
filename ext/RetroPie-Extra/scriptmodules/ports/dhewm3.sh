@@ -16,7 +16,8 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="dhewm3"
 rp_module_desc="dhewm3 - Doom 3 GPL Source Port"
 rp_module_licence="GPL3 https://github.com/dhewm/dhewm3/blob/master/COPYING.txt"
-rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
+#rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
+rp_module_repo="git https://github.com/warriormaster12/dhewm3.git master"
 rp_module_help="Place Game Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Expansion Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4"
 rp_module_section="exp"
 rp_module_flags=""
@@ -61,24 +62,31 @@ function remove_dhewm3() {
 function configure_dhewm3() {
     mkdir -p "$home/.config/dhewm3/base"
     mkdir -p "$home/.config/dhewm3/d3xp"
-    chown -R $__user:$__user "$home/.config/dhewm3"
+    mkdir -p "$home/.local/share/dhewm3"
     moveConfigDir "$home/.config/dhewm3" "$md_conf_root/doom3"
+    moveConfigDir "$home/.local/share/dhewm3" "$md_conf_root/doom3"
     chown -R $__user:$__user "$md_conf_root/doom3"
+
+    mkRomDir "ports/doom3/base"
+    mkRomDir "ports/doom3/d3xp"
+    moveConfigDir "$md_inst/base" "$romdir/ports/doom3/base"
+    moveConfigDir "$md_inst/d3xp" "$romdir/ports/doom3/d3xp"
+    if [[ -f "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh" ]]; then
+        mv "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh" "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh.0ff"
+    fi
+    chown -R $__user:$__user "$romdir/ports/doom3"
 
     local launch_prefix
     if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT-WMC:"; fi
     addPort "$md_id" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3"
-
-    mkRomDir "ports/doom3/base"
-    mkRomDir "ports/doom3/d3xp"
-
-    moveConfigDir "$md_inst/base" "$romdir/ports/doom3/base"
-    moveConfigDir "$md_inst/d3xp" "$romdir/ports/doom3/d3xp"
-    chown -R $__user:$__user "$romdir/ports/doom3/base"
-    chown -R $__user:$__user "$romdir/ports/doom3/d3xp"
+    local launch_suffix
+    if isPlatform "vulkan"; then
+        launch_suffix=" +set r_renderApi 1"
+        addPort "$md_id-vulkan" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3$launch_suffix"
+    fi
 
     # seta r_mode "5" = 1024x768 | seta r_mode "9" = 1280x720 | seta r_mode "15" = 1920x1080
-    cat >"$md_inst/dhewm3.cfg" << _EOF_
+    cat >"$md_inst/dhewm.cfg" << _EOF_
 unbindall
 bind "TAB" "_impulse19"
 bind "ENTER" "_button2"
@@ -171,13 +179,58 @@ seta r_renderer "best"
 seta r_mode "5"
 seta ui_name "DoomGuy"
 _EOF_
-    if [[ ! -f "$home/.config/dhewm3/base/dhewm3.cfg" ]]; then
-        cp "$md_inst/dhewm3.cfg" "$home/.config/dhewm3/base/dhewm3.cfg"
-        chown -R $__user:$__user "$home/.config/dhewm3/base/dhewm3.cfg"
+    if [[ ! -f "$home/.config/dhewm3/base/dhewm.cfg" ]]; then
+        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/base/dhewm.cfg"
+        chown -R $__user:$__user "$home/.config/dhewm3/base/dhewm.cfg"
     fi
 
-    cat >"$md_inst/dhewm3-d3xp.cfg" << _EOF_
+    cat >"$md_inst/dhewm-d3xp.cfg" << _EOF_
 unbindall
+bind "TAB" "_impulse19"
+bind "ENTER" "_button2"
+bind "ESCAPE" "togglemenu"
+bind "SPACE" "_moveUp"
+bind "0" "_impulse27"
+bind "1" "_impulse1"
+bind "2" "_impulse3"
+bind "3" "_impulse4"
+bind "4" "_impulse6"
+bind "5" "_impulse7"
+bind "6" "_impulse8"
+bind "7" "_impulse9"
+bind "8" "_impulse10"
+bind "9" "_impulse11"
+bind "[" "_impulse15"
+bind "\\" "_mlook"
+bind "]" "_impulse14"
+bind "a" "_moveleft"
+bind "c" "_movedown"
+bind "d" "_moveright"
+bind "f" "_impulse0"
+bind "q" "_impulse12"
+bind "r" "_impulse13"
+bind "s" "_back"
+bind "t" "clientMessageMode"
+bind "w" "_forward"
+bind "y" "clientMessageMode 1"
+bind "z" "_zoom"
+bind "BACKSPACE" "clientDropWeapon"
+bind "PAUSE" "pause"
+bind "LEFTARROW" "_left"
+bind "RIGHTARROW" "_right"
+bind "ALT" "_strafe"
+bind "CTRL" "_attack"
+bind "DEL" "_lookdown"
+bind "PGDN" "_lookup"
+bind "END" "_impulse18"
+bind "F1" "_impulse28"
+bind "F2" "_impulse29"
+bind "F3" "_impulse17"
+bind "F5" "savegame quick"
+bind "F6" "_impulse20"
+bind "F7" "_impulse22"
+bind "F9" "loadgame quick"
+bind "F12" "screenshot"
 bind "JOY_BTN_SOUTH" "_moveUp"
 bind "JOY_BTN_EAST" "_zoom"
 bind "JOY_BTN_WEST" "_moveDown"
@@ -214,9 +267,9 @@ seta r_renderer "best"
 seta r_mode "5"
 seta ui_name "DoomGuy"
 _EOF_
-    if [[ ! -f "$home/.config/dhewm3/d3xp/dhewm3.cfg" ]]; then
-        cp "$md_inst/dhewm3-d3xp.cfg" "$home/.config/dhewm3/d3xp/dhewm3.cfg"
-        chown -R $__user:$__user "$home/.config/dhewm3/d3xp/dhewm3.cfg"
+    if [[ ! -f "$home/.config/dhewm3/d3xp/dhewm.cfg" ]]; then
+        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/d3xp/dhewm.cfg"
+        chown -R $__user:$__user "$home/.config/dhewm3/d3xp/dhewm.cfg"
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_dhewm3
