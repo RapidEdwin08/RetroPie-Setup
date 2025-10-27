@@ -16,8 +16,8 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="dhewm3"
 rp_module_desc="dhewm3 - Doom 3 GPL Source Port"
 rp_module_licence="GPL3 https://github.com/dhewm/dhewm3/blob/master/COPYING.txt"
-#rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
-rp_module_repo="git https://github.com/warriormaster12/dhewm3.git master"
+rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
+#rp_module_repo="git https://github.com/warriormaster12/dhewm3.git master"
 rp_module_help="Place Game Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Expansion Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4\n\nPlace Classic Doom 3 Files in [ports/doom3/cdoom]:\ncdoom_*.pk4"
 rp_module_section="exp"
 rp_module_flags=""
@@ -99,14 +99,18 @@ function configure_dhewm3() {
     if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT:"; fi
     addPort "$md_id" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3"
     addPort "$md_id-d3xp" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp"
-    addPort "$md_id-classic" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1"
+    if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
+        addPort "$md_id-classic" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1"
+    fi
 
     local launch_suffix
     if isPlatform "vulkan"; then
         launch_suffix=" +set r_renderApi 1"
         addPort "$md_id-vulkan" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3$launch_suffix"
         addPort "$md_id-d3xp-vulkan" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp$launch_suffix"
-        addPort "$md_id-classic-vulkan" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1$launch_suffix"
+        if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
+            addPort "$md_id-classic-vulkan" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1$launch_suffix"
+        fi
     fi
 
     # seta r_mode "5" = 1024x768 | seta r_mode "9" = 1280x720 | seta r_mode "15" = 1920x1080
@@ -517,8 +521,10 @@ StartupWMClass=Doom3Classic
 Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
-    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+    if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
+        if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+    fi
 
     cat >"$md_inst/Doom3_72x72.xpm" << _EOF_
 /* XPM */
