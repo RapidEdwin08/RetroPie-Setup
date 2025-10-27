@@ -29,6 +29,7 @@ function depends_dhewm3() {
     #getDepends cmake libsdl2-dev libopenal-dev libogg-dev libvorbis-dev zlib1g-dev libcurl4-openssl-dev xorg
     local depends=(cmake libsdl2-dev libopenal-dev libogg-dev libvorbis-dev zlib1g-dev libcurl4-openssl-dev)
     depends+=(xorg matchbox-window-manager)
+    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
     getDepends "${depends[@]}"
 }
 
@@ -39,6 +40,7 @@ function sources_dhewm3() {
 }
 
 function build_dhewm3() {
+    if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
     mkdir "$md_build/build"
     cd "$md_build/build"
     cmake "../neo"
@@ -55,6 +57,7 @@ function build_dhewm3() {
         "$md_build/build"
         "$md_build/dhewm3-sdk/build/cdoom.so"
     )
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
 
 function install_dhewm3() {
