@@ -37,6 +37,7 @@ function sources_uzdoom() {
     fi
 
     # Apply JoyPad + Preference Tweaks
+    applyPatch "$md_data/01_EndoomOff.diff"
     applyPatch "$md_data/02_JoyMappings.diff"
     applyPatch "$md_data/03_Preferences.diff"
 
