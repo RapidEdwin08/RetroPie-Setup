@@ -1,5 +1,5 @@
 diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbinds.txt
---- a/wadsrc/static/engine/commonbinds.txt	UZDoom Source trunk 5104cc43
+--- a/wadsrc/static/engine/commonbinds.txt	UZDoom Source trunk da87fb3d
 +++ b/wadsrc/static/engine/commonbinds.txt	2025-10-28 17:33:18.150096509 -0400
 @@ -45,10 +45,10 @@
  // I can't see why they shouldn't be for Doom or Chex either.

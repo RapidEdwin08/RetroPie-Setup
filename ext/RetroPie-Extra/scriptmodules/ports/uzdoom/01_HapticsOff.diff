@@ -1,5 +1,5 @@
 diff -ur a/src/common/engine/m_haptics.cpp b/src/common/engine/m_haptics.cpp
---- a/src/common/engine/m_haptics.cpp	2025-10-28 20:55:25.073306440 -0400
+--- a/src/common/engine/m_haptics.cpp	UZDoom Source trunk da87fb3d
 +++ b/src/common/engine/m_haptics.cpp	2025-10-29 00:02:14.754968676 -0400
 @@ -127,7 +127,7 @@
  	Haptics.strength.right_trigger = self * Haptics.strength.base;

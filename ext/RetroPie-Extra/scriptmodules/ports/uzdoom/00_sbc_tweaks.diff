@@ -1,5 +1,5 @@
 diff -ur a/src/g_cvars.cpp b/src/g_cvars.cpp
---- a/src/g_cvars.cpp	UZDoom Source trunk 5104cc43
+--- a/src/g_cvars.cpp	UZDoom Source trunk da87fb3d
 +++ b/src/g_cvars.cpp	2025-10-28 17:33:18.150096509 -0400
 @@ -122,10 +122,10 @@
  
@@ -14,15 +14,24 @@ diff -ur a/src/g_cvars.cpp b/src/g_cvars.cpp
  	else if (self > 65535)
  		self = 65535;
  	else if (self < 100)
-diff -ur a/src/playsim/p_effect.cpp b/src/playsim/p_effect.cpp
---- a/src/playsim/p_effect.cpp	UZDoom Source trunk 5104cc43
-+++ b/src/playsim/p_effect.cpp	2025-10-28 17:33:18.150096509 -0400
-@@ -57,7 +57,7 @@
- #pragma warning(disable: 6011) // dereference null pointer in thinker iterator
- #endif
+diff -ur a/src/common/rendering/hwrenderer/data/hw_cvars.cpp b/src/common/rendering/hwrenderer/data/hw_cvars.cpp
+--- a/src/common/rendering/hwrenderer/data/hw_cvars.cpp	UZDoom Source trunk da87fb3d
++++ b/src/common/rendering/hwrenderer/data/hw_cvars.cpp	2025-10-29 01:21:35.594795664 -0400
+@@ -56,7 +56,7 @@
+ CVAR(Bool, gl_portals, true, 0)
+ CVAR(Bool,gl_mirrors,true,0)	// This is for debugging only!
+ CVAR(Bool,gl_mirror_envmap, true, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+-CVAR(Bool, gl_seamless, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR(Bool, gl_seamless, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
  
--CVAR (Int, cl_rockettrails, 1, CVAR_ARCHIVE);
-+CVAR (Int, cl_rockettrails, 0, CVAR_ARCHIVE);
- CVAR (Bool, r_rail_smartspiral, false, CVAR_ARCHIVE);
- CVAR (Int, r_rail_spiralsparsity, 1, CVAR_ARCHIVE);
- CVAR (Int, r_rail_trailsparsity, 1, CVAR_ARCHIVE);
+ CUSTOM_CVAR(Int, r_mirror_recursions,4,CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+ {
+@@ -115,7 +115,7 @@
+ // Texture CVARs
+ //
+ //==========================================================================
+-CUSTOM_CVARD(Float, gl_texture_filter_anisotropic, 16.f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL, "changes the OpenGL texture anisotropy setting")
++CUSTOM_CVARD(Float, gl_texture_filter_anisotropic, 8.f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL, "changes the OpenGL texture anisotropy setting")
+ {
+ 	screen->SetTextureFilterMode();
+ }
