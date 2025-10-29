@@ -14,7 +14,7 @@
 rp_module_id="uzdoom"
 rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk d1d12cfc"
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk da87fb3d"
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
 
