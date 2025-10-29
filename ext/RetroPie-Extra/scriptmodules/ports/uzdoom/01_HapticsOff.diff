@@ -1,0 +1,12 @@
+diff -ur a/src/common/engine/m_haptics.cpp b/src/common/engine/m_haptics.cpp
+--- a/src/common/engine/m_haptics.cpp	2025-10-28 20:55:25.073306440 -0400
++++ b/src/common/engine/m_haptics.cpp	2025-10-29 00:02:14.754968676 -0400
+@@ -127,7 +127,7 @@
+ 	Haptics.strength.right_trigger = self * Haptics.strength.base;
+ };
+ 
+-CUSTOM_CVARD(Int, haptics_strength, 10, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, "Translate linear haptics to audio taper")
++CUSTOM_CVARD(Int, haptics_strength, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, "Translate linear haptics to audio taper")
+ {
+ 	double l1 = self / 10.0;
+ 	double l2 = l1 * l1;
