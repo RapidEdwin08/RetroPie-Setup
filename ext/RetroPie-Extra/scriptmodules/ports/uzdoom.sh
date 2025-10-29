@@ -16,7 +16,8 @@ rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based 
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
 #rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 5104cc43" # g4.15pre-717-g5104cc431-m
 #rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk da87fb3d" # g4.15pre-718-gda87fb3d9-m
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk dd38edbb" # g4.15pre-730-gdd38edbba-m
+#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk dd38edbb" # g4.15pre-730-gdd38edbba-m
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 18ecb597" # g4.15pre-731-g18ecb5973-m
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
 
@@ -32,12 +33,11 @@ function depends_uzdoom() {
 
 function sources_uzdoom() {
     gitPullOrClone
-    # Apply Single-Board-Computer Specific Tweaks
-    if isPlatform "rpi"* || isPlatform "arm"; then
-        applyPatch "$md_data/00_sbc_tweaks.diff"
-    fi
 
-    # Apply JoyPad + Preference Tweaks
+    # 0ptional Apply Single-Board-Computer Specific Tweaks
+    if isPlatform "rpi"* || isPlatform "arm"; then applyPatch "$md_data/00_sbc_tweaks.diff"; fi
+
+    # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/01_HapticsOff.diff"
     applyPatch "$md_data/02_JoyMappings.diff"
     applyPatch "$md_data/03_Preferences.diff"
