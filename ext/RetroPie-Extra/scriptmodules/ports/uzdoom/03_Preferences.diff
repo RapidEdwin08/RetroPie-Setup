@@ -5,7 +5,7 @@ diff -ur a/src/am_map.cpp b/src/am_map.cpp
  CVAR(Bool, am_showtime, true, CVAR_ARCHIVE);
  CVAR(Bool, am_showtotaltime, false, CVAR_ARCHIVE);
  CVAR(Bool, am_showlevelname, true, CVAR_ARCHIVE);
--CVAR(Int, am_colorset, 0, CVAR_ARCHIVE);
+-CVAR(Int, am_colorset, -1, CVAR_ARCHIVE);
 +CVAR(Int, am_colorset, 1, CVAR_ARCHIVE);
  CVAR(Bool, am_customcolors, true, CVAR_ARCHIVE);
  CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
@@ -111,7 +111,7 @@ diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
  
  
  // Stretch status bar to full screen width?
--CUSTOM_CVAR (Int, st_scale, 0, CVAR_ARCHIVE)
+-CUSTOM_CVAR (Int, st_scale, -1, CVAR_ARCHIVE)
 +CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
  {
  	if (self < -1)
@@ -127,15 +127,3 @@ diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
  CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
  {
  	if (self < 0 || self > 2) self = 2;
-diff -ur a/src/menu/doommenu.cpp b/src/menu/doommenu.cpp
---- a/src/menu/doommenu.cpp	UZDoom Source trunk 5104cc43
-+++ b/src/menu/doommenu.cpp	2025-10-28 17:33:18.150096509 -0400
-@@ -71,7 +71,7 @@
- EXTERN_CVAR(Bool, haptics_do_menus)
- EXTERN_CVAR(Float, hud_scalefactor)
- 
--CVAR(Bool, m_simpleoptions, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
-+CVAR(Bool, m_simpleoptions, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
- CVAR(Bool, m_simpleoptions_view, true, 0);
- 
- typedef void(*hfunc)();
