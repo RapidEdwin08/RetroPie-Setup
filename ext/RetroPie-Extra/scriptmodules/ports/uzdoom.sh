@@ -127,4 +127,3 @@ function configure_uzdoom() {
     game_data_lr-prboom
     add_games_${md_id}
 }
-
