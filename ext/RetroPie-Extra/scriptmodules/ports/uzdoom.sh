@@ -14,12 +14,23 @@
 rp_module_id="uzdoom"
 rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 5104cc43" # g4.15pre-717-g5104cc431-m
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk da87fb3d" # g4.15pre-718-gda87fb3d9-m
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk dd38edbb" # g4.15pre-730-gdd38edbba-m
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 18ecb597" # g4.15pre-731-g18ecb5973-m
+#rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 3becc39d" # Last Tested/Working commit for Reference
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git :_get_version_uzdoom"
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
+
+function _get_version_uzdoom() {
+    # default UZDoom version
+    local uzdoom_version="4.14.3"
+
+    # 32 bit is no longer supported since g4.8.1
+    isPlatform "32bit" && uzdoom_version="4.8"
+    echo $uzdoom_version
+}
+
+function _get_version_zmusic_uzdoom() {
+    echo "1.3.0"
+}
 
 function depends_uzdoom() {
     local depends=(
@@ -27,20 +38,24 @@ function depends_uzdoom() {
         libopenal-dev libjpeg-dev libgl1-mesa-dev libasound2-dev pkg-config
         zlib1g-dev)
     local depends=(libsdl2-dev libvpx-dev libwebp-dev)
-    local depends=(build-essential libgtk2.0-dev waylandpp-dev ninja-build)
     getDepends "${depends[@]}"
 }
 
 function sources_uzdoom() {
     gitPullOrClone
 
-    # 0ptional Apply Single-Board-Computer Specific Tweaks
+    # Apply Single-Board-Computer Specific Tweaks
     if isPlatform "rpi"* || isPlatform "arm"; then applyPatch "$md_data/00_sbc_tweaks.diff"; fi
 
-    # 0ptional Apply JoyPad + Preference Tweaks
-    applyPatch "$md_data/01_HapticsOff.diff"
-    applyPatch "$md_data/02_JoyMappings.diff"
-    applyPatch "$md_data/03_Preferences.diff"
+    # Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
+    applyPatch "$md_data/01_sijl_tweaks.diff"
+    applyPatch "$md_data/02_JoyMappings_0SFA.diff" # OSFA Axes to Prevent being stuck looking up on Varying JoyPads
+    applyPatch "$md_data/03_Preferences.diff" #ENABLED
+
+    # add 'ZMusic' repo
+    cd "$md_build"
+    ##gitPullOrClone zmusic https://github.com/ZDoom/ZMusic $(_get_version_zmusic_uzdoom)
+    gitPullOrClone zmusic https://github.com/ZDoom/ZMusic
 
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
@@ -55,9 +70,17 @@ function sources_uzdoom() {
 }
 
 function build_uzdoom() {
+    # build 'ZMusic' first
+    pushd zmusic
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$md_build/release/zmusic" .
+    make
+    make install
+    popd
+
     mkdir -p "$md_build/build"
     cd "$md_build/build"
-    local params=(-DCMAKE_INSTALL_PREFIX="$md_inst" -DPK3_QUIET_ZIPDIR=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDYN_OPENAL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF -G Ninja)
+    local params=(-DCMAKE_BUILD_TYPE=RelWithDebInfo) # options are: Debug Release RelWithDebInfo MinSizeRel
+    local params=(-DCMAKE_INSTALL_PREFIX="$md_inst" -DPK3_QUIET_ZIPDIR=ON -DDYN_OPENAL=ON -DCMAKE_PREFIX_PATH="$md_build/release/zmusic")
     ! hasFlag "vulkan" && params+=(-DHAVE_VULKAN=OFF)
 
     cmake "${params[@]}" ..
@@ -66,6 +89,11 @@ function build_uzdoom() {
 }
 
 function install_uzdoom() {
+    # 20251010 I'm tired of updating the libzmusic.so.1.* version...
+    local libzmusic_ver=libzmusic.so.$(_get_version_zmusic_uzdoom)
+    if [[ ! -f "$md_build/release/zmusic/lib/$libzmusic_ver" ]]; then libzmusic_ver="$(basename $(ls $md_build/release/zmusic/lib/libzmusic.so.1.*))"; fi
+    echo LIBZMUSIC.SO: [$libzmusic_ver]
+
     md_ret_files=(
         'build/brightmaps.pk3'
         'build/uzdoom'
@@ -74,6 +102,9 @@ function install_uzdoom() {
         'build/game_support.pk3'
         'build/game_widescreen_gfx.pk3'
         'build/soundfonts'
+        "release/zmusic/lib/libzmusic.so.1"
+        "release/zmusic/lib/$libzmusic_ver"
+        ##"release/zmusic/lib/libzmusic.so.$(_get_version_zmusic_uzdoom)"
         'README.md'
         'LICENSE'
     )
@@ -91,19 +122,18 @@ function add_games_uzdoom() {
     # 4 (Legacy): Emulates lighting of Legacy 1.4's GL renderer.
     # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    ##params+=("+gl_maplightmode 8") # Can still enable but will not save to ini
+    isPlatform "32bit" && params+=("+gl_maplightmode 8") # Can still enable but will no longer save to ini after 4.11.x
 
     # https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
     # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    
+    params+=("+gl_lightmode 1")
+
     ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
     if isPlatform "arm"; then
-        params+=("+gl_lightmode 0") # Classic (Faster)
-        params+=("'+set snd_mididevice -3'") # FluidSynth is too memory/CPU intensive
+        params+=("'+set snd_mididevice -2'") # FluidSynth is too memory/CPU intensive
     else
-        params+=("+gl_lightmode 1")
         params+=("'+snd_mididevice -5'")
     fi
     
