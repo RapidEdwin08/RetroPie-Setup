@@ -65,7 +65,7 @@ function build_uzdoom-dev() {
 
     cmake "${params[@]}" ..
     cmake --build .
-    md_ret_require="$md_build/build/$md_id"
+    md_ret_require="$md_build/build/uzdoom"
 }
 
 function install_uzdoom-dev() {
