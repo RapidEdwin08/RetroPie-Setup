@@ -1,0 +1,63 @@
+diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbinds.txt
+--- a/wadsrc/static/engine/commonbinds.txt	UZDoom Source trunk da87fb3d
++++ b/wadsrc/static/engine/commonbinds.txt	2025-10-28 17:33:18.150096509 -0400
+@@ -45,10 +45,10 @@
+ // I can't see why they shouldn't be for Doom or Chex either.
+ pgup +moveup
+ ins +movedown
+-home land
++home centerview
+ pgdn +lookup
+ del +lookdown
+-end centerview
++end land
+ 
+ // Gamepads
+ lstickleft +moveleft
+@@ -59,10 +59,10 @@
+ rstickright +right
+ rstickup +lookup
+ rstickdown +lookdown
+-pad_a +use
+-pad_b crouch
+-pad_x +reload
+-pad_y +jump
++pad_a +jump
++pad_b +use
++pad_x crouch
++pad_y +reload
+ rtrigger +attack
+ ltrigger +altattack
+ lshoulder weapprev
+@@ -70,12 +70,13 @@
+ pad_start menu_main
+ pad_back togglemap
+ pad_touchpad togglemap
+-rthumb +zoom
+-guide pause
++rthumb centerview
++lthumb +speed
++guide "showpop 1"
+ dpadleft invprev
+ dpadright invnext
+ dpaddown invuse
+-dpadup "slot 1"
++dpadup "toggle cl_run"
+ paddle_1 "slot 2"
+ paddle_2 "slot 3"
+ paddle_3 "slot 4"
+@@ -109,3 +110,14 @@
+ mapbind dpaddown +am_pandown
+ mapbind lshoulder +am_zoomout
+ mapbind rshoulder +am_zoomin
++
++/* 0riginal D00M/Heretic Keyboard Inputs [NOT WASD] */
++uparrow +forward
++leftarrow +left
++rightarrow +right
++downarrow +back
++, +moveleft
++. +moveright
++ctrl +attack
++alt +strafe
++/ +jump
