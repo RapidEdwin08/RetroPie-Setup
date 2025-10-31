@@ -14,10 +14,19 @@
 rp_module_id="uzdoom"
 rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 9c06dad7" # Last Tested/Working commit for Reference
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 3becc39d" # g4.14.2-50-g3becc39dc-m
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 :_get_commit_uzdoom"
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
+
+function _get_commit_uzdoom() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
+    local branch_tag=4.14.3
+    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+
+    echo $branch_commit
+    #echo 835be65f; # Change default texture filtering to None - Trilinear
+    #echo 3becc39d; # g4.14.2-50-g3becc39dc-m
+}
 
 function _get_version_zmusic_uzdoom() {
     echo "1.3.0"
