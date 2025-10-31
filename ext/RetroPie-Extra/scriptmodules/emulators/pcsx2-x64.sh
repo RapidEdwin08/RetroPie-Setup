@@ -13,13 +13,9 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
-# Version put here to be displayed in Help
-#pcsx2_ver="v2.0.2"; # 2f46e5a8406e4832ba60c5ab1ba2fd16a074ab1f 20240712 # Prior Version Reference
-pcsx2_ver="v2.4.0"; # e4af1c424451c6b65c5c387404315cef77e9901b 20250629
-
 rp_module_id="pcsx2-x64"
 rp_module_desc="PS2 emulator PCSX2 Optimized for x86_64"
-rp_module_help="pcsx2-${pcsx2_ver}-linux-appimage-x64-Qt.AppImage \n \n https://github.com/PCSX2/pcsx2/releases/tag/${pcsx2_ver} \n \n PCSX2 uses third-party code. You can view the licenses for this code by selecting \"Third-Party Notices\" \n \nROM Extensions: .bin .iso .img .mdf .z .z2 .bz2 .cso .chd .ima .gz\n\nCopy your PS2 roms to $romdir/ps2\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PS2\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
+rp_module_help="[pcsx2-linux-appimage-x64-Qt.AppImage]\nhttps://github.com/PCSX2/pcsx2/releases/ \n \n PCSX2 uses third-party code. You can view the licenses for this code by selecting \"Third-Party Notices\" \n \nROM Extensions: .bin .iso .img .mdf .z .z2 .bz2 .cso .chd .ima .gz\n\nCopy your PS2 roms to $romdir/ps2\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PS2\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="GPL3 https://raw.githubusercontent.com/PCSX2/pcsx2/master/COPYING.GPLv3"
 rp_module_section="exp"
 rp_module_flags="!all x86_64"
@@ -40,6 +36,9 @@ function depends_pcsx2-x64() {
 }
 
 function install_bin_pcsx2-x64() {
+    #local pcsx2_ver="v2.0.2"; # 2f46e5a8 20240712
+    local pcsx2_ver="v2.4.0"; # e4af1c42 20250629
+
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/pcsx2-x64/pcsx2-x64-rp-assets.tar.gz" "$md_build"
     download "https://github.com/PCSX2/pcsx2/releases/download/${pcsx2_ver}/pcsx2-${pcsx2_ver}-linux-appimage-x64-Qt.AppImage" "$md_build"
 
@@ -123,7 +122,7 @@ function remove_pcsx2-x64() {
 
 function configure_pcsx2-x64() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
-    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartPCSX2 = "pcsx2"' ; echo $?) == '1' ]]; then echo 'ps2_StartPCSX2 = "pcsx2"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
+    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartPCSX2 = "pcsx2-x64-editor"' ; echo $?) == '1' ]]; then echo 'ps2_StartPCSX2 = "pcsx2-x64-editor"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
     addSystem "ps2"
     local launch_prefix
