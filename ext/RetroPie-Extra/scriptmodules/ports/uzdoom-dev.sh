@@ -14,10 +14,19 @@
 rp_module_id="uzdoom-dev"
 rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk da87fb3d" # g4.15pre-718-gda87fb3d9-m
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 18ecb597" # g4.15pre-731-g18ecb5973-m
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk :_get_commit_uzdoom-dev"
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
+
+function _get_commit_uzdoom-dev() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
+    local branch_tag=trunk
+    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+
+    echo $branch_commit
+    #echo b4c521ec; # Change default texture filtering to None - Trilinear
+    #echo 3d958a7e; # g4.15pre-732-g3d958a7e0-m
+}
 
 function depends_uzdoom-dev() {
     if ! isPlatform "64bit" ; then
