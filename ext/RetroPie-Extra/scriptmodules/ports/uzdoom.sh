@@ -14,25 +14,20 @@
 rp_module_id="uzdoom"
 rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 3becc39d" # Last Tested/Working commit for Reference
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git :_get_version_uzdoom"
+#rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 9c06dad7" # Last Tested/Working commit for Reference
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 3becc39d" # g4.14.2-50-g3becc39dc-m
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
-
-function _get_version_uzdoom() {
-    # default UZDoom version
-    local uzdoom_version="4.14.3"
-
-    # 32 bit is no longer supported since g4.8.1
-    isPlatform "32bit" && uzdoom_version="4.8"
-    echo $uzdoom_version
-}
 
 function _get_version_zmusic_uzdoom() {
     echo "1.3.0"
 }
 
 function depends_uzdoom() {
+    if ! isPlatform "64bit" ; then
+        #dialog --ok --msgbox "Installer is for a 64bit system Only!" 22 76 2>&1 >/dev/tty
+        md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
+    fi
     local depends=(
         cmake libfluidsynth-dev libmpg123-dev libsndfile1-dev libbz2-dev
         libopenal-dev libjpeg-dev libgl1-mesa-dev libasound2-dev pkg-config
@@ -44,18 +39,18 @@ function depends_uzdoom() {
 function sources_uzdoom() {
     gitPullOrClone
 
-    # Apply Single-Board-Computer Specific Tweaks
+    # 0ptional Apply Single-Board-Computer Specific Tweaks
     if isPlatform "rpi"* || isPlatform "arm"; then applyPatch "$md_data/00_sbc_tweaks.diff"; fi
 
-    # Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
-    applyPatch "$md_data/01_sijl_tweaks.diff"
+    # 0ptional Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
+    applyPatch "$md_data/01_sijl_tweaks.diff" # Enable JoyPad in Menu
     applyPatch "$md_data/02_JoyMappings_0SFA.diff" # OSFA Axes to Prevent being stuck looking up on Varying JoyPads
     applyPatch "$md_data/03_Preferences.diff" #ENABLED
 
     # add 'ZMusic' repo
     cd "$md_build"
-    ##gitPullOrClone zmusic https://github.com/ZDoom/ZMusic $(_get_version_zmusic_uzdoom)
     gitPullOrClone zmusic https://github.com/ZDoom/ZMusic
+    ##gitPullOrClone zmusic https://github.com/ZDoom/ZMusic $(_get_version_zmusic_uzdoom)
 
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
@@ -122,7 +117,7 @@ function add_games_uzdoom() {
     # 4 (Legacy): Emulates lighting of Legacy 1.4's GL renderer.
     # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    isPlatform "32bit" && params+=("+gl_maplightmode 8") # Can still enable but will no longer save to ini after 4.11.x
+    ##params+=("+gl_maplightmode 8") # Can still enable but will no longer save to ini after 4.11.x
 
     # https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
@@ -131,20 +126,9 @@ function add_games_uzdoom() {
     params+=("+gl_lightmode 1")
 
     ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
-    if isPlatform "arm"; then
-        params+=("'+set snd_mididevice -2'") # FluidSynth is too memory/CPU intensive
-    else
-        params+=("'+snd_mididevice -5'")
-    fi
-    
-    # when using the 32bit version on GLES platforms, pre-set the renderer
-    if isPlatform "32bit" && hasFlag "gles"; then
-        params+=("+set vid_preferbackend 2")
-    fi
+    params+=("'+snd_mididevice -5'")
 
-    if isPlatform "kms"; then
-        params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
-    fi
+    isPlatform "kms" && params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
 }
