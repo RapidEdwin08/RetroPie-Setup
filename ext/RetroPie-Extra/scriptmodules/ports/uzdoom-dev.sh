@@ -14,8 +14,8 @@
 rp_module_id="uzdoom-dev"
 rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 18ecb597" # g4.15pre-731-g18ecb5973-m
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk"
+#rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk da87fb3d" # g4.15pre-718-gda87fb3d9-m
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk 18ecb597" # g4.15pre-731-g18ecb5973-m
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
 
@@ -103,15 +103,9 @@ function add_games_uzdoom-dev() {
     params+=("+gl_lightmode 1")
 
     ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
-    if isPlatform "arm"; then
-        params+=("'+set snd_mididevice -2'") # FluidSynth is too memory/CPU intensive
-    else
-        params+=("'+snd_mididevice -5'")
-    fi
+    params+=("'+snd_mididevice -5'")
 
-    if isPlatform "kms"; then
-        params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
-    fi
+    isPlatform "kms" && params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
 }
