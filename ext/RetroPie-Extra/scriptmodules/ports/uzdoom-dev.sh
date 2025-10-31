@@ -107,7 +107,7 @@ function add_games_uzdoom-dev() {
 
     isPlatform "kms" && params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
 
-    _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
+    _add_games_lr-prboom "$launcher_prefix $md_inst/uzdoom -iwad %ROM% ${params[*]}"
 }
 
 function configure_uzdoom-dev() {
