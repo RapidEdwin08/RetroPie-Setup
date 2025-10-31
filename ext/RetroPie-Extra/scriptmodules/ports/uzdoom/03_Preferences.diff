@@ -1,6 +1,6 @@
 diff -ur a/src/am_map.cpp b/src/am_map.cpp
---- a/src/am_map.cpp	2025-06-15 20:12:44.689600019 -0400
-+++ b/src/am_map.cpp	2025-06-15 20:22:19.474038903 -0400
+--- a/src/am_map.cpp	Source
++++ b/src/am_map.cpp	Modified
 @@ -171,7 +171,7 @@
  CVAR(Bool, am_showtime, true, CVAR_ARCHIVE);
  CVAR(Bool, am_showtotaltime, false, CVAR_ARCHIVE);
@@ -11,8 +11,8 @@ diff -ur a/src/am_map.cpp b/src/am_map.cpp
  CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
  CVAR(Int, am_drawmapback, 1, CVAR_ARCHIVE);
  diff -ur a/src/common/audio/music/i_music.cpp b/src/common/audio/music/i_music.cpp
---- a/src/common/audio/music/i_music.cpp	2025-06-15 20:12:44.689600019 -0400
-+++ b/src/common/audio/music/i_music.cpp	2025-09-08 23:10:25.789334634 -0400
+--- a/src/common/audio/music/i_music.cpp	Source
++++ b/src/common/audio/music/i_music.cpp	Modified
 @@ -70,7 +70,7 @@
  // Maximum volume of MOD/stream music.
  //==========================================================================
@@ -23,8 +23,8 @@ diff -ur a/src/am_map.cpp b/src/am_map.cpp
  	if (self < 0.f)
  		self = 0.f;
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
---- a/src/common/console/c_console.cpp	2025-06-15 20:12:44.693600019 -0400
-+++ b/src/common/console/c_console.cpp	2025-06-15 21:20:21.029596578 -0400
+--- a/src/common/console/c_console.cpp	Source
++++ b/src/common/console/c_console.cpp	Modified
 @@ -128,7 +128,7 @@
  static char *work = NULL;
  static int worklen = 0;
@@ -35,8 +35,8 @@ diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
  	if (self < 0) self = 0;
  }
 diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
---- a/src/common/rendering/v_video.cpp	2025-06-15 20:12:44.721600013 -0400
-+++ b/src/common/rendering/v_video.cpp	2025-06-15 20:22:18.714038330 -0400
+--- a/src/common/rendering/v_video.cpp	Source
++++ b/src/common/rendering/v_video.cpp	Modified
 @@ -130,7 +130,7 @@
  }
  
@@ -47,8 +47,8 @@ diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
  	if (self < 0)
  	{
 diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
---- a/src/common/statusbar/base_sbar.cpp	2025-06-15 20:12:44.733600011 -0400
-+++ b/src/common/statusbar/base_sbar.cpp	2025-06-15 20:22:18.018037807 -0400
+--- a/src/common/statusbar/base_sbar.cpp	Source
++++ b/src/common/statusbar/base_sbar.cpp	Modified
 @@ -57,9 +57,9 @@
  IMPLEMENT_CLASS(DHUDFont, false, false);
  
@@ -63,8 +63,8 @@ diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.c
  
  CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
 diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
---- a/src/console/c_notifybuffer.cpp	2025-06-15 20:12:44.765600005 -0400
-+++ b/src/console/c_notifybuffer.cpp	2025-06-15 21:20:19.109596839 -0400
+--- a/src/console/c_notifybuffer.cpp	Source
++++ b/src/console/c_notifybuffer.cpp	Modified
 @@ -59,7 +59,7 @@
  CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
  CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
@@ -75,8 +75,8 @@ diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
  	if (self < 0) self = 0;
  }
 diff -ur a/src/g_game.cpp b/src/g_game.cpp
---- a/src/g_game.cpp	2025-06-15 20:12:44.769600004 -0400
-+++ b/src/g_game.cpp	2025-06-15 20:22:21.138040149 -0400
+--- a/src/g_game.cpp	Source
++++ b/src/g_game.cpp	Modified
 @@ -2235,7 +2235,7 @@
  
  CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
@@ -87,8 +87,8 @@ diff -ur a/src/g_game.cpp b/src/g_game.cpp
  CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
  {
 diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
---- a/src/g_statusbar/shared_sbar.cpp	2025-06-15 20:12:44.769600004 -0400
-+++ b/src/g_statusbar/shared_sbar.cpp	2025-06-15 20:22:57.050066218 -0400
+--- a/src/g_statusbar/shared_sbar.cpp	Source
++++ b/src/g_statusbar/shared_sbar.cpp	Modified
 @@ -105,7 +105,7 @@
  
  
@@ -110,8 +110,8 @@ diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
  {
  	if (self < 0 || self > 2) self = 2;
 diff -ur a/src/menu/doommenu.cpp b/src/menu/doommenu.cpp
---- a/src/menu/doommenu.cpp	2025-06-15 20:12:44.777600002 -0400
-+++ b/src/menu/doommenu.cpp	2025-06-15 20:23:39.538095059 -0400
+--- a/src/menu/doommenu.cpp	Source
++++ b/src/menu/doommenu.cpp	Modified
 @@ -76,7 +76,7 @@
  EXTERN_CVAR(Bool, show_messages)
  EXTERN_CVAR(Float, hud_scalefactor)

@@ -1,6 +1,6 @@
 diff -ur a/src/g_cvars.cpp b/src/g_cvars.cpp
---- a/src/g_cvars.cpp	UZDoom Source trunk da87fb3d
-+++ b/src/g_cvars.cpp	2025-10-28 17:33:18.150096509 -0400
+--- a/src/g_cvars.cpp	Source
++++ b/src/g_cvars.cpp	Modified
 @@ -122,10 +122,10 @@
  
  // [BC] Allow the maximum number of particles to be specified by a cvar (so people
@@ -15,8 +15,8 @@ diff -ur a/src/g_cvars.cpp b/src/g_cvars.cpp
  		self = 65535;
  	else if (self < 100)
 diff -ur a/src/common/rendering/hwrenderer/data/hw_cvars.cpp b/src/common/rendering/hwrenderer/data/hw_cvars.cpp
---- a/src/common/rendering/hwrenderer/data/hw_cvars.cpp	UZDoom Source trunk da87fb3d
-+++ b/src/common/rendering/hwrenderer/data/hw_cvars.cpp	2025-10-29 01:21:35.594795664 -0400
+--- a/src/common/rendering/hwrenderer/data/hw_cvars.cpp	Source
++++ b/src/common/rendering/hwrenderer/data/hw_cvars.cpp	Modified
 @@ -56,7 +56,7 @@
  CVAR(Bool, gl_portals, true, 0)
  CVAR(Bool,gl_mirrors,true,0)	// This is for debugging only!

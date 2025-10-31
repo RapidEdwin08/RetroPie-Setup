@@ -1,6 +1,6 @@
 diff -ur a/src/common/engine/m_joy.cpp b/src/common/engine/m_joy.cpp
---- a/src/common/engine/m_joy.cpp	2024-06-13 19:37:29.000000000 -0400
-+++ b/src/common/engine/m_joy.cpp	2024-06-13 20:10:13.093510100 -0400
+--- a/src/common/engine/m_joy.cpp	Source
++++ b/src/common/engine/m_joy.cpp	Modified
 @@ -59,7 +59,7 @@
  
  // PUBLIC DATA DEFINITIONS -------------------------------------------------
@@ -11,8 +11,8 @@ diff -ur a/src/common/engine/m_joy.cpp b/src/common/engine/m_joy.cpp
  #ifdef _WIN32
  	joy_ps2raw->Callback();
 diff -ur a/src/common/platform/posix/sdl/i_input.cpp b/src/common/platform/posix/sdl/i_input.cpp
---- a/src/common/platform/posix/sdl/i_input.cpp	2024-06-13 19:37:29.000000000 -0400
-+++ b/src/common/platform/posix/sdl/i_input.cpp	2024-06-13 20:10:33.802694600 -0400
+--- a/src/common/platform/posix/sdl/i_input.cpp	Source
++++ b/src/common/platform/posix/sdl/i_input.cpp	Modified
 @@ -180,12 +180,10 @@
  {
  	// Clear out any mouse movement.
@@ -27,8 +27,8 @@ diff -ur a/src/common/platform/posix/sdl/i_input.cpp b/src/common/platform/posix
  
  static void MouseRead ()
 diff -ur a/src/common/startscreen/endoom.cpp b/src/common/startscreen/endoom.cpp
---- a/src/common/startscreen/endoom.cpp	2024-06-13 19:37:29.000000000 -0400
-+++ b/src/common/startscreen/endoom.cpp	2024-06-13 20:14:45.764105900 -0400
+--- a/src/common/startscreen/endoom.cpp	Source
++++ b/src/common/startscreen/endoom.cpp	Modified
 @@ -67,7 +67,7 @@
  
  // PUBLIC DATA DEFINITIONS -------------------------------------------------
