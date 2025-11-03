@@ -21,7 +21,6 @@ function depends_lzdoom() {
         libev-dev libfluidsynth-dev libgme-dev libsdl2-dev libmpg123-dev libsndfile1-dev zlib1g-dev libbz2-dev
         timidity freepats cmake libopenal-dev libjpeg-dev libgl1-mesa-dev fluid-soundfont-gm
     )
-
     getDepends "${depends[@]}"
 }
 
@@ -34,6 +33,15 @@ function sources_lzdoom() {
         applyPatch "$md_data/02_lzma_sdk_dont_force_arm_crc32.diff"
     fi
     applyPatch "$md_data/03_extra_includes.diff"
+
+	# Apply Single-Board-Computer Specific Tweaks
+	if isPlatform "rpi"* || isPlatform "arm"; then
+		applyPatch "$md_data/00_sbc_tweaks.diff"
+	fi
+	# Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
+	applyPatch "$md_data/01_sijl_tweaks.diff"
+	applyPatch "$md_data/02_JoyMappings_0SFA.diff"
+	applyPatch "$md_data/03_Preferences.diff" #ENABLED
 }
 
 function build_lzdoom() {
@@ -60,7 +68,7 @@ function install_lzdoom() {
 }
 
 function add_games_lzdoom() {
-    local params=("+fullscreen 1")
+    local params=("+fullscreen 1 -config $romdir/ports/doom/lzdoom.ini -savedir $romdir/ports/doom/lzdoom-saves")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
 
     if isPlatform "mesa" || isPlatform "gl"; then
@@ -69,11 +77,16 @@ function add_games_lzdoom() {
         params+=("+vid_renderer 0")
     fi
 
-    # FluidSynth is too memory/CPU intensive
-    if isPlatform "arm"; then
-        params+=("+snd_mididevice -3")
+    ## -1 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
+    if isPlatform "arm"; then # FluidSynth is too memory/CPU intensive
+        params+=("'+set snd_mididevice -2'")
+    else
+        params+=("'+snd_mididevice -1'")
     fi
-
+    
+    # Music Volume
+    params+=("+snd_musicvolume 1")
+    
     if isPlatform "kms"; then
         params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
     fi
@@ -83,6 +96,8 @@ function add_games_lzdoom() {
 
 function configure_lzdoom() {
     mkRomDir "ports/doom"
+    mkRomDir "ports/doom/mods"
+    mkRomDir "ports/doom/lzdoom-saves"
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 
