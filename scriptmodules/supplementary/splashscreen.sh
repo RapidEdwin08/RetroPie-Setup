@@ -51,10 +51,10 @@ function _video_exts_splashscreen() {
 }
 
 function depends_splashscreen() {
-	getDepends fbi mpv vlc vorbis-tools; # fim insserv
-	if [ ! -f /etc/mpv/mpv.conf ]; then echo "$mpvIMAGESreference" > /etc/mpv/mpv.conf; fi
-	if [ ! -f ~/.config/mpv/mpv.conf ]; then mkdir ~/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > ~/.config/mpv/mpv.conf; fi
-	if [ ! -f /home/pi/.config/mpv/mpv.conf ]; then mkdir /home/pi/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > /home/pi/.config/mpv/mpv.conf; fi
+    getDepends fbi mpv vlc vorbis-tools; # fim insserv
+    if [ ! -f /etc/mpv/mpv.conf ]; then echo "$mpvIMAGESreference" > /etc/mpv/mpv.conf; fi
+    if [ ! -f ~/.config/mpv/mpv.conf ]; then mkdir ~/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > ~/.config/mpv/mpv.conf; fi
+    if [ ! -f /home/pi/.config/mpv/mpv.conf ]; then mkdir /home/pi/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > /home/pi/.config/mpv/mpv.conf; fi
 }
 
 function install_bin_splashscreen() {
@@ -96,6 +96,19 @@ _EOF_
     mkUserDir "$datadir/splashscreens"
     echo "Place your own splashscreens in here." >"$datadir/splashscreens/README.txt"
     chown $user:$user "$datadir/splashscreens/README.txt"
+
+    echo 'while pgrep vlc >/dev/null; do sleep 1; done #Splashscreen-wait' > /dev/shm/09-splashscreen-wait.sh
+    echo 'while pgrep mpv >/dev/null; do sleep 1; done #Splashscreen-wait' >> /dev/shm/09-splashscreen-wait.sh
+    echo 'while pgrep fbi >/dev/null; do sleep 1; done #Splashscreen-wait' >> /dev/shm/09-splashscreen-wait.sh
+    if [ -f /usr/bin/omxplayer ]; then echo 'while pgrep omxplayer >/dev/null; do sleep 1; done #Splashscreen-wait' >> /dev/shm/09-splashscreen-wait.sh; fi
+    chmod 755 /dev/shm/09-splashscreen-wait.sh
+    sudo mv /dev/shm/09-splashscreen-wait.sh /etc/profile.d/09-splashscreen-wait.sh
+    sudo chown root /etc/profile.d/09-splashscreen-wait.sh
+
+    cp ~/RetroPie-Setup/scriptmodules/supplementary/splashscreen/asplashscreen.sh /dev/shm/asplashscreen.sh
+    chmod 755 /dev/shm/asplashscreen.sh
+    mv /dev/shm/asplashscreen.sh /opt/retropie/supplementary/splashscreen/asplashscreen.sh
+    chown root /opt/retropie/supplementary/splashscreen/asplashscreen.sh
 }
 
 function enable_plymouth_splashscreen() {
@@ -219,27 +232,27 @@ function randomize_splashscreen() {
     case "$choice" in
         0)
             iniSet "RANDOMIZE" "disabled"
-			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"disabled\"+g' "$rp_splash_boot" #64bit_Bookworm
+            sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"disabled\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer disabled."
             ;;
         1)
             iniSet "RANDOMIZE" "retropie"
-			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"retropie\"+g' "$rp_splash_boot" #64bit_Bookworm
+            sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"retropie\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled in directory $rootdir/supplementary/$md_id"
             ;;
         2)
             iniSet "RANDOMIZE" "custom"
-			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"custom\"+g' "$rp_splash_boot" #64bit_Bookworm
+            sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"custom\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled in directory $datadir/splashscreens"
             ;;
         3)
             iniSet "RANDOMIZE" "all"
-			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"all\"+g' "$rp_splash_boot" #64bit_Bookworm
+            sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"all\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled for both splashscreen directories."
             ;;
         4)
             iniSet "RANDOMIZE" "list"
-			sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"list\"+g' "$rp_splash_boot" #64bit_Bookworm
+            sudo sed -i 's+^RANDOMIZE=.*+RANDOMIZE=\"list\"+g' "$rp_splash_boot" #64bit_Bookworm
             printMsgs "dialog" "Splashscreen randomizer enabled for entries in /etc/splashscreen.list"
             ;;
     esac
@@ -266,19 +279,20 @@ function preview_splashscreen() {
                 1)
                     file=$(choose_splashscreen "$path" "image")
                     [[ -z "$file" ]] && break
-					clear; fbi -T 2 -a -noverbose "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fbi)
-					#clear; fim -a -q -T 2 "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fim)
+                    ##clear; fbi -T 2 -a -noverbose "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fbi)
+                    #clear; fim -a -q -T 2 "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fim)
                     #clear; mpv -vo sdl -fs --ontop --no-terminal "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep mpv)
+                    clear; mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep mpv)
                     #clear; cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep vlc)
                     ;;
                 2)
                     file=$(mktemp)
                     find "$path" -type f ! -regex ".*/\..*" ! -regex ".*LICENSE" ! -regex ".*README.*" ! -regex ".*\.sh" ! -regex ".*retropie.pkg.*" | grep -v "$REGEX_VIDEO" | sort > "$file"
                     if [[ -s "$file" ]]; then
-						Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fbi -T 2 -a -t 2 --noverbose --once --list "$file" > /dev/null 2>&1; while pgrep fbi; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-						#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fim) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fim -a -q -T 2 "$file" > /dev/null 2>&1; while pgrep fim; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-						#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1; while pgrep mpv; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-						#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1; while pgrep vlc; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                        ##Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fbi -T 2 -a -t 2 --noverbose --once --list "$file" > /dev/null 2>&1; while pgrep fbi; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                        #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fim) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fim -a -q -T 2 "$file" > /dev/null 2>&1; while pgrep fim; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                        Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1; while pgrep mpv; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                        #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1; while pgrep vlc; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
                     else
                         printMsgs "dialog" "There are no splashscreens installed in $path"
                     fi
@@ -288,8 +302,8 @@ function preview_splashscreen() {
                 3)
                     file=$(choose_splashscreen "$path" "video")
                     [[ -z "$file" ]] && break
-					Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --audio-device=alsa/sysdefault:CARD=vc4hdmi0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-					#Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                    Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --audio-device=alsa/sysdefault:CARD=vc4hdmi0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                    #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
                     ;;
             esac
         done
