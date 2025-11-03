@@ -1,16 +1,4 @@
-diff -ur a/src/am_map.cpp b/src/am_map.cpp
---- a/src/am_map.cpp	Source
-+++ b/src/am_map.cpp	Modified
-@@ -171,7 +171,7 @@
- CVAR(Bool, am_showtime, true, CVAR_ARCHIVE);
- CVAR(Bool, am_showtotaltime, false, CVAR_ARCHIVE);
- CVAR(Bool, am_showlevelname, true, CVAR_ARCHIVE);
--CVAR(Int, am_colorset, 0, CVAR_ARCHIVE);
-+CVAR(Int, am_colorset, 1, CVAR_ARCHIVE);
- CVAR(Bool, am_customcolors, true, CVAR_ARCHIVE);
- CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
- CVAR(Int, am_drawmapback, 1, CVAR_ARCHIVE);
- diff -ur a/src/common/audio/music/i_music.cpp b/src/common/audio/music/i_music.cpp
+diff -ur a/src/common/audio/music/i_music.cpp b/src/common/audio/music/i_music.cpp
 --- a/src/common/audio/music/i_music.cpp	Source
 +++ b/src/common/audio/music/i_music.cpp	Modified
 @@ -70,7 +70,7 @@
@@ -18,14 +6,14 @@ diff -ur a/src/am_map.cpp b/src/am_map.cpp
  //==========================================================================
  
 -CUSTOM_CVARD(Float, snd_musicvolume, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
-+CUSTOM_CVARD(Float, snd_musicvolume, 1.0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
++CUSTOM_CVARD(Float, snd_musicvolume, 0.7, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
  {
  	if (self < 0.f)
  		self = 0.f;
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
 --- a/src/common/console/c_console.cpp	Source
 +++ b/src/common/console/c_console.cpp	Modified
-@@ -128,7 +128,7 @@
+@@ -134,7 +134,7 @@
  static char *work = NULL;
  static int worklen = 0;
  
@@ -37,7 +25,7 @@ diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
 diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
 --- a/src/common/rendering/v_video.cpp	Source
 +++ b/src/common/rendering/v_video.cpp	Modified
-@@ -130,7 +130,7 @@
+@@ -142,7 +142,7 @@
  }
  
  
@@ -77,7 +65,16 @@ diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
 diff -ur a/src/g_game.cpp b/src/g_game.cpp
 --- a/src/g_game.cpp	Source
 +++ b/src/g_game.cpp	Modified
-@@ -2235,7 +2235,7 @@
+@@ -205,7 +205,7 @@
+ 
+ #define SLOWTURNTICS	6 
+ 
+-CVAR (Bool,		cl_run,			false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
++CVAR (Bool,		cl_run,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always running from evil?
+ CVAR (Bool,		freelook,		true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
+ CVAR (Bool,		lookstrafe,		false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always strafe with mouse?
+ CVAR (Float,	m_forward,		1.f,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+@@ -2262,7 +2262,7 @@
  
  CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
  static int nextautosave = -1;
@@ -89,11 +86,20 @@ diff -ur a/src/g_game.cpp b/src/g_game.cpp
 diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
 --- a/src/g_statusbar/shared_sbar.cpp	Source
 +++ b/src/g_statusbar/shared_sbar.cpp	Modified
+@@ -89,7 +89,7 @@
+ EXTERN_CVAR(Bool, inter_subtitles)
+ EXTERN_CVAR(Bool, ui_screenborder_classic_scaling)
+ 
+-CVAR(Int, hud_scale, -1, CVAR_ARCHIVE);
++CVAR(Int, hud_scale, 0, CVAR_ARCHIVE);
+ CVAR(Bool, log_vgafont, false, CVAR_ARCHIVE)
+ CVAR(Bool, hud_oldscale, true, CVAR_ARCHIVE)
+ 
 @@ -105,7 +105,7 @@
  
  
  // Stretch status bar to full screen width?
--CUSTOM_CVAR (Int, st_scale, 0, CVAR_ARCHIVE)
+-CUSTOM_CVAR (Int, st_scale, -1, CVAR_ARCHIVE)
 +CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
  {
  	if (self < -1)
@@ -109,15 +115,3 @@ diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
  CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
  {
  	if (self < 0 || self > 2) self = 2;
-diff -ur a/src/menu/doommenu.cpp b/src/menu/doommenu.cpp
---- a/src/menu/doommenu.cpp	Source
-+++ b/src/menu/doommenu.cpp	Modified
-@@ -76,7 +76,7 @@
- EXTERN_CVAR(Bool, show_messages)
- EXTERN_CVAR(Float, hud_scalefactor)
- 
--CVAR(Bool, m_simpleoptions, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-+CVAR(Bool, m_simpleoptions, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
- 
- typedef void(*hfunc)();
- DMenu* CreateMessageBoxMenu(DMenu* parent, const char* message, int messagemode, bool playsound, FName action = NAME_None, hfunc handler = nullptr);

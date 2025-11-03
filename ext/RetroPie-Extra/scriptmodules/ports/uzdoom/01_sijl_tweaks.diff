@@ -26,15 +26,3 @@ diff -ur a/src/common/platform/posix/sdl/i_input.cpp b/src/common/platform/posix
  }
  
  static void MouseRead ()
-diff -ur a/src/common/startscreen/endoom.cpp b/src/common/startscreen/endoom.cpp
---- a/src/common/startscreen/endoom.cpp	Source
-+++ b/src/common/startscreen/endoom.cpp	Modified
-@@ -67,7 +67,7 @@
- 
- // PUBLIC DATA DEFINITIONS -------------------------------------------------
- 
--CUSTOM_CVAR(Int, showendoom, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-+CUSTOM_CVAR(Int, showendoom, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
- {
- 	if (self < 0) self = 0;
- 	else if (self > 2) self=2;
