@@ -62,7 +62,7 @@ function configure_qzdl() {
     mkRomDir "ports"
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
-    addPort "$md_id" "zdl" "+Start ZDL" "$launch_prefix$md_inst/zdl"
+    addPort "$md_id" "zdl" "+Start ZDL" "$launch_prefix$md_inst/zdl -platformtheme gtk3"
     sed -i s'+_PORT_+_SYS_+g' "$romdir/ports/+Start ZDL.sh"
 
     local shortcut_name
@@ -72,7 +72,7 @@ function configure_qzdl() {
 Name=ZDL
 GenericName=ZDL
 Comment=ZDoom WAD Launcher
-Exec=$md_inst/zdl
+Exec=$md_inst/zdl -platformtheme gtk3
 Icon=$md_inst/ico_icon.xpm
 Terminal=false
 Type=Application
