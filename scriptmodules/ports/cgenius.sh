@@ -12,8 +12,16 @@
 rp_module_id="cgenius"
 rp_module_desc="Commander Genius - Modern Interpreter for the Commander Keen Games (Vorticon and Galaxy Games)"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/gerstrong/Commander-Genius/master/COPYRIGHT"
-rp_module_repo="git https://gitlab.com/Dringgstein/Commander-Genius.git v3.3.0"
+rp_module_repo="git https://gitlab.com/Dringgstein/Commander-Genius.git :_get_version_cgenius"
 rp_module_section="exp"
+
+function _get_version_cgenius() {
+    if [[ "$__os_debian_ver" -le 10 ]]; then
+        echo "v3.3.0"
+    else
+        echo "master"
+    fi
+}
 
 function depends_cgenius() {
     getDepends cmake libcurl4-openssl-dev libvorbis-dev libogg-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
