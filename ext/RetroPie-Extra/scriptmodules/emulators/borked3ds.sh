@@ -29,10 +29,7 @@ function depends_borked3ds() {
  
     # Additional libraries required for running
 	#local depends=(build-essential cmake clang clang-format libc++-dev libsdl2-dev libssl-dev qt6-l10n-tools qt6-tools-dev qt6-tools-dev-tools qt6-base-dev qt6-base-private-dev libxcb-cursor-dev libvulkan-dev qt6-multimedia-dev libqt6sql6 libasound2-dev xorg-dev libx11-dev libxext-dev libpipewire-0.3-dev libsndio-dev ffmpeg libgl-dev libswscale-dev libavformat-dev libavcodec-dev libavdevice-dev libglut3.12 libglut-dev freeglut3-dev mesa-vulkan-drivers libinput-dev libqt6core6 libfdk-aac-dev)
-	local depends=(build-essential cmake clang clang-format libc++-dev libsdl2-dev libssl-dev qt6-l10n-tools qt6-tools-dev qt6-tools-dev-tools qt6-base-dev qt6-base-private-dev libxcb-cursor-dev libvulkan-dev qt6-multimedia-dev libqt6sql6 libasound2-dev xorg-dev libx11-dev libxext-dev libpipewire-0.3-dev libsndio-dev ffmpeg libgl-dev libswscale-dev libavformat-dev libavcodec-dev libavdevice-dev freeglut3-dev mesa-vulkan-drivers libinput-dev)
-    if [[ ! $(apt-cache search libglut3.12) == '' ]]; then
-        depends+=(libglut3.12 libglut-dev)
-    fi
+	local depends=(build-essential cmake clang clang-format libc++-dev libsdl2-dev libssl-dev qt6-l10n-tools qt6-tools-dev qt6-tools-dev-tools qt6-base-dev qt6-base-private-dev libxcb-cursor-dev libvulkan-dev qt6-multimedia-dev libqt6sql6 libasound2-dev xorg-dev libx11-dev libxext-dev libpipewire-0.3-dev libsndio-dev ffmpeg libgl-dev libswscale-dev libavformat-dev libavcodec-dev libavdevice-dev libglut3.12 libglut-dev freeglut3-dev mesa-vulkan-drivers libinput-dev)
 	if isPlatform "aarch64"; then
 		depends+=(robin-map-dev)
 	else
@@ -46,6 +43,7 @@ function depends_borked3ds() {
 	else
 		depends+=(libqt6core6)
 	fi
+	[[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
 	getDepends "${depends[@]}"
 }
 
@@ -88,9 +86,11 @@ function build_borked3ds() {
  	isPlatform "aarch64" && extra_build_options="-DDYNARMIC_USE_BUNDLED_EXTERNALS=OFF"
 	mkdir build
 	cd build
+    if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
 	$md_build/cmake-4.0.2/bin/cmake .. -DCMAKE_BUILD_TYPE=Release $extra_build_options
  	$md_build/cmake-4.0.2/bin/cmake --build . -- -j"$(nproc)"
 	md_ret_require="$md_build/build/bin"
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
  
 function install_borked3ds() {
