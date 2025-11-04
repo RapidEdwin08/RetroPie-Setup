@@ -43,6 +43,7 @@ function depends_borked3ds() {
 	else
 		depends+=(libqt6core6)
 	fi
+	[[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
 	getDepends "${depends[@]}"
 }
 
@@ -85,9 +86,11 @@ function build_borked3ds() {
  	isPlatform "aarch64" && extra_build_options="-DDYNARMIC_USE_BUNDLED_EXTERNALS=OFF"
 	mkdir build
 	cd build
+    if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
 	$md_build/cmake-4.0.2/bin/cmake .. -DCMAKE_BUILD_TYPE=Release $extra_build_options
  	$md_build/cmake-4.0.2/bin/cmake --build . -- -j"$(nproc)"
 	md_ret_require="$md_build/build/bin"
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
  
 function install_borked3ds() {
