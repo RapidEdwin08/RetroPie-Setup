@@ -105,7 +105,7 @@ _EOF_
     sudo mv /dev/shm/09-splashscreen-wait.sh /etc/profile.d/09-splashscreen-wait.sh
     sudo chown root /etc/profile.d/09-splashscreen-wait.sh
 
-    cp ~/RetroPie-Setup/scriptmodules/supplementary/splashscreen/asplashscreen.sh /dev/shm/asplashscreen.sh
+    cp $home/RetroPie-Setup/scriptmodules/supplementary/splashscreen/asplashscreen.sh /dev/shm/asplashscreen.sh
     chmod 755 /dev/shm/asplashscreen.sh
     mv /dev/shm/asplashscreen.sh /opt/retropie/supplementary/splashscreen/asplashscreen.sh
     chown root /opt/retropie/supplementary/splashscreen/asplashscreen.sh
