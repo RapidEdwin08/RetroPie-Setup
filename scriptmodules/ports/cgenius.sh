@@ -19,7 +19,8 @@ function _get_version_cgenius() {
     if [[ "$__os_debian_ver" -le 10 ]]; then
         echo "v3.3.0"
     else
-        echo "master"
+		echo "v3.6.1"
+        #echo "master"
     fi
 }
 
