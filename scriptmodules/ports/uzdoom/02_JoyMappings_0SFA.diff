@@ -1,0 +1,115 @@
+diff -ur a/src/common/platform/posix/sdl/i_joystick.cpp b/src/common/platform/posix/sdl/i_joystick.cpp
+--- a/src/common/platform/posix/sdl/i_joystick.cpp	Source
++++ b/src/common/platform/posix/sdl/i_joystick.cpp	Modified
+@@ -145,7 +145,7 @@
+ 				info.Name.Format("Axis %d", i+1);
+ 			else
+ 				info.Name.Format("Hat %d (%c)", (i-NumAxes)/2 + 1, (i-NumAxes)%2 == 0 ? 'x' : 'y');
+-			info.DeadZone = DEFAULT_DEADZONE;
++			info.DeadZone = 0.2;
+ 			info.Multiplier = 1.0f;
+ 			info.Value = 0.0;
+ 			info.ButtonValue = 0;
+@@ -270,7 +270,7 @@
+ };
+ 
+ // [Nash 4 Feb 2024] seems like on Linux, the third axis is actually the Left Trigger, resulting in the player uncontrollably looking upwards.
+-const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Side, JOYAXIS_Forward, JOYAXIS_None, JOYAXIS_Yaw, JOYAXIS_Pitch};
++const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Yaw, JOYAXIS_Forward, JOYAXIS_None, JOYAXIS_None, JOYAXIS_None};
+ 
+ class SDLInputJoystickManager
+ {
+diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbinds.txt
+--- a/wadsrc/static/engine/commonbinds.txt	Source
++++ b/wadsrc/static/engine/commonbinds.txt	Modified
+@@ -45,10 +45,10 @@
+ // I can't see why they shouldn't be for Doom or Chex either.
+ pgup +moveup
+ ins +movedown
+-home land
++home centerview
+ pgdn +lookup
+ del +lookdown
+-end centerview
++end land
+ 
+ // Xbox 360 / PS2 controllers
+ pad_a +use
+@@ -65,21 +65,6 @@
+ pad_back pause
+ lthumb crouch
+ 
+-// Generic gamepad bindings
+-joy1 +use
+-joy4 +jump
+-axis6plus +attack
+-axis3plus +altattack
+-joy5 weapprev
+-joy6 weapnext
+-pov1left invprev
+-pov1right invnext
+-pov1down invuse
+-pov1up togglemap
+-joy8 menu_main
+-joy7 pause
+-joy10 crouch
+-
+ /* Default automap bindings */
+ mapbind f am_togglefollow
+ mapbind g am_togglegrid
+@@ -118,3 +103,55 @@
+ mapbind pov1down +am_pandown
+ mapbind joy5 +am_zoomout
+ mapbind joy6 +am_zoomin
++
++// 0ne-Size-Fits-All - Neutral Axes - Multiple D-Pad Support - 0ut-0f-Box Config for 8+Button joyPads - Jump @joy9 - No doublebinds
++joy1 "toggle cl_run"
++joy2 +use
++//doublebind joy2 invuse
++joy3 +attack
++joy4 weapnext
++joy5 +moveleft
++joy6 +moveright
++joy7 togglemap
++joy8 menu_main
++joy9 +jump
++
++// D-Pad Bindings Hat
++pov1up +forward
++pov1down +back
++pov1left +left
++pov1right +right
++
++// D-Pad Bindings PS3
++//joy14 +forward
++//joy15 +back
++//joy16 +left
++//joy17 +right
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++// 0riginal D00M/Heretic Keyboard Inputs [NOT WASD]
++UpArrow +forward
++LeftArrow +left
++RightArrow +right
++DownArrow +back
++, +moveleft
++. +moveright
++Ctrl +attack
++Alt +strafe
++/ +jump
++
++// @LINE #115 END +joyMappings

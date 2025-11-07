@@ -1,0 +1,16 @@
+diff -ur a/src/g_cvars.cpp b/src/g_cvars.cpp
+--- a/src/g_cvars.cpp	Source
++++ b/src/g_cvars.cpp	Modified
+@@ -122,10 +122,10 @@
+ 
+ // [BC] Allow the maximum number of particles to be specified by a cvar (so people
+ // with lots of nice hardware can have lots of particles!).
+-CUSTOM_CVAR(Int, r_maxparticles, 4000, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, r_maxparticles, 2500, CVAR_ARCHIVE | CVAR_NOINITCALL)
+ {
+ 	if (self == 0)
+-		self = 4000;
++		self = 2500;
+ 	else if (self > 65535)
+ 		self = 65535;
+ 	else if (self < 100)

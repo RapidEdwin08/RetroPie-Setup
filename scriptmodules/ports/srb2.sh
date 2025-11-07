@@ -56,11 +56,45 @@ function install_srb2() {
         'assets/zones.pk3'
         'assets/README.txt'
         'assets/LICENSE.txt'
+        'src/sdl/SDL_icon.xpm'
     )
+}
+
+function remove_srb2() {
+    if [[ -f "/usr/share/applications/Sonic Robo Blast 2.desktop" ]]; then sudo rm -f "/usr/share/applications/Sonic Robo Blast 2.desktop"; fi
+    if [[ -f "$home/Desktop/Sonic Robo Blast 2.desktop" ]]; then rm -f "$home/Desktop/Sonic Robo Blast 2.desktop"; fi
+    if [[ -f "$romdir/ports/Sonic Robo Blast 2.sh" ]]; then rm "$romdir/ports/Sonic Robo Blast 2.sh"; fi
 }
 
 function configure_srb2() {
     addPort "$md_id" "srb2" "Sonic Robo Blast 2" "pushd $md_inst; ./srb2; popd"
-
     moveConfigDir "$home/.srb2"  "$md_conf_root/$md_id"
+
+    cat >"$md_inst/srb2.sh" << _EOF_
+#!/bin/bash
+pushd $md_inst; ./srb2; popd
+_EOF_
+    chmod 755 "$md_inst/srb2.sh"
+
+    local shortcut_name
+    shortcut_name="Sonic Robo Blast 2"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+[Desktop Entry]
+Name=$shortcut_name
+GenericName=$shortcut_name
+Comment=$shortcut_name
+Exec=$md_inst/srb2.sh
+Icon=$md_inst/SDL_icon.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=$shortcut_name;SRB2
+StartupWMClass=$shortcut_name
+Name[en_US]=$shortcut_name
+_EOF_
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+
+    [[ "$md_mode" == "remove" ]] && remove_srb2
 }
