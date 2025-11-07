@@ -46,7 +46,14 @@ function sources_uzdoom-dev() {
     gitPullOrClone
 
     # 0ptional Apply Single-Board-Computer Specific Tweaks
-    if isPlatform "rpi"* || isPlatform "arm"; then applyPatch "$md_data/00_sbc_tweaks.diff"; fi
+    if isPlatform "rpi"* || isPlatform "arm"; then
+        applyPatch "$md_data/00_sbc_tweaks.diff" # r_maxparticles 2500
+        if isPlatform "rpi5"; then
+            sed -i 's/gl_texture_filter_anisotropic, 16.f,/gl_texture_filter_anisotropic, 8.f,/' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        else
+            sed -i 's/gl_texture_filter_anisotropic, 16.f,/gl_texture_filter_anisotropic, 2.f,/' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        fi
+    fi
 
     # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/01_HapticsOff.diff"
