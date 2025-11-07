@@ -1,15 +1,3 @@
-diff -ur a/src/common/audio/music/i_music.cpp b/src/common/audio/music/i_music.cpp
---- a/src/common/audio/music/i_music.cpp	Source
-+++ b/src/common/audio/music/i_music.cpp	Modified
-@@ -70,7 +70,7 @@
- // Maximum volume of MOD/stream music.
- //==========================================================================
- 
--CUSTOM_CVARD(Float, snd_musicvolume, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
-+CUSTOM_CVARD(Float, snd_musicvolume, 0.7, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
- {
- 	if (self < 0.f)
- 		self = 0.f;
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
 --- a/src/common/console/c_console.cpp	Source
 +++ b/src/common/console/c_console.cpp	Modified
