@@ -21,17 +21,24 @@ function _update_hook_lr-fbalpha2012() {
     renameModule "lr-fba" "lr-fbalpha2012"
 }
 
+function depends_lr-fbalpha2012() {
+    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
+    getDepends "${depends[@]}"
+}
+
 function sources_lr-fbalpha2012() {
     gitPullOrClone
 }
 
 function build_lr-fbalpha2012() {
     cd svn-current/trunk/
+	if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
     make -f makefile.libretro clean
     local params=()
     isPlatform "arm" && params+=("platform=armv")
     make -f makefile.libretro "${params[@]}"
     md_ret_require="$md_build/svn-current/trunk/fbalpha2012_libretro.so"
+	if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 }
 
 function install_lr-fbalpha2012() {
