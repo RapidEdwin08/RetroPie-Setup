@@ -85,7 +85,7 @@ function add_games_lzdoom() {
     fi
     
     # Music Volume
-    params+=("+snd_musicvolume 1")
+     #params+=("+snd_musicvolume 1") # Moved to 03_Preferences.diff
     
     if isPlatform "kms"; then
         params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
