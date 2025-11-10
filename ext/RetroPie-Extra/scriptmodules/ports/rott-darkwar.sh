@@ -768,6 +768,9 @@ popd
 
 # Kill qjoypad
 pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
+
+if [[ -f /etc/xdg/autostart/qjoypad-start.desktop ]]; then qjoypad-start; fi
+
 exit 0
 _EOF_
     chmod 755 "$md_inst/rott-darkwar-qjoy.sh"
@@ -778,6 +781,8 @@ _EOF_
 }
 
 function shortcuts_icons_rott-darkwar() {
+    local exec_name="$md_inst/$md_id.sh"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then exec_name=$md_inst/$md_id-qjoy.sh; fi
     local shortcut_name
     shortcut_name="Rise Of The Triad Dark War"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -785,7 +790,7 @@ function shortcuts_icons_rott-darkwar() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=RoTT Dark War
-Exec=$md_inst/$md_id.sh
+Exec=$exec_name
 Icon=$md_inst/ROTTDW_48x48.xpm
 Terminal=false
 Type=Application

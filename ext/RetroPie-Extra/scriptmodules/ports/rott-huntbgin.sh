@@ -772,6 +772,9 @@ popd
 
 # Kill qjoypad
 pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
+
+if [[ -f /etc/xdg/autostart/qjoypad-start.desktop ]]; then qjoypad-start; fi
+
 exit 0
 _EOF_
     chmod 755 "$md_inst/rott-huntbgin-qjoy.sh"
@@ -783,6 +786,8 @@ _EOF_
 }
 
 function shortcuts_icons_rott-huntbgin() {
+    local exec_name="$md_inst/$md_id.sh"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then exec_name=$md_inst/$md_id-qjoy.sh; fi
     local shortcut_name
     shortcut_name="Rise Of The Triad Hunt Begins"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -790,7 +795,7 @@ function shortcuts_icons_rott-huntbgin() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=RoTT Hunt Begins
-Exec=$md_inst/$md_id.sh
+Exec=$exec_name
 Icon=$md_inst/ROTTHB_48x48.xpm
 Terminal=false
 Type=Application

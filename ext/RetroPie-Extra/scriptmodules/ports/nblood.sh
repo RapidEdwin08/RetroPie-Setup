@@ -248,6 +248,9 @@ popd
 
 # Kill qjoypad
 pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
+
+if [[ -f /etc/xdg/autostart/qjoypad-start.desktop ]]; then qjoypad-start; fi
+
 exit 0
 _EOF_
     chmod 755 "$md_inst/nblood-qjoy.sh"
@@ -258,6 +261,8 @@ _EOF_
 }
 
 function shortcuts_icons_nblood() {
+    local exec_name="$md_inst/$md_id.sh"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then exec_name=$md_inst/$md_id-qjoy.sh; fi
     local shortcut_name
     shortcut_name="Blood"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -265,7 +270,7 @@ function shortcuts_icons_nblood() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/$md_id.sh
+Exec=$exec_name
 Icon=$md_inst/Blood_48x48.xpm
 Terminal=false
 Type=Application
@@ -284,7 +289,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/$md_id.sh cryptic
+Exec=$exec_name cryptic
 Icon=$md_inst/BloodCP_32x64.xpm
 Terminal=false
 Type=Application

@@ -354,6 +354,9 @@ fi
 
 # Kill qjoypad
 pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
+
+if [[ -f /etc/xdg/autostart/qjoypad-start.desktop ]]; then qjoypad-start; fi
+
 exit 0
 _EOF_
     chmod 755 "$md_inst/$md_id-qjoy.sh"
@@ -365,6 +368,8 @@ _EOF_
 }
 
 function shortcuts_icons_hexen2-gl() {
+    local exec_name="$md_inst/glhexen2 -f -conwidth 800"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then exec_name=$md_inst/$md_id-qjoy.sh; fi
     local shortcut_name
     shortcut_name="HeXen II"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -372,7 +377,7 @@ function shortcuts_icons_hexen2-gl() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/glhexen2 -f -conwidth 800
+Exec=$exec_name
 Icon=$md_inst/HexenII_70x70.xpm
 Terminal=false
 Type=Application
@@ -385,13 +390,15 @@ _EOF_
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
     rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
+    exec_name="$md_inst/glhexen2 -f -conwidth 800 -portals"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then exec_name="$md_inst/$md_id-qjoy.sh portals"; fi
     shortcut_name="HeXen II Portal Of Praevus"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/glhexen2 -f -conwidth 800 -portals
+Exec=$exec_name
 Icon=$md_inst/HexenIIPraevus_70x70.xpm
 Terminal=false
 Type=Application
