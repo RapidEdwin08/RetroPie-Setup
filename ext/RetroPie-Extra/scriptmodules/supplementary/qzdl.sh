@@ -15,11 +15,19 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="qzdl"
 rp_module_desc="Qt version of ZDL - ZDoom [WAD] Launcher"
-rp_module_help="- General Settings [Source Ports]:\n/opt/retropie/ports/uzdoom/uzdoom\n/opt/retropie/ports/lzdoom/lzdoom\n \n- General Settings [IWADs]:\n$home/RetroPie/roms/ports/doom/doomu.wad\n$home/RetroPie/roms/ports/doom/doom2.wad\n \n- General Settings [Always Add These Parameters]:\nDOOMWADDIR=$home/RetroPie/roms/ports/doom\n-config $home/RetroPie/roms/ports/doom/uzdoom.ini\n+gl_lightmode 1\n \nExtra Command Line Arguments: +logfile /dev/shm/ZDL.log"
+rp_module_help="- General Settings [Source Ports]:\n/opt/retropie/ports/uzdoom/uzdoom\n/opt/retropie/ports/lzdoom/lzdoom\n \n- General Settings [IWADs]:\n$home/RetroPie/roms/ports/doom/doomu.wad\n$home/RetroPie/roms/ports/doom/doom2.wad\n \n- General Settings [Always Add These Parameters]:\nDOOMWADDIR=$home/RetroPie/roms/ports/doom\n-config $home/RetroPie/roms/ports/doom/uzdoom.ini\n-savedir $home/RetroPie/roms/ports/doom/uzdoom-saves\n \nExtra Command Line Arguments: +logfile /dev/shm/ZDL.log\n \nAdjust ZDL Theme [-platformtheme qt5ct]: Qt5 Settings"
 rp_module_licence="GNU3 https://raw.githubusercontent.com/qbasicer/qzdl/refs/heads/master/LICENSE"
-rp_module_repo="git https://github.com/qbasicer/qzdl.git master"
+rp_module_repo="git https://github.com/qbasicer/qzdl.git master :_get_commit_qzdl"
 rp_module_section="exp"
 rp_module_flags=""
+
+function _get_commit_qzdl() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch_tag=master
+    local branch_commit="$(git ls-remote https://github.com/qbasicer/qzdl.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+
+    echo $branch_commit
+}
 
 function depends_qzdl() {
     #local depends=(qtcreator qtdeclarative5-dev)
