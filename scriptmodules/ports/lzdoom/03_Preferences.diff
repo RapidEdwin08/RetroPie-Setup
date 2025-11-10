@@ -90,3 +90,15 @@ diff -ur a/src/c_console.cpp b/src/c_console.cpp
  {
  	if (self < 0) self = 0;
  }
+diff -ur a/src/sound/music/i_music.cpp b/src/sound/music/i_music.cpp
+--- a/src/sound/music/i_music.cpp	2025-11-09 19:30:20.123363664 -0500
++++ b/src/sound/music/i_music.cpp	2025-11-09 19:33:41.436271952 -0500
+@@ -110,7 +110,7 @@
+ // Maximum volume of MOD/stream music.
+ //==========================================================================
+ 
+-CUSTOM_CVAR (Float, snd_musicvolume, 0.5f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CUSTOM_CVAR (Float, snd_musicvolume, 1.0f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
