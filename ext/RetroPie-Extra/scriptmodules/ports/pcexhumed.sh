@@ -372,7 +372,8 @@ popd
 # Kill qjoypad
 pkill -15 qjoypad > /dev/null 2>&1; rm /tmp/qjoypad.pid > /dev/null 2>&1
 
-if [[ -f /etc/xdg/autostart/qjoypad-start.desktop ]]; then qjoypad-start; fi
+# Restart qjoypad IF DTWPID qjoypad@Desktop is Enabled + startx is running
+if [[ -f /etc/xdg/autostart/qjoypad-start.desktop ]] && pgrep -f startx &> /dev/null 2>&1; then qjoypad-start > /dev/null 2>&1; fi
 
 exit 0
 _EOF_
