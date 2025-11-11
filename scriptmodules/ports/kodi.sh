@@ -90,12 +90,16 @@ function install_bin_kodi() {
 function remove_kodi() {
     aptRemove kodi
     rp_callModule kodi depends remove
+    rm -f "$romdir/ports/Kodi.sh"
+    rm -f "$romdir/kodi/Kodi.sh"
+    rm -f "$romdir/ports/+Start Kodi.sh"
+    rm -f "$romdir/kodi/+Start Kodi.sh"
 }
 
 function configure_kodi() {
     moveConfigDir "$home/.kodi" "$md_conf_root/kodi"
 
-    addPort "$md_id" "kodi" "Kodi" "kodi-standalone"
+    addPort "$md_id" "kodi" "+Start Kodi" "kodi-standalone"
 
     addSystem "kodi" "kodi" ".sh" "pc" "kodi" "bash %ROM%" "$home/RetroPie/roms/kodi"
     # <command>/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ kodi %ROM%</command> -->> <command>bash %ROM%</command>
@@ -104,9 +108,10 @@ function configure_kodi() {
         sed -i 's+/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ kodi+bash+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
         chown $__user:$__user /opt/retropie/configs/all/emulationstation/es_systems.cfg
     fi
-    if [[ ! -f "$romdir/kodi/Kodi.sh" ]]; then cp "$romdir/ports/Kodi.sh" "$romdir/kodi/Kodi.sh"; chown $__user:$__user "$romdir/kodi/Kodi.sh"; fi
+    if [[ ! -f "$romdir/kodi/+Start Kodi.sh" ]]; then cp "$romdir/ports/+Start Kodi.sh" "$romdir/kodi/+Start Kodi.sh"; chown $__user:$__user "$romdir/kodi/+Start Kodi.sh"; fi
 
     [[ "$md_mode" == "install" ]] && shortcuts_icons_kodi
+    [[ "$md_mode" == "remove" ]] && remove_kodi
 }
 
 function shortcuts_icons_kodi() {
