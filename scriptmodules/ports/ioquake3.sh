@@ -60,6 +60,8 @@ function install_ioquake3() {
         "$(_release_dir)/ioquake3"
         "$(_release_dir)/renderer_opengl1.so"
         "$(_release_dir)/renderer_opengl2.so"
+        "misc/quake3.svg"
+        "misc/quake3-tango.png"
     )
 }
 
