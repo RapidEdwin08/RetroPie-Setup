@@ -96,6 +96,16 @@ function configure_kodi() {
     moveConfigDir "$home/.kodi" "$md_conf_root/kodi"
 
     addPort "$md_id" "kodi" "Kodi" "kodi-standalone"
+
+    addSystem "kodi" "kodi" ".sh" "pc" "kodi" "bash %ROM%" "$home/RetroPie/roms/kodi"
+    # <command>/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ kodi %ROM%</command> -->> <command>bash %ROM%</command>
+    sed -i 's+/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ kodi+bash+g' /etc/emulationstation/es_systems.cfg
+    if [ -f /opt/retropie/configs/all/emulationstation/es_systems.cfg ]; then
+        sed -i 's+/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ kodi+bash+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
+        chown $__user:$__user /opt/retropie/configs/all/emulationstation/es_systems.cfg
+    fi
+    if [[ ! -f "$romdir/kodi/Kodi.sh" ]]; then cp "$romdir/ports/Kodi.sh" "$romdir/kodi/Kodi.sh"; chown $__user:$__user "$romdir/kodi/Kodi.sh"; fi
+
     [[ "$md_mode" == "install" ]] && shortcuts_icons_kodi
 }
 
