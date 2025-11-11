@@ -78,10 +78,17 @@ function build_dosbox-staging() {
 
 function install_dosbox-staging() {
     ninja -C build install
-    md_ret_files=(        
-        'contrib/icons/svg/dosbox-staging-32.svg'
-        'contrib/icons/old/dosbox-old.ico'
-    )
+    if [[ -f "$md_build/extras/icons/svg/dosbox-staging-32.svg" ]]; then
+        md_ret_files=(        
+            'extras/icons/svg/dosbox-staging-32.svg'
+            'extras/icons/old/dosbox-old.ico'
+        )
+    else
+        md_ret_files=(        
+            'contrib/icons/svg/dosbox-staging-32.svg'
+            'contrib/icons/old/dosbox-old.ico'
+        )
+    fi
 }
 
 function remove_dosbox-staging() {
