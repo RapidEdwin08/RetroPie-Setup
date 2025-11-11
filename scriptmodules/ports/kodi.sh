@@ -56,14 +56,7 @@ function depends_kodi() {
     fi
 
     # required for reboot/shutdown options. Don't try and remove if removing dependencies
-    #[[ "$md_mode" == "install" ]] && getDepends policykit-1
-    if [[ "$md_mode" == "install" ]]; then
-        if [[ $(apt-cache search policykit-1 | grep 'policykit-1 ') == '' ]]; then
-            getDepends polkitd
-        else
-            getDepends policykit-1
-        fi
-    fi
+    [[ "$md_mode" == "install" ]] && getDepends polkitd
 
     addUdevInputRules
 }
@@ -96,28 +89,4 @@ function configure_kodi() {
     moveConfigDir "$home/.kodi" "$md_conf_root/kodi"
 
     addPort "$md_id" "kodi" "Kodi" "kodi-standalone"
-    [[ "$md_mode" == "install" ]] && shortcuts_icons_kodi
-}
-
-function shortcuts_icons_kodi() {
-    local shortcut_name
-    shortcut_name="Kodi"
-    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
-[Desktop Entry]
-Name=$shortcut_name
-GenericName=$shortcut_name
-Comment=$shortcut_name Media Center (formerly XBMC) 
-Exec=kodi --standalone -fs
-Icon=kodi
-Terminal=false
-Type=Application
-Categories=Game;Emulator
-Keywords=Kodi;XBMC
-StartupWMClass=Kodi
-Name[en_US]=$shortcut_name
-_EOF_
-    chmod 755 "$md_inst/$shortcut_name.desktop"
-    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-    rm -f "/usr/share/applications/kodi.desktop"; rm -f "/usr/share/applications/kodi-fs.desktop"
-    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 }
