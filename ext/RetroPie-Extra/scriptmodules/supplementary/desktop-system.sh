@@ -20,9 +20,9 @@ rp_module_section="config"
 rp_module_flags=""
 
 function gui_desktop-system() {
-    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Add Desktop ES System [desktop = XINIT:startx] \nNOTE: This does NOT Install any Desktop Environments" 15 60 5 \
-        "1" "ADD Desktop System to ES" \
-        "2" "DEL Desktop System to ES" \
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Add Desktop ES System [desktop = XINIT:startx] \nNOTE: This does NOT Install any Desktop Environments\n \n- /etc/emulationstation/es_systems.cfg:\n  <system>\n    <name>desktop</name>\n    <fullname>desktop</fullname>\n    <path>$romdir/desktop</path>\n    <extension>.sh .SH</extension>\n    <command>bash %ROM%</command>\n    <platform>pc</platform>\n    <theme>desktop</theme>\n  </system>\n \n- $md_conf_root/ports/desktop/emulators.cfg:\n  desktop = \"XINIT:startx\"" 25 60 5 \
+        "1" "ADD [_PORT_ desktop] System" \
+        "2" "DEL [_PORT_ desktop] System" \
         "3" "Cancel" 2>&1 >/dev/tty)
 
     case $choice in
