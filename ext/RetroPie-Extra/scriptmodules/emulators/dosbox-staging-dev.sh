@@ -107,6 +107,15 @@ function configure_dosbox-staging-dev() {
     cp "$romdir/pc/+Start DOSBox-Staging.sh" "$md_inst/dosbox-staging.sh"; chmod 755 "$md_inst/dosbox-staging.sh"
     sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$0" == "/opt/retropie/emulators/dosbox-staging-dev/dosbox-staging.sh" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
 
+    # dosbox-staging.conf # cycles    = auto -->> cycles    = max
+    local dosbox_conf="$md_conf_root/pc/dosbox-staging.conf"
+    if [[ -f "$dosbox_conf" ]]; then
+        sed -i 's+^cpu_cycles.*+cycles    = max+g' "$dosbox_conf"
+        # fullresolution = original -->> fullscreen_mode = original
+        sed -i 's+^fullresolution.*+fullscreen_mode = original+g' "$dosbox_conf"
+        chown $__user:$__user "$dosbox_conf"
+    fi
+
     local config_dir="$md_conf_root/pc"
     chown -R "$__user":"$__group" "$config_dir"
 
