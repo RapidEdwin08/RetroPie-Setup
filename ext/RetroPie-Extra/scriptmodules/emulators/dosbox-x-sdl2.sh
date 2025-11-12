@@ -76,7 +76,7 @@ function remove_dosbox-x-sdl2() {
     local shortcut_name
     shortcut_name="DOSBox-X"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/pc/+Start $shortcut_name.sh"; rm -f "$md_conf_root/dosbox-x/README.TXT"
+    rm -f "$romdir/pc/+Start $shortcut_name.sh"; rm -f "$md_conf_root/dosbox-x/README.TXT"; rmdir "$md_conf_root/dosbox-x" 2>/dev/null
 
     shortcut_name="Doom (DOSBox-X)"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
@@ -106,30 +106,6 @@ function gui_dosbox-x-sdl2() {
 
 function configure_dosbox-x-sdl2() {
     if [[ -d "$romdir/pc" ]]; then chown -R $__user:$__user "$romdir/pc"; fi
-    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
-    [[ "$md_mode" == "remove" ]] && return
-
-    mkRomDir "pc/.games"
-    moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
-
-    # dosbox-x-2025.10.07.conf # cycles             = auto -->> cycles             = max
-    local dosbox_ver="$(cat $md_inst/share/metainfo/com.dosbox_x.DOSBox-X.metainfo.xml | grep 'release version=' | awk '{ print $2}' | cut -d"=" -f 2- | sed 's/"//g')"
-    local dosbox_conf="$md_conf_root/pc/dosbox-x-$dosbox_ver.conf"
-    if [[ -f "$dosbox_conf" ]]; then
-        sed -i 's+^cycles .*+cycles             = max+g' "$dosbox_conf"
-        sed -i 's+^cpu_cycles .*+cpu_cycles           = max+g' "$dosbox_conf"
-        chown $__user:$__user "$dosbox_conf"
-    fi
-
-    if [[ ! -d "$md_conf_root/pc/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/DOSGAMES"; fi
-    if [[ ! -d "$home/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$home/DOSGAMES"; fi
-    chown -R $__user:$__user "$romdir/pc/.games"
-
-    sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
-    sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
-    chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
-    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "$home/Desktop/DOSBox-X.desktop"; chown $__user:$__user "$home/Desktop/DOSBox-X.desktop"; fi
-    ##rm -f "/usr/share/applications/DOSBox-X.desktop"; cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "/usr/share/applications/DOSBox-X.desktop"; chown $__user:$__user "/usr/share/applications/DOSBox-X.desktop"
 
     local script="$md_inst/$md_id.sh"
     cat > "$script" << _EOF_
@@ -170,8 +146,8 @@ echo "\${params[@]}" >> /dev/shm/runcommand.info
 # Start DOSBox-X
 /opt/retropie/emulators/dosbox-x-sdl2/bin/dosbox-x "\${params[@]}"
 _EOF_
+    chmod 755 "$script"
 
-    chmod +x "$script"
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix$script"
@@ -179,9 +155,50 @@ _EOF_
     sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
     chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
 
+    [[ "$md_mode" == "remove" ]] && rm -f "$md_conf_root/dosbox-x/README.TXT" 2>/dev/null
     addEmulator "1" "$md_id" "pc" "$launch_prefix$script %ROM%"
     addSystem "pc"
-    echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"
+    if [[ "$md_mode" == "install" ]]; then echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"; fi
+
+    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
+    [[ "$md_mode" == "remove" ]] && return
+
+    mkRomDir "pc/.games"
+    moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
+
+    # -printconf does not generate a complete conf
+    su $__user -c "$md_inst/bin/dosbox-x -userconf &"
+    sleep 7; pkill dosbox-x
+
+    local dbx_output="default"
+    if isPlatform "kms"; then
+        dbx_output="openglnb"
+    fi
+
+    local config_path=$(su "$__user" -c "\"$md_inst/bin/dosbox-x\" -printconf")
+    if [[ -f "$config_path" ]]; then
+        iniConfig " = " "" "$config_path"
+        iniSet "cycles" "max"
+        iniSet "output" "$dbx_output"
+        iniSet "fullresolution" "desktop"
+        iniSet "vsyncmode" "off"
+        iniSet "blocksize" "2048"
+        iniSet "prebuffer" "50"
+        if isPlatform "rpi"; then
+            iniSet "core" "auto"
+            iniSet "fullscreen" "false"
+        fi
+    fi
+
+    if [[ ! -d "$md_conf_root/pc/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/DOSGAMES"; fi
+    if [[ ! -d "$home/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$home/DOSGAMES"; fi
+    chown -R $__user:$__user "$romdir/pc/.games"
+
+    sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "$home/Desktop/DOSBox-X.desktop"; chown $__user:$__user "$home/Desktop/DOSBox-X.desktop"; fi
+    ##rm -f "/usr/share/applications/DOSBox-X.desktop"; cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "/usr/share/applications/DOSBox-X.desktop"; chown $__user:$__user "/usr/share/applications/DOSBox-X.desktop"
 
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
     [[ "$md_mode" == "install" ]] && shortcuts_icons_dosbox-x-sdl2
