@@ -111,6 +111,15 @@ function configure_dosbox-x-sdl2() {
 
     mkRomDir "pc/.games"
     moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
+
+    # dosbox-x-2025.10.07.conf # cycles             = auto -->> cycles             = max
+    local dosbox_ver="$(cat $md_inst/share/metainfo/com.dosbox_x.DOSBox-X.metainfo.xml | grep 'release version=' | awk '{ print $2}' | cut -d"=" -f 2- | sed 's/"//g')"
+    local dosbox_conf="$md_conf_root/pc/dosbox-x-$dosbox_ver.conf"
+    if [[ -f "$dosbox_conf" ]]; then
+        sed -i 's+^cycles.*+cycles             = max+g' "$dosbox_conf"
+        chown $__user:$__user "$dosbox_conf"
+    fi
+
     if [[ ! -d "$md_conf_root/pc/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/DOSGAMES"; fi
     if [[ ! -d "$home/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$home/DOSGAMES"; fi
     chown -R $__user:$__user "$romdir/pc/.games"
