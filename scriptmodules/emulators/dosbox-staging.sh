@@ -116,14 +116,6 @@ function configure_dosbox-staging() {
     cp "$romdir/pc/+Start DOSBox-Staging.sh" "$md_inst/dosbox-staging.sh"; chmod 755 "$md_inst/dosbox-staging.sh"
     sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$0" == "/opt/retropie/emulators/dosbox-staging/dosbox-staging.sh" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
 
-    # dosbox-staging.conf # cpu_cycles           = 3000 -->> cpu_cycles           = max
-    local dosbox_conf="$md_conf_root/pc/dosbox-staging.conf"
-    if [[ -f "$dosbox_conf" ]]; then
-        sed -i 's+^cycles .*+cpu_cycles           = max+g' "$dosbox_conf"
-        sed -i 's+^cpu_cycles .*+cpu_cycles           = max+g' "$dosbox_conf"
-        chown $__user:$__user "$dosbox_conf"
-    fi
-
     local config_dir="$md_conf_root/pc"
     chown -R "$__user":"$__group" "$config_dir"
 
@@ -135,6 +127,7 @@ function configure_dosbox-staging() {
     local config_path=$(su "$__user" -c "\"$md_inst/bin/dosbox\" -printconf")
     if [[ -f "$config_path" ]]; then
         iniConfig " = " "" "$config_path"
+        iniSet "cpu_cycles" "max"
         if isPlatform "rpi"; then
             iniSet "fullscreen" "true"
             iniSet "fullresolution" "original"
