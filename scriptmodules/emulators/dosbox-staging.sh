@@ -119,8 +119,8 @@ function configure_dosbox-staging() {
     # dosbox-staging.conf # cpu_cycles           = 3000 -->> cpu_cycles           = max
     local dosbox_conf="$md_conf_root/pc/dosbox-staging.conf"
     if [[ -f "$dosbox_conf" ]]; then
-        sed -i 's+^cycles.*+cpu_cycles           = max+g' "$dosbox_conf"
-        sed -i 's+^cpu_cycles.*+cpu_cycles           = max+g' "$dosbox_conf"
+        sed -i 's+^cycles .*+cpu_cycles           = max+g' "$dosbox_conf"
+        sed -i 's+^cpu_cycles .*+cpu_cycles           = max+g' "$dosbox_conf"
         chown $__user:$__user "$dosbox_conf"
     fi
 
