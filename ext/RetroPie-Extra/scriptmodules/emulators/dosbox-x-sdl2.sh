@@ -181,6 +181,7 @@ _EOF_
         iniSet "cycles" "max"
         iniSet "output" "$dbx_output"
         iniSet "fullresolution" "desktop"
+        iniSet "aspect" "true" # 'surface' output: inherits old DOSBox aspect ratio correction
         iniSet "vsyncmode" "off"
         iniSet "blocksize" "2048"
         iniSet "prebuffer" "50"
