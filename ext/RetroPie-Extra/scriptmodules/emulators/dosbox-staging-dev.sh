@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-# This file is part of The RetroPie Project
+# This file is part of RetroPie-Extra, a supplement to RetroPie.
+# For more information, please visit:
 #
-# The RetroPie Project is the legal property of its developers, whose names are
-# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+# https://github.com/RetroPie/RetroPie-Setup
+# https://github.com/Exarkuniv/RetroPie-Extra
+# https://github.com/RapidEdwin08/RetroPie-Setup
 #
-# See the LICENSE.md file at the top-level directory of this distribution and
-# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
+# See the LICENSE file distributed with this source and at
+# https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="dosbox-staging-dev"
 rp_module_desc="modern DOS/x86 emulator focusing on ease of use"
@@ -95,6 +99,7 @@ function remove_dosbox-staging-dev() {
 
 function configure_dosbox-staging-dev() {
     configure_dosbox
+    addEmulator "1" "$md_id" "pc" "$md_inst/dosbox-staging.sh %ROM%" # Overwrite prior [configure_dosbox] entry that pointed to /roms/pc/+Start DOSBox-Staging
     if [[ -d "$romdir/pc" ]]; then chown -R $__user:$__user "$romdir/pc"; fi
 
     [[ "$md_mode" == "remove" ]] && remove_dosbox-staging-dev
@@ -105,28 +110,34 @@ function configure_dosbox-staging-dev() {
     chown -R $__user:$__user "$romdir/pc/.games"
 
     cp "$romdir/pc/+Start DOSBox-Staging.sh" "$md_inst/dosbox-staging.sh"; chmod 755 "$md_inst/dosbox-staging.sh"
-    sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$0" == "/opt/retropie/emulators/dosbox-staging-dev/dosbox-staging.sh" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
+    #sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$0" == "/opt/retropie/emulators/dosbox-staging-dev/dosbox-staging.sh" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
+    sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$1" == "" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
 
     local config_dir="$md_conf_root/pc"
+    local shell_history="$config_dir/shell_history.txt"
+    if [[ ! -f "$shell_history" ]]; then cat > "$shell_history" << _EOF_; fi
+exit
+intro
+_EOF_
     chown -R "$__user":"$__group" "$config_dir"
 
-    local staging_output="texturenb"
+    local staging_output="opengl"
     if isPlatform "kms"; then
-        staging_output="openglnb"
+        staging_output="texturenb" # openglnb Deprecated value
     fi
 
     local config_path=$(su "$__user" -c "\"$md_inst/bin/dosbox\" -printconf")
     if [[ -f "$config_path" ]]; then
         iniConfig " = " "" "$config_path"
-        iniSet "cycles" "max"
+        iniSet "cpu_cycles" "max"
+        iniSet "output" "$staging_output"
+        iniSet "fullscreen_mode" "original" # fullresolution Deprecated value
+        iniSet "vsync" "true"
+        iniSet "blocksize" "2048"
+        iniSet "prebuffer" "50"
         if isPlatform "rpi"; then
-            iniSet "fullscreen" "true"
-            iniSet "fullscreen_mode" "original"
-            iniSet "vsync" "true"
-            iniSet "output" "$staging_output"
             iniSet "core" "dynamic"
-            iniSet "blocksize" "2048"
-            iniSet "prebuffer" "50"
+            iniSet "fullscreen" "true"
         fi
     fi
 
