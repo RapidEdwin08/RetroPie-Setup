@@ -117,6 +117,7 @@ function configure_dosbox-x-sdl2() {
     local dosbox_conf="$md_conf_root/pc/dosbox-x-$dosbox_ver.conf"
     if [[ -f "$dosbox_conf" ]]; then
         sed -i 's+^cycles.*+cycles             = max+g' "$dosbox_conf"
+        sed -i 's+^cpu_cycles.*+cpu_cycles           = max+g' "$dosbox_conf"
         chown $__user:$__user "$dosbox_conf"
     fi
 
