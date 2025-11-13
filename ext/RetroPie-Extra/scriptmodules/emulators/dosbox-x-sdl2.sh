@@ -42,8 +42,8 @@ function depends_dosbox-x-sdl2() {
 
 function sources_dosbox-x-sdl2() {
     gitPullOrClone
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\\\>GAMES~1/g' "$md_build/contrib/translations/en/en_US.lng"
-    sed -i 's/HAVE FUN WITH DOSBox-X.*/Type DOOM and Press ENTER | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\\\>GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Z:\\\>DOOM | [F12+Q] QLaunch | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\\\>GAMES~1"\)\;/g' "$md_build/contrib/translations/en/en_US.lng"
+    sed -i 's/HAVE FUN WITH DOSBox-X.*/Z:\\\>DOOM | [F12+Q] QLaunch | [F12+F] Fullscreen | [F12+ESC] MenuBar | C:\\\>GAMES~1"\)\;/g' "$md_build/src/shell/shell.cpp"
     sed -i 's+--enable-debug=heavy.*+--enable-debug --prefix=/usr --enable-sdl2 "${@}" "${opt}" || exit 1+g' "$md_build/build-debug-sdl2"
 }
 
@@ -122,7 +122,7 @@ if [[ \${#dos_bat} -ge 9 ]] ; then dos_bat=\$short_name~\$short_num; fi
 # DOSBox-X Params
 params+=(-defaultdir /opt/retropie/configs/pc)
 if [[ "\$1" == *"+Start DOSBox-X"* ]] || [[ "\$1" == '' ]]; then
-    params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc");
+    params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc -c @C:");
 elif [[ "\$1" == *".EXE" ]] || [[ "\$1" == *".exe" ]]; then
     params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs)
 elif [[ "\$1" == *".COM" ]] || [[ "\$1" == *".com" ]]; then
@@ -181,6 +181,7 @@ _EOF_
         iniSet "cycles" "max"
         iniSet "output" "$dbx_output"
         iniSet "fullresolution" "desktop"
+        iniSet "windowresolution" "original"
         iniSet "aspect" "true" # 'surface' output: inherits old DOSBox aspect ratio correction
         iniSet "vsyncmode" "off"
         iniSet "blocksize" "2048"
@@ -213,7 +214,7 @@ function shortcuts_icons_dosbox-x-sdl2() {
 Name=DOSBox-X
 GenericName=DOS Emulator
 Comment=An enhanced x86/DOS emulator with sound/graphics
-Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc""
+Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc"" -c "@C:"
 Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg
 Terminal=false
 Type=Application
