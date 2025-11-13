@@ -131,7 +131,7 @@ _EOF_
         iniConfig " = " "" "$config_path"
         iniSet "cpu_cycles" "max"
         iniSet "output" "$staging_output"
-        iniSet "fullscreen_mode" "original" # fullresolution Deprecated value
+        iniSet "fullscreen_mode" "standard" # fullresolution/desktop = Deprecated values
         iniSet "vsync" "true"
         iniSet "blocksize" "2048"
         iniSet "prebuffer" "50"
