@@ -114,9 +114,9 @@ function configure_dosbox-staging() {
     if [[ ! -d "$home/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$home/DOSGAMES"; fi
     chown -R $__user:$__user "$romdir/pc/.games"
 
+    sed -i 's+running in X+running with ROM, windowed when running withOUT ROM in X+g' "$romdir/pc/+Start DOSBox-Staging.sh"
+    sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$1" == "" \]\]; then params\+=(-fullscreen); else if \[\[ ! -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi; fi+g' "$romdir/pc/+Start DOSBox-Staging.sh"
     cp "$romdir/pc/+Start DOSBox-Staging.sh" "$md_inst/dosbox-staging.sh"; chmod 755 "$md_inst/dosbox-staging.sh"
-    #sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$0" == "/opt/retropie/emulators/dosbox-staging-dev/dosbox-staging.sh" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
-    sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$1" == "" \]\] \&\& \[\[ -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi+g' "$md_inst/dosbox-staging.sh"
 
     local config_dir="$md_conf_root/pc"
     local shell_history="$config_dir/shell_history.txt"
@@ -137,13 +137,13 @@ _EOF_
         iniSet "cpu_cycles" "max"
         iniSet "cpu_cycles_protected" "auto" # fixed values are not allowed if 'cpu_cycles' is 'max', using 'auto'
         iniSet "output" "$staging_output"
+        iniSet "fullscreen" "false" # Dynamically set by DOSBox-Staging.sh instead
         iniSet "fullresolution" "original"
         iniSet "vsync" "true"
         iniSet "blocksize" "2048"
         iniSet "prebuffer" "50"
         if isPlatform "rpi"; then
             iniSet "core" "dynamic"
-            iniSet "fullscreen" "true"
         fi
     fi
 
