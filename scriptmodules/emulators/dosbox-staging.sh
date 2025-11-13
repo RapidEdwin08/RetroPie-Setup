@@ -135,6 +135,7 @@ _EOF_
     if [[ -f "$config_path" ]]; then
         iniConfig " = " "" "$config_path"
         iniSet "cpu_cycles" "max"
+        iniSet "cpu_cycles_protected" "auto" # fixed values are not allowed if 'cpu_cycles' is 'max', using 'auto'
         iniSet "output" "$staging_output"
         iniSet "fullresolution" "original"
         iniSet "vsync" "true"
