@@ -134,6 +134,7 @@ _EOF_
         iniSet "output" "$staging_output"
         iniSet "fullscreen" "false" # Dynamically set by DOSBox-Staging.sh instead
         iniSet "fullscreen_mode" "standard" # fullresolution/desktop = Deprecated values
+        iniSet "window_size" "1024x768"
         iniSet "vsync" "false" # true = Slower in fullscreen with X
         iniSet "blocksize" "2048"
         iniSet "prebuffer" "50"
