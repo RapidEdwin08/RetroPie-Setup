@@ -116,6 +116,7 @@ function configure_dosbox-staging() {
 
     sed -i 's+running in X+running with ROM, windowed when running withOUT ROM in X+g' "$romdir/pc/+Start DOSBox-Staging.sh"
     sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$1" == "" \]\]; then params\+=(-fullscreen); else if \[\[ ! -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi; fi+g' "$romdir/pc/+Start DOSBox-Staging.sh"
+    sed -i 's+-freesize 1024+-freesize 2048+g' "$romdir/pc/+Start DOSBox-Staging.sh"
     cp "$romdir/pc/+Start DOSBox-Staging.sh" "$md_inst/dosbox-staging.sh"; chmod 755 "$md_inst/dosbox-staging.sh"
 
     local config_dir="$md_conf_root/pc"
@@ -139,7 +140,7 @@ _EOF_
         iniSet "output" "$staging_output"
         iniSet "fullscreen" "false" # Dynamically set by DOSBox-Staging.sh instead
         iniSet "fullresolution" "original"
-        iniSet "window_size" "1024x768"
+        iniSet "windowresolution" "default"
         iniSet "vsync" "false" # true = Slower in fullscreen with X
         iniSet "blocksize" "2048"
         iniSet "prebuffer" "50"
