@@ -76,7 +76,7 @@ function remove_dosbox-x-sdl2() {
     local shortcut_name
     shortcut_name="DOSBox-X"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/pc/+Start $shortcut_name.sh"; rm -f "$md_conf_root/dosbox-x/README.TXT"; rmdir "$md_conf_root/dosbox-x" 2>/dev/null
+    rm -f "$romdir/pc/+Start $shortcut_name.sh"
 
     shortcut_name="Doom (DOSBox-X)"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
@@ -107,8 +107,16 @@ function gui_dosbox-x-sdl2() {
 function configure_dosbox-x-sdl2() {
     if [[ -d "$romdir/pc" ]]; then chown -R $__user:$__user "$romdir/pc"; fi
 
-    local script="$md_inst/$md_id.sh"
-    cat > "$script" << _EOF_
+    local script="$md_inst/$md_id.sh" # Script
+    local launch_prefix
+    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    addEmulator "1" "$md_id" "pc" "$launch_prefix$script %ROM%"
+    addSystem "pc"
+
+    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
+    [[ "$md_mode" == "remove" ]] && return
+
+    cat > "$script" << _EOF_ # Script
 #!/bin/bash
 dos_exe=\$(basename "\$1")
 dos_dir=\$(dirname "\$1")
@@ -121,20 +129,21 @@ if [[ \${#dos_bat} -ge 9 ]] ; then dos_bat=\$short_name~\$short_num; fi
 
 # DOSBox-X Params
 params+=(-defaultdir /opt/retropie/configs/pc)
+params+=(-c "@echo off")
 if [[ "\$1" == *"+Start DOSBox-X"* ]] || [[ "\$1" == '' ]]; then
-    params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc -c @C:");
+    params=(-c "@MOUNT C \$HOME/RetroPie/roms/pc -freesize 2048" -c "@C:");
 elif [[ "\$1" == *".EXE" ]] || [[ "\$1" == *".exe" ]]; then
-    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs)
+    params=(-c "@MOUNT C \"\$dos_dir\" -freesize 2048" -c @C: -c \"\$dos_exe\" -fs)
 elif [[ "\$1" == *".COM" ]] || [[ "\$1" == *".com" ]]; then
-    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \"\$dos_exe\" -fs)
+    params=(-c "@MOUNT C \"\$dos_dir\" -freesize 2048" -c @C: -c \"\$dos_exe\" -fs)
 elif [[ "\$1" == *".BAT" ]] || [[ "\$1" == *".bat" ]]; then
-    params=(-c "@MOUNT C \"\$dos_dir\"" -c @C: -c \$dos_bat -fs)
+    params=(-c "@MOUNT C \"\$dos_dir\" -freesize 2048" -c @C: -c \$dos_bat -fs)
 elif [[ "\$1" == *".CONF" ]] || [[ "\$1" == *".conf" ]]; then
     params=(-userconf -conf "\$1" -fs)
 elif [[ "\$1" == *".SH" ]] || [[ "\$1" == *".sh" ]]; then
     bash "\$1"; exit
 else
-    params=(-c "@MOUNT C \"\$1\" -freesize 1024" -c "@C:" -fs)
+    params=(-c "@MOUNT C \"\$1\" -freesize 2048" -c "@C:" -fs)
 fi
 
 if [[ ! "\$1" == *"+Start DOSBox-X"* ]] && [[ ! "\$1" == '' ]]; then
@@ -148,20 +157,10 @@ echo "\${params[@]}" >> /dev/shm/runcommand.info
 _EOF_
     chmod 755 "$script"
 
-    local launch_prefix
-    isPlatform "kms" && launch_prefix="XINIT-WMC:"
-    addPort "$md_id" "dosbox-x" "+Start DOSBox-X" "$launch_prefix$script"
-    mv "$romdir/ports/+Start DOSBox-X.sh" "$romdir/pc/+Start DOSBox-X.sh"
-    sed -i 's+_PORT_.*+_SYS_ "dosbox-x" ""+g' "$romdir/pc/+Start DOSBox-X.sh"
+    mkRomDir "pc"
+    rm -f "$romdir/pc/+Start DOSBox-X.sh" 2>/dev/null
+    cp "$script" "$romdir/pc/+Start DOSBox-X.sh"
     chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
-
-    [[ "$md_mode" == "remove" ]] && rm -f "$md_conf_root/dosbox-x/README.TXT" 2>/dev/null
-    addEmulator "1" "$md_id" "pc" "$launch_prefix$script %ROM%"
-    addSystem "pc"
-    if [[ "$md_mode" == "install" ]]; then echo "Called by $romdir/pc/+Start DOSBox-X.sh" > "$md_conf_root/dosbox-x/README.TXT"; chown $__user:$__user "$md_conf_root/dosbox-x/README.TXT"; fi
-
-    [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
-    [[ "$md_mode" == "remove" ]] && return
 
     mkRomDir "pc/.games"
     moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
@@ -196,11 +195,9 @@ _EOF_
     if [[ ! -d "$home/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$home/DOSGAMES"; fi
     chown -R $__user:$__user "$romdir/pc/.games"
 
-    sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
+    sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"\ -c\ \"@C:\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     chmod 755 "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
-    ##if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/DOSBox-X.desktop"; cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "$home/Desktop/DOSBox-X.desktop"; chown $__user:$__user "$home/Desktop/DOSBox-X.desktop"; fi
-    ##rm -f "/usr/share/applications/DOSBox-X.desktop"; cp "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop" "/usr/share/applications/DOSBox-X.desktop"; chown $__user:$__user "/usr/share/applications/DOSBox-X.desktop"
 
     [[ "$md_mode" == "install" ]] && game_data_dosbox-x-sdl2
     [[ "$md_mode" == "install" ]] && shortcuts_icons_dosbox-x-sdl2
@@ -214,7 +211,7 @@ function shortcuts_icons_dosbox-x-sdl2() {
 Name=DOSBox-X
 GenericName=DOS Emulator
 Comment=An enhanced x86/DOS emulator with sound/graphics
-Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc"" -c "@C:"
+Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "@echo off" -c "MOUNT C "$home/RetroPie/roms/pc" -freesize 2048" -c "@C:"
 Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg
 Terminal=false
 Type=Application
@@ -232,7 +229,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc/.games"" -c "C:" -c "cd DOOM" -c "DOOM.EXE" -fs -fastlaunch -exit
+Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc/.games" -freesize 2048" -c "C:" -c "cd DOOM" -c "DOOM.EXE" -fs -fastlaunch -exit
 Icon=$md_inst/Doom_53x72.xpm
 Terminal=false
 Type=Application
@@ -251,7 +248,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc/.games"" -c "C:" -c "cd CHEX" -c "SMACKPLY.EXE INTRO.SMK /B /N /U1" -c "dos32a.exe CHEX.EXE" -c "SMACKPLY.EXE END.SMK /B /N /U1" -fs -fastlaunch -exit
+Exec=$md_inst/bin/dosbox-x -defaultdir /opt/retropie/configs/pc -nopromptfolder -c "MOUNT C "$home/RetroPie/roms/pc/.games" -freesize 2048" -c "C:" -c "cd CHEX" -c "SMACKPLY.EXE INTRO.SMK /B /N /U1" -c "dos32a.exe CHEX.EXE" -c "SMACKPLY.EXE END.SMK /B /N /U1" -fs -fastlaunch -exit
 Icon=$md_inst/ChexQuest_64x64.xpm
 Terminal=false
 Type=Application
