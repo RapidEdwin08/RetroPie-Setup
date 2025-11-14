@@ -113,6 +113,9 @@ function configure_dosbox-staging-dev() {
     cp "$romdir/pc/+Start DOSBox-Staging.sh" "$md_inst/dosbox-staging.sh"; chmod 755 "$md_inst/dosbox-staging.sh"
     sed -i 's+running in X+running with ROM, windowed when running withOUT ROM in X+g' "$md_inst/dosbox-staging.sh"
     sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+if \[\[ ! "$1" == "" \]\]; then params\+=(-fullscreen); else if \[\[ ! -n "$DISPLAY" \]\]; then params\+=(-fullscreen); fi; fi+g' "$md_inst/dosbox-staging.sh"
+    sed -i 's+running in X+running from ES+g' "$romdir/pc/+Start DOSBox-Staging.sh"
+    sed -i 's+\[\[ -n "$DISPLAY" \]\] \&\& params\+=(-fullscreen)+params\+=(-fullscreen)+g' "$romdir/pc/+Start DOSBox-Staging.sh"
+    chown $__user:$__user "$romdir/pc/+Start DOSBox-Staging.sh"
 
     local config_dir="$md_conf_root/pc"
     local shell_history="$config_dir/shell_history.txt"
