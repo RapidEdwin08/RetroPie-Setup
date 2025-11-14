@@ -76,7 +76,7 @@ function remove_dosbox-x-sdl2() {
     local shortcut_name
     shortcut_name="DOSBox-X"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/pc/+Start $shortcut_name.sh"
+    rm -f "$romdir/pc/+Start $shortcut_name.sh"; rmdir "$md_conf_root/dosbox-x" 2>/dev/null
 
     shortcut_name="Doom (DOSBox-X)"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
