@@ -111,6 +111,7 @@ function configure_dosbox-x-sdl2() {
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator "1" "$md_id" "pc" "$launch_prefix$script %ROM%"
+    addEmulator "1" "$md_id" "dosbox-x" "$launch_prefix$script" # XINIT-WMC
     addSystem "pc"
 
     [[ "$md_mode" == "remove" ]] && remove_dosbox-x-sdl2
@@ -158,14 +159,18 @@ _EOF_
     chmod 755 "$script"
 
     mkRomDir "pc"
-    rm -f "$romdir/pc/+Start DOSBox-X.sh" 2>/dev/null
-    cp "$script" "$romdir/pc/+Start DOSBox-X.sh"
+
+    cat > "$romdir/pc/+Start DOSBox-X.sh" << _EOF_ # XINIT-WMC
+#!/bin/bash
+"/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _SYS_ "dosbox-x" ""
+_EOF_
+    chmod 755 "$romdir/pc/+Start DOSBox-X.sh"
     chown $__user:$__user "$romdir/pc/+Start DOSBox-X.sh"
 
     mkRomDir "pc/.games"
     moveConfigDir "$home/.config/dosbox-x" "$md_conf_root/pc"
 
-    # -printconf does not generate a complete conf
+    # -userconf to generate a conf
     su $__user -c "$md_inst/bin/dosbox-x -userconf &"
     sleep 7; pkill dosbox-x
 
