@@ -81,7 +81,7 @@ function game_data_scummvm() {
         if [[ -d "$romdir/scummvm/FullThrottle.svm" ]]; then mv "$romdir/scummvm/FullThrottle.svm" "$romdir/scummvm/FullThrottle.BAK"; fi
         downloadAndExtract "https://archive.org/download/FullThrottleDemo/ftdemo.zip" "$romdir/scummvm"
         mv "$romdir/scummvm/ftdemo" "$romdir/scummvm/FullThrottle.svm"
-        chmod -R 664 "$romdir/scummvm/FullThrottle.svm"
+        chmod -R 777 "$romdir/scummvm/FullThrottle.svm"
         chown -R "$__user":"$__user" "$romdir/scummvm/FullThrottle.svm"
     fi
 
@@ -181,7 +181,7 @@ _EOF_
         echo "[scummvm]" > "$md_conf_root/scummvm/scummvm.ini"
         iniConfig "=" "" "$md_conf_root/scummvm/scummvm.ini"
         iniSet "extrapath" "$md_conf_root/scummvm/ScummVM/extra"
-        iniSet "themepath" "$md_conf_root/scummvm/theme"
+        iniSet "themepath" "$md_conf_root/scummvm/ScummVM/theme"
         iniSet "iconspath" "$md_conf_root/scummvm/ScummVM/icons"
         iniSet "savepath" "$md_conf_root/scummvm/ScummVM/saves"
         iniSet "browser_lastpath" "$home/RetroPie/roms/scummvm"
@@ -244,8 +244,7 @@ function shortcuts_icons_scummvm() {
     local shortcut_name
 
     shortcut_name="ScummVM"
-    if [[ "$md_id" == "scummvm" ]]; then
-        cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
@@ -259,10 +258,9 @@ Keywords=Maniac;Mansion;ScummVM
 StartupWMClass=ScummVM
 Name[en_US]=$shortcut_name
 _EOF_
-        chmod 755 "$md_inst/$shortcut_name.desktop"
-        if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
-        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
-    fi
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
     shortcut_name="Full Throttle"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
