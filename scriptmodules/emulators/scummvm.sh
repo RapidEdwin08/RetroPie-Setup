@@ -268,7 +268,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/scummvm.sh FullThrottle"
+Exec=$md_inst/scummvm.sh FullThrottle
 Icon=$md_inst/FullThrottle_74x74.xpm
 Terminal=true
 Type=Application
