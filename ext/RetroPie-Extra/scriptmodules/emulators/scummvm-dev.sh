@@ -93,6 +93,7 @@ function game_data_scummvm-dev() {
         downloadAndExtract "https://archive.org/download/FullThrottleDemo/ftdemo.zip" "$romdir/scummvm"
         mv "$romdir/scummvm/ftdemo" "$romdir/scummvm/FullThrottle.svm"
         chown -R "$__user":"$__user" "$romdir/scummvm/FullThrottle.svm"
+        chmod 777 -R "$__user":"$__user" "$romdir/scummvm/FullThrottle.svm"
     fi
 
     local icons_dir="$md_conf_root/scummvm/ScummVM/icons"
