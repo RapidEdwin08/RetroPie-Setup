@@ -87,7 +87,7 @@ function game_data_scummvm() {
     local icons_dir="$md_conf_root/scummvm/ScummVM/icons"
     [[ "$md_id" == "lr-scummvm" ]] && icons_dir="$biosdir/scummvm/icons"
     if [[ ! -f "$icons_dir/gui-icons-ft.dat" ]]; then
-        download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/scriptmodules/emulators/scummvm/scummvm-rp-assets.tar.gz" "$icons_dir"
+        download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/scriptmodules/emulators/$md_id/$md_id-rp-assets.tar.gz" "$icons_dir"
         mv "$icons_dir/scummvm-rp-assets.tar.gz" "$icons_dir/gui-icons-ft.dat"
         chown "$__user":"$__user" "$icons_dir/gui-icons-ft.dat"
     fi
@@ -180,7 +180,7 @@ _EOF_
         echo "[scummvm]" > "$md_conf_root/scummvm/scummvm.ini"
         iniConfig "=" "" "$md_conf_root/scummvm/scummvm.ini"
         iniSet "extrapath" "$md_conf_root/scummvm/ScummVM/extra"
-        iniSet "themepath" "$biosdir/scummvm/theme"
+        iniSet "themepath" "$md_conf_root/scummvm/theme"
         iniSet "iconspath" "$md_conf_root/scummvm/ScummVM/icons"
         iniSet "savepath" "$md_conf_root/scummvm/ScummVM/saves"
         iniSet "browser_lastpath" "$home/RetroPie/roms/scummvm"
@@ -269,7 +269,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ scummvm "$romdir/scummvm/FullThrottle.svm"
+Exec=$md_inst/scummvm.sh FullThrottle"
 Icon=$md_inst/FullThrottle_74x74.xpm
 Terminal=true
 Type=Application
