@@ -101,7 +101,6 @@ function remove_scummvm() {
 
     shortcut_name="Full Throttle"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/scummvm/+Start $shortcut_name.sh"
 }
 
 function gui_scummvm() {
