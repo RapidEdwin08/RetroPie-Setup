@@ -111,12 +111,8 @@ function remove_scummvm-dev() {
     rm -f "$romdir/scummvm/+Start $shortcut_name.sh"
 
     shortcut_name="Full Throttle"
-    if [[ -d "/opt/retropie/libretrocores/lr-scummvm" ]]; then
-        sed -i s+Icon=.*+Icon=/opt/retropie/libretrocores/lr-scummvm/FullThrottle_74x74.xpm+ "/usr/share/applications/$shortcut_name.desktop"
-        if [[ -f "$home/Desktop/$shortcut_name.desktop" ]]; then sed -i s+Icon=.*+Icon=/opt/retropie/libretrocores/lr-scummvm/FullThrottle_74x74.xpm+ "$home/Desktop/$shortcut_name.desktop"; fi
-    else
-        rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    fi
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
+    rm -f "$romdir/scummvm/+Start $shortcut_name.sh"
 }
 
 function gui_scummvm-dev() {
