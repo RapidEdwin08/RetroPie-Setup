@@ -81,6 +81,7 @@ function game_data_scummvm() {
         if [[ -d "$romdir/scummvm/FullThrottle.svm" ]]; then mv "$romdir/scummvm/FullThrottle.svm" "$romdir/scummvm/FullThrottle.BAK"; fi
         downloadAndExtract "https://archive.org/download/FullThrottleDemo/ftdemo.zip" "$romdir/scummvm"
         mv "$romdir/scummvm/ftdemo" "$romdir/scummvm/FullThrottle.svm"
+        chmod -R 777 "$romdir/scummvm/FullThrottle.svm"
         chown -R "$__user":"$__user" "$romdir/scummvm/FullThrottle.svm"
     fi
 
