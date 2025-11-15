@@ -44,35 +44,6 @@ function install_lr-scummvm() {
     )
 }
 
-function remove_lr-scummvm() {
-    local shortcut_name="Full Throttle"
-    if [[ -d "/opt/retropie/emulators/scummvm" ]]; then
-        sed -i s+Icon=.*+Icon=/opt/retropie/emulators/scummvm/FullThrottle_74x74.xpm+ "/usr/share/applications/$shortcut_name.desktop"
-        if [[ -f "$home/Desktop/$shortcut_name.desktop" ]]; then sed -i s+Icon=.*+Icon=/opt/retropie/emulators/scummvm/FullThrottle_74x74.xpm+ "$home/Desktop/$shortcut_name.desktop"; fi
-    else
-        rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    fi
-}
-
-function gui_lr-scummvm() {
-    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
-        "1" "Get Shortcuts + Icons" \
-        "2" "Cancel" 2>&1 >/dev/tty)
-
-    case $choice in
-        1)
-            game_data_scummvm
-            shortcuts_icons_scummvm
-            ;;
-        2)
-            echo "Canceled"
-            ;;
-        *)
-            echo "Invalid Selection"
-            ;;
-    esac
-}
-
 function configure_lr-scummvm() {
     addEmulator 0 "$md_id" "scummvm" "$md_inst/romdir-launcher.sh %ROM%"
     addSystem "scummvm"
@@ -168,5 +139,4 @@ _EOF_
     chmod +x "$md_inst/romdir-launcher.sh"
 
     [[ "$md_mode" == "install" ]] && game_data_scummvm
-    [[ "$md_mode" == "install" ]] && shortcuts_icons_scummvm
 }
