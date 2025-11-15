@@ -92,7 +92,7 @@ function game_data_scummvm-dev() {
         if [[ -d "$romdir/scummvm/FullThrottle.svm" ]]; then mv "$romdir/scummvm/FullThrottle.svm" "$romdir/scummvm/FullThrottle.BAK"; fi
         downloadAndExtract "https://archive.org/download/FullThrottleDemo/ftdemo.zip" "$romdir/scummvm"
         mv "$romdir/scummvm/ftdemo" "$romdir/scummvm/FullThrottle.svm"
-        chmod -R 777 "$romdir/scummvm/FullThrottle.svm"
+        chmod -R 664 "$romdir/scummvm/FullThrottle.svm"
         chown -R "$__user":"$__user" "$romdir/scummvm/FullThrottle.svm"
     fi
 
@@ -100,7 +100,7 @@ function game_data_scummvm-dev() {
     [[ "$md_id" == "lr-scummvm" ]] && icons_dir="$biosdir/scummvm/icons"
     if [[ ! -f "$icons_dir/gui-icons-ft.dat" ]]; then
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/$md_id/$md_id-rp-assets.tar.gz" "$icons_dir"
-        mv "$icons_dir/scummvm-rp-assets.tar.gz" "$icons_dir/gui-icons-ft.dat"
+        mv "$icons_dir/$md_id-rp-assets.tar.gz" "$icons_dir/gui-icons-ft.dat"
         chown "$__user":"$__user" "$icons_dir/gui-icons-ft.dat"
     fi
 }
@@ -119,7 +119,7 @@ function remove_scummvm-dev() {
     fi
 }
 
-function gui_lr-scummvm-dev() {
+function gui_scummvm-dev() {
     choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
         "1" "Get Shortcuts + Icons" \
         "2" "Cancel" 2>&1 >/dev/tty)
