@@ -57,9 +57,9 @@ function install_dosbox-x-sdl2() {
 }
 
 function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/$md_id/dosbox-x-rp-assets.tar.gz" "$romdir/pc"
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/dosbox-x-rp-assets.tar.gz" "$romdir/pc"
     if [[ ! -f "$romdir/pc/.games/CHEX/INTRO.SMK" ]]; then
-        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/$md_id/dosbox-x-rp-cqsmks.tar.gz" "$romdir/pc/.games/CHEX"
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/dosbox-x-rp-cqsmks.tar.gz" "$romdir/pc/.games/CHEX"
     fi
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Doom (Shareware).conf"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Chex Quest (Promotional).conf"

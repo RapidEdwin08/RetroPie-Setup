@@ -98,7 +98,7 @@ function game_data_scummvm-dev() {
 
     local icons_dir="$md_conf_root/scummvm/ScummVM/icons"
     if [[ ! -f "$icons_dir/gui-icons-ft.dat" ]]; then
-        download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/scummvm-dev/scummvm-dev-rp-assets.tar.gz" "$icons_dir"
+        download "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/scummvm-dev-rp-assets.tar.gz" "$icons_dir"
         mv "$icons_dir/scummvm-dev-rp-assets.tar.gz" "$icons_dir/gui-icons-ft.dat"
         chown "$__user":"$__user" "$icons_dir/gui-icons-ft.dat"
     fi

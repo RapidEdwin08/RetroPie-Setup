@@ -39,7 +39,7 @@ function install_bin_duckstation() {
     if isPlatform "aarch64"; then duckstation_platform=arm64; fi
     local duckstation_appimage=DuckStation-"$duckstation_platform".AppImage
 
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/emulators/duckstation/duckstation-rp-assets.tar.gz" "$md_build"
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/duckstation-rp-assets.tar.gz" "$md_build"
     download "https://github.com/stenzek/duckstation/releases/download/${duckstation_version}/${duckstation_appimage}" "$md_build"
 
     pushd "$md_build"
