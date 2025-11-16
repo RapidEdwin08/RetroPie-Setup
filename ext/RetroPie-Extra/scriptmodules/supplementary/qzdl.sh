@@ -15,7 +15,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="qzdl"
 rp_module_desc="Qt version of ZDL - ZDoom [WAD] Launcher"
-rp_module_help="- General Settings [Source Ports]:\n/opt/retropie/ports/uzdoom/uzdoom\n/opt/retropie/ports/lzdoom/lzdoom\n \n- General Settings [IWADs]:\n$home/RetroPie/roms/ports/doom/doomu.wad\n$home/RetroPie/roms/ports/doom/doom2.wad\n \n- General Settings [Always Add These Parameters]:\nDOOMWADDIR=$home/RetroPie/roms/ports/doom\n-config $home/RetroPie/roms/ports/doom/uzdoom.ini\n-savedir $home/RetroPie/roms/ports/doom/uzdoom-saves\n \nExtra Command Line Arguments: +logfile /dev/shm/ZDL.log\n \nAdjust ZDL Theme [-platformtheme qt5ct]: Qt5 Settings"
+rp_module_help="- General Settings [Source Ports]:\n/opt/retropie/ports/uzdoom/uzdoom\n/opt/retropie/ports/lzdoom/lzdoom\n \n- General Settings [IWADs]:\n$home/RetroPie/roms/ports/doom/doomu.wad\n$home/RetroPie/roms/ports/doom/doom2.wad\n \n- General Settings [Always Add These Parameters]:\nDOOMWADDIR=$home/RetroPie/roms/ports/doom\n-config $home/RetroPie/roms/ports/doom/uzdoom.ini\n-savedir $home/RetroPie/roms/ports/doom/uzdoom-saves\n \nExtra Command Line Arguments: +logfile /dev/shm/ZDL.log\n \nqZDL will use Current Qt Theme: [-platformtheme qt#ct]\nAdjust Qt Theme using Qt5/Qt6 Settings: [qt5ct]/[qt6ct]"
 rp_module_licence="GNU3 https://raw.githubusercontent.com/qbasicer/qzdl/refs/heads/master/LICENSE"
 rp_module_repo="git https://github.com/qbasicer/qzdl.git master :_get_commit_qzdl"
 rp_module_section="exp"
@@ -31,10 +31,19 @@ function _get_commit_qzdl() {
 
 function depends_qzdl() {
     #local depends=(qtcreator qtdeclarative5-dev)
-    local depends=(cmake qtbase5-dev qt5-qmake qtbase5-dev-tools qtchooser qt5ct whiptail)
-    if [[ ! $(apt-cache search qt5-default) == '' ]]; then
-        depends+=(qt5-default)
+    local depends=(cmake qtchooser whiptail)
+
+    if [[ ! $(apt-cache search qt6-base-dev) == '' ]]; then # [qt6]
+        depends=(qt6-base-dev qmake6 qt6-base-dev-tools qt6-gtk-platformtheme qt6ct)
+    else
+        depends=(qt5-gtk-platformtheme qt5ct) # [qt5]
+        if [[ ! $(apt-cache search qt5-default) == '' ]]; then # [qt5-default]
+            depends+=(qt5-default)
+        else
+            depends=(qtbase5-dev qt5-qmake qtbase5-dev-tools) # [qt5-default] equivalent
+        fi
     fi
+
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
@@ -68,9 +77,14 @@ function remove_qzdl() {
 
 function configure_qzdl() {
     mkRomDir "ports"
+
+    local qtct_ver=qt5ct
+    if [[ ! $(apt-cache search qt6-base-dev) == '' ]]; then qtct_ver=qt6ct; fi
+
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
-    addPort "$md_id" "zdl" "+Start ZDL" "$launch_prefix$md_inst/zdl -platformtheme qt5ct"
+
+    addPort "$md_id" "zdl" "+Start ZDL" "$launch_prefix$md_inst/zdl -platformtheme $qtct_ver"
     sed -i s'+_PORT_+_SYS_+g' "$romdir/ports/+Start ZDL.sh"
 
     local shortcut_name
@@ -80,7 +94,7 @@ function configure_qzdl() {
 Name=ZDL
 GenericName=ZDL
 Comment=ZDoom WAD Launcher
-Exec=$md_inst/zdl -platformtheme qt5ct
+Exec=$md_inst/zdl -platformtheme $qtct_ver
 Icon=$md_inst/ico_icon.xpm
 Terminal=false
 Type=Application
