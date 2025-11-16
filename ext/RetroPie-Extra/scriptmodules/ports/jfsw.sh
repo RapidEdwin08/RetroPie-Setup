@@ -63,7 +63,7 @@ function gamedata_jfsw() {
     fi
 
     if [[ ! -f "$dest/tdragon.zip" ]] || [[ ! -f "$dest/wantdest.grp" ]]; then # Expansions
-        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/$md_id-rp-assets.tar.gz" "$dest"
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/jfsw-rp-assets.tar.gz" "$dest"
     fi
 
     if [[ ! -f "$dest/sw.grp" ]]; then # Download Shareware Data from 3DRealms FTP

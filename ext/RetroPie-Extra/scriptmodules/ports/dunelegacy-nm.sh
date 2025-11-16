@@ -82,7 +82,7 @@ function install_dunelegacy-nm() {
 function game_data_dunelegacy-nm() {
     if [[ ! -f "$romdir/ports/dune2/$md_id/Dune2_MH_2_0.exe" ]]; then
 		mkRomDir "ports/dune2/$md_id"
-		downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/$md_id/$md_id-rp-assets.tar.gz" "$romdir/ports/dune2/$md_id"
+		downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/dunelegacy-nm-rp-assets.tar.gz" "$romdir/ports/dune2/$md_id"
 		chown -R $__user:$__user "$romdir/ports/dune2/$md_id"
 	fi
 }

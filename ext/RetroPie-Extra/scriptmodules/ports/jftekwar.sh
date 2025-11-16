@@ -57,14 +57,14 @@ function install_jftekwar() {
 function gamedata_jftekwar() {
     local dest="$romdir/ports/ksbuild/tekwar"
     mkUserDir "$dest"
+    pushd "$dest"; rename 'y/A-Z/a-z/' *; popd
 
-    if [[ -f "$dest/TEKD1.EXE" ]] || [[ -f "$dest/TEKWAR.EXE" ]]; then
-        pushd "$dest"; rename 'y/A-Z/a-z/' *; popd
-    fi
-    if [[ ! -f "$dest/tekd1.exe" ]] && [[ ! -f "$dest/tekwar.exe" ]]; then # Download Demo Data from JonoF's GIT
-        downloadAndExtract "https://www.jonof.id.au/files/buildgames/tekwar.zip" "$dest"
-        pushd "$dest"; rename 'y/A-Z/a-z/' *; popd
-    fi
+    # Demo unplayable with jftekwar
+    #if [[ ! -f "$dest/tekd1.exe" ]] && [[ ! -f "$dest/tekwar.exe" ]]; then # Download Demo Data from JonoF's GIT
+        #downloadAndExtract "https://www.jonof.id.au/files/buildgames/tekwar.zip" "$dest"
+        #pushd "$dest"; rename 'y/A-Z/a-z/' *; popd
+    #fi
+
     chown -R $__user:$__user "$dest"
 }
 

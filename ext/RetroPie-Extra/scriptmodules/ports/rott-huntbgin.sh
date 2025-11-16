@@ -79,7 +79,7 @@ function install_rott-huntbgin() {
 
 function game_data_rott-huntbgin() {
     if [[ ! -f "$romdir/ports/rott-huntbgin/HUNTBGIN.WAD" ]]; then
-        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/rott-huntbgin/rott-huntbgin-rp-assets.tar.gz" "$romdir/ports/rott-huntbgin"
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/rott-huntbgin-rp-assets.tar.gz" "$romdir/ports/rott-huntbgin"
     fi
 }
 

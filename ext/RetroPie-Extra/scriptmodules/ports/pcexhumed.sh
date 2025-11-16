@@ -64,7 +64,7 @@ function install_pcexhumed() {
 function game_data_pcexhumed() {
     if [[ ! -f "$romdir/ports/ksbuild/pcexhumed/STUFF.DAT" ]] && [[ ! -f "$romdir/ports/ksbuild/pcexhumed/BOOK.MOV" ]]; then
 		mkRomDir "ports/ksbuild/pcexhumed"
-		downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/scriptmodules/ports/pcexhumed/pcexhumed-rp-assets.tar.gz" "$romdir/ports/ksbuild/pcexhumed"
+		downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/pcexhumed-rp-assets.tar.gz" "$romdir/ports/ksbuild/pcexhumed"
 		chown -R $__user:$__user "$romdir/ports/ksbuild/pcexhumed"
 	fi
 }
