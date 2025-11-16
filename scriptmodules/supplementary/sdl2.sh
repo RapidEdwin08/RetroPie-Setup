@@ -12,8 +12,22 @@
 rp_module_id="sdl2"
 rp_module_desc="SDL (Simple DirectMedia Layer) v2.x"
 rp_module_licence="ZLIB https://raw.githubusercontent.com/libsdl-org/SDL/main/LICENSE.txt"
+rp_module_repo="git https://github.com/RetroPie/SDL.git :_get_branch_sdl2 :_get_commit_sdl2"
 rp_module_section="depends"
 rp_module_flags=""
+
+function _get_branch_sdl2() {
+    local ver="$(get_ver_sdl2)"
+    local branch="retropie-${ver}"
+    echo $branch
+}
+
+function _get_commit_sdl2() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch="$(_get_branch_sdl2)"
+    local branch_commit="$(git ls-remote https://github.com/RetroPie/SDL.git $branch HEAD | grep $branch | awk '{ print $1}' | cut -c -8)"
+    echo $branch_commit
+}
 
 function get_ver_sdl2() {
     if [[ "$__os_debian_ver" -ge 11 ]]; then
@@ -91,7 +105,7 @@ function build_sdl2() {
     isPlatform "mali" && conf_flags+=("--enable-video-mali" "--disable-video-opengl")
     isPlatform "dispmanx" && conf_flags+=("--enable-video-rpi") || conf_flags+=("--disable-video-rpi")
     isPlatform "kms" || isPlatform "rpi" && conf_flags+=("--enable-video-kmsdrm")
-	#isPlatform "gles" || isPlatform "gl" && conf_flags+=("--enable-video-opengl")
+    #isPlatform "gles" || isPlatform "gl" && conf_flags+=("--enable-video-opengl")
 
     # format debian package dependencies into comma-separated list
     conf_depends=( "${conf_depends[@]/%/,}" )
