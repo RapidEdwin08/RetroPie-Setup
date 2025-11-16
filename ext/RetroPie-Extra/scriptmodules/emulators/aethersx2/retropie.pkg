@@ -1,8 +1,0 @@
-pkg_origin="binary"
-pkg_date="2023-12-10T00:37:13-04:00"
-pkg_repo_type="http"
-pkg_repo_url="http://web.archive.org/web/20240120140213/https://www.aethersx2.com/archive/desktop/linux/AetherSX2-v1.5-3606.AppImage"
-pkg_repo_branch="1.5.3606"
-pkg_repo_commit="20796b1a02a591324cffe08f8f13a192"
-pkg_repo_date="2022-07-10T07:20:28+00:00"
-pkg_repo_extra=""
