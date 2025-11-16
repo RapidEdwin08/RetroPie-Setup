@@ -70,7 +70,7 @@ function game_data_ioquake3() {
         downloadAndExtract "$__archive_url/Q3DemoPaks.zip" "$romdir/ports/quake3" -j
     fi
     if [[ ! -f "$romdir/ports/quake3/chronic.pk3" ]]; then
-        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/scriptmodules/ports/$md_id/$md_id-rp-assets.tar.gz" "$romdir/ports/quake3"
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/ioquake3-rp-assets.tar.gz" "$romdir/ports/quake3"
     fi
     # always chown as moveConfigDir in the configure_ script would move the root owned demo files
     chown -R "$__user":"$__group" "$romdir/ports/quake3"
