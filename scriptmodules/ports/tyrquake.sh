@@ -8,12 +8,9 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
-# If no user is specified (for RetroPie below v4.8.9)
-if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="tyrquake"
 rp_module_desc="Quake 1 engine - TyrQuake port"
-rp_module_help="Place Quake I Game Folders in [ports/quake]:\nid1\nhipnotic\nrogue\ndopa"
 rp_module_licence="GPL2 https://disenchant.net/git/tyrquake.git/plain/gnu.txt"
 rp_module_repo="git https://github.com/RetroPie/tyrquake.git master"
 rp_module_section="opt"
@@ -63,25 +60,6 @@ function add_games_tyrquake() {
     _add_games_lr-tyrquake "$binary ${params[*]}"
 }
 
-function gui_tyrquake() {
-    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
-        "1" "Get Shortcuts + Icons" \
-        "2" "Cancel" 2>&1 >/dev/tty)
-
-    case $choice in
-        1)
-            add_games_lr-tyrquake
-            shortcuts_icons_lr-tyrquake
-            ;;
-        2)
-            echo "Canceled"
-            ;;
-        *)
-            echo "Invalid Selection"
-            ;;
-    esac
-}
-
 function configure_tyrquake() {
     mkRomDir "ports/quake"
 
@@ -90,9 +68,4 @@ function configure_tyrquake() {
     add_games_tyrquake
 
     moveConfigDir "$home/.tyrquake" "$md_conf_root/quake/tyrquake"
-
-    #[[ "$md_mode" == "remove" ]] && remove_lr-tyrquake
-    if [[ ! -d "/opt/retropie/libretrocores/lr-tyrquake" ]] && [[ "$md_mode" == "remove" ]]; then remove_lr-tyrquake; fi
-    [[ "$md_mode" == "remove" ]] && return
-    [[ "$md_mode" == "install" ]] && shortcuts_icons_lr-tyrquake
 }
