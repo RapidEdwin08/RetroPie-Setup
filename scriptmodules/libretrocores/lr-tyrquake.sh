@@ -139,9 +139,9 @@ function shortcuts_icons_lr-tyrquake() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=/opt/retropie/supplementary/runcommand/runcommand.sh 0 _PORT_ quake $romdir/ports/quake/id1/pak0.pak
+Exec=/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-tyrquake/tyrquake_libretro.so --config /opt/retropie/configs/ports/quake/retroarch.cfg $romdir/ports/quake/id1/pak0.pak
 Icon=$md_inst/Quake_72x72.xpm
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Game;Emulator
 Keywords=NIN;Quake
@@ -160,9 +160,9 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=/opt/retropie/supplementary/runcommand/runcommand.sh 0 _PORT_ quake $romdir/ports/quake/$addon_name/pak0.pak
+Exec=/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-tyrquake/tyrquake_libretro.so --config /opt/retropie/configs/ports/quake/retroarch.cfg $romdir/ports/quake/$addon_name/pak0.pak
 Icon=$md_inst/Quake_74x74.xpm
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Game;Emulator
 Keywords=NIN;Quake;$addon_name
@@ -182,9 +182,9 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=/opt/retropie/supplementary/runcommand/runcommand.sh 0 _PORT_ quake $romdir/ports/quake/$addon_name/pak0.pak
+Exec=/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-tyrquake/tyrquake_libretro.so --config /opt/retropie/configs/ports/quake/retroarch.cfg $romdir/ports/quake/$addon_name/pak0.pak
 Icon=$md_inst/Quake_70x70.xpm
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Game;Emulator
 Keywords=NIN;Quake;$addon_name
@@ -204,9 +204,9 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=/opt/retropie/supplementary/runcommand/runcommand.sh 0 _PORT_ quake $romdir/ports/quake/$addon_name/pak0.pak
+Exec=/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-tyrquake/tyrquake_libretro.so --config /opt/retropie/configs/ports/quake/retroarch.cfg $romdir/ports/quake/$addon_name/pak0.pak
 Icon=$md_inst/Quake_70x70.xpm
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Game;Emulator
 Keywords=NIN;Quake;$addon_name
