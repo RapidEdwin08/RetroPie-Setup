@@ -8,6 +8,8 @@
 # See the LICENSE.md file at the top-level directory of this distribution and
 # at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 # Config for mpv Image Viewing [/etc/mpv/mpv.conf] [~/.config/mpv/mpv.conf]:
 mpvIMAGESreference=$(
@@ -53,8 +55,11 @@ function _video_exts_splashscreen() {
 function depends_splashscreen() {
     getDepends fbi mpv vlc vorbis-tools; # fim insserv
     if [ ! -f /etc/mpv/mpv.conf ]; then echo "$mpvIMAGESreference" > /etc/mpv/mpv.conf; fi
-    if [ ! -f ~/.config/mpv/mpv.conf ]; then mkdir ~/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > ~/.config/mpv/mpv.conf; fi
-    if [ ! -f /home/pi/.config/mpv/mpv.conf ]; then mkdir /home/pi/.config/mpv > /dev/null 2>&1; echo "$mpvIMAGESreference" > /home/pi/.config/mpv/mpv.conf; fi
+    if [ ! -f /home/$__user/.config/mpv/mpv.conf ]; then
+        mkdir -p /home/$__user/.config/mpv > /dev/null 2>&1
+        echo "$mpvIMAGESreference" > /home/$__user/.config/mpv/mpv.conf
+        chown $__user:$__user /home/$__user/.config/mpv/mpv.conf
+    fi
 }
 
 function install_bin_splashscreen() {
@@ -91,11 +96,11 @@ _EOF_
         iniConfig "=" '"' "$configdir/all/$md_id.cfg"
         iniSet "RANDOMIZE" "disabled"
     fi
-    chown $user:$user "$configdir/all/$md_id.cfg"
+    chown $__user:$__user "$configdir/all/$md_id.cfg"
 
     mkUserDir "$datadir/splashscreens"
     echo "Place your own splashscreens in here." >"$datadir/splashscreens/README.txt"
-    chown $user:$user "$datadir/splashscreens/README.txt"
+    chown $__user:$__user "$datadir/splashscreens/README.txt"
 
     echo 'while pgrep vlc >/dev/null; do sleep 1; done #Splashscreen-wait' > /dev/shm/09-splashscreen-wait.sh
     echo 'while pgrep mpv >/dev/null; do sleep 1; done #Splashscreen-wait' >> /dev/shm/09-splashscreen-wait.sh
@@ -227,7 +232,7 @@ function randomize_splashscreen() {
     local cmd=(dialog --backtitle "$__backtitle" --menu "Choose an option." 22 86 16)
     local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
     iniConfig "=" '"' "$configdir/all/$md_id.cfg"
-    chown $user:$user "$configdir/all/$md_id.cfg"
+    chown $__user:$__user "$configdir/all/$md_id.cfg"
 
     case "$choice" in
         0)
@@ -312,7 +317,7 @@ function preview_splashscreen() {
 
 function download_extra_splashscreen() {
     gitPullOrClone "$datadir/splashscreens/retropie-extra" https://github.com/HerbFargus/retropie-splashscreens-extra
-    chown -R $user:$user "$datadir/splashscreens/retropie-extra"
+    chown -R $__user:$__user "$datadir/splashscreens/retropie-extra"
 }
 
 function gui_splashscreen() {
