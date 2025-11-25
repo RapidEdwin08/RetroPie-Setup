@@ -199,6 +199,7 @@ _EOF_
     if [[ ! -d "$md_conf_root/pc/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$md_conf_root/pc/DOSGAMES"; fi
     if [[ ! -d "$home/DOSGAMES" ]]; then ln -s $romdir/pc/.games "$home/DOSGAMES"; fi
     chown -R $__user:$__user "$romdir/pc/.games"
+    chown -R $__user:$__user "$home/DOSGAMES"
 
     sed -i "s+Exec=.*+Exec=$md_inst/bin/dosbox-x\ -defaultdir\ $md_conf_root/pc\ -nopromptfolder \-c\ \"MOUNT C \"$home/RetroPie/roms/pc\"\"\ -c\ \"@C:\"+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
     sed -i "s+Icon=.*+Icon=$md_inst/share/icons/hicolor/scalable/apps/dosbox-x.svg+g" "$md_inst/share/applications/com.dosbox_x.DOSBox-X.desktop"
