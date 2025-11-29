@@ -17,11 +17,19 @@ rp_module_id="ppsspp-dev"
 rp_module_desc="PlayStation Portable emulator PPSSPP - latest development version"
 rp_module_help="ROM Extensions: .iso .pbp .cso\n\nCopy your PlayStation Portable roms to $romdir/psp"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/hrydgard/ppsspp/master/LICENSE.TXT"
-#rp_module_repo="git https://github.com/hrydgard/ppsspp.git master"
-#rp_module_repo="git https://github.com/hrydgard/ppsspp.git master 40a53315" # 20250910 Delete reference to prebuilt libfreetype, pull in the source instead - CMake Error at ext/freetype/CMakeLists.txt:223 (message): In-source builds are not permitted! Make a separate folder for building
-rp_module_repo="git https://github.com/hrydgard/ppsspp.git master 28f8ce64" # 20250910 Add freetype as a submodule (2.14.0) - Last Commit Before CMake Error
+rp_module_repo="git https://github.com/hrydgard/ppsspp.git master :_get_commit_ppsspp-dev"
 rp_module_section="exp"
 rp_module_flags=""
+
+function _get_commit_ppsspp-dev() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch=master
+    local branch_commit="$(git ls-remote https://github.com/hrydgard/ppsspp.git $branch HEAD | grep $branch | awk '{ print $1}' | cut -c -8 | tail -1)"
+
+    echo $branch_commit
+    #echo 40a53315; # 20250910 Delete reference to prebuilt libfreetype, pull in the source instead - CMake Error at ext/freetype/CMakeLists.txt:223 (message): In-source builds are not permitted! Make a separate folder for building
+    #echo 28f8ce64; # 20250910 Add freetype as a submodule (2.14.0) - Last Commit Before CMake Error
+}
 
 function depends_ppsspp-dev() {
     local depends=(cmake libsdl2-dev libsnappy-dev libzip-dev zlib1g-dev)
@@ -199,7 +207,9 @@ function configure_ppsspp-dev() {
     ##addEmulator 0 "$md_id" "psp" "$md_inst/$md_id.sh %ROM%"
     ## Use XINIT to Prevent [runcommand.log] Vulkan with working device not detected. DEBUG: Vulkan is not available, not using Vulkan.
     addEmulator 1 "$md_id" "psp" "$launch_prefix$md_inst/$md_id.sh %ROM%"
-    addSystem "psp" "PSP" ".gui" # Additional .GUI Extension to hide +Start PPSSPP.gui from Game List + Load without Errors
+    addSystem "psp" "PSP" ".gui" # Additional .GUI Extension to hide +Start PPSSPP.gui (dev) from Game List + Load without Errors
+    sed -i 's+<extension>.iso .pbp .cso .ISO .PBP .CSO</extension>+<extension>.iso .pbp .cso .gui .ISO .PBP .CSO .GUI</extension>+g' /etc/emulationstation/es_systems.cfg
+    sed -i 's+<extension>.iso .pbp .cso .ISO .PBP .CSO</extension>+<extension>.iso .pbp .cso .gui .ISO .PBP .CSO .GUI</extension>+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
 
     # if we are removing the last remaining psp emu - remove the symlink
     if [[ "$md_mode" == "remove" ]]; then
