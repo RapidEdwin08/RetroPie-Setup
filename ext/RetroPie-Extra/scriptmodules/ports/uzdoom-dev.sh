@@ -21,7 +21,7 @@ rp_module_flags="sdl2 !armv6"
 function _get_commit_uzdoom-dev() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
     local branch_tag=trunk
-    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8 | tail -1)"
 
     echo $branch_commit
     #echo b4c521ec; # Change default texture filtering to None - Trilinear
