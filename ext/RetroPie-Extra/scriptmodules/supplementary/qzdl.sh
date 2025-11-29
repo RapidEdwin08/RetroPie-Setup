@@ -24,7 +24,7 @@ rp_module_flags=""
 function _get_commit_qzdl() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
     local branch_tag=master
-    local branch_commit="$(git ls-remote https://github.com/qbasicer/qzdl.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+    local branch_commit="$(git ls-remote https://github.com/qbasicer/qzdl.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8 | tail -1)"
 
     echo $branch_commit
 }
