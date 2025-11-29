@@ -24,7 +24,7 @@ rp_module_flags="sdl2"
 function _get_commit_scummvm-dev() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
     local branch_tag=master
-    local branch_commit="$(git ls-remote https://github.com/dosbox-staging/dosbox-staging.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+    local branch_commit="$(git ls-remote https://github.com/dosbox-staging/dosbox-staging.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8 | tail -1)"
 
     echo $branch_commit
     #echo ce9e35fd; # RELEASE: This is 3.1.0git
