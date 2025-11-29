@@ -25,7 +25,7 @@ function _get_branch_sdl2() {
 function _get_commit_sdl2() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
     local branch="$(_get_branch_sdl2)"
-    local branch_commit="$(git ls-remote https://github.com/RetroPie/SDL.git $branch HEAD | grep $branch | awk '{ print $1}' | cut -c -8)"
+    local branch_commit="$(git ls-remote https://github.com/RetroPie/SDL.git $branch HEAD | grep $branch | awk '{ print $1}' | cut -c -8 | tail -1)"
     echo $branch_commit
 }
 
