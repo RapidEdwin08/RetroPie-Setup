@@ -26,9 +26,9 @@ function _get_commit_ppsspp-dev() {
     local branch=master
     local branch_commit="$(git ls-remote https://github.com/hrydgard/ppsspp.git $branch HEAD | grep $branch | awk '{ print $1}' | cut -c -8 | tail -1)"
 
-    echo $branch_commit
+    ##echo $branch_commit
     #echo 40a53315; # 20250910 Delete reference to prebuilt libfreetype, pull in the source instead - CMake Error at ext/freetype/CMakeLists.txt:223 (message): In-source builds are not permitted! Make a separate folder for building
-    #echo 28f8ce64; # 20250910 Add freetype as a submodule (2.14.0) - Last Commit Before CMake Error
+    echo 28f8ce64; # 20250910 Add freetype as a submodule (2.14.0) - Last Commit Before CMake Error
 }
 
 function depends_ppsspp-dev() {
