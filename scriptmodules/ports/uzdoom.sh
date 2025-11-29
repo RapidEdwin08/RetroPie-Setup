@@ -19,11 +19,11 @@ rp_module_flags="sdl2 !armv6"
 function _get_commit_uzdoom() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
     local branch_tag=4.14.3
-    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8)"
+    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8 | tail -1)"
 
     echo $branch_commit
     #echo 835be65f; # Change default texture filtering to None - Trilinear
-    #echo 3becc39d; # g4.14.2-50-g3becc39dc-m
+    #echo 1cb7598a; # This is 4.14.3
 }
 
 function _get_version_zmusic_uzdoom() {
