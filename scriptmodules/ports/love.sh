@@ -50,16 +50,41 @@ function game_data_love() {
     # get Mari0 1.6.2 (freeware game data)
     if [[ ! -f "$romdir/love/mari0.love" ]]; then
         downloadAndExtract "https://github.com/Stabyourself/mari0/archive/1.6.2.tar.gz" "$__tmpdir/mari0" --strip-components 1
+
+        # Update [game.lua] to QUIT on JoyPad Press Back # inlcude CHANGES.diff
+        cp "$__tmpdir/mari0/game.lua" "$__tmpdir/mari0/game.lua.0riginal"
+        cat >>"$__tmpdir/mari0/game.lua" <<_EOF_
+
+function love.gamepadpressed(joystick, button)
+    if joystick:isGamepadDown("back") then love.event.quit()
+    end
+end
+
+_EOF_
+        diff -ur "$__tmpdir/mari0/game.lua.0riginal" "$__tmpdir/mari0/game.lua" > "$__tmpdir/mari0/CHANGES.diff"
+        rm -f "$__tmpdir/mari0/game.lua.0riginal"
+
+        # Compress [game.love]
         pushd "$__tmpdir/mari0"
         zip -qr "$romdir/love/mari0.love" .
         popd
         rm -fr "$__tmpdir/mari0"
         chown "$__user":"$__group" "$romdir/love/mari0.love"
     fi
+
+    # Get DOOM'd
+    if [[ ! -f "$romdir/love/DOOM'd.love" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/love-rp-assets.tar.gz" "$romdir/love"
+        if [[ ! -f "$romdir/love/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/love/gamelist.xml" ]]; then mv "$romdir/love/gamelist.xml.love" "$romdir/love/gamelist.xml"; fi
+        chown -R $__user:$__user -R "$romdir/love"
+    fi
 }
 
 function configure_love() {
     setConfigRoot ""
+
+    moveConfigDir "$home/.local/share/love" "$md_conf_root/love"
+    chown -R $__user:$__user "$md_conf_root/love"
 
     mkRomDir "love"
 
