@@ -71,6 +71,7 @@ function configure_desktop-system() {
         chown $__user:$__user /opt/retropie/configs/all/emulationstation/es_systems.cfg
     fi
     mv "$md_conf_root/desktop" "$md_conf_root/ports" 2>/dev/null; chown -R $__user:$__user "$md_conf_root/ports/desktop" 2>/dev/null; rmdir "$md_conf_root/desktop" 2>/dev/null
+    mkRomDir "desktop"
     if [[ ! -f "$romdir/desktop/+Start Desktop.sh" ]]; then cp "$romdir/ports/+Start Desktop.sh" "$romdir/desktop/+Start Desktop.sh" 2>/dev/null; chown $__user:$__user "$romdir/desktop/+Start Desktop.sh" 2>/dev/null; fi
 
     [[ "$md_mode" == "remove" ]] && remove_desktop-system
