@@ -108,6 +108,7 @@ function configure_kodi() {
         sed -i 's+/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ kodi+bash+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
         chown $__user:$__user /opt/retropie/configs/all/emulationstation/es_systems.cfg
     fi
+    mkRomDir "kodi"
     if [[ ! -f "$romdir/kodi/+Start Kodi.sh" ]]; then cp "$romdir/ports/+Start Kodi.sh" "$romdir/kodi/+Start Kodi.sh"; chown $__user:$__user "$romdir/kodi/+Start Kodi.sh"; fi
 
     [[ "$md_mode" == "install" ]] && shortcuts_icons_kodi
