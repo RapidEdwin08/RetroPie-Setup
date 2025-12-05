@@ -107,6 +107,9 @@ function game_data_chocolate-doom() {
     if [[ ! -f "$md_inst/chocolate-doom-setup_64x64.xpm" ]]; then
         download https://raw.githubusercontent.com/RapidEdwin08/chocolate-doom-plus/main/chocolate-doom-setup_64x64.xpm "$md_build"
     fi
+
+    download https://raw.githubusercontent.com/RapidEdwin08/chocolate-doom-plus/main/Chocolate%20Doom%20Setup.sh /dev/shm
+    mv "/dev/shm/Chocolate%20Doom%20Setup.sh" "/usr/bin/chocolate-doom"; chmod 755 "/usr/bin/chocolate-doom"; chown root /usr/bin/chocolate-doom
 }
 
 function remove_chocolate-doom() {
@@ -136,6 +139,8 @@ function remove_chocolate-doom() {
 
     rm -f "/usr/share/applications/Chocolate D00M Setup.desktop"
     rm -f "$home/Desktop/Chocolate D00M Setup.desktop"
+
+    #rm -f /usr/bin/chocolate-doom
 }
 
 function gui_chocolate-doom() {
@@ -695,7 +700,7 @@ _EOF_
 Name=Chocolate D00M Setup
 GenericName=Chocolate D00M Setup
 Comment=Chocolate D00M Setup
-Exec=$md_inst/chocolate_doom_setup
+Exec=/usr/bin/chocolate-doom
 Icon=$md_inst/chocolate-doom-setup_64x64.xpm
 Terminal=true
 Type=Application
