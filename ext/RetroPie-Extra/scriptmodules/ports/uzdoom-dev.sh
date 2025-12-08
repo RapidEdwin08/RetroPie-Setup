@@ -70,6 +70,11 @@ function sources_uzdoom-dev() {
     if isPlatform "armv8"; then
         if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
+
+    # Temp fix for trunk build until PR is Sync'd https://github.com/UZDoom/UZDoom/issues/653
+    # print(f"inconsistent language mapping {languages[po_id]} / {_po_files[po_id]["meta"]["id"]}")
+    # print(f"inconsistent language mapping {languages[po_id]} / {_po_files[po_id]['meta']['id']}")
+    sed -i "s+print(f\"inconsistent language mapping.*+print(f\"inconsistent language mapping {languages[po_id]} / {_po_files[po_id]['meta']['id']}\")+" "$md_build/libraries/Translation/scripts/compile.py"
 }
 
 function build_uzdoom-dev() {
