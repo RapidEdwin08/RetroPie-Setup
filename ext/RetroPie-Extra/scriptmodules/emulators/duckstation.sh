@@ -90,7 +90,7 @@ function install_bin_duckstation() {
 }
 
 function remove_duckstation() {
-    if [[ -f /usr/share/applications/DOSBox-X.desktop ]]; then sudo rm -f /usr/share/applications/DOSBox-X.desktop; fi
+    if [[ -f /usr/share/applications/DuckStation.desktop ]]; then sudo rm -f /usr/share/applications/DuckStation.desktop; fi
     if [[ -f "$home/Desktop/DuckStation.desktop" ]]; then rm -f "$home/Desktop/DuckStation.desktop"; fi
     if [[ -f "$romdir/psx/+Start DuckStation.m3u" ]]; then rm "$romdir/psx/+Start DuckStation.m3u"; fi
 }
