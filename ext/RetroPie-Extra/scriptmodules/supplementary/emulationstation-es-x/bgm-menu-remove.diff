@@ -1,0 +1,43 @@
+diff -ur a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
+--- a/es-app/src/guis/GuiMenu.cpp	Source
++++ b/es-app/src/guis/GuiMenu.cpp	Modified
+@@ -39,7 +39,7 @@
+ #include <memory>
+ 
+ // Música de fondo ES-X (gestor central)
+-#include "audio/BackgroundMusicManager.h"
++//#include "audio/BackgroundMusicManager.h"
+ 
+ // Helper local para traducciones .ini y colores de menú
+ namespace
+@@ -180,20 +180,20 @@
+ 	if (UIModeController::getInstance()->isUIModeFull())
+ 	{
+ 		// 🎵 MÚSICA DE FONDO (ES-X) – usar estado REAL del BackgroundMusicManager
+-		{
+-			auto bgm_switch = std::make_shared<SwitchComponent>(mWindow);
++		//{
++			//auto bgm_switch = std::make_shared<SwitchComponent>(mWindow);
+ 
+-			// Estado inicial: lo que dice el manager (no Settings suelto)
+-			bgm_switch->setState(BackgroundMusicManager::getInstance().isEnabled());
++			 // Estado inicial: lo que dice el manager (no Settings suelto)
++			//bgm_switch->setState(BackgroundMusicManager::getInstance().isEnabled());
+ 
+-			s->addWithLabel(_("BACKGROUND MUSIC").c_str(), bgm_switch);
+-			s->addSaveFunc([bgm_switch] {
+-				BackgroundMusicManager::getInstance().setEnabled(bgm_switch->getState());
++			//s->addWithLabel(_("BACKGROUND MUSIC").c_str(), bgm_switch);
++			//s->addSaveFunc([bgm_switch] {
++				//BackgroundMusicManager::getInstance().setEnabled(bgm_switch->getState());
+ 
+ 				// (Opcional) mantener compatibilidad con una key vieja si la usaste antes:
+-				Settings::getInstance()->setBool("EnableBGM", bgm_switch->getState());
+-			});
+-		}
++				//Settings::getInstance()->setBool("EnableBGM", bgm_switch->getState());
++			//});
++		//}
+ 
+ #if defined(__linux__)
+ 		// audio card
