@@ -67,6 +67,8 @@ function install_bin_minecraft-pi-reborn() {
     mv "minecraft-pi-reborn_128x128.xpm" "$md_inst"; mv "minecraft-pi-reborn_256x256.xpm" "$md_inst"
 
     if [[ ! -d "$home/.minecraft-pi" ]]; then mkdir "$home/.minecraft-pi"; fi
+    if [[ ! -d "$home/.minecraft-pi/overrides" ]]; then mkdir "$home/.minecraft-pi/overrides"; fi
+    if [[ ! -f "$home/.minecraft-pi/README-AUDIO-overrides.txt" ]]; then mv "README-AUDIO-overrides.txt" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/options.txt" ]]; then mv "options.txt" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/server.properties" ]]; then mv "server.properties" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Repo-Seeds.txt" ]]; then mv "README-MCPI-Repo-Seeds.txt" "$home/.minecraft-pi"; fi
@@ -102,7 +104,7 @@ function configure_minecraft-pi-reborn() {
 
     # --server will call Dialog.sh withOUT retropiemenu launch when called from .desktop Shortcut
     # --es-server will call Dialog.sh with RetroPie-Setup/retropie_packages.sh retropiemenu launch for JoyPad Support when called from ES
-    addPort "$md_id-server" "minecraft-pi-reborn-server" "+Start Minecraft Pi Edition Reborn (Server)" "$md_inst/minecraft.sh --es-server"
+    addPort "$md_id-server" "minecraft-pi-reborn-server" "+Start Minecraft Pi Edition Reborn (Server)" "$launch_prefix$md_inst/minecraft.sh --es-server"
 
     [[ "$md_mode" == "remove" ]] && remove_minecraft-pi-reborn
 }
