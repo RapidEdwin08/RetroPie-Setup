@@ -104,7 +104,7 @@ function configure_minecraft-pi-reborn() {
 
     # --server will call Dialog.sh withOUT retropiemenu launch when called from .desktop Shortcut
     # --es-server will call Dialog.sh with RetroPie-Setup/retropie_packages.sh retropiemenu launch for JoyPad Support when called from ES
-    addPort "$md_id-server" "minecraft-pi-reborn-server" "+Start Minecraft Pi Edition Reborn (Server)" "$launch_prefix$md_inst/minecraft.sh --es-server"
+    addPort "$md_id-server" "minecraft-pi-reborn-server" "+Start Minecraft Pi Edition Reborn (Server)" "$md_inst/minecraft.sh --es-server"
 
     [[ "$md_mode" == "remove" ]] && remove_minecraft-pi-reborn
 }
