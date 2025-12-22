@@ -66,6 +66,8 @@ function install_bin_bigpemu() {
 function remove_bigpemu() {
     rm -f "/usr/share/applications/bigpemu.desktop"
     rm -f "$home/Desktop/bigpemu.desktop"
+    rm -f "/usr/share/applications/BigPEmu.desktop"
+    rm -f "$home/Desktop/BigPEmu.desktop"
     rm -f "$romdir/atarijaguar/+Start BigPEmu.gui"
     rm -f "$romdir/jaguarcd/+Start BigPEmu.gui"
 }
