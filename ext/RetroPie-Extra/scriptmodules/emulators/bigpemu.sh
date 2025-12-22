@@ -27,6 +27,7 @@ function depends_bigpemu() {
         md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
     fi
     local depends
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
 
