@@ -164,7 +164,7 @@ function gui_chocolate-doom() {
 
 function configure_chocolate-doom() {
     mv "$md_inst/Chocolate%20Doom%20Setup.sh" "$md_inst/chocolate_doom_setup"; chmod 755 "$md_inst/chocolate_doom_setup"
-    moveConfigDir "$home/.local/share/chocolate-doom" "$md_conf_root/ports/chocolate-doom"
+    moveConfigDir "$home/.local/share/chocolate-doom" "$md_conf_root/chocolate-doom"
     if [[ "$__os_debian_ver" -le 10 ]]; then
       cat >"$md_inst/chocolate-doom.cfg" << _EOF_
 video_driver                  ""
@@ -462,11 +462,11 @@ key_multi_msgplayer4          19
 _EOF_
       sed -i s+'/home/pi/'+"$home/"+g "$md_inst/chocolate-doom.cfg"
     fi
-    if [[ ! -f "$md_conf_root/ports/chocolate-doom/chocolate-doom.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/ports/chocolate-doom/chocolate-doom.cfg"; fi
-    if [[ ! -f "$md_conf_root/ports/chocolate-doom/chocolate-heretic.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/ports/chocolate-doom/chocolate-heretic.cfg"; fi
-    if [[ ! -f "$md_conf_root/ports/chocolate-doom/chocolate-hexen.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/ports/chocolate-doom/chocolate-hexen.cfg"; fi
-    if [[ ! -f "$md_conf_root/ports/chocolate-doom/chocolate-strife.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/ports/chocolate-doom/chocolate-strife.cfg"; fi
-    chown -R $__user:$__user "$md_conf_root/ports/chocolate-doom"
+    if [[ ! -f "$md_conf_root/chocolate-doom/chocolate-doom.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/chocolate-doom/chocolate-doom.cfg"; fi
+    if [[ ! -f "$md_conf_root/chocolate-doom/chocolate-heretic.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/chocolate-doom/chocolate-heretic.cfg"; fi
+    if [[ ! -f "$md_conf_root/chocolate-doom/chocolate-hexen.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/chocolate-doom/chocolate-hexen.cfg"; fi
+    if [[ ! -f "$md_conf_root/chocolate-doom/chocolate-strife.cfg" ]]; then cp "$md_inst/chocolate-doom.cfg" "$md_conf_root/chocolate-doom/chocolate-strife.cfg"; fi
+    chown -R $__user:$__user "$md_conf_root/chocolate-doom"
 
     # Temporary until the official RetroPie WAD selector is complete.
     if [[ -f "$romdir/ports/doom/doom1.wad" ]]; then
