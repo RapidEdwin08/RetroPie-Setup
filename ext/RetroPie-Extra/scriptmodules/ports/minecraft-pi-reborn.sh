@@ -21,11 +21,11 @@ rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
 
 function depends_minecraft-pi-reborn() {
-    local depends=(libsdl2-dev libopenal1 libglib2.0-0)
+    local depends=(libsdl2-dev libopenal1)
     if [[ $(apt-cache search libfuse2t64 | grep 'libfuse2t64 ') == '' ]]; then
-        depends+=(libfuse2)
+        depends+=(libfuse2 libglib2.0-0)
     else
-        depends+=(libfuse2t64)
+        depends+=(libfuse2t64 libglib2.0-0t64)
     fi
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
