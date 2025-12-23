@@ -73,9 +73,9 @@ function install_bin_minecraft-pi-reborn() {
     if [[ ! -f "$home/.minecraft-pi/server.properties" ]]; then mv "server.properties" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Repo-Seeds.txt" ]]; then mv "README-MCPI-Repo-Seeds.txt" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Controls.txt" ]]; then mv "README-MCPI-Controls.txt" "$home/.minecraft-pi"; fi
-    if [[ ! -d "$md_conf_root/ports/minecraft-pi-reborn" ]]; then mkdir "$md_conf_root/ports/minecraft-pi-reborn"; fi
-    moveConfigDir "$home/.minecraft-pi" "$md_conf_root/ports/minecraft-pi-reborn"
-    chown -R $__user:$__user -R "$md_conf_root/ports/minecraft-pi-reborn"
+    if [[ ! -d "$md_conf_root/minecraft-pi-reborn" ]]; then mkdir "$md_conf_root/minecraft-pi-reborn"; fi
+    moveConfigDir "$home/.minecraft-pi" "$md_conf_root/minecraft-pi-reborn"
+    chown -R $__user:$__user -R "$md_conf_root/minecraft-pi-reborn"
 
     mkRomDir "ports"
     mkRomDir "ports/media"; mkRomDir "ports/media/image"; mkRomDir "ports/media/marquee"; mkRomDir "ports/media/video"
