@@ -77,14 +77,14 @@ function install_bin_duckstation() {
     if [[ ! -d "$md_conf_root/psx/duckstation" ]]; then mkdir "$md_conf_root/psx/duckstation"; fi
     moveConfigDir "$home/.local/share/duckstation" "$md_conf_root/psx/duckstation"
     moveConfigDir "$home/.config/duckstation" "$md_conf_root/psx/duckstation"
-    chown -R $__user:$__user -R "$md_conf_root/psx/duckstation"
+    chown -R $__user:$__user "$md_conf_root/psx/duckstation"
 
     mkRomDir "psx"
     chmod 755 '+Start DuckStation.m3u'; mv '+Start DuckStation.m3u' "$romdir/psx"
     mkRomDir "psx/media"; mkRomDir "psx/media/image"; mkRomDir "psx/media/marquee"; mkRomDir "psx/media/video"
     mv 'media/image/DuckStation.png' "$romdir/psx/media/image"; mv 'media/marquee/DuckStation.png' "$romdir/psx/media/marquee"; mv 'media/video/DuckStation.mp4' "$romdir/psx/media/video"
     if [[ ! -f "$romdir/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; else mv 'gamelist.xml' "$romdir/psx/gamelist.xml.duckstation"; fi
-    chown -R $__user:$__user -R "$romdir/psx"
+    chown -R $__user:$__user "$romdir/psx"
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
 }

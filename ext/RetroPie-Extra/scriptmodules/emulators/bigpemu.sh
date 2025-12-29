@@ -51,14 +51,14 @@ function install_bin_bigpemu() {
     mkRomDir "atarijaguar/media"; mkRomDir "atarijaguar/media/image"; mkRomDir "atarijaguar/media/marquee"; mkRomDir "atarijaguar/media/video"
     mv 'media/image/BigPEmu.png' "$romdir/atarijaguar/media/image"; mv 'media/marquee/BigPEmu.png' "$romdir/atarijaguar/media/marquee"
     if [[ ! -f "$romdir/atarijaguar/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/atarijaguar"; else mv 'gamelist.xml' "$romdir/atarijaguar/gamelist.xml.atarijaguar"; fi
-    chown -R $__user:$__user -R "$romdir/atarijaguar"
+    chown -R $__user:$__user "$romdir/atarijaguar"
 
     # 0ptional gamelist and artwork jaguarcd
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/bigpemu-rp-assets.tar.gz" "$md_build"
     mkRomDir "jaguarcd/media"; mkRomDir "jaguarcd/media/image"; mkRomDir "jaguarcd/media/marquee"; mkRomDir "jaguarcd/media/video"
     mv 'media/image/BigPEmu.png' "$romdir/jaguarcd/media/image"; mv 'media/marquee/BigPEmu.png' "$romdir/jaguarcd/media/marquee"
     if [[ ! -f "$romdir/jaguarcd/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/jaguarcd"; else mv 'gamelist.xml' "$romdir/jaguarcd/gamelist.xml.jaguarcd"; fi
-    chown -R $__user:$__user -R "$romdir/jaguarcd"
+    chown -R $__user:$__user "$romdir/jaguarcd"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
@@ -77,7 +77,7 @@ function configure_bigpemu() {
     mkdir -p "$home/.bigpemu_userdata"
     mkdir -p "$md_conf_root/atarijaguar"
     moveConfigDir "$home/.bigpemu_userdata" "$md_conf_root/atarijaguar"
-    chown -R $__user:$__user -R "$md_conf_root/atarijaguar"
+    chown -R $__user:$__user "$md_conf_root/atarijaguar"
 
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'atarijaguar_StartBigPEmu = "bigpemu-ui"' ; echo $?) == '1' ]]; then echo 'atarijaguar_StartBigPEmu = "bigpemu-ui"' >> /opt/retropie/configs/all/emulators.cfg; fi
@@ -85,11 +85,11 @@ function configure_bigpemu() {
 
     # atarijaguar .j64 .jag .zip 
     addSystem "atarijaguar" "Atari Jaguar" ".bigpimg .cof .rom .abs .cue .cdi .j64 .jag .zip .gui"
-    touch "$romdir/atarijaguar/+Start BigPEmu.gui"; chown -R $__user:$__user -R "$romdir/atarijaguar"
+    touch "$romdir/atarijaguar/+Start BigPEmu.gui"; chown -R $__user:$__user "$romdir/atarijaguar"
 
     # jaguarcd .bigpimg .cof .rom .abs .cue .cdi
     addSystem "jaguarcd" "Atari Jaguar CD" ".bigpimg .cof .rom .abs .cue .cdi .j64 .jag .zip .gui"
-    touch "$romdir/jaguarcd/+Start BigPEmu.gui"; chown -R $__user:$__user -R "$romdir/jaguarcd"
+    touch "$romdir/jaguarcd/+Start BigPEmu.gui"; chown -R $__user:$__user "$romdir/jaguarcd"
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WMC:"

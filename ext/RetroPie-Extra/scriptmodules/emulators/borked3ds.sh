@@ -125,15 +125,27 @@ function install_borked3ds() {
     #'build/bin/Release/borked3ds-room'
     #'build/bin/Release/tests'
     )
+
+    # 0ptional gamelist and artwork 3ds
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/borked3ds-rp-assets.tar.gz" "$md_build"
+    mkRomDir "3ds/media"; mkRomDir "3ds/media/image"; mkRomDir "3ds/media/marquee"; mkRomDir "3ds/media/video"
+    mv 'media/image/BigPEmu.png' "$romdir/3ds/media/image"; mv 'media/marquee/BigPEmu.png' "$romdir/3ds/media/marquee"
+    if [[ ! -f "$romdir/3ds/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/3ds"; else mv 'gamelist.xml' "$romdir/3ds/gamelist.xml.3ds"; fi
+    chown -R $__user:$__user "$romdir/3ds"
 }
 
 function remove_borked3ds() {
     rm -f /usr/share/applications/Borked 3DS.desktop
     rm -f "$home/Desktop/Borked 3DS.desktop"
-    rm -f "$home/RetroPie/roms/3ds/+Start Borked3DS.app"
+    rm -f "$home/RetroPie/roms/3ds/+Start Borked3DS.gui"
 }
 
 function configure_borked3ds() {
+    mkdir -p "$home/.config/borked3ds-emu"
+    mkdir -p "$md_conf_root/3ds/borked3ds"
+    moveConfigDir "$home/.config/borked3ds-emu" "$md_conf_root/3ds/borked3ds"
+    chown -R $__user:$__user "$md_conf_root/3ds/borked3ds"
+
     mkRomDir "3ds"
     ensureSystemretroconfig "3ds"
     local launch_prefix
@@ -145,7 +157,7 @@ function configure_borked3ds() {
     #addEmulator 1 "$md_id-room" "3ds" "$launch_extension$launch_prefix$md_inst/borked3ds-room"
     #addEmulator 2 "$md_id-cli" "3ds" "$launch_extension$launch_prefix$md_inst/borked3ds-cli"
     #addEmulator 3 "$md_id-tests" "3ds" "$launch_extension$launch_prefix$md_inst/tests"
-    addSystem "3ds" "3ds" ".3ds .3dsx .elf .axf .cci .cxi .app"
+    addSystem "3ds" "3ds" ".3ds .3dsx .elf .axf .cci .cxi .app .gui"
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-ui+qjoypad" "3ds" "$launch_prefix$md_inst/borked3ds-qjoy.sh"
@@ -154,12 +166,8 @@ function configure_borked3ds() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q '3ds_StartBorked3DS = "borked3ds-ui' ; echo $?) == '1' ]]; then echo '3ds_StartBorked3DS = "borked3ds-ui"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
-    cat >"$romdir/3ds/+Start Borked3DS.app" << _EOF_
-#!/bin/bash
-"/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _SYS_ "3ds" ""
-_EOF_
-    chmod 755 "$romdir/3ds/+Start Borked3DS.app"
-    chown $__user:$__user "$romdir/3ds/+Start Borked3DS.app"
+    touch "$romdir/3ds/+Start Borked3DS.gui"; chown -R $__user:$__user "$romdir/3ds"
+    chown $__user:$__user "$romdir/3ds/+Start Borked3DS.gui"
 
    cat >"$md_inst/borked3ds-qjoy.sh" << _EOF_
 #!/bin/bash

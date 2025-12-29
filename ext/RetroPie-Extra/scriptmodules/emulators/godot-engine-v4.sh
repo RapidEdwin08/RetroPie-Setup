@@ -732,7 +732,7 @@ function game_data_godot-engine-v4() {
     if [[ ! -f "$romdir/godot-engine/media/image/Portal 2D.png" ]]; then
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/godot-engine-v4-rp-assets.tar.gz" "$romdir/godot-engine"
         if [[ ! -f "$romdir/godot-engine/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/godot-engine/gamelist.xml" ]]; then mv "$romdir/godot-engine/gamelist.xml.godot" "$romdir/godot-engine/gamelist.xml"; fi
-        chown -R $__user:$__user -R "$romdir/godot-engine"
+        chown -R $__user:$__user "$romdir/godot-engine"
     fi
 }
 

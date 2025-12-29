@@ -64,7 +64,7 @@ function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Doom (Shareware).conf"
     sed -i s+'/home/pi/'+"$home/"+g "$romdir/pc/Chex Quest (Promotional).conf"
     if [[ ! -f "$romdir/pc/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/pc/gamelist.xml" ]]; then mv "$romdir/pc/gamelist.xml.dosbox-x" "$romdir/pc/gamelist.xml"; fi
-    chown -R $__user:$__user -R "$romdir/pc"
+    chown -R $__user:$__user "$romdir/pc"
     if [[ ! -d "$md_inst/share/dosbox-x/drivez/DOOM" ]]; then cp -R "$romdir/pc/.games/DOOM" "$md_inst/share/dosbox-x/drivez/DOOM"; chown -R $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM"; fi
     mv -f "$romdir/pc/.games/DOOM.BAT" "$md_inst/share/dosbox-x/drivez/DOOM.BAT"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DOOM.BAT"
     mv -f "$romdir/pc/.games/DEBUG.COM" "$md_inst/share/dosbox-x/drivez/DEBUG.COM"; chown $__user:$__user "$md_inst/share/dosbox-x/drivez/DEBUG.COM"
