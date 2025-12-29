@@ -75,14 +75,14 @@ function install_bin_minecraft-pi-reborn() {
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Controls.txt" ]]; then mv "README-MCPI-Controls.txt" "$home/.minecraft-pi"; fi
     if [[ ! -d "$md_conf_root/minecraft-pi-reborn" ]]; then mkdir "$md_conf_root/minecraft-pi-reborn"; fi
     moveConfigDir "$home/.minecraft-pi" "$md_conf_root/minecraft-pi-reborn"
-    chown -R $__user:$__user -R "$md_conf_root/minecraft-pi-reborn"
+    chown -R $__user:$__user "$md_conf_root/minecraft-pi-reborn"
 
     mkRomDir "ports"
     mkRomDir "ports/media"; mkRomDir "ports/media/image"; mkRomDir "ports/media/marquee"; mkRomDir "ports/media/video"
     mv 'media/image/Minecraft Pi Edition Reborn.png' "$romdir/ports/media/image"; mv 'media/marquee/Minecraft Pi Edition Reborn.png' "$romdir/ports/media/marquee"
     mv 'media/image/Minecraft Pi Edition Reborn (Server).png' "$romdir/ports/media/image"; mv 'media/marquee/Minecraft Pi Edition Reborn (Server).png' "$romdir/ports/media/marquee"
     if [[ ! -f "$romdir/ports/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ports"; else mv 'gamelist.xml' "$romdir/ports/gamelist.xml.minecraft-pi"; fi
-    chown -R $__user:$__user -R "$romdir/ports"
+    chown -R $__user:$__user "$romdir/ports"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
