@@ -129,7 +129,7 @@ function install_borked3ds() {
     # 0ptional gamelist and artwork 3ds
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/borked3ds-rp-assets.tar.gz" "$md_build"
     mkRomDir "3ds/media"; mkRomDir "3ds/media/image"; mkRomDir "3ds/media/marquee"; mkRomDir "3ds/media/video"
-    mv 'media/image/BigPEmu.png' "$romdir/3ds/media/image"; mv 'media/marquee/BigPEmu.png' "$romdir/3ds/media/marquee"
+    mv 'media/image/Borked3DS.png' "$romdir/3ds/media/image"; mv 'media/marquee/Borked3DS.png' "$romdir/3ds/media/marquee"
     if [[ ! -f "$romdir/3ds/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/3ds"; else mv 'gamelist.xml' "$romdir/3ds/gamelist.xml.3ds"; fi
     chown -R $__user:$__user "$romdir/3ds"
 }
