@@ -40,6 +40,22 @@ function install_vice() {
     make install
 }
 
+function game_data_vice() {
+    # Artwork and gamelist.xml
+    if [[ ! -f "$romdir/c64/+Start Basic.d64" ]] || [[ ! -f "$md_inst/basic.d64" ]]; then # [$md_inst/basic.d64] Required for [Vice Basic.desktop] shortcut
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/vice-rp-assets.tar.gz" "$romdir/c64"
+        if [[ ! -f "$romdir/c64/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/c64/gamelist.xml" ]]; then mv "$romdir/c64/gamelist.xml.c64" "$romdir/c64/gamelist.xml"; fi
+        chown -R $__user:$__user "$romdir/c64"
+        if [[ ! -f "$md_inst/basic.d64" ]]; then cp "$romdir/c64/+Start Basic.d64" "$md_inst/basic.d64"; chmod 755 "$md_inst/basic.d64"; fi
+    fi
+}
+
+function remove_vice() {
+    rm -f /usr/share/applications/Vice Basic.desktop
+    rm -f "$home/Desktop/Vice Basic.desktop"
+    rm -f "$home/RetroPie/roms/c64/+Start Basic.d64"
+}
+
 function configure_vice() {
     # get a list of supported extensions
     local exts="$(getPlatformConfig c64_exts)"
@@ -123,4 +139,102 @@ _EOF_
         iniSet "SDLWindowWidth" "384"
         iniSet "SDLWindowHeight" "272"
     fi
+
+    [[ "$md_mode" == "install" ]] && game_data_vice # [$md_inst/basic.d64] Required for [Vice Basic.desktop] shortcut
+    [[ "$md_mode" == "install" ]] && shortcuts_icons_vice
+}
+
+function shortcuts_icons_vice() {
+    local shortcut_name
+    shortcut_name="Vice Basic"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+[Desktop Entry]
+Name=$shortcut_name
+GenericName=$shortcut_name
+Comment=[F12] for MENU
+Exec=$md_inst/bin/vice.sh x64 $md_inst/basic.d64
+Icon=$md_inst/vice_64x64.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=C64;Basic;Vice
+StartupWMClass=Vice
+Name[en_US]=$shortcut_name
+_EOF_
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+
+    cat >"$md_inst/vice_64x64.xpm" << _EOF_
+/* XPM */
+static char * vice_64x64_xpm[] = {
+"64 64 3 1",
+"   c None",
+".  c #002255",
+"+  c #FF0000",
+"                              ...                               ",
+"                       ................                         ",
+"                    ....................                        ",
+"                  ......................                        ",
+"                ........................                        ",
+"              ..........................                        ",
+"             ...........................                        ",
+"            ............................                        ",
+"           .............................                        ",
+"          ..............................                        ",
+"         ...............................                        ",
+"        ................................                        ",
+"       .................................                        ",
+"      ..................................                        ",
+"      ..................................                        ",
+"     ........................     ......                        ",
+"    .....................             ..                        ",
+"    ...................                                         ",
+"   ...................                                          ",
+"   ..................                                           ",
+"   .................                     ...................... ",
+"  .................                      .....................  ",
+"  ................                       ....................   ",
+"  ...............                        ...................    ",
+" ................                        ..................     ",
+" ...............                         .................      ",
+" ...............                         ................       ",
+" ...............                         ................       ",
+" ..............                          ...............        ",
+" ..............                          ..............         ",
+" ..............                          .............          ",
+"...............                                                 ",
+"...............                                                 ",
+" ..............                          +++++++++++++          ",
+" ..............                          ++++++++++++++         ",
+" ..............                          +++++++++++++++        ",
+" ...............                         +++++++++++++++        ",
+" ...............                         ++++++++++++++++       ",
+" ...............                         +++++++++++++++++      ",
+" ................                        ++++++++++++++++++     ",
+"  ...............                        +++++++++++++++++++    ",
+"  ................                       ++++++++++++++++++++   ",
+"  .................                      +++++++++++++++++++++  ",
+"   .................                     ++++++++++++++++++++++ ",
+"   ..................                                           ",
+"   ...................                                          ",
+"    ...................                                         ",
+"    ......................            ..                        ",
+"     ........................     ......                        ",
+"      ..................................                        ",
+"      ..................................                        ",
+"       .................................                        ",
+"        ................................                        ",
+"         ...............................                        ",
+"          ..............................                        ",
+"           .............................                        ",
+"            ............................                        ",
+"             ...........................                        ",
+"               .........................                        ",
+"                ........................                        ",
+"                  ......................                        ",
+"                    ....................                        ",
+"                        ...............                         ",
+"                                                                "};
+_EOF_
 }
