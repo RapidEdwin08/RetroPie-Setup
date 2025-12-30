@@ -50,19 +50,25 @@ function install_bin_minecraft-pi-reborn() {
     chmod 755 "$minecraftpi_appimage"; mv "$minecraftpi_appimage" "$md_inst"
 
     sed -i "s+^app_img=.*+app_img=$minecraftpi_appimage+g" "minecraft.sh"
+    sed -i "s+^app_img=.*+app_img=$minecraftpi_appimage+g" "minecraft-qjoy.sh"
 
     sed -i "s+Exec=.*+Exec=$md_inst/$minecraftpi_appimage\ --server+g" "Minecraft Pi Edition Reborn.desktop"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+        sed -i "s+Exec=.*+Exec=$md_inst/minecraft-qjoy.sh+g" "Minecraft Pi Edition Reborn.desktop"
+    fi
     chmod 755 "Minecraft Pi Edition Reborn.desktop"; cp "Minecraft Pi Edition Reborn.desktop" "$md_inst"; cp "Minecraft Pi Edition Reborn.desktop" "/usr/share/applications/"
     if [[ -d "$home/Desktop" ]]; then mv -f "Minecraft Pi Edition Reborn.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/Minecraft Pi Edition Reborn.desktop"; fi
 
     minecraftpi_appimage=minecraft-pi-reborn-server-"$minecraftpi_version"-"$minecraftpi_platform".AppImage
     sed -i "s+^srv_app_img=.*+srv_app_img=$minecraftpi_appimage+g" "minecraft.sh"
+    sed -i "s+^srv_app_img=.*+srv_app_img=$minecraftpi_appimage+g" "minecraft-qjoy.sh"
 
     ##sed -i "s+Exec=.*+Exec=$md_inst/$minecraftpi_appimage+g" "Minecraft Pi Edition Reborn (Server).desktop"
     chmod 755 "Minecraft Pi Edition Reborn (Server).desktop"; cp "Minecraft Pi Edition Reborn (Server).desktop" "$md_inst"; cp "Minecraft Pi Edition Reborn (Server).desktop" "/usr/share/applications/"
     if [[ -d "$home/Desktop" ]]; then mv -f "Minecraft Pi Edition Reborn (Server).desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/Minecraft Pi Edition Reborn (Server).desktop"; fi
 
     sed -i s+'/home/pi/'+"$home/"+g "minecraft.sh"; chmod 755 "minecraft.sh"; mv "minecraft.sh" "$md_inst"
+    sed -i s+'/home/pi/'+"$home/"+g "minecraft-qjoy.sh"; chmod 755 "minecraft-qjoy.sh"; mv "minecraft-qjoy.sh" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "minecraft-es-server.sh"; chmod 755 "minecraft-es-server.sh"; mv "minecraft-es-server.sh" "$md_inst"
     mv "minecraft-pi-reborn_128x128.xpm" "$md_inst"; mv "minecraft-pi-reborn_256x256.xpm" "$md_inst"
 
@@ -73,6 +79,12 @@ function install_bin_minecraft-pi-reborn() {
     if [[ ! -f "$home/.minecraft-pi/server.properties" ]]; then mv "server.properties" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Repo-Seeds.txt" ]]; then mv "README-MCPI-Repo-Seeds.txt" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Controls.txt" ]]; then mv "README-MCPI-Controls.txt" "$home/.minecraft-pi"; fi
+
+    if [[ ! -d "$home/.minecraft-pi/games/com.mojang/minecraftWorlds/Server" ]]; then
+        mkdir -p "$home/.minecraft-pi/games/com.mojang/minecraftWorlds"
+        mv ./Server "$home/.minecraft-pi/games/com.mojang/minecraftWorlds"
+    fi
+
     if [[ ! -d "$md_conf_root/minecraft-pi-reborn" ]]; then mkdir "$md_conf_root/minecraft-pi-reborn"; fi
     moveConfigDir "$home/.minecraft-pi" "$md_conf_root/minecraft-pi-reborn"
     chown -R $__user:$__user "$md_conf_root/minecraft-pi-reborn"
@@ -104,6 +116,10 @@ function configure_minecraft-pi-reborn() {
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     # (No Argument) will Run normal AppImage with the --server argument to generate the world and [server.properties] in current directory.
     addPort "$md_id" "minecraft-pi-reborn" "+Start Minecraft Pi Edition Reborn" "$launch_prefix$md_inst/minecraft.sh"
+
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+        addPort "$md_id+qjoypad" "minecraft-pi-reborn" "+Start Minecraft Pi Edition Reborn" "$launch_prefix$md_inst/minecraft-qjoy.sh"
+    fi
 
     # --server will call Dialog.sh withOUT retropiemenu launch when called from .desktop Shortcut
     # --es-server will call Dialog.sh with RetroPie-Setup/retropie_packages.sh retropiemenu launch for JoyPad Support when called from ES
