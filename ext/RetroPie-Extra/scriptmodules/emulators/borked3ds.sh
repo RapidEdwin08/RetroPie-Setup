@@ -125,13 +125,15 @@ function install_borked3ds() {
     #'build/bin/Release/borked3ds-room'
     #'build/bin/Release/tests'
     )
+}
 
-    # 0ptional gamelist and artwork 3ds
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/borked3ds-rp-assets.tar.gz" "$md_build"
-    mkRomDir "3ds/media"; mkRomDir "3ds/media/image"; mkRomDir "3ds/media/marquee"; mkRomDir "3ds/media/video"
-    mv 'media/image/Borked3DS.png' "$romdir/3ds/media/image"; mv 'media/marquee/Borked3DS.png' "$romdir/3ds/media/marquee"
-    if [[ ! -f "$romdir/3ds/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/3ds"; else mv 'gamelist.xml' "$romdir/3ds/gamelist.xml.3ds"; fi
-    chown -R $__user:$__user "$romdir/3ds"
+function game_data_borked3ds() {
+    # Artwork and gamelist.xml
+    if [[ ! -f "$romdir/3ds/media/image/Borked3DS.png" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/borked3ds-rp-assets.tar.gz" "$romdir/3ds"
+        if [[ ! -f "$romdir/3ds/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/3ds/gamelist.xml" ]]; then mv "$romdir/3ds/gamelist.xml.3ds" "$romdir/3ds/gamelist.xml"; fi
+        chown -R $__user:$__user "$romdir/3ds"
+    fi
 }
 
 function remove_borked3ds() {
@@ -224,6 +226,7 @@ _EOF_
 
     [[ "$md_mode" == "remove" ]] && remove_borked3ds
     [[ "$md_mode" == "remove" ]] && return
+    [[ "$md_mode" == "install" ]] && game_data_borked3ds
     [[ "$md_mode" == "install" ]] && shortcuts_icons_borked3ds
 }
 
