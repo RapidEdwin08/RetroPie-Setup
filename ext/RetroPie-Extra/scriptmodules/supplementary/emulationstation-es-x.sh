@@ -43,12 +43,14 @@ function depends_emulationstation-es-x()      { depends_emulationstation; }
 function sources_emulationstation-es-x() {
     sources_emulationstation
 
-    # window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Connected: ") + joyName, 4000));
+    # [Source]: window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Connected: ") + joyName, 4000));
     ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected: \") \+ joyName,+window->setInfoPopup(new GuiInfoPopup(window, joyName \+ std::string(\" Connected\"),+" "$md_build/es-core/src/InputManager.cpp" # Reverse string<->joyName
     sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Connected Message
 
-    # window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Disconnected: ") + joyName, 4000));
-    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    # [Source]: window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Disconnected: ") + joyName, 4000));
+    ###sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected: \") \+ joyName,+window->setInfoPopup(new GuiInfoPopup(window, joyName \+ std::string(\" Disconnected\"),+" "$md_build/es-core/src/InputManager.cpp" # Reverse string<->joyName
     ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Disconnected Message
 
     # Disable Built-In BGM Menu Button IF IMP found
