@@ -44,10 +44,12 @@ function sources_emulationstation-es-x() {
     sources_emulationstation
 
     # window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Connected: ") + joyName, 4000));
-    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp"
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Connected Message
 
     # window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Disconnected: ") + joyName, 4000));
-    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp"
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Disconnected Message
 
     # Disable Built-In BGM Menu Button IF IMP found
     if [[ -d /opt/retropie/configs/imp ]]; then
@@ -147,6 +149,11 @@ function configure_emulationstation-es-x() {
     #install_esx_theme "https://github.com/Renetrox/Alekfull-nx-retropie" "Alekfull-nx-retropie"
     #install_esx_theme "https://github.com/Renetrox/Mini" "Mini"
     install_esx_theme "https://github.com/RapidEdwin08/metapixel-doomed" "metapixel-doomed"
+
+    # Extra Systems for carbon-2021: cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor wine
+    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/doom.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-assets.tar.gz" "/etc/emulationstation/themes"
+    fi
 
     echo "Themes installed."
 
