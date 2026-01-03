@@ -52,7 +52,7 @@ function sources_emulationstation-es-x() {
     ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Disconnected Message
 
     # Disable Built-In BGM Menu Button IF IMP found
-    if [[ -d /opt/retropie/configs/imp ]]; then
+    if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
         echo IMP FOUND: BGM [On/Off] Button Will NOT be Included in [ES-X]
         applyPatch "$md_data/bgm-menu-remove.diff"
     fi
@@ -104,12 +104,12 @@ function configure_emulationstation-es-x() {
     # ============================================================
     # 3.5) Ensure RetroPie music folder exists (NO default music)
     # ============================================================
-    if [[ ! -d /opt/retropie/configs/imp ]]; then
+    if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
+        echo "IMP FOUND: SKIP Creating ES-X [music] Folders: [$home/RetroPie/music] [$home/.emulationstation/music]"
+    else
         echo "Creating ES-X [music] Folders: [$home/RetroPie/music] [$home/.emulationstation/music]"
         mkUserDir "$home/RetroPie/music"
         mkUserDir "$home/.emulationstation/music"
-    else
-        echo "IMP FOUND: SKIP Creating ES-X [music] Folders: [$home/RetroPie/music] [$home/.emulationstation/music]"
     fi
 
     # ============================================================
@@ -151,7 +151,7 @@ function configure_emulationstation-es-x() {
     install_esx_theme "https://github.com/RapidEdwin08/metapixel-doomed" "metapixel-doomed"
 
     # Extra Systems for carbon-2021: cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor wine
-    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/doom.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
+    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/doom.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-assets.tar.gz" "/etc/emulationstation/themes"
     fi
 
@@ -180,7 +180,7 @@ function configure_emulationstation-es-x() {
     fi
 
     # Disable Built-In BGM in es_settings.cfg IF IMP found
-    if [[ -d /opt/retropie/configs/imp ]]; then
+    if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
         echo IMP FOUND: Setting [BackgroundMusic=false] in [es_settings.cfg]
         sed -i "s+BackgroundMusic\" value=.*+BackgroundMusic\" value=\"false\" /\>+" "$home/.emulationstation/es_settings.cfg"
     fi
