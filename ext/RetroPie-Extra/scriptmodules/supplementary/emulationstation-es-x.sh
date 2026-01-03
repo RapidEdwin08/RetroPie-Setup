@@ -20,6 +20,8 @@
 #  Installs ES-X + its language files + default ES-X themes.
 # ============================================================
 #
+# If no user is specified (for RetroPie below v4.8.9)
+if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="emulationstation-es-x"
 rp_module_desc="EmulationStation-X (ES-X) - Experimental fork with .ini language and theme enhancements (replaces standard EmulationStation)"
@@ -27,20 +29,25 @@ rp_module_help="After installing, ES-X becomes the main frontend. Includes autom
 rp_module_section="exp"
 rp_module_flags="frontend"
 
-# License (same as upstream ES unless modified)
 rp_module_licence="MIT https://github.com/Aloshi/EmulationStation/blob/master/LICENSE"
 
 # ES-X repository
 rp_module_repo="git https://github.com/Renetrox/EmulationStation-X main"
 
-# -- Link to base EmulationStation build system ---------------------
-
+# ------------------------------------------------------------
+# Link to base EmulationStation build system
+# ------------------------------------------------------------
 function _update_hook_emulationstation-es-x() { _update_hook_emulationstation; }
 function depends_emulationstation-es-x()      { depends_emulationstation; }
-
-##function sources_emulationstation-es-x()      { sources_emulationstation; }
+#function sources_emulationstation-es-x()      { sources_emulationstation; }
 function sources_emulationstation-es-x() {
     sources_emulationstation
+
+    # window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Connected: ") + joyName, 4000));
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp"
+
+    # window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Disconnected: ") + joyName, 4000));
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp"
 
     # Disable Built-In BGM Menu Button IF IMP found
     if [[ -d /opt/retropie/configs/imp ]]; then
@@ -48,27 +55,27 @@ function sources_emulationstation-es-x() {
         applyPatch "$md_data/bgm-menu-remove.diff"
     fi
 }
-
 function build_emulationstation-es-x()        { build_emulationstation; }
 function install_emulationstation-es-x()      { install_emulationstation; }
 
-# -------------------------------------------------------------------
+# ------------------------------------------------------------
 
 function configure_emulationstation-es-x() {
+
     # ============================================================
-    # 1) Remove the standard EmulationStation to avoid conflicts
+    # 1) Remove standard EmulationStation
     # ============================================================
     echo "Removing original EmulationStation..."
     rp_callModule "emulationstation" remove
 
     # ============================================================
-    # 2) Configure ES-X using standard ES logic
+    # 2) Configure ES-X using upstream logic
     # ============================================================
     echo "Configuring ES-X..."
     configure_emulationstation
 
     # ============================================================
-    # 3) Install .ini language files
+    # 3) Install language files (.ini)
     # ============================================================
     echo "Installing ES-X language files..."
 
@@ -86,14 +93,25 @@ function configure_emulationstation-es-x() {
     if [[ -n "$lang_src" ]]; then
         mkUserDir "$lang_dst"
         cp -v "$lang_src"/* "$lang_dst"/ 2>/dev/null
-        chown -R "$user:$user" "$lang_dst"
+        chown -R "$__user:$__user" "$lang_dst"
         echo "Language files installed at $lang_dst"
     else
         echo "WARNING: No 'lang' folder found for ES-X."
     fi
 
     # ============================================================
-    # 4) Install ES-X themes (ArtBook, Mini, Alekfull NX)
+    # 3.5) Ensure RetroPie music folder exists (NO default music)
+    # ============================================================
+    if [[ ! -d /opt/retropie/configs/imp ]]; then
+        echo "Creating ES-X [music] Folders: [$home/RetroPie/music] [$home/.emulationstation/music]"
+        mkUserDir "$home/RetroPie/music"
+        mkUserDir "$home/.emulationstation/music"
+    else
+        echo "IMP FOUND: SKIP Creating ES-X [music] Folders: [$home/RetroPie/music] [$home/.emulationstation/music]"
+    fi
+
+    # ============================================================
+    # 4) Install / update ES-X themes
     # ============================================================
     echo "Installing ES-X themes..."
     local themes_dir="$home/.emulationstation/themes"
@@ -105,50 +123,54 @@ function configure_emulationstation-es-x() {
         local target="$themes_dir/$folder"
 
         if [[ -d "$target/.git" ]]; then
-            echo "Updating theme: $folder"
-            git -C "$target" pull --ff-only
+            echo "Checking updates for theme: $folder"
+            git -C "$target" fetch --quiet
+
+            if [[ -n "$(git -C "$target" status -uno | grep 'behind')" ]]; then
+                echo "Updating theme: $folder"
+                git -C "$target" pull --ff-only
+            else
+                echo "Theme already up to date: $folder"
+            fi
+
         elif [[ -d "$target" ]]; then
-            echo "Folder exists but is not a git repo: $folder — skipping."
+            echo "Theme folder exists but is not a git repository: $folder — leaving untouched."
+
         else
             echo "Cloning theme: $folder"
             git clone "$repo" "$target"
-            chown -R "$user:$user" "$target"
+            chown -R "$__user:$__user" "$target"
         fi
     }
 
-    ##install_esx_theme "https://github.com/Renetrox/art-book-next-ESX" "art-book-next-ESX"
-    install_esx_theme "https://github.com/Renetrox/Alekfull-nx-retropie" "Alekfull-nx-retropie"
-    ##install_esx_theme "https://github.com/Renetrox/Mini" "Mini"
+    #install_esx_theme "https://github.com/Renetrox/art-book-next-ESX" "art-book-next-ESX"
+    #install_esx_theme "https://github.com/Renetrox/Alekfull-nx-retropie" "Alekfull-nx-retropie"
+    #install_esx_theme "https://github.com/Renetrox/Mini" "Mini"
     install_esx_theme "https://github.com/RapidEdwin08/metapixel-doomed" "metapixel-doomed"
 
     echo "Themes installed."
 
     # ============================================================
-    # 5) Apply a default theme ON FIRST INSTALL ONLY
-    #    Default: Alekfull-nx-retropie (simple + theme.ini)
+    # 5) Apply default theme ONLY on first install
     # ============================================================
     local es_settings="$home/.emulationstation/es_settings.cfg"
 
     if [[ ! -f "$es_settings" ]] || ! grep -q "<string name=\"ThemeSet\"" "$es_settings"; then
-        echo "Applying default ES-X sample theme: Alekfull-nx-retropie"
-        
+        echo "Applying default ES-X theme: metapixel-doomed"
+
         mkUserDir "$(dirname "$es_settings")"
         touch "$es_settings"
 
         if grep -q "<string name=\"ThemeSet\"" "$es_settings"; then
-            sed -i 's|<string name="ThemeSet".*|<string name="ThemeSet" value="Alekfull-nx-retropie" />|' "$es_settings"
+            sed -i 's|<string name="ThemeSet".*|<string name="ThemeSet" value="metapixel-doomed" />|' "$es_settings"
         else
-            echo '<string name="ThemeSet" value="Alekfull-nx-retropie" />' >> "$es_settings"
+            echo '<string name="ThemeSet" value="metapixel-doomed" />' >> "$es_settings"
         fi
-        
-        chown "$user:$user" "$es_settings"
+
+        chown "$__user:$__user" "$es_settings"
     else
         echo "Theme already configured by user — not changing."
     fi
-
-    echo "Creating ES-X [music] Folders: [$home/RetroPie/music] [$home/.emulationstation/music]"
-    mkUserDir "$home/RetroPie/music"
-    mkUserDir "$home/.emulationstation/music"
 
     # Disable Built-In BGM in es_settings.cfg IF IMP found
     if [[ -d /opt/retropie/configs/imp ]]; then
