@@ -43,25 +43,22 @@ function install_bin_bigpemu() {
     downloadAndExtract "https://www.richwhitehouse.com/jaguar/builds/${bigpemu_tar}" "$(dirname "$md_inst")" # bigpemu.tar.gz/bigpemu/*
     chmod 755 "$md_inst/bigpemu"
 
-    mkRomDir "atarijaguar"
-    mkRomDir "jaguarcd"
-
-    # 0ptional gamelist and artwork atarijaguar
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/bigpemu-rp-assets.tar.gz" "$md_build"
-    mkRomDir "atarijaguar/media"; mkRomDir "atarijaguar/media/image"; mkRomDir "atarijaguar/media/marquee"; mkRomDir "atarijaguar/media/video"
-    mv 'media/image/BigPEmu.png' "$romdir/atarijaguar/media/image"; mv 'media/marquee/BigPEmu.png' "$romdir/atarijaguar/media/marquee"
-    if [[ ! -f "$romdir/atarijaguar/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/atarijaguar"; else mv 'gamelist.xml' "$romdir/atarijaguar/gamelist.xml.atarijaguar"; fi
-    chown -R $__user:$__user "$romdir/atarijaguar"
-
-    # 0ptional gamelist and artwork jaguarcd
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/bigpemu-rp-assets.tar.gz" "$md_build"
-    mkRomDir "jaguarcd/media"; mkRomDir "jaguarcd/media/image"; mkRomDir "jaguarcd/media/marquee"; mkRomDir "jaguarcd/media/video"
-    mv 'media/image/BigPEmu.png' "$romdir/jaguarcd/media/image"; mv 'media/marquee/BigPEmu.png' "$romdir/jaguarcd/media/marquee"
-    if [[ ! -f "$romdir/jaguarcd/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/jaguarcd"; else mv 'gamelist.xml' "$romdir/jaguarcd/gamelist.xml.jaguarcd"; fi
-    chown -R $__user:$__user "$romdir/jaguarcd"
-
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
+}
+
+function game_data_bigpemu() {
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/bigpemu-rp-assets.tar.gz" "$romdir/atarijaguar"
+    if [[ ! -f "$romdir/atarijaguar/gamelist.xml" ]]; then mv "$romdir/atarijaguar/gamelist.xml.jaguar" "$romdir/atarijaguar/gamelist.xml"; fi
+    mv "$romdir/atarijaguar/media/image/BigPEmu-atarijaguar.png" "$romdir/atarijaguar/media/image/BigPEmu.png"; rm -f "$romdir/atarijaguar/media/image/BigPEmu-jaguarcd.png"
+    mv "$romdir/atarijaguar/retropie.pkg" "$md_inst"
+    chown -R $__user:$__user "$romdir/atarijaguar"
+
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/bigpemu-rp-assets.tar.gz" "$romdir/jaguarcd"
+    if [[ ! -f "$romdir/jaguarcd/gamelist.xml" ]]; then mv "$romdir/jaguarcd/gamelist.xml.jaguar" "$romdir/jaguarcd/gamelist.xml"; fi
+    mv "$romdir/jaguarcd/media/image/BigPEmu-jaguarcd.png" "$romdir/jaguarcd/media/image/BigPEmu.png"; rm -f "$romdir/jaguarcd/media/image/BigPEmu-atarijaguar.png"
+    mv "$romdir/jaguarcd/retropie.pkg" "$md_inst"
+    chown -R $__user:$__user "$romdir/jaguarcd"
 }
 
 function remove_bigpemu() {
@@ -74,6 +71,9 @@ function remove_bigpemu() {
 }
 
 function configure_bigpemu() {
+    mkRomDir "atarijaguar"
+    mkRomDir "jaguarcd"
+
     mkdir -p "$home/.bigpemu_userdata"
     mkdir -p "$md_conf_root/atarijaguar"
     moveConfigDir "$home/.bigpemu_userdata" "$md_conf_root/atarijaguar"
@@ -101,6 +101,7 @@ function configure_bigpemu() {
     addEmulator 0 "$md_id-ui" "jaguarcd" "$launch_prefix$md_inst/bigpemu"
 
     [[ "$md_mode" == "remove" ]] && remove_bigpemu
+    [[ "$md_mode" == "install" ]] && game_data_bigpemu
     [[ "$md_mode" == "install" ]] && shortcuts_icons_bigpemu
 }
 
