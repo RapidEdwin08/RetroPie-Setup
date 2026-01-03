@@ -52,11 +52,15 @@ function configure_lr-mess() {
     [[ -z "$module" ]] && module="mamemess_libretro.so"
 
     local system
-    for system in nes gb coleco arcadia crvision atarijaguar; do
+    for system in nes gb coleco arcadia crvision atarijaguar cdimono1; do
         mkRomDir "$system"
         defaultRAConfig "$system"
         addEmulator 0 "$md_id" "$system" "$md_inst/$module"
-        addSystem "$system"
+        if [[ "$system" == 'cdimono1' ]]; then
+            addSystem "cdimono1" "Philips CDI" ".chd .iso .7z .zip"
+        else
+            addSystem "$system"
+        fi
     done
 
     [[ "$md_mode" == "remove" ]] && return
