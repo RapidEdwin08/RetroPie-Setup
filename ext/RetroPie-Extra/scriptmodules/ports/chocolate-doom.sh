@@ -82,15 +82,7 @@ function game_data_chocolate-doom() {
     if [[ ! -f "$romdir/ports/doom/doom1.wad" ]]; then
         wget "$__archive_url/doom1.wad" -O "$romdir/ports/doom/doom1.wad"
     fi
-    # Symbolic Link to [doomu.wad] for [Chocolate Doom.desktop]
-    if [[ ! -f "$romdir/ports/doom/doomu.wad" ]]; then
-      if [[ -f "$romdir/ports/doom/doom.wad" ]]; then
-         ln -s "$romdir/ports/doom/doom.wad" "$romdir/ports/doom/doomu.wad"
-      else
-         ln -s "$romdir/ports/doom/doom1.wad" "$romdir/ports/doom/doomu.wad"
-      fi
-      chown $__user:$__user "$romdir/ports/doom/doomu.wad"
-   fi
+    chown $__user:$__user "$romdir/ports/doom/doom1.wad"
 
     if [[ ! -f "$romdir/ports/doom/freedoom1.wad" ]]; then
         wget "https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip"
