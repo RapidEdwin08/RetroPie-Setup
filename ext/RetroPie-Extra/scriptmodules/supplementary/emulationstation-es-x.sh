@@ -43,21 +43,27 @@ function depends_emulationstation-es-x()      { depends_emulationstation; }
 function sources_emulationstation-es-x() {
     sources_emulationstation
 
-    # [Source]: window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Connected: ") + joyName, 4000));
-    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
-    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected: \") \+ joyName,+window->setInfoPopup(new GuiInfoPopup(window, joyName \+ std::string(\" Connected\"),+" "$md_build/es-core/src/InputManager.cpp" # Reverse string<->joyName
-    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Connected Message
-
-    # [Source]: window->setInfoPopup(new GuiInfoPopup(window, std::string("★ Disconnected: ") + joyName, 4000));
-    ###sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
-    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected: \") \+ joyName,+window->setInfoPopup(new GuiInfoPopup(window, joyName \+ std::string(\" Disconnected\"),+" "$md_build/es-core/src/InputManager.cpp" # Reverse string<->joyName
-    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Disconnected Message
+    # [Trixie] error: conflicting declaration ‘typedef int Mix_Music’ # BackgroundMusicManager.h:9:27: note: previous declaration as ‘typedef struct _Mix_Music Mix_Music’
+    if [[ "$__gcc_version" -gt 12 ]]; then
+        sed -i "s+^struct _Mix_Music\;+struct Mix_Music\;+" "$md_build/es-app/src/audio/BackgroundMusicManager.h"
+        sed -i "s+typedef struct _Mix_Music Mix_Music+//typedef struct _Mix_Music Mix_Music+" "$md_build/es-app/src/audio/BackgroundMusicManager.h"
+    fi
 
     # Disable Built-In BGM Menu Button IF IMP found
     if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
         echo IMP FOUND: BGM [On/Off] Button Will NOT be Included in [ES-X]
         applyPatch "$md_data/bgm-menu-remove.diff"
     fi
+
+    # [x3] 0ptional JoyPad Connected Popup Changes
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected: \") \+ joyName,+window->setInfoPopup(new GuiInfoPopup(window, joyName \+ std::string(\" Connected\"),+" "$md_build/es-core/src/InputManager.cpp" # Reverse string<->joyName
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Connected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Connected+" "$md_build/es-core/src/InputManager.cpp" # Remove Connected Message
+
+    # [x3] 0ptional JoyPad Disconnected Popup Changes
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Star Only
+    sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected: \") \+ joyName,+window->setInfoPopup(new GuiInfoPopup(window, joyName \+ std::string(\" Disconnected\"),+" "$md_build/es-core/src/InputManager.cpp" # Reverse string<->joyName
+    ##sed -i "s+window->setInfoPopup(new GuiInfoPopup(window, std::string(\"★ Disconnected+//window->setInfoPopup(new GuiInfoPopup(window, std::string(\"Disconnected+" "$md_build/es-core/src/InputManager.cpp" # Remove Disconnected Message
 }
 function build_emulationstation-es-x()        { build_emulationstation; }
 function install_emulationstation-es-x()      { install_emulationstation; }
