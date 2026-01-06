@@ -844,6 +844,7 @@ function configure_godot-engine-v4() {
             audio_driver_string="--audio-driver"
             main_pack_string="--main-pack"
             video_driver_string="--rendering-method gl_compatibility"
+            isPlatform "rpi"* && video_driver_string="--rendering-method mobile"
             isPlatform "kms" && video_driver_string="--rendering-method mobile"
         else
             audio_driver_string="--audio-driver"
