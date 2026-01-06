@@ -112,7 +112,7 @@ function remove_minecraft-pi-reborn() {
 
 function configure_minecraft-pi-reborn() {
     local launch_prefix
-    isPlatform "rpi"* && launch_prefix="XINIT:"
+    isPlatform "rpi"* && launch_prefix="XINIT-WMC:"
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     # (No Argument) will Run normal AppImage with the --server argument to generate the world and [server.properties] in current directory.
     addPort "$md_id" "minecraft-pi-reborn" "+Start Minecraft Pi Edition Reborn" "$launch_prefix$md_inst/minecraft.sh"
