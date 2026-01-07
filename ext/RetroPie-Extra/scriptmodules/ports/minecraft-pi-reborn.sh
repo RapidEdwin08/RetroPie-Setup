@@ -72,13 +72,11 @@ function install_bin_minecraft-pi-reborn() {
     sed -i s+'/home/pi/'+"$home/"+g "minecraft-es-server.sh"; chmod 755 "minecraft-es-server.sh"; mv "minecraft-es-server.sh" "$md_inst"
     mv "minecraft-pi-reborn_128x128.xpm" "$md_inst"; mv "minecraft-pi-reborn_256x256.xpm" "$md_inst"
 
-    if [[ ! -d "$home/.minecraft-pi" ]]; then mkdir "$home/.minecraft-pi"; fi
-    if [[ ! -d "$home/.minecraft-pi/overrides" ]]; then mkdir "$home/.minecraft-pi/overrides"; fi
-    if [[ ! -f "$home/.minecraft-pi/README-AUDIO-overrides.txt" ]]; then mv "README-AUDIO-overrides.txt" "$home/.minecraft-pi"; fi
+    mkdir -p "$home/.minecraft-pi"
+    mkdir -p "$home/.minecraft-pi/overrides"
     if [[ ! -f "$home/.minecraft-pi/options.txt" ]]; then mv "options.txt" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/server.properties" ]]; then mv "server.properties" "$home/.minecraft-pi"; fi
-    if [[ ! -f "$home/.minecraft-pi/README-MCPI-Repo-Seeds.txt" ]]; then mv "README-MCPI-Repo-Seeds.txt" "$home/.minecraft-pi"; fi
-    if [[ ! -f "$home/.minecraft-pi/README-MCPI-Controls.txt" ]]; then mv "README-MCPI-Controls.txt" "$home/.minecraft-pi"; fi
+    if [[ ! -f "$home/.minecraft-pi/README-MCPI-Reborn.txt" ]]; then mv "README-MCPI-Reborn.txt" "$home/.minecraft-pi"; fi
 
     if [[ ! -d "$home/.minecraft-pi/games/com.mojang/minecraftWorlds/Server" ]]; then
         mkdir -p "$home/.minecraft-pi/games/com.mojang/minecraftWorlds"
@@ -94,6 +92,7 @@ function install_bin_minecraft-pi-reborn() {
     mv 'media/image/Minecraft Pi Edition Reborn.png' "$romdir/ports/media/image"; mv 'media/marquee/Minecraft Pi Edition Reborn.png' "$romdir/ports/media/marquee"
     mv 'media/image/Minecraft Pi Edition Reborn (Server).png' "$romdir/ports/media/image"; mv 'media/marquee/Minecraft Pi Edition Reborn (Server).png' "$romdir/ports/media/marquee"
     if [[ ! -f "$romdir/ports/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ports"; else mv 'gamelist.xml' "$romdir/ports/gamelist.xml.minecraft-pi"; fi
+    if [[ ! -f "$romdir/ports/README-MCPI-Reborn.txt" ]]; then cp "$home/.minecraft-pi/README-MCPI-Reborn.txt" "$romdir/ports"; fi
     chown -R $__user:$__user "$romdir/ports"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
