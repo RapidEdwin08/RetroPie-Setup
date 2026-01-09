@@ -77,8 +77,10 @@ function configure_openbor-v4() {
     addEmulator 1 "$md_id" "$md_id" "$md_inst/$md_id.sh %ROM%"
     addSystem "openbor" "OpenBOR" ".pak .sh .bor"
     sed -i s'+_SYS_\ openbor+_SYS_\ openbor-v4+g' /etc/emulationstation/es_systems.cfg
+    sed -i s'+<platform>openbor</platform>+<platform>pc</platform>+g' /etc/emulationstation/es_systems.cfg
     if [[ -f /opt/retropie/configs/all/emulationstation/es_systems.cfg ]]; then
         sed -i s'+_SYS_\ openbor+_SYS_\ openbor-v4+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
+        sed -i s'+<platform>openbor</platform>+<platform>pc</platform>+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
     fi
 
     cat >"$romdir/openbor/+Start OpenBOR.sh" << _EOF_
