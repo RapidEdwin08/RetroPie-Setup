@@ -17,7 +17,8 @@ rp_module_id="openbor-v3"
 rp_module_desc="OpenBOR - Beat 'em Up Game Engine V3 (.BOR/SDL1)"
 rp_module_help="*OpenBOR.PAK games NEED to be EXTRACTED as .BOR Folders*\n \nOpenBOR.BOR folders can be placed in:\n $romdir/openbor/\n \n[openbor-unpak] + [openbor-repak] Utilities are included as Additional Emulator Entries accessible via runcommand\n \n * RESTART ES after [unpak/repak] to Refresh GameList * \n \n    PAK EXTRACT v0.67 by cyperghost also Included\n    /opt/retropie/emulators/openbor-v3/extract.sh"
 rp_module_licence="BSD https://raw.githubusercontent.com/rofl0r/openbor/master/LICENSE"
-rp_module_repo="git https://github.com/rofl0r/openbor.git master"
+#rp_module_repo="git https://github.com/rofl0r/openbor.git master"
+rp_module_repo="git https://github.com/darknior/openbor.git master" # Fork with ability to call [.bor] from command line %ROM%
 rp_module_section="exp"
 rp_module_flags="sdl1 !mali !x11 !rpi5"
 
@@ -61,7 +62,7 @@ function remove_openbor-v3() {
     rm -f "$home/Desktop/OpenBOR-V3.desktop"
     rm -f "$home/RetroPie/roms/openbor/+Start OpenBOR.sh"
     rm -f "$home/RetroPie/retropiemenu/OpenBOR PAK Extract.sh"
-    rm -f "$romdir/openbor/extract-pak/README.txt"
+    rm -f "$romdir/openbor/README_extract-pak.txt"
 }
 
 function configure_openbor-v3() {
@@ -77,9 +78,11 @@ function configure_openbor-v3() {
     ln -snf "/dev/shm" "$md_inst/Logs"
 
     mkRomDir "openbor"
-    mkRomDir "openbor/extract-pak"
-    echo Place as many .PAK files you want Extract HERE. > "$romdir/openbor/extract-pak/README.txt"
-    echo OpenBOR PAK Extract can be ran from RetroPie Menu or [$md_inst/extract.sh] >> "$romdir/openbor/extract-pak/README.txt"
+    #mkRomDir "openbor/extract-pak"
+    echo 'OpenBOR PAK Extract can be ran from RetroPie Menu -> OpenBOR PAK Extract or CLI: /opt/retropie/emulators/openbor-v3/extract.sh' > "$romdir/openbor/README_extract-pak.txt"
+    echo 'Place as many [.PAK] files you want to Extract in: ../roms/openbor/extract-pak/' >> "$romdir/openbor/README_extract-pak.txt"
+    echo 'Extracted [.bor] Folders are Placed in: ../roms/openbor/*.bor' >> "$romdir/openbor/README_extract-pak.txt"
+    echo 'Extracted [.PAK] Files are Renamed: ../roms/openbor/extract-pak/*.PAK.original' >> "$romdir/openbor/README_extract-pak.txt"
     ln -snf "$romdir/openbor" "$md_inst/Paks"
     chown -R $__user:$__user "$romdir/openbor"
 
@@ -91,8 +94,10 @@ function configure_openbor-v3() {
     addEmulator 1 "$md_id" "$md_id" "$md_inst/$md_id.sh %ROM%"
     addSystem "openbor" "OpenBOR" ".pak .sh .bor"
     sed -i s'+_SYS_\ openbor+_SYS_\ openbor-v3+g' /etc/emulationstation/es_systems.cfg
+    sed -i s'+<platform>openbor</platform>+<platform>pc</platform>+g' /etc/emulationstation/es_systems.cfg
     if [[ -f /opt/retropie/configs/all/emulationstation/es_systems.cfg ]]; then
         sed -i s'+_SYS_\ openbor+_SYS_\ openbor-v3+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
+        sed -i s'+<platform>openbor</platform>+<platform>pc</platform>+g' /opt/retropie/configs/all/emulationstation/es_systems.cfg
     fi
 
     cat >"$romdir/openbor/+Start OpenBOR.sh" << _EOF_
