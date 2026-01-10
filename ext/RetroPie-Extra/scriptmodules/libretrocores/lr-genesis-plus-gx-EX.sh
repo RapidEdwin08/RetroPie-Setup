@@ -55,19 +55,12 @@ function configure_lr-genesis-plus-gx-EX() {
         addSystem "$system"
     done
 
-    local paprium_sys=lr-genesis-plus-gx-EX
-    conf_memory_vars
-    local needed=2500
-    local size=$((needed - __memory_avail))
-    if [[ $size -ge 0 ]]; then
-        echo Memory Avalable: [$__memory_avail] Paprium Requires: [$needed]
-        paprium_sys=lr-genesis-plus-gx-EX-SWAP
-        echo Setting Paprium to run with [$paprium_sys] to meet Memory Requirements
-    fi
-
+    local paprium_sys=lr-genesis-plus-gx-EX-SWAP
+    echo Configure [emulators.cfg] to run [paprium] [Paprium] [PAPRIUM] with [$paprium_sys] to meet 2.5GB Memory Requirements
     if [ "$(cat /opt/retropie/configs/all/emulators.cfg | grep -e megadrive_paprium -e megadrive_Paprium)" == '' ]; then
         echo "megadrive_paprium = \"$paprium_sys\"" >> /opt/retropie/configs/all/emulators.cfg
         echo "megadrive_Paprium = \"$paprium_sys\"" >> /opt/retropie/configs/all/emulators.cfg
+        echo "megadrive_PAPRIUM = \"$paprium_sys\"" >> /opt/retropie/configs/all/emulators.cfg
     fi
 
     cat >"$md_inst/ex-swap.sh" << _EOF_
@@ -132,7 +125,7 @@ function rpSwap() {
 
 conf_memory_vars
 rpSwap on \$swap_mb
-/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-genesis-plus-gx-EX/genesis_plus_gx_libretro.so --config /opt/retropie/configs/megadrive/retroarch.cfg "\$@"
+/opt/retropie/emulators/retroarch/bin/retroarch -L $md_inst/genesis_plus_gx_libretro.so --config /opt/retropie/configs/megadrive/retroarch.cfg "\$@"
 rpSwap off
 _EOF_
     chmod 755 "$md_inst/ex-swap.sh"
