@@ -51,11 +51,89 @@ function configure_lr-genesis-plus-gx-EX() {
         ! isPlatform "armv6" && def=1
         mkRomDir "$system"
         addEmulator "$def" "$md_id" "$system" "$md_inst/genesis_plus_gx_libretro.so"
+        [[ "$system" == 'megadrive' ]] && addEmulator 0 "$md_id-SWAP" "$system" "$md_inst/ex-swap.sh %ROM%"
         addSystem "$system"
     done
 
-    if [ "$(cat /opt/retropie/configs/all/emulators.cfg | grep -e megadrive_paprium -e megadrive_Paprium)" == '' ]; then
-        echo 'megadrive_paprium = "lr-genesis-plus-gx-EX"' >> /opt/retropie/configs/all/emulators.cfg
-        echo 'megadrive_Paprium = "lr-genesis-plus-gx-EX"' >> /opt/retropie/configs/all/emulators.cfg
+    local paprium_sys=lr-genesis-plus-gx-EX
+    conf_memory_vars
+    local needed=2500
+    local size=$((needed - __memory_avail))
+    if [[ $size -ge 0 ]]; then
+        echo Memory Avalable: [$__memory_avail] Paprium Requires: [$needed]
+        paprium_sys=lr-genesis-plus-gx-EX-SWAP
+        echo Setting Paprium to run with [$paprium_sys] to meet Memory Requirements
     fi
+
+    if [ "$(cat /opt/retropie/configs/all/emulators.cfg | grep -e megadrive_paprium -e megadrive_Paprium)" == '' ]; then
+        echo "megadrive_paprium = \"$paprium_sys\"" >> /opt/retropie/configs/all/emulators.cfg
+        echo "megadrive_Paprium = \"$paprium_sys\"" >> /opt/retropie/configs/all/emulators.cfg
+    fi
+
+    cat >"$md_inst/ex-swap.sh" << _EOF_
+#!/bin/bash
+
+# This file contains functions from The RetroPie Project
+#
+# The RetroPie Project is the legal property of its developers, whose names are
+# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+#
+# See the LICENSE.md file at the top-level directory of this distribution and
+# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
+#
+
+# https://retropie.org.uk/forum/topic/37137/has-anyone-got-paprium-working-on-retropie/42
+swap_mb=2500
+
+## ~/RetroPie/RetroPie-Setup/scriptmodules/inifuncs.sh
+function conf_memory_vars() {
+    __memory_total_kb=\$(awk '/^MemTotal:/{print \$2}' /proc/meminfo)
+    __memory_total=\$(( __memory_total_kb / 1024 ))
+    if grep -q "^MemAvailable:" /proc/meminfo; then
+        __memory_avail_kb=\$(awk '/^MemAvailable:/{print \$2}' /proc/meminfo)
+    else
+        local mem_free=\$(awk '/^MemFree:/{print \$2}' /proc/meminfo)
+        local mem_cached=\$(awk '/^Cached:/{print \$2}' /proc/meminfo)
+        local mem_buffers=\$(awk '/^Buffers:/{print \$2}' /proc/meminfo)
+        __memory_avail_kb=\$((mem_free + mem_cached + mem_buffers))
+    fi
+    __memory_avail=\$(( __memory_avail_kb / 1024 ))
+}
+
+## ~/RetroPie/RetroPie-Setup/scriptmodules/helpers.sh
+function rpSwap() {
+    local command=\$1
+    local __swapdir=/opt/retropie/libretrocores/lr-genesis-plus-gx-EX/ex-swap
+    local swapfile="\$__swapdir/swap"
+    case \$command in
+        on)
+            rpSwap off
+            local needed=\$2
+            local size=\$((needed - __memory_avail))
+            echo Memory Avalable: [\$__memory_avail] Required: [\$needed]
+            if [[ \$size -ge 0 ]]; then
+                echo "Adding \$size MB of additional swap"
+                sudo mkdir -p "\$__swapdir/"
+                sudo fallocate -l \${size}M "\$swapfile"
+                sudo chmod 600 "\$swapfile"
+                sudo mkswap "\$swapfile"
+                sudo swapon "\$swapfile"
+            else
+                echo SWAPFILE NOT NEEDED; Memory Avalable: [\$__memory_avail] \>= Memory Required: [\$needed]
+            fi
+            ;;
+        off)
+            echo "Removing additional swap"
+            sudo swapoff "\$swapfile" 2>/dev/null
+            sudo rm -f "\$swapfile" 2>/dev/null
+            ;;
+    esac
+}
+
+conf_memory_vars
+rpSwap on \$swap_mb
+/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-genesis-plus-gx-EX/genesis_plus_gx_libretro.so --config /opt/retropie/configs/megadrive/retroarch.cfg "\$@"
+rpSwap off
+_EOF_
+    chmod 755 "$md_inst/ex-swap.sh"
 }
