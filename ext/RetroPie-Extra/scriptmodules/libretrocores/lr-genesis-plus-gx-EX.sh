@@ -100,25 +100,27 @@ function rpSwap() {
     local swapfile="\$__swapdir/swap"
     case \$command in
         on)
-            rpSwap off
             local needed=\$2
             local size=\$((needed - __memory_avail))
-            echo Memory Avalable: [\$__memory_avail] Required: [\$needed]
+            echo Memory Required: [\$needed] Memory Avalable: [\$__memory_avail]
             if [[ \$size -ge 0 ]]; then
-                echo "Adding \$size MB of additional swap"
+                rpSwap off force
+                echo "Adding [\$size] MB of additional swap"
                 sudo mkdir -p "\$__swapdir/"
                 sudo fallocate -l \${size}M "\$swapfile"
                 sudo chmod 600 "\$swapfile"
                 sudo mkswap "\$swapfile"
                 sudo swapon "\$swapfile"
             else
-                echo SWAPFILE NOT NEEDED; Memory Avalable: [\$__memory_avail] \>= Memory Required: [\$needed]
+                echo SWAPFILE NOT NEEDED
             fi
             ;;
         off)
-            echo "Removing additional swap"
-            sudo swapoff "\$swapfile" 2>/dev/null
-            sudo rm -f "\$swapfile" 2>/dev/null
+            if [[ -f "\$swapfile" ]] || [[ "\$2" == "force" ]]; then
+                echo "Removing additional swap"
+                sudo swapoff "\$swapfile" 2>/dev/null
+                sudo rm -f "\$swapfile" 2>/dev/null
+            fi
             ;;
     esac
 }
