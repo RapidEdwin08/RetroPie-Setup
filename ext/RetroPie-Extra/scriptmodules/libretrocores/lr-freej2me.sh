@@ -27,10 +27,10 @@ rp_module_flags=""
 function depends_lr-freej2me() {
     if [[ "$legacy_branch" == '1' ]]; then
         sudo apt-get remove ca-certificates-java openjdk-11-jre-headless -y
-        if [[ -d /etc/ssl/certs/java ]]; then sudo rm /etc/ssl/certs/java -Rf; fi
-        sudo mkdir /etc/ssl/certs/java
+        sudo rm /etc/ssl/certs/java -Rf 2>/dev/null
+        sudo mkdir -p /etc/ssl/certs/java
 
-        if [[ $(apt-cache search openjdk-11-jre-headless) == '' ]]; then
+        if [[ ! $(apt-cache search openjdk-8-jdk) == '' ]]; then
             local depends=(ant ca-certificates-java openjdk-8-jdk)
         else
             local depends=(ant ca-certificates-java openjdk-11-jre-headless)
