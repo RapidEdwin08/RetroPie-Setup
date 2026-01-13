@@ -284,21 +284,18 @@ function preview_splashscreen() {
                 1)
                     file=$(choose_splashscreen "$path" "image")
                     [[ -z "$file" ]] && break
-                    ##clear; fbi -T 2 -a -noverbose "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fbi)
-                    #clear; fim -a -q -T 2 "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fim)
+                    Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & fbi -T 1 -a -t 2 --noverbose "$file" > /dev/null 2>&1; while pgrep fbi > /dev/null 2>&1; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
+                    #clear; fbi -T 1 -a -noverbose "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1; clear & clear
                     #clear; mpv -vo sdl -fs --ontop --no-terminal "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep mpv)
-                    clear; mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep mpv)
-                    #clear; cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep vlc)
+                    #tr "\n" "\0" <"$file" | xargs -0 sudo -u $__user XDG_RUNTIME_DIR=/run/user/$SUDO_UID vlc --intf dummy --quiet --play-and-exit --image-duration 6 "$file"
                     ;;
                 2)
                     file=$(mktemp)
                     find "$path" -type f ! -regex ".*/\..*" ! -regex ".*LICENSE" ! -regex ".*README.*" ! -regex ".*\.sh" ! -regex ".*retropie.pkg.*" | grep -v "$REGEX_VIDEO" | sort > "$file"
                     if [[ -s "$file" ]]; then
-                        Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fbi -T 1 -a -t 2 --noverbose --once --list "$file" > /dev/null 2>&1; while pgrep fbi; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-                        ##Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fbi -T 2 -a -t 2 --noverbose --once --list "$file" > /dev/null 2>&1; while pgrep fbi; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-                        #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fim) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & fim -a -q -T 2 "$file" > /dev/null 2>&1; while pgrep fim; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-                        ###Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1; while pgrep mpv; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-                        #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1; while pgrep vlc; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                        Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & fbi -T 1 -a -t 6 --noverbose --once --list "$file" > /dev/null 2>&1; clear; while pgrep fbi > /dev/null 2>&1; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
+                        ###Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --ontop --no-terminal "$file" > /dev/null 2>&1; while pgrep mpv; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
+                        #tr "\n" "\0" <"$file" | xargs -0 sudo -u $__user XDG_RUNTIME_DIR=/run/user/$SUDO_UID vlc --intf dummy --quiet --play-and-exit --image-duration 6 "$file"
                     else
                         printMsgs "dialog" "There are no splashscreens installed in $path"
                     fi
@@ -308,8 +305,9 @@ function preview_splashscreen() {
                 3)
                     file=$(choose_splashscreen "$path" "video")
                     [[ -z "$file" ]] && break
-                    Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & mpv -vo sdl -fs --audio-device=alsa/sysdefault:CARD=vc4hdmi0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
-                    #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep vlc) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; chmod 755 $Uinput; clear; bash $Uinput & cvlc -q --no-osd -L --no-loop -f --no-video-title-show --play-and-exit --x11-display :0.0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1
+                    sudo -u $__user XDG_RUNTIME_DIR=/run/user/$SUDO_UID vlc --intf dummy --quiet --play-and-exit "$file"
+                    #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & mpv -vo sdl -fs -ao=alsa --audio-device=alsa/default:CARD=vc4hdmi0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
+                    #mpv --ao=help > /dev/shm/mpv.log; mpv --audio-device=help >> /dev/shm/mpv-splash.log
                     ;;
             esac
         done
