@@ -20,7 +20,7 @@ rp_module_licence="BSD https://raw.githubusercontent.com/rofl0r/openbor/master/L
 #rp_module_repo="git https://github.com/rofl0r/openbor.git master"
 rp_module_repo="git https://github.com/darknior/openbor.git master" # Fork with ability to call [.bor] from command line %ROM%
 rp_module_section="exp"
-rp_module_flags="sdl1 !mali !x11 !rpi5"
+rp_module_flags="sdl1 !mali !x11 !rpi5 !:\$__os_debian_ver:-gt:11"
 
 function depends_openbor() {
     getDepends libsdl1.2-dev libsdl-gfx1.2-dev libogg-dev libvorbisidec-dev libvorbis-dev libpng-dev zlib1g-dev

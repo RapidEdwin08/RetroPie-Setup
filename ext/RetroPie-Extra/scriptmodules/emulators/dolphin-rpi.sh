@@ -23,7 +23,7 @@ rp_module_help="ROM Extensions: .elf .dol .gcm .iso .rvz .wbfs .ciso .gcz .wad .
 rp_module_licence="GPL2 https://github.com/gvx64/dolphin-rpi/blob/master/license.txt"
 rp_module_repo="git https://github.com/gvx64/dolphin-rpi.git master"
 rp_module_section="exp"
-rp_module_flags="!all aarch64"
+rp_module_flags="!all aarch64 !:\$__os_debian_ver:-gt:12 !:\$__os_debian_ver:-lt:11"
 
 function depends_dolphin-rpi() {
     local platform

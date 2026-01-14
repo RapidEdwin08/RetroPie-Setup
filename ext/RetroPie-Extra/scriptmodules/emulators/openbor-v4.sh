@@ -19,7 +19,7 @@ rp_module_help="*   OpenBOR.PAK games do NOT need to be Extracted   *\n \nOpenBO
 rp_module_licence="BSD https://raw.githubusercontent.com/DCurrent/openbor/refs/heads/master/LICENSE"
 rp_module_repo="git https://github.com/DCurrent/openbor.git master"
 rp_module_section="exp"
-rp_module_flags="sdl2 !mali !rpi3"
+rp_module_flags="sdl2 !mali !rpi3 !:\$__os_debian_ver:-lt:11"
 
 function depends_openbor-v4() {
     getDepends libogg-dev libvorbisidec-dev libvorbis-dev libpng-dev zlib1g-dev libvpx-dev libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-gfx-dev
