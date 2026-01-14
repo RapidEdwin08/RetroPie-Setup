@@ -284,7 +284,7 @@ function preview_splashscreen() {
                 1)
                     file=$(choose_splashscreen "$path" "image")
                     [[ -z "$file" ]] && break
-                    Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & fbi -T 1 -a -t 2 --noverbose "$file" > /dev/null 2>&1; while pgrep fbi > /dev/null 2>&1; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
+                    Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & fbi -T 1 -a -t 6 --noverbose "$file" > /dev/null 2>&1; while pgrep fbi > /dev/null 2>&1; do sleep 0.1 > /dev/null 2>&1; done; kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
                     #clear; fbi -T 1 -a -noverbose "$file" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep fbi) > /dev/null 2>&1; clear & clear
                     #clear; mpv -vo sdl -fs --ontop --no-terminal "$line" > /dev/null 2>&1 & read -p "" </dev/tty && kill $(pgrep mpv)
                     #tr "\n" "\0" <"$file" | xargs -0 sudo -u $__user XDG_RUNTIME_DIR=/run/user/$SUDO_UID vlc --intf dummy --quiet --play-and-exit --image-duration 6 "$file"
@@ -305,9 +305,11 @@ function preview_splashscreen() {
                 3)
                     file=$(choose_splashscreen "$path" "video")
                     [[ -z "$file" ]] && break
+                    if [[ ! "$(pgrep mpg123)" == '' ]]; then pkill -STOP mpg123 > /dev/null 2>&1; fi
                     sudo -u $__user XDG_RUNTIME_DIR=/run/user/$SUDO_UID vlc --intf dummy --quiet --play-and-exit "$file"
                     #Uinput=/dev/shm/input.u; echo 'read -p "" </dev/tty && kill $(pgrep mpv) > /dev/null 2>&1 & rm $0 > /dev/null 2>&1' > $Uinput; clear; bash $Uinput & mpv -vo sdl -fs -ao=alsa --audio-device=alsa/default:CARD=vc4hdmi0 "$file" > /dev/null 2>&1 && kill -KILL $(ps -eaf | grep "input.u" | awk '{print $2}') > /dev/null 2>&1; rm $Uinput > /dev/null 2>&1; clear & clear
                     #mpv --ao=help > /dev/shm/mpv.log; mpv --audio-device=help >> /dev/shm/mpv-splash.log
+                    if [[ ! "$(pgrep mpg123)" == '' ]]; then if [[ ! "$(cat /opt/retropie/configs/imp/settings/pause.flag 2>/dev/null)" == '1' ]]; then pkill -CONT mpg123 > /dev/null 2>&1; fi; fi
                     ;;
             esac
         done
