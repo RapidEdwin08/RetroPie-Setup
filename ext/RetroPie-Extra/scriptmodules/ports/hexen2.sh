@@ -45,7 +45,7 @@ The Remaining Audio Tracks can be Copied/Pasted/Renamed
    tulku1 -> casa2     tulku9 -> casb1
    tulku4 -> casa3"
 rp_module_section="exp"
-rp_module_flags=""
+rp_module_flags="!:\$__os_debian_ver:-gt:11"
 
 function depends_hexen2() {
     # libsdl1.2-dev libsdl-net1.2-dev libsdl-sound1.2-dev libsdl-mixer1.2-dev libsdl-image1.2-dev timidity freepats
