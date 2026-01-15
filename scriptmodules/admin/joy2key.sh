@@ -90,6 +90,9 @@ _EOF_
     # make sure the install user is part of 'input' group
     usermod -a -G input "$__user"
 
+    # Temp workaround for https://github.com/RetroPie/RetroPie-Setup/issues/4136
+    if [[ "$__os_debian_ver" -ge 13 ]]; then mv /opt/retropie/admin/joy2key/osk.py /opt/retropie/admin/joy2key/osk.py.OFF; fi
+
     joy2keyStart
 }
 
