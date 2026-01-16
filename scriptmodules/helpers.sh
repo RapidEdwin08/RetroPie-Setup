@@ -162,7 +162,8 @@ function inputBox() {
         done
     fi
 
-    echo "$text"
+	# Too many DeprecationWarnings
+	echo "$text" | tr -d ' ' | tail -n 1
 }
 
 ## @fn hasPackage()
