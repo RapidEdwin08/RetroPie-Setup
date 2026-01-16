@@ -137,7 +137,7 @@ function connect_wifi() {
             key_min=5
         fi
 
-        cmd=(inputBox "WiFi key/password" "" $key_min)
+        cmd=(inputBox "$essid WiFi key/password" "" $key_min)
         local key_ok=0
         while [[ $key_ok -eq 0 ]]; do
             key=$("${cmd[@]}") || return
