@@ -97,11 +97,13 @@ function _set_interface_wifi() {
 
     if [[ "$state" == "up" ]]; then
         if ! ifup $iface; then
+            echo "Setting Interface $iface $state      "
             ip link set $iface up
             sleep 5 # Device Busy
         fi
     elif [[ "$state" == "down" ]]; then
         if ! ifdown $iface; then
+            echo "Setting Interface $iface $state      "
             ip link set $iface down
             sleep 5 # Device Busy
         fi
@@ -111,7 +113,7 @@ function _set_interface_wifi() {
 function remove_nm_wifi() {
     local iface="$1"
     # delete the NM connection named RetroPie-WiFi
-    nmcli connection delete RetroPie-WiFi
+    nmcli connection delete RetroPie-WiFi 2>&1 | grep -v 'unknown connection'
     _set_interface_wifi $iface down 2>/dev/null
 }
 
@@ -343,6 +345,10 @@ function gui_wifi() {
             "3 Will import the SSID (network name) and PSK (password) from the 'wifikeyfile.txt' file on the boot partition
 
 The file should contain two lines as follows\n\nssid = \"YOUR WIFI SSID\"\npsk = \"YOUR PASSWORD\""
+            4 "Enable WiFi Interface"
+            "4 Enable WiFi Interface $iface for this Session"
+            5 "Disable WiFi Interface"
+            "5 Disable WiFi Interface $iface for this Session"
         )
 
         local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
@@ -381,6 +387,16 @@ The file should contain two lines as follows\n\nssid = \"YOUR WIFI SSID\"\npsk =
                     else
                         printMsgs "dialog" "File 'wifikeyfile.txt' not found on the boot partition!"
                     fi
+                    ;;
+                4)
+                    dialog --defaultno --yesno "This will Enable the WiFi Interface $iface for this Session.\n\nAre you sure you want to continue ?" 12 35 2>&1 >/dev/tty
+                    [[ $? -ne 0 ]] && continue
+                    _set_interface_wifi $iface up 2>/dev/null
+                    ;;
+                5)
+                    dialog --defaultno --yesno "This will Disable the WiFi Interface $iface for this Session.\n\nAre you sure you want to continue ?" 12 35 2>&1 >/dev/tty
+                    [[ $? -ne 0 ]] && continue
+                    _set_interface_wifi $iface down 2>/dev/null
                     ;;
             esac
         else
