@@ -89,8 +89,8 @@ class CenteredButton(urwid.WidgetWrap):
     def selectable(self):
         return True
 
-    #def sizing(self):
-        #return frozenset([FLOW])
+    def sizing(self):
+        return frozenset([FLOW])
 
     signals = ["click"]
 
