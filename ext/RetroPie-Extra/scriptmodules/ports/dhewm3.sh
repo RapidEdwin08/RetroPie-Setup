@@ -96,6 +96,26 @@ function remove_dhewm3() {
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
 }
 
+function gui_dhewm3() {
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
+        "1" "Get Shortcuts + Icons" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            configure_dhewm3
+            game_data_dhewm3
+            shortcuts_icons_dhewm3
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+}
+
 function configure_dhewm3() {
     local launch_prefix
     if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT:"; fi
