@@ -21,7 +21,7 @@ if isPlatform "kms"; then
 else
     rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
 fi
-rp_module_help="Place Game Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Expansion Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4\n\nPlace The Lost Mission Doom 3 Files in [ports/doom3/d3le]:\nlm_pak*.pk4\n\nPlace Classic Doom 3 Files in [ports/doom3/cdoom]:\ncdoom_*.pk4"
+rp_module_help="Place Doom 3 Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Resurrection of Evil Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4\n\nPlace The Lost Mission Files in [ports/doom3/d3le]:\nlm_pak*.pk4\n\nPlace Doom 3 Classic Files in [ports/doom3/cdoom]:\ncdoom_*.pk4\n\nPlace Doom II for Doom 3 Files in [ports/doom3/d2d3]:\n*_00.pk4"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -91,13 +91,51 @@ function remove_dhewm3() {
 
     shortcut_name="Doom 3 The Lost Mission"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
+
+    shortcut_name="Doom II for Doom 3"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
 }
 
 function configure_dhewm3() {
+    local launch_prefix
+    if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT:"; fi
+    addPort "$md_id" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3"
+    addPort "$md_id-d3xp" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp"
+    if [[ -f "$romdir/ports/doom3/d3le/lm_pak.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Lost Mission Requires Resurrection of Evil
+        addPort "$md_id-d3le" "doom3-d3le" "Doom 3 The Lost Mission" "$launch_prefix$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1"
+    fi
+    if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
+        addPort "$md_id-classic" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1"
+    fi
+    if [[ -f "$romdir/ports/doom3/d2d3/tga_00.pk4" ]] || [[ -f "$romdir/ports/doom3/d2d3/TGA_00.PK4" ]]; then
+        addPort "$md_id-classic" "doom3-d2d3" "Doom II for Doom 3" "$launch_prefix$md_inst/dhewm3 +set fs_game d2d3 +map entryway +set com_allowconsole 1"
+    fi
+
+    local launch_suffix
+    #if isPlatform "vulkan"; then
+    if isPlatform "kms" && isPlatform "vulkan"; then
+        launch_suffix=" +set r_renderApi 1"
+        addPort "$md_id-vulkan" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3$launch_suffix"
+        addPort "$md_id-d3xp-vulkan" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp$launch_suffix"
+        if [[ -f "$romdir/ports/doom3/d3le/lm_pak.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then
+            addPort "$md_id-d3le-vulkan" "doom3-d3le" "Doom 3 The Lost Mission" "$launch_prefix$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix"
+        fi
+        if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
+            addPort "$md_id-classic-vulkan" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1$launch_suffix"
+        fi
+        if [[ -f "$romdir/ports/doom3/d2d3/tga_00.pk4" ]] || [[ -f "$romdir/ports/doom3/d2d3/TGA_00.PK4" ]]; then
+            addPort "$md_id-d2d3-vulkan" "doom3-d2d3" "Doom II for Doom 3" "$launch_prefix$md_inst/dhewm3 +set fs_game d2d3 +map entryway +set com_allowconsole 1$launch_suffix"
+        fi
+    fi
+
+    [[ "$md_mode" == "remove" ]] && remove_dhewm3
+    [[ "$md_mode" == "remove" ]] && return
+
     mkUserDir "$home/.config/dhewm3/base"
     mkUserDir "$home/.config/dhewm3/d3xp"
     mkUserDir "$home/.config/dhewm3/d3le"
     mkUserDir "$home/.config/dhewm3/cdoom"
+    mkUserDir "$home/.config/dhewm3/d2d3"
     mkUserDir "$home/.local/share/dhewm3"
     moveConfigDir "$home/.config/dhewm3" "$md_conf_root/doom3"
     moveConfigDir "$home/.local/share/dhewm3" "$md_conf_root/doom3"
@@ -113,36 +151,11 @@ function configure_dhewm3() {
 
     mkRomDir "ports/doom3/d3le"
     mkRomDir "ports/doom3/cdoom"
+    mkRomDir "ports/doom3/d2d3"
     ln -s "$home/RetroPie/roms/ports/doom3/d3le" "$md_inst/d3le"
     ln -s "$home/RetroPie/roms/ports/doom3/cdoom" "$md_inst/cdoom"
+    ln -s "$home/RetroPie/roms/ports/doom3/d2d3" "$md_inst/d2d3"
     chown -R $__user:$__user "$romdir/ports/doom3"
-
-    local launch_prefix
-    if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT:"; fi
-    addPort "$md_id" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3"
-    addPort "$md_id-d3xp" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp"
-    if [[ -f "$romdir/ports/doom3/d3le/lm_pak.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Lost Mission Requires Resurrection of Evil
-        addPort "$md_id-d3le" "doom3-d3le" "Doom 3 The Lost Mission" "$launch_prefix$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1"
-    fi
-    if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
-        addPort "$md_id-classic" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1"
-    fi
-
-    local launch_suffix
-    if isPlatform "vulkan"; then
-        launch_suffix=" +set r_renderApi 1"
-        addPort "$md_id-vulkan" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3$launch_suffix"
-        addPort "$md_id-d3xp-vulkan" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp$launch_suffix"
-        if [[ -f "$romdir/ports/doom3/d3le/lm_pak.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then
-            addPort "$md_id-d3le-vulkan" "doom3-d3le" "Doom 3 The Lost Mission" "$launch_prefix$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix"
-        fi
-        if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
-            addPort "$md_id-classic-vulkan" "doom3-classic" "Doom 3 Classic" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1$launch_suffix"
-        fi
-    fi
-
-    [[ "$md_mode" == "remove" ]] && remove_dhewm3
-    [[ "$md_mode" == "remove" ]] && return
 
     # seta r_mode "5" = 1024x768 | seta r_mode "9" = 1280x720 | seta r_mode "15" = 1920x1080
     # seta r_renderApi "0" = OpenGL | seta r_renderApi "1" = Vulkan
@@ -245,6 +258,10 @@ _EOF_
     if [[ ! -f "$home/.config/dhewm3/cdoom/dhewm.cfg" ]]; then
         cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/cdoom/dhewm.cfg"
         chown -R $__user:$__user "$home/.config/dhewm3/cdoom/dhewm.cfg"
+    fi
+    if [[ ! -f "$home/.config/dhewm3/d2d3/dhewm.cfg" ]]; then
+        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/d2d3/dhewm.cfg"
+        chown -R $__user:$__user "$home/.config/dhewm3/d2d3/dhewm.cfg"
     fi
 
     cat >"$md_inst/dhewm-d3xp.cfg" << _EOF_
@@ -504,7 +521,7 @@ _EOF_
 
 function shortcuts_icons_dhewm3() {
     local launch_suffix
-    if isPlatform "vulkan"; then launch_suffix=" +set r_renderApi 1"; fi
+    if isPlatform "kms" && isPlatform "vulkan"; then launch_suffix=" +set r_renderApi 1"; fi
     local shortcut_name
     shortcut_name="Doom 3"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
@@ -582,6 +599,27 @@ Name[en_US]=$shortcut_name
 _EOF_
     chmod 755 "$md_inst/$shortcut_name.desktop"
     if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]] || [[ -f "$romdir/ports/doom3/cdoom/CDOOM_MAIN.PK4" ]]; then
+        if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+    fi
+
+    shortcut_name="Doom II for Doom 3"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+[Desktop Entry]
+Name=$shortcut_name
+GenericName=$shortcut_name
+Comment=$shortcut_name
+Exec=$md_inst/dhewm3 +set fs_game d2d3 +map entryway +set com_allowconsole 1
+Icon=$md_inst/d2d3_78x78.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=Doom3;DoomII
+StartupWMClass=DoomIIforDoom3
+Name[en_US]=$shortcut_name
+_EOF_
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -f "$romdir/ports/doom3/d2d3/tga_00.pk4" ]] || [[ -f "$romdir/ports/doom3/d2d3/TGA_00.PK4" ]]; then
         if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
         rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
@@ -9173,5 +9211,346 @@ static char * cdoom_48x48_xpm[] = {
 "                        4'5'6'7'y&=*T,w 8'9'0'a'r.b'c'[ =*S=d'e'f'g':&                          ",
 "                              h'1+i'j'k'l'm'n'o'p'q'r's't'u'v'w''+                              ",
 "                                        :&                                                      "};
+_EOF_
+
+    cat >"$md_inst/d2d3_78x78.xpm" << _EOF_
+/* XPM */
+static char * d2d3_78x78_xpm[] = {
+"78 78 257 2",
+"   c None",
+".  c #47704C",
+"+  c #000000",
+"@  c #000000",
+"#  c #000000",
+"\$     c #000000",
+"%  c #000000",
+"&  c #000000",
+"*  c #000000",
+"=  c #000000",
+"-  c #000000",
+";  c #000000",
+">  c #020202",
+",  c #010101",
+"'  c #000000",
+")  c #000000",
+"!  c #000000",
+"~  c #000000",
+"{  c #000000",
+"]  c #000000",
+"^  c #000000",
+"/  c #000000",
+"(  c #020202",
+"_  c #010101",
+":  c #000000",
+"<  c #000000",
+"[  c #010101",
+"}  c #000000",
+"|  c #000000",
+"1  c #000000",
+"2  c #000000",
+"3  c #000000",
+"4  c #000000",
+"5  c #000000",
+"6  c #000000",
+"7  c #000000",
+"8  c #000000",
+"9  c #353535",
+"0  c #000000",
+"a  c #232323",
+"b  c #000000",
+"c  c #2B2B2B",
+"d  c #3F3F3F",
+"e  c #2D2D2D",
+"f  c #101010",
+"g  c #232323",
+"h  c #252525",
+"i  c #363636",
+"j  c #434343",
+"k  c #1A1A1A",
+"l  c #2A2A2A",
+"m  c #4B4B4B",
+"n  c #0F0F0F",
+"o  c #000000",
+"p  c #131313",
+"q  c #181818",
+"r  c #121212",
+"s  c #161616",
+"t  c #1D1D1D",
+"u  c #070707",
+"v  c #151515",
+"w  c #0B0A0B",
+"x  c #141414",
+"y  c #252525",
+"z  c #464646",
+"A  c #212121",
+"B  c #2C2C2C",
+"C  c #3C3C3C",
+"D  c #202020",
+"E  c #1A1A1A",
+"F  c #393939",
+"G  c #424242",
+"H  c #282828",
+"I  c #2A2A2A",
+"J  c #3F3F3F",
+"K  c #1C1C1C",
+"L  c #101010",
+"M  c #0E0E0E",
+"N  c #303030",
+"O  c #2E2E2E",
+"P  c #343434",
+"Q  c #373737",
+"R  c #030202",
+"S  c #1E1E1E",
+"T  c #444444",
+"U  c #4A4A4A",
+"V  c #1B1B1B",
+"W  c #F1F1F1",
+"X  c #242324",
+"Y  c #040404",
+"Z  c #0C0C0C",
+"\`     c #323232",
+" . c #363636",
+".. c #4F4F50",
+"+. c #4C4C4D",
+"@. c #090909",
+"#. c #222222",
+"\$.    c #5E5E5E",
+"%. c #FFFFFF",
+"&. c #EEEEEE",
+"*. c #6E6E6E",
+"=. c #6A696A",
+"-. c #FF5D17",
+";. c #535254",
+">. c #0B0702",
+",. c #565656",
+"'. c #595959",
+"). c #666666",
+"!. c #FF6618",
+"~. c #636262",
+"{. c #333233",
+"]. c #717171",
+"^. c #FF5416",
+"/. c #592D15",
+"(. c #3E180A",
+"_. c #6D3F1F",
+":. c #68472F",
+"<. c #723415",
+"[. c #5B4230",
+"}. c #A13E16",
+"|. c #682C12",
+"1. c #491806",
+"2. c #93401A",
+"3. c #833915",
+"4. c #341104",
+"5. c #160802",
+"6. c #FAFAFA",
+"7. c #4F240F",
+"8. c #5F3923",
+"9. c #D84C17",
+"0. c #B54719",
+"a. c #291407",
+"b. c #38271D",
+"c. c #944E2A",
+"d. c #A44D23",
+"e. c #C74918",
+"f. c #B45624",
+"g. c #E9E9E8",
+"h. c #FE4914",
+"i. c #513629",
+"j. c #844424",
+"k. c #654B3B",
+"l. c #E84F18",
+"m. c #1D1005",
+"n. c #331C0E",
+"o. c #504137",
+"p. c #FF7219",
+"q. c #F25419",
+"r. c #121421",
+"s. c #4A2C1B",
+"t. c #70523E",
+"u. c #3E4159",
+"v. c #858585",
+"w. c #40260D",
+"x. c #E2E2E2",
+"y. c #B03712",
+"z. c #2C1F1B",
+"A. c #C7C7C7",
+"B. c #323851",
+"C. c #BEBDBD",
+"D. c #C55525",
+"E. c #747474",
+"F. c #8B8C8B",
+"G. c #74462B",
+"H. c #A0A0A0",
+"I. c #5C1D09",
+"J. c #433124",
+"K. c #5A4945",
+"L. c #363442",
+"M. c #7D4E2E",
+"N. c #464A6A",
+"O. c #A6573B",
+"P. c #DC5922",
+"Q. c #1E2030",
+"R. c #67524B",
+"S. c #797978",
+"T. c #7E240C",
+"U. c #443832",
+"V. c #929292",
+"W. c #B78439",
+"X. c #A87043",
+"Y. c #261713",
+"Z. c #1F1412",
+"\`.    c #E07132",
+" + c #FB3911",
+".+ c #B4B4B4",
+"++ c #942A0D",
+"@+ c #999999",
+"#+ c #BE3A12",
+"\$+    c #3C2F2D",
+"%+ c #260A03",
+"&+ c #B95F3A",
+"*+ c #CC6132",
+"=+ c #82533C",
+"-+ c #D3D3D3",
+";+ c #FFFE85",
+">+ c #AEAEAE",
+",+ c #262B3F",
+"'+ c #808080",
+")+ c #976042",
+"!+ c #BC6E3F",
+"~+ c #433F4D",
+"{+ c #C69130",
+"]+ c #030614",
+"^+ c #A7A7A7",
+"/+ c #DCDCDC",
+"(+ c #CECECE",
+"_+ c #FED831",
+":+ c #FC763A",
+"<+ c #FFE768",
+"[+ c #5C3B0A",
+"}+ c #FD8636",
+"|+ c #7D7D7D",
+"1+ c #DB310E",
+"2+ c #C17225",
+"3+ c #735A53",
+"4+ c #D58848",
+"5+ c #4A4F83",
+"6+ c #AB2405",
+"7+ c #A87F48",
+"8+ c #DEA946",
+"9+ c #FF821A",
+"0+ c #FFFB52",
+"a+ c #87634C",
+"b+ c #FFFC3B",
+"c+ c #FFBC20",
+"d+ c #FEB13D",
+"e+ c #FD5D31",
+"f+ c #DC8A2D",
+"g+ c #D1A03B",
+"h+ c #FEDB4C",
+"i+ c #FFFD6C",
+"j+ c #C19154",
+"k+ c #D8D8D8",
+"l+ c #7A6760",
+"m+ c #9D6D31",
+"n+ c #FE9718",
+"o+ c #CAC262",
+"p+ c #FCC371",
+"q+ c #886316",
+"r+ c #FCC54D",
+"s+ c #FCFB9F",
+"t+ c #FEA135",
+"u+ c #947A5D",
+"v+ c #4A3D0A",
+"w+ c #F6E19C",
+"x+ c #FDFCBD",
+"y+ c #5E5F9E",
+"z+ c #988123",
+"A+ c #DDA276",
+"B+ c #E9B544",
+"C+ c #B58B75",
+"D+ c #866F7F",
+"E+ c #FE9964",
+"F+ c #6E6CB0",
+"G+ c #BCA78C",
+"H+ c #615A75",
+"                                                                                                                                                            ",
+"                                                                V D v k A D X H B N e P 9 Q                                                                 ",
+"                                                        k p M v c G ..;.,.,.,.,.,.,.,.,.;.+.z T j d                                                         ",
+"                                                  s r @.a j ,.,...G N D s n M Z M n s D B C z ..;...+.U z                                                   ",
+"                                              x w s d ,.;.C k Y , + , > Y w M M M w u > , + > @.V {.T m m U z                                               ",
+"                                          s R K U ,.d q , + > M D c N N N O e e O N N N N e #.f Y , Y q {.G T z G                                           ",
+"                                      k u p z ,.P @.+ > p l N B A r Y , , > R R Y Y R , @.v X N {.e q Y , M l C C d C                                       ",
+"                                    f Y F ,.F u + u A N l p R , R Y w f q K D a h H H h D k n u Y q O {.h w , Z B F P F                                     ",
+"                                  Y q ..U f + Y X O D > , > u f q S a h H c O N P Q C C C C F P H q u u h P H w , v {.N N                                   ",
+"                              q Y e ,.N , , t N t , R Z K l N N N e c l l l B e N P Q C d G z z z G i h n u X P A R Y H P h N                               ",
+"                            D R C ;.q + w B h Y Y V F +.+.z F O h #.D D D D #.X H l e N 9 F d G z U U z C H n @.e N f , k P #.l                             ",
+"                          s Y T m w + k N r Y D ;.].].'.j N #.k x p p x v q k K D #.X H c O \` i C G z U U z F A @.k 9 t > f {.A D                           ",
+"                        t Y z z Y , a l Y r ,.V.@+S.;.{.A q p p r r r p p p x s q k t D a h H B N P F d T z z G O x M \` H R w N A D                         ",
+"                      q Y T z R , H a Y {.@+A.^+*.d X s f f r p p x x x x x p p p p v q k t D a H l O {.F d j z j i t Z B B Y u N S S                       ",
+"                      Y C U Y > l D u '.A.x.^+\$.N k f n n f f f r r r p p p x v x x p p p x q k S A h l e \` F d G j F a r l e Y w {.q                       ",
+"                    u N ..@., H D Z S./+g.H...h x n n n n n n n n n f f r p x v v s s s v x p p v q K D X H B {.F d G F h q l c R n {.r                     ",
+"                  f k ,.s + #.a w F.g.g.H.z D f n n n n n n n n n n n n f f p p x v s s q q q v x p x q V D X H O 9 C d F h S e h , k N w                   ",
+"                k Y ..c + k l w v.g.g.H.z V f n n n n n n n n n n n n n n f f r p p x v s q q q q s x p x q V D X l \` F C i H a {.K , h H M                 ",
+"                u C z , @.O u E.x.&.>+z k n n n n n n n n n n n n n n n n n f f r p p x v v s q q q q s x p x q V D h N Q F \` B h 9 M Y N p                 ",
+"              x q ,.n , c r ;./+W C...V n n n n n n n n n n n n n n n n n n f f f f p p p x v v s s q q s v x p x q K X O i F B 9 l N R p N w               ",
+"              R U {.+ K X h A.W k+~.D f n n n n n n n n n n n n n n n n n f f f f r r r p p p p x v v s s s s x p p v k a O Q 9 l C P S + l t               ",
+"            r A ;.Y Y O @.@+&.g.v.l f n n n n n n n n n n n n n n n n f f f f r r r r r r r r p p p p x v v v v x p p p q a N F N i F i u @.N R             ",
+"            Y +.O + a t ;.x.W .+C p n n n n n n n n n n n n n n n f f f f r p p p p p p p p r r r r p p p p x x x x p p r q H Q F l T F h + H S             ",
+"          q k ;.Y Y e M .+&./+~.V n n n n n n n n n n n n n n f f f r p p p p p x x p p p p p p r r r r r r r p p p p p p p K N C P Q j F u @.N Y           ",
+"          M T F + A t \$.g.&.H.O f n n n n n n n n n n n n n f f r p p p x x v v v v v v x x p p p r r f f f f f f r r p p p s h F d O z d a + B v           ",
+"          w ,.f , e n .+&.k+,.q n n n n n n n n n n n n n f r p p x x v v s s s s s s s v v x p p p r f f f n n n n f f f p x S 9 z C F z F R v l           ",
+"        q B +., p H G x.W H.O f n M Z w w w w w w Z M M n n n f f f r p v s s x x p p p r r r r f n n M M n M Z w w w Z Z M n x h C G N m T x > N >         ",
+"        f z \` + H v F.&.x.~.k n M w t.a+z+z+z+z+z+z+b.w m.z+z+z+z+m+u+u+o.f f a+u+u+u+u+u+u+R.k u+u+7+u+k.w Y.u+u+u+u+a+s.z+z+z+=+M.t.N d U l + l V         ",
+"        Z ;.x , e x A.W C.C f n M w M.C G C J.J.U.o.7+J.z+:.+.j m G U.d l+J._.t.T G G d U.U.z+l+u+U.z C :.u [.k.d d a+u+z+i.8._.8.s.i.d i U C > q H         ",
+"      V S ;.R Z l C x.&.F.X n n n w 8.Q.N.L.B.L.L.L.{.i.t.u.N.u.F u.u.L.H+8.:.....N.L.d L.{.t a+t.C +.u.l+a.:.C u.u.M.G.8+g+W.o+=+7.[...Q z U Z Y O         ",
+"      q P z + K A S.&.x.\$.q n n n w _.,+u...u+u+K.J.b.k.t.G G a+l+u+..L.D+t.:.3+u+~.u+u+'.C d )+a+K.K.~+H+8.t.C ~+L.:.I.<.t.z+c.|.g+z+).U C ..K + O Y       ",
+"      K z F + H p H.&.A.G r n n n w G.X j )+t+8+=+U.\$+t.t.+.\$+4+}+}+t.o.3+t.t.7+a+X.t+t+)+K.o.=+a+X.R.o.R.)+M.\$+H {.:.5.Y 4+u+++3.j+c ].~.P ..O + B M       ",
+"      s ..h + e M C.&.^+N f n n n w M.U.o.G.[.K.t.\$+\$+t.M.J.b.=+c.M.:.[.M.R.M.=+t.M._.:.a+R.K.)+a+k.k.K.[.7+J.\$+h l :.k.t.=+j+X.T.3.a+~.E.N U C + X V       ",
+"      s ;.q , e k (+&.v.X n n n n w G.K.R.G.p R :.8.U.M.M.G.i.3+Z._.G.8.=+3+=+=+=+M.>.l =+[.:.)+u+k.[.i.=+[.k.i.U.d M.=+M.2+2+P.y.++7.z v.F d z , k X       ",
+"      K ;.M R B H /+x.*.t n n n n w G.o.K.G.s + t.G.8.M.c.c.8.a+Z [+_.8.G.a+M.=+)+_.>.N )+i.[.)+l+[.J.J.k.[.G.=+M.k.M.7+{+{+W.{+{+{+j+u+V.T F +.R f l       ",
+"      A ;.u u B P x.k+\$.k n n n n w M.U.[.M.V + t.=+8.j.c.c._.)+f [+G.<.G.a+G.c.c.c.R C )+:.[.X.u+:.s.:.=+G.t.8.8.[.:.|.<.<.|.<.<.<.<.'..+,.N ..Y w c       ",
+"      h ;.Y u c C x.(+;.s n n n n w M.M.:.c.z.+ M.M.i.c.d.d._.O.r /.c.j.c.=+G.f.d.M.R j.m+j.j.m+a+_.8.W.c.=+=+i.i.t.j.m.w w w w w M B F.x.=.c ..Y u c       ",
+"      l ..Y @.c F /+A.+.s n n n n w M.=+*+c.b.+ M.G.[.D.d.c.<.O.m./.d.0.d.c.j.D.D.j.R #+f.}.d.m+a+G.G.7+:.G.j./.:.c.2.m.M n n n n f i H.6.S.H ;.Y u c       ",
+"      e ..u u c 9 -+.+m v n n n f Z M.o.=+j.Y.+ j.d._.P.D.P.2.M.m.7.}.e.0.c.j.l.9.j.R ++d.f.0.f.)+2.j.M._.j.j._.8.j.2.m.M n n n n r F >+6.|+X ;.Y u c       ",
+"      O ..@.u e B C.>+m s n n n f Z _.s.G.j.a.+ d.d.3.P.f.0.3.j.5.7.0.P.D.d.j.l.l.j., 7.d.e.e.f.d.0.c.M.G.2.<.W._.2.2.m.M n n n n r d C.6.|+X ;.Y w l       ",
+"      N ;.n Y O a ^+^++.q n n n f Z _.w._.j.a.w.c.2.|.P.d.y.++c.>.7.D.q.9.d.j.q.q.j., /.c.l.l.f.d.0.d.j.c.0.2.D.<.2.2.m.M n n n n x U (+W ].H ..> f H       ",
+"      {.;.q , O q F.H.;.V n n n n w _.w._.2._.m+3.e.3.f.0.9.9.D.7+s.e.-.9.d.j.-.q.3.[+m+e.q.q.f.d.P.D.}.0.0.d.D.<.2.2.5.M n n n n s ,.x.&.'.O +.+ k a       ",
+"      i ..h + N r *.@+'.A r f n n w _.w._.2+m+0.}.0.3.d.2.y.e.-.q.4+P.!.0.2._.l.q.f.D.q.p.!.P.d.f.l.9.++P.++d.D.|.3.2.5.M n n n n K *.W x.C F G + X q       ",
+"      P +.N + l s ;.F.\$.l x p f n w _.8.j.e.0.9.e.9.<.O.j+O.9.!.p.!.-.e.{+d.)+X.l.q.!.!.-.q.W.m+!+e.9.T.e+7.<.P.<._.2.5.M n n n n h F.6.-+k U N + c Z       ",
+"      Q U C , t X F '+=.\` q x r f w 3._.D.p.9.-.!.P.q+4+|.4+4+!.p.!.f.B+P.I.T.*+4+l.p.-.l.{+m+T.\`.m+}./.q.2.3.P.3._.3.5.M n n n f 9 .+%.C.Z ;.k + B R       ",
+"        z z u M B X =.*.C S q v r M 3.d.P.q.-.q.}.z+t+++n 1.4+j+9.z+t+9.n.s p I.9.4+D.f.g+j.n M T.\`.W.|.e.2+1.P.}.2.<.5.M n n n x ../+6.F.r ;.u Y B         ",
+"        z U q > N r ..=.z h k q v M 3.3.9.-.9.3.{+f+T.s K k Z.X.8+n+y.Z.k K V s 1.1+8+g+7.p q s r I.P._.++2+4.P.}.}.<.5.M n n n D S.W g.;.B m + q X         ",
+"        G m c + l k Q ~...N S V q f <.2.9.9.q+8+\`.1.q S D D K p ++T.r k K K K V s a.++a.r v s s v f n w 4.T.m.c.++#+/.u M n n f {..+%.(+v U N + H k         ",
+"        d U C R x c A ;.,.C h S V f <.<.3.q+B+e.a.q K S D b.m+=+M.M.M.=+t.t.t.t.t.t.t.k.R.R.R.3+b.p f n M @.Z G.}.2.3.@.M n n q '.x.W V.Z ;.n > e +         ",
+"          U G v > N f C ;.T e A S x |.a.z+t+}.f x q V t S A G.[.3+a+a+a+a+u+u+u+u+l+a+l+l+l+H+k.Z.r f f M Z 4.!+|.I.<.@.M n f l @+6.x.G N U , v h           ",
+"          z j O + a X H U m Q H #.s q+g+9+T.f v q q k V t S i.8.9 C L.d C G z +.+.~+~+..;.N.5+b.r f f n n M 4.9.f+[+<.u M n s ;./+6.^+u ..X + l f           ",
+"            U C w u \` f F U d N h q {+\`.I.p q q q q q q V t D i.l+3+3+3+3+l+l+~.=.=.=.~.H+H+o.Z.r f n n n M Z 4.#+t+X.n.M f e @+6.x.;.h .., u B             ",
+"            U C H + h a X G T F c K |.Y.k K V k k k q q q k K D )+a+m ..\$.'.S.V.H+H+5+H+N.K.z.p f f n n n n M M 5.}.}+M.Z V ~.x.W H.Y ..H + h q             ",
+"              d Q w u \` f N j d {.H A A D D S t K k k k q q k k J.[.;.3+l+~.'.\$.H+).3+3+H+J.x p f n n n n n n n M w T.I.p d .+6.-+F e ..> u e               ",
+"              T P c , S c k F G C \` c l h a A D S t K k k k q q k U.+.K.K.;.B.h '.,.R.R.H+q x p f f n n n n n n n M M n e F.W g.S.w ;.V + H q               ",
+"                F 9 v > N V h F d F N e l H X #.D D t K V k k q q U.U K.R.+.L.#.H+\$.R.3+H+k x p f f n n n n n n n n f X *.x.W H.w z C + r l                 ",
+"                d c {.Y Z {.p c C d F \` O c H h X #.D S t K V k q U.G k.k.K.L.D ..R.R.R.H+V x p r f n n n n n n n f D '.(+6.C.B e ..u > e M                 ",
+"                  Q e H , V N s O C C Q {.N e l h h a A D S t V k U.G o.o.z L.S N.+.,.K.N.V x p r f n n n n n n f D ;.C.6.A.d V ,.q + X D                   ",
+"                    l {.V , h B K N F C Q P N O c H h X #.D D t K \$+d o.o.T L.V N.T K.t.;.k p r f f n n n n n f #.;..+W -+,.f ;.l + q l                     ",
+"                    9 S 9 f R l l A O F C F P \` N e l H h X A D S \$+L.Q F Q {.K +.F d d u.q f f f n n n n n x H '..+W A.;.Z ;.{.+ Z O Y                     ",
+"                      e K P w Y B l h O Q F F 9 {.N N B H h X a A O ,+O ,+,+e a ~+B.u.~+B.s n n n n n n f k N )..+&..+C f ;.Q , u O n                       ",
+"                        X D {.w Y l O l O {.F F i {.\` N O c H \$+9 ~+u.u.N.N.N.5+y+y+y+5+5+u.c f n n f x #.d E.C.k+V.X k ;.P + u O v                         ",
+"                          K D {.Z > h {.e {.O i F i P \` N N e C L.{.L.c L.L.L.~+~+~+B.{.L.L.~+A f x t N ;.'+>+^+'.u B ,.l + u O q                           ",
+"                            k S 9 r , K i N C N N 9 i P \` N i ~+L.,+L.L.u.u.u.u.N.N.N.u.u.B...L.D B G ~.'+F.~.X @.G ;.V + M N x                             ",
+"                              k q 9 K , M N F d d N O \` {.[.:.k.R.3+H+H+D+D+D+D+D+D+D+D+F+y+H+[.8.+.\$.~...H Y l ;.G u + q N n                               ",
+"                                k M \` l u R D F G z G \` l i.j.j.j.3.3.++}.}.}.}.}.}.++3.3.3.j.j.k.d N k Y A +...A , > X l Y                                 ",
+"                                    Y H {.q , @.H d U +.z F e h h H H H h h h X X a X h h h X D q M u l ..;.O R + f O D +                                   ",
+"                                      Y p \` B M , @.h d ....U G i O l h D K V k q k S s q f M M X T ,...l Y + u l c @.+                                     ",
+"                                      , u Y D {.l M , R q {.z ;.,...z C \` B H X D K S h \` j ..,...C p , + w h O q R + +                                     ",
+"                                  + + + + , > Y D \` N k Y , R f X F z ..;.,.,.,.,.,.,.;.m C h Z , + > s c e k + + + + + + + +                               ",
+"                                + + + + + , + + R R s B {.B V w > + , > u w M M M @.Y , , + , u q l N H n + + + + , + + + + , +                             ",
+"                              + , + + + + , + + + + , > Y q l N \` O h t s f M Z M f v K X B N O H r , + + + + + + , + + + + , +                             ",
+"                                + + + + + + + + + + + + , R > , > f S h l e e O e B l X t M > + R , + + + + + + + + + + + , +                               ",
+"                                      + + + + + + + + + + + + + + , + R + + + + + + > + + + + + + + + + + + + + + + + + +                                   ",
+"                                              + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + ,                                           ",
+"                                                            + + + , , + + + + + + + + + + , , + +                                                           ",
+"                                                                                                                                                            ",
+"                                                                                                                                                            "};
 _EOF_
 }
