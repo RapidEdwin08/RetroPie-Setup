@@ -1,7 +1,7 @@
 diff -ur a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
 --- a/es-app/src/guis/GuiMenu.cpp	Source
 +++ b/es-app/src/guis/GuiMenu.cpp	Modified
-@@ -39,7 +39,7 @@
+@@ -40,7 +40,7 @@
  #include <memory>
  
  // Música de fondo ES-X (gestor central)
@@ -10,34 +10,30 @@ diff -ur a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
  
  // Helper local para traducciones .ini y colores de menú
  namespace
-@@ -180,20 +180,20 @@
+@@ -169,16 +169,16 @@
+ 
  	if (UIModeController::getInstance()->isUIModeFull())
  	{
- 		// 🎵 MÚSICA DE FONDO (ES-X) – usar estado REAL del BackgroundMusicManager
 -		{
 -			auto bgm_switch = std::make_shared<SwitchComponent>(mWindow);
-+		//{
-+			//auto bgm_switch = std::make_shared<SwitchComponent>(mWindow);
- 
--			// Estado inicial: lo que dice el manager (no Settings suelto)
 -			bgm_switch->setState(BackgroundMusicManager::getInstance().isEnabled());
-+			 // Estado inicial: lo que dice el manager (no Settings suelto)
-+			//bgm_switch->setState(BackgroundMusicManager::getInstance().isEnabled());
- 
+-
 -			s->addWithLabel(_("BACKGROUND MUSIC").c_str(), bgm_switch);
 -			s->addSaveFunc([bgm_switch] {
 -				BackgroundMusicManager::getInstance().setEnabled(bgm_switch->getState());
-+			//s->addWithLabel(_("BACKGROUND MUSIC").c_str(), bgm_switch);
-+			//s->addSaveFunc([bgm_switch] {
-+				//BackgroundMusicManager::getInstance().setEnabled(bgm_switch->getState());
- 
- 				// (Opcional) mantener compatibilidad con una key vieja si la usaste antes:
 -				Settings::getInstance()->setBool("EnableBGM", bgm_switch->getState());
 -			});
 -		}
++		//{
++			//auto bgm_switch = std::make_shared<SwitchComponent>(mWindow);
++			//bgm_switch->setState(BackgroundMusicManager::getInstance().isEnabled());
++
++			//s->addWithLabel(_("BACKGROUND MUSIC").c_str(), bgm_switch);
++			//s->addSaveFunc([bgm_switch] {
++				//BackgroundMusicManager::getInstance().setEnabled(bgm_switch->getState());
 +				//Settings::getInstance()->setBool("EnableBGM", bgm_switch->getState());
 +			//});
 +		//}
  
  #if defined(__linux__)
- 		// audio card
+ 		auto audio_card = std::make_shared< OptionListComponent<std::string> >(mWindow, _("AUDIO CARD").c_str(), false);
