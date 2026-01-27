@@ -53,11 +53,13 @@ function sources_qzdl() {
 }
 
 function build_qzdl() {
+    rpSwap on 1024
     cd $md_build
     mkdir build
     cd build
     cmake ..
     make -j"$(nproc)"
+	rpSwap off
     md_ret_require="$md_build/build/zdl"
 }
 
