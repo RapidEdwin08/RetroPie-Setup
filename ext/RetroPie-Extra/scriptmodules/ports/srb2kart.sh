@@ -21,7 +21,7 @@ rp_module_repo="git https://github.com/STJr/Kart-Public.git master"
 rp_module_section="exp"
 
 function depends_srb2kart() {
-    getDepends cmake libsdl2-dev libsdl2-mixer-dev
+    getDepends cmake libsdl2-dev libsdl2-mixer-dev libpng-dev libcurl4-openssl-dev libgme-dev libopenmpt-dev libminiupnpc-dev
 }
 
 function sources_srb2kart() {
