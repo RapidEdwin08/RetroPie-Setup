@@ -10,7 +10,7 @@
 #
 
 rp_module_id="uzdoom"
-rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
+rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v4.14.3 is the continuation of ZDoom and GZDoom"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
 rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 :_get_commit_uzdoom"
 rp_module_section="opt"
@@ -22,8 +22,8 @@ function _get_commit_uzdoom() {
     local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     echo $branch_commit
-    #echo 835be65f; # Change default texture filtering to None - Trilinear
-    #echo 1cb7598a; # This is 4.14.3
+    #echo 835be65f; # 20251028 Change default texture filtering to None - Trilinear
+    #echo 1cb7598a; # 20251128 This is 4.14.3
 }
 
 function _get_version_zmusic_uzdoom() {
@@ -46,20 +46,21 @@ function depends_uzdoom() {
 function sources_uzdoom() {
     gitPullOrClone
 
-    # 0ptional Apply Single-Board-Computer Specific Tweaks
-    if isPlatform "rpi"* || isPlatform "arm"; then
-        applyPatch "$md_data/00_sbc_tweaks.diff" # r_maxparticles 2500
-        if isPlatform "rpi5"; then
-            sed -i 's/gl_texture_filter_anisotropic, 16.f,/gl_texture_filter_anisotropic, 8.f,/' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
-        else
-            sed -i 's/gl_texture_filter_anisotropic, 16.f,/gl_texture_filter_anisotropic, 2.f,/' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
-        fi
-    fi
+    # Add option for testing old lighting modes to menu https://github.com/drfrag666/lzdoom/commit/afa94ae18673a9a91f1deda4b0e6564fb0223779
+    applyPatch "$md_data/0ld_lighting_modes.diff"
 
-    # 0ptional Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
+    # Apply Single-Board-Computer Specific Tweaks
+    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
+
+    # Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
     applyPatch "$md_data/01_sijl_tweaks.diff" # Enable JoyPad in Menu
-    applyPatch "$md_data/02_JoyMappings_0SFA.diff" # OSFA Axes to Prevent being stuck looking up on Varying JoyPads
+    applyPatch "$md_data/02_JoyMappings_0SFA.diff"
     applyPatch "$md_data/03_Preferences.diff" #ENABLED
+
+    # VSync On
+    if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
+        sed -i 's+CUSTOM_CVAR (Bool, vid_vsync,.*+CUSTOM_CVAR (Bool, vid_vsync, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)+' "$md_build/src/common/rendering/v_video.cpp"
+    fi
 
     # add 'ZMusic' repo
     cd "$md_build"
@@ -115,7 +116,6 @@ function install_uzdoom() {
         "release/zmusic/lib/$libzmusic_ver"
         ##"release/zmusic/lib/libzmusic.so.$(_get_version_zmusic_uzdoom)"
         'README.md'
-        'LICENSE'
     )
 }
 
@@ -123,26 +123,34 @@ function add_games_uzdoom() {
     local params=("-fullscreen -config $romdir/ports/doom/uzdoom.ini -savedir $romdir/ports/doom/uzdoom-saves")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
     
-    # https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
+    # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
     # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
     # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
     # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
     # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
-    # 4 (Legacy): Emulates lighting of Legacy 1.4's GL renderer.
+    # 4 (Doom Legacy): Emulates lighting of Legacy 1.4's GL renderer.
     # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    ##params+=("+gl_maplightmode 8") # Can still enable but will no longer save to ini after 4.11.x
+    # +gl_maplightmode will no longer save to ini after 4.11.x
 
-    # https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
+    # [+gl_lightmode] +4.11.x Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
     # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    params+=("+gl_lightmode 1")
+
+    params+=("+gl_maplightmode 4") # Apply Sector light mode (Doom Legacy) using [gl_maplightmode]
+    ##params+=("+gl_lightmode 2") # g4.8.0 Sector light mode (Doom) for Low-end HW
+    ##params+=("+gl_lightmode 0") # u4.14.3 Sector light mode (Classic) for Low-end HW
 
     ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
     params+=("'+snd_mididevice -5'")
 
-    isPlatform "kms" && params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
+    # VSync On ## Moved to Source
+    ##if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then params+=("+vid_vsync 1"); fi
+
+    if isPlatform "kms"; then
+        params+=("-width %XRES%" "-height %YRES%")
+    fi
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
 }
@@ -154,8 +162,6 @@ function configure_uzdoom() {
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 
-    [[ "$md_mode" == "remove" ]] && return
-
-    game_data_lr-prboom
+    [[ "$md_mode" == "install" ]] && game_data_lr-prboom
     add_games_${md_id}
 }
