@@ -1,16 +1,114 @@
+diff -ur a/src/common/rendering/hwrenderer/data/hw_cvars.cpp b/src/common/rendering/hwrenderer/data/hw_cvars.cpp
+--- a/src/common/rendering/hwrenderer/data/hw_cvars.cpp	Source 20260129-trunk-c34025d8
++++ b/src/common/rendering/hwrenderer/data/hw_cvars.cpp	Modified
+@@ -29,7 +29,7 @@
+ #include "printf.h"
+ #include <algorithm>
+ 
+-CUSTOM_CVAR(Int, gl_fogmode, 2, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, gl_fogmode, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
+ {
+ 	if (self > 2) self = 2;
+ 	if (self < 0) self = 0;
+@@ -40,7 +40,7 @@
+ CVAR(Bool, gl_portals, true, 0)
+ CVAR(Bool,gl_mirrors,true,0)	// This is for debugging only!
+ CVAR(Bool,gl_mirror_envmap, true, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+-CVAR(Bool, gl_seamless, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR(Bool, gl_seamless, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ 
+ CUSTOM_CVAR(Int, r_mirror_recursions,4,CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+ {
+@@ -134,10 +134,10 @@
+ 	screen->SetTextureFilterMode();
+ }
+ 
+-CVAR(Bool, gl_precache, false, CVAR_ARCHIVE)
++CVAR(Bool, gl_precache, true, CVAR_ARCHIVE)
+ 
+ 
+-CUSTOM_CVAR(Int, gl_shadowmap_filter, 1, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
++CUSTOM_CVAR(Int, gl_shadowmap_filter, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ {
+ 	if (self < 0 || self > 8) self = 1;
+ }
+diff -ur a/src/common/rendering/hwrenderer/data/hw_shadowmap.cpp b/src/common/rendering/hwrenderer/data/hw_shadowmap.cpp
+--- a/src/common/rendering/hwrenderer/data/hw_shadowmap.cpp	Source 20260129-trunk-c34025d8
++++ b/src/common/rendering/hwrenderer/data/hw_shadowmap.cpp	Modified
+@@ -54,7 +54,7 @@
+ int IShadowMap::LightsProcessed;
+ int IShadowMap::LightsShadowmapped;
+ 
+-CVAR(Bool, gl_light_shadowmap, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
++CVAR(Bool, gl_light_shadowmap, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ 
+ ADD_STAT(shadowmap)
+ {
+@@ -63,7 +63,7 @@
+ 	return out;
+ }
+ 
+-CUSTOM_CVAR(Int, gl_shadowmap_quality, 1024, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
++CUSTOM_CVAR(Int, gl_shadowmap_quality, 128, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ {
+ 	switch (self)
+ 	{
+diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
+--- a/src/common/rendering/v_video.cpp	Source 20260129-trunk-c34025d8
++++ b/src/common/rendering/v_video.cpp	Modified
+@@ -495,7 +495,7 @@
+ //
+ //==========================================================================
+ 
+-CUSTOM_CVAR(Float, transsouls, 0.75f, CVAR_ARCHIVE)
++CUSTOM_CVAR(Float, transsouls, 1.f, CVAR_ARCHIVE)
+ {
+ 	if (self < 0.25f)
+ 	{
 diff -ur a/src/g_cvars.cpp b/src/g_cvars.cpp
---- a/src/g_cvars.cpp	Source
+--- a/src/g_cvars.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/g_cvars.cpp	Modified
-@@ -122,10 +122,10 @@
+@@ -62,7 +62,7 @@
+ 
+ 
+ 
+-CUSTOM_CVAR (Bool, gl_lights, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
++CUSTOM_CVAR (Bool, gl_lights, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)		// dd_flashlight
+ {
+ 	for (auto Level : AllLevels())
+ 	{
+@@ -111,7 +111,7 @@
  
  // [BC] Allow the maximum number of particles to be specified by a cvar (so people
  // with lots of nice hardware can have lots of particles!).
 -CUSTOM_CVAR(Int, r_maxparticles, 4000, CVAR_ARCHIVE | CVAR_NOINITCALL)
-+CUSTOM_CVAR(Int, r_maxparticles, 2500, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, r_maxparticles, 100, CVAR_ARCHIVE | CVAR_NOINITCALL)
  {
  	if (self == 0)
--		self = 4000;
-+		self = 2500;
- 	else if (self > 65535)
- 		self = 65535;
- 	else if (self < 100)
+ 		self = 4000;
+diff -ur a/src/r_data/r_vanillatrans.cpp b/src/r_data/r_vanillatrans.cpp
+--- a/src/r_data/r_vanillatrans.cpp	Source 20260129-trunk-c34025d8
++++ b/src/r_data/r_vanillatrans.cpp	Modified
+@@ -29,7 +29,7 @@
+ #endif
+ 
+ bool r_UseVanillaTransparency;
+-CVAR(Int, r_vanillatrans, 0, CVAR_ARCHIVE)
++CVAR(Int, r_vanillatrans, 1, CVAR_ARCHIVE)
+ TMap<FName, bool> AutoTrans = {};
+ 
+ namespace
+diff -ur a/src/rendering/hwrenderer/hw_dynlightdata.cpp b/src/rendering/hwrenderer/hw_dynlightdata.cpp
+--- a/src/rendering/hwrenderer/hw_dynlightdata.cpp	Source 20260129-trunk-c34025d8
++++ b/src/rendering/hwrenderer/hw_dynlightdata.cpp	Modified
+@@ -32,8 +32,8 @@
+ //==========================================================================
+ 
+ // These shouldn't be called 'gl...' anymore...
+-CVAR (Bool, gl_light_sprites, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+-CVAR (Bool, gl_light_particles, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
++CVAR (Bool, gl_light_sprites, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
++CVAR (Bool, gl_light_particles, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+ 
+ 
+ //==========================================================================

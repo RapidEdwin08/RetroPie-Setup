@@ -1,5 +1,5 @@
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
---- a/src/common/console/c_console.cpp	Source
+--- a/src/common/console/c_console.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/common/console/c_console.cpp	Modified
 @@ -134,7 +134,7 @@
  static char *work = NULL;
@@ -11,7 +11,7 @@ diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
  	if (self < 0) self = 0;
  }
 diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
---- a/src/common/rendering/v_video.cpp	Source
+--- a/src/common/rendering/v_video.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/common/rendering/v_video.cpp	Modified
 @@ -142,7 +142,7 @@
  }
@@ -23,7 +23,7 @@ diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
  	if (self < 0)
  	{
 diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
---- a/src/common/statusbar/base_sbar.cpp	Source
+--- a/src/common/statusbar/base_sbar.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/common/statusbar/base_sbar.cpp	Modified
 @@ -57,9 +57,9 @@
  IMPLEMENT_CLASS(DHUDFont, false, false);
@@ -39,7 +39,7 @@ diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.c
  
  CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
 diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
---- a/src/console/c_notifybuffer.cpp	Source
+--- a/src/console/c_notifybuffer.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/console/c_notifybuffer.cpp	Modified
 @@ -59,7 +59,7 @@
  CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
@@ -51,7 +51,7 @@ diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
  	if (self < 0) self = 0;
  }
 diff -ur a/src/g_game.cpp b/src/g_game.cpp
---- a/src/g_game.cpp	Source
+--- a/src/g_game.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/g_game.cpp	Modified
 @@ -206,7 +206,7 @@
  
@@ -81,7 +81,7 @@ diff -ur a/src/g_game.cpp b/src/g_game.cpp
  CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
  {
 diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
---- a/src/g_statusbar/shared_sbar.cpp	Source
+--- a/src/g_statusbar/shared_sbar.cpp	Source 20260129-trunk-c34025d8
 +++ b/src/g_statusbar/shared_sbar.cpp	Modified
 @@ -89,7 +89,7 @@
  EXTERN_CVAR(Bool, inter_subtitles)
