@@ -12,7 +12,7 @@
 #
 
 rp_module_id="uzdoom-dev"
-rp_module_desc="UZDoom is a modder-friendly OpenGL and Vulkan source port based on the DOOM engine"
+rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v4.14.3 is the continuation of ZDoom and GZDoom"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
 rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk :_get_commit_uzdoom-dev"
 rp_module_section="exp"
@@ -21,11 +21,11 @@ rp_module_flags="sdl2 !armv6"
 function _get_commit_uzdoom-dev() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
     local branch_tag=trunk
-    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
+    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     echo $branch_commit
-    #echo b4c521ec; # Change default texture filtering to None - Trilinear
-    #echo 3d958a7e; # g4.15pre-732-g3d958a7e0-m
+    #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
+    #echo c34025d8; # 20260129 clean up vid_fsdwmhack
 }
 
 function depends_uzdoom-dev() {
@@ -46,19 +46,28 @@ function sources_uzdoom-dev() {
     gitPullOrClone
 
     # 0ptional Apply Single-Board-Computer Specific Tweaks
-    if isPlatform "rpi"* || isPlatform "arm"; then
-        applyPatch "$md_data/00_sbc_tweaks.diff" # r_maxparticles 2500
-        if isPlatform "rpi5"; then
-            sed -i 's/gl_texture_filter_anisotropic, 16.f,/gl_texture_filter_anisotropic, 8.f,/' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
-        else
-            sed -i 's/gl_texture_filter_anisotropic, 16.f,/gl_texture_filter_anisotropic, 2.f,/' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
-        fi
-    fi
+    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
+
+    # 0ptional Add option for testing old lighting modes to menu https://github.com/drfrag666/lzdoom/commit/afa94ae18673a9a91f1deda4b0e6564fb0223779
+    applyPatch "$md_data/01_0ld_lighting_modes.diff"
 
     # 0ptional Apply JoyPad + Preference Tweaks
-    applyPatch "$md_data/01_HapticsOff.diff"
     applyPatch "$md_data/02_JoyMappings.diff"
     applyPatch "$md_data/03_Preferences.diff"
+
+    # 0ptional Haptics 0FF [haptics_strength, 0]
+    ##sed -i 's+CUSTOM_CVARD(Int, haptics_strength,.*+CUSTOM_CVARD(Int, haptics_strength, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"Translate linear haptics to audio taper\")+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    # 0ptional Haptics 0FF in Menus [MyHouse.wad]
+    sed -i 's+CVARD(Bool, haptics_do_menus,.*+CVARD(Bool, haptics_do_menus,  false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for menus\");     // MyHouse.wad+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    # 0ptional Haptics 0FF for Player Actions [Firing]
+    sed -i 's+CVARD(Bool, haptics_do_action,.*+CVARD(Bool, haptics_do_action, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for player doing things\");+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    # 0ptional VSync On
+    if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
+        sed -i 's+CUSTOM_CVAR (Bool, vid_vsync,.*+CUSTOM_CVAR (Bool, vid_vsync, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)+' "$md_build/src/common/rendering/v_video.cpp"
+    fi
 
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
@@ -99,34 +108,41 @@ function install_uzdoom-dev() {
         'build/game_widescreen_gfx.pk3'
         'build/soundfonts'
         'README.md'
-        'LICENSE'
     )
 }
 
 function add_games_uzdoom-dev() {
-    local params=("-fullscreen -config $romdir/ports/doom/uzdoom-dev.ini -savedir $romdir/ports/doom/uzdoom-saves")
+    local params=("-fullscreen -config $romdir/ports/doom/uzdoom-dev.ini -savedir $romdir/ports/doom/uzdoom-dev-saves")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
     
-    # https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
+    # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
     # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
     # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
     # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
     # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
-    # 4 (Legacy): Emulates lighting of Legacy 1.4's GL renderer.
+    # 4 (Doom Legacy): Emulates lighting of Legacy 1.4's GL renderer.
     # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    ##params+=("+gl_maplightmode 8") # Can still enable but will no longer save to ini after 4.11.x
+    # +gl_maplightmode will no longer save to ini after 4.11.x
 
-    # https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
+    # [+gl_lightmode] +4.11.x Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
     # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    params+=("+gl_lightmode 1")
+
+    params+=("+gl_maplightmode 4") # Apply Sector light mode (Doom Legacy) using [gl_maplightmode]
+    ##params+=("+gl_lightmode 2") # g4.8.0 Sector light mode (Doom) for Low-end HW
+    ##params+=("+gl_lightmode 0") # u4.14.3 Sector light mode (Classic) for Low-end HW
 
     ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
     params+=("'+snd_mididevice -5'")
 
-    isPlatform "kms" && params+=("+vid_vsync 1" "-width %XRES%" "-height %YRES%")
+    # VSync On ## Moved to Source
+    ##if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then params+=("+vid_vsync 1"); fi
+
+    if isPlatform "kms"; then
+        params+=("-width %XRES%" "-height %YRES%")
+    fi
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/uzdoom -iwad %ROM% ${params[*]}"
 }
@@ -134,12 +150,10 @@ function add_games_uzdoom-dev() {
 function configure_uzdoom-dev() {
     mkRomDir "ports/doom"
     mkRomDir "ports/doom/mods"
-    mkRomDir "ports/doom/uzdoom-saves"
+    mkRomDir "ports/doom/uzdoom-dev-saves"
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 
-    [[ "$md_mode" == "remove" ]] && return
-
-    game_data_lr-prboom
+    [[ "$md_mode" == "install" ]] && game_data_lr-prboom
     add_games_${md_id}
 }
