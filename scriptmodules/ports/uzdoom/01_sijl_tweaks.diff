@@ -1,5 +1,5 @@
 diff -ur a/src/common/engine/m_joy.cpp b/src/common/engine/m_joy.cpp
---- a/src/common/engine/m_joy.cpp	Source
+--- a/src/common/engine/m_joy.cpp	Source u4.14.3
 +++ b/src/common/engine/m_joy.cpp	Modified
 @@ -59,7 +59,7 @@
  
@@ -11,9 +11,9 @@ diff -ur a/src/common/engine/m_joy.cpp b/src/common/engine/m_joy.cpp
  #ifdef _WIN32
  	joy_ps2raw->Callback();
 diff -ur a/src/common/platform/posix/sdl/i_input.cpp b/src/common/platform/posix/sdl/i_input.cpp
---- a/src/common/platform/posix/sdl/i_input.cpp	Source
+--- a/src/common/platform/posix/sdl/i_input.cpp	Source u4.14.3
 +++ b/src/common/platform/posix/sdl/i_input.cpp	Modified
-@@ -180,12 +180,10 @@
+@@ -182,12 +182,10 @@
  {
  	// Clear out any mouse movement.
  	SDL_GetRelativeMouseState (NULL, NULL);

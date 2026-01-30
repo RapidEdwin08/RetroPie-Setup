@@ -1,12 +1,12 @@
 diff -ur a/src/common/platform/posix/sdl/i_joystick.cpp b/src/common/platform/posix/sdl/i_joystick.cpp
---- a/src/common/platform/posix/sdl/i_joystick.cpp	Source
+--- a/src/common/platform/posix/sdl/i_joystick.cpp	Source u4.14.3
 +++ b/src/common/platform/posix/sdl/i_joystick.cpp	Modified
 @@ -145,7 +145,7 @@
  				info.Name.Format("Axis %d", i+1);
  			else
  				info.Name.Format("Hat %d (%c)", (i-NumAxes)/2 + 1, (i-NumAxes)%2 == 0 ? 'x' : 'y');
 -			info.DeadZone = DEFAULT_DEADZONE;
-+			info.DeadZone = 0.2;
++			info.DeadZone = 0.25f;
  			info.Multiplier = 1.0f;
  			info.Value = 0.0;
  			info.ButtonValue = 0;
@@ -20,7 +20,7 @@ diff -ur a/src/common/platform/posix/sdl/i_joystick.cpp b/src/common/platform/po
  class SDLInputJoystickManager
  {
 diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbinds.txt
---- a/wadsrc/static/engine/commonbinds.txt	Source
+--- a/wadsrc/static/engine/commonbinds.txt	Source u4.14.3
 +++ b/wadsrc/static/engine/commonbinds.txt	Modified
 @@ -45,10 +45,10 @@
  // I can't see why they shouldn't be for Doom or Chex either.

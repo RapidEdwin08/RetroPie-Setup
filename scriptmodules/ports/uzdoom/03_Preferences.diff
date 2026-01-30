@@ -1,7 +1,19 @@
+diff -ur a/src/common/audio/sound/i_sound.cpp b/src/common/audio/sound/i_sound.cpp
+--- a/src/common/audio/sound/i_sound.cpp	Source u4.14.3
++++ b/src/common/audio/sound/i_sound.cpp	Modified
+@@ -107,7 +107,7 @@
+ // Maximum volume of a sound effect.
+ //==========================================================================
+ 
+-CUSTOM_CVAR (Float, snd_sfxvolume, 1.f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
++CUSTOM_CVAR (Float, snd_sfxvolume, 0.5f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
---- a/src/common/console/c_console.cpp	Source
+--- a/src/common/console/c_console.cpp	Source u4.14.3
 +++ b/src/common/console/c_console.cpp	Modified
-@@ -134,7 +134,7 @@
+@@ -128,7 +128,7 @@
  static char *work = NULL;
  static int worklen = 0;
  
@@ -10,10 +22,22 @@ diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
  {
  	if (self < 0) self = 0;
  }
+diff -ur a/src/common/menu/savegamemanager.cpp b/src/common/menu/savegamemanager.cpp
+--- a/src/common/menu/savegamemanager.cpp	Source u4.14.3
++++ b/src/common/menu/savegamemanager.cpp	Modified
+@@ -49,7 +49,7 @@
+ #include "m_argv.h"
+ #include "i_specialpaths.h"
+ 
+-CVAR(String, save_dir, "", CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_SYSTEM_ONLY);
++CVAR(String, save_dir, "$DOOMWADDIR", CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_SYSTEM_ONLY);
+ FString SavegameFolder;
+ CVAR(Int, save_sort_order, 1, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ 
 diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
---- a/src/common/rendering/v_video.cpp	Source
+--- a/src/common/rendering/v_video.cpp	Source u4.14.3
 +++ b/src/common/rendering/v_video.cpp	Modified
-@@ -142,7 +142,7 @@
+@@ -130,7 +130,7 @@
  }
  
  
@@ -23,7 +47,7 @@ diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
  	if (self < 0)
  	{
 diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
---- a/src/common/statusbar/base_sbar.cpp	Source
+--- a/src/common/statusbar/base_sbar.cpp	Source u4.14.3
 +++ b/src/common/statusbar/base_sbar.cpp	Modified
 @@ -57,9 +57,9 @@
  IMPLEMENT_CLASS(DHUDFont, false, false);
@@ -33,13 +57,13 @@ diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.c
 -CVAR(Int, crosshairhealth, 2, CVAR_ARCHIVE);
 -CVARD(Float, crosshairscale, 0.5, CVAR_ARCHIVE, "changes the size of the crosshair");
 +CVAR(Color, crosshaircolor, 0x00ff1e, CVAR_ARCHIVE);
-+CVAR(Int, crosshairhealth, 1, CVAR_ARCHIVE);
++CVAR(Int, crosshairhealth, 2, CVAR_ARCHIVE);
 +CVARD(Float, crosshairscale, 0.25, CVAR_ARCHIVE, "changes the size of the crosshair");
  CVAR(Bool, crosshairgrow, false, CVAR_ARCHIVE);
  
  CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
 diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
---- a/src/console/c_notifybuffer.cpp	Source
+--- a/src/console/c_notifybuffer.cpp	Source u4.14.3
 +++ b/src/console/c_notifybuffer.cpp	Modified
 @@ -59,7 +59,7 @@
  CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
@@ -51,7 +75,7 @@ diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
  	if (self < 0) self = 0;
  }
 diff -ur a/src/g_game.cpp b/src/g_game.cpp
---- a/src/g_game.cpp	Source
+--- a/src/g_game.cpp	Source u4.14.3
 +++ b/src/g_game.cpp	Modified
 @@ -205,7 +205,7 @@
  
@@ -67,12 +91,12 @@ diff -ur a/src/g_game.cpp b/src/g_game.cpp
  CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
  static int nextautosave = -1;
 -CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-+CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)		// autosave can break some mods
  CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) // [mxd]
  CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
  {
 diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
---- a/src/g_statusbar/shared_sbar.cpp	Source
+--- a/src/g_statusbar/shared_sbar.cpp	Source u4.14.3
 +++ b/src/g_statusbar/shared_sbar.cpp	Modified
 @@ -89,7 +89,7 @@
  EXTERN_CVAR(Bool, inter_subtitles)
