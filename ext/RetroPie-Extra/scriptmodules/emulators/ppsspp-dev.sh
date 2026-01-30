@@ -24,7 +24,7 @@ rp_module_flags=""
 function _get_commit_ppsspp-dev() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
     local branch=master
-    local branch_commit="$(git ls-remote https://github.com/hrydgard/ppsspp.git $branch HEAD | grep $branch | awk '{ print $1}' | cut -c -8 | tail -1)"
+    local branch_commit="$(git ls-remote https://github.com/hrydgard/ppsspp.git $branch HEAD | grep $branch | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     ##echo $branch_commit
     #echo 40a53315; # 20250910 Delete reference to prebuilt libfreetype, pull in the source instead - CMake Error at ext/freetype/CMakeLists.txt:223 (message): In-source builds are not permitted! Make a separate folder for building
@@ -202,10 +202,11 @@ function configure_ppsspp-dev() {
     fi
 
     local launch_prefix
-    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    ## Use XINIT to Prevent [runcommand.log] Vulkan with working device not detected. DEBUG: Vulkan is not available, not using Vulkan.
+    if ( isPlatform "kms" ) && ( isPlatform "vulkan" ); then launch_prefix="XINIT-WMC:"; fi
+
     ##addEmulator 0 "$md_id" "psp" "pushd $md_inst; $md_inst/PPSSPPSDL ${extra_params[*]} %ROM%; popd"
     ##addEmulator 0 "$md_id" "psp" "$md_inst/$md_id.sh %ROM%"
-    ## Use XINIT to Prevent [runcommand.log] Vulkan with working device not detected. DEBUG: Vulkan is not available, not using Vulkan.
     addEmulator 1 "$md_id" "psp" "$launch_prefix$md_inst/$md_id.sh %ROM%"
     addSystem "psp" "PSP" ".gui" # Additional .GUI Extension to hide +Start PPSSPP.gui (dev) from Game List + Load without Errors
     sed -i 's+<extension>.iso .pbp .cso .ISO .PBP .CSO</extension>+<extension>.iso .pbp .cso .gui .ISO .PBP .CSO .GUI</extension>+g' /etc/emulationstation/es_systems.cfg
