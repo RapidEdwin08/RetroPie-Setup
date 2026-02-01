@@ -32,7 +32,16 @@ rp_module_flags="frontend"
 rp_module_licence="MIT https://github.com/Aloshi/EmulationStation/blob/master/LICENSE"
 
 # ES-X repository
-rp_module_repo="git https://github.com/Renetrox/EmulationStation-X main"
+rp_module_repo="git https://github.com/Renetrox/EmulationStation-X.git main :_get_commit_emulationstation-es-x"
+
+function _get_commit_emulationstation-es-x() {
+    # Pull Latest Commit SHA
+    local branch_tag=main
+    local branch_commit="$(git ls-remote https://github.com/Renetrox/EmulationStation-X.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    #echo $branch_commit
+    echo 5f237788; # 20260103 Last commit before addition of Es-X Theme Downloader
+}
 
 # ------------------------------------------------------------
 # Link to base EmulationStation build system
@@ -52,7 +61,16 @@ function sources_emulationstation-es-x() {
     # Disable Built-In BGM Menu Button IF IMP found
     if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
         echo IMP FOUND: BGM [On/Off] Button Will NOT be Included in [ES-X]
-        applyPatch "$md_data/bgm-menu-remove.diff"
+        if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
+            applyPatch "$md_data/bgm-menu-remove-5f237788.diff"
+        else
+            applyPatch "$md_data/bgm-menu-remove.diff"
+        fi
+    fi
+
+    # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
+    if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
+        applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff"
     fi
 
     # [x3] 0ptional JoyPad Connected Popup Changes
