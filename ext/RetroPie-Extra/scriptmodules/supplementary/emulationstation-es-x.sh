@@ -40,6 +40,7 @@ function _get_commit_emulationstation-es-x() {
     local branch_commit="$(git ls-remote https://github.com/Renetrox/EmulationStation-X.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     #echo $branch_commit
+    #echo 402fc3b4; # 20260127 Fix: create existing <folder> entries from gamelist when missing in tree
     echo 5f237788; # 20260103 Last commit before addition of Es-X Theme Downloader
 }
 
@@ -70,7 +71,10 @@ function sources_emulationstation-es-x() {
 
     # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
     if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
+        # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
         applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff"
+        # Update HelpComponent to xbox style .png Icons
+        sed -i 's+.svg+.png+' "$md_build/es-core/src/components/HelpComponent.cpp"
     fi
 
     # [x3] 0ptional JoyPad Connected Popup Changes
@@ -85,6 +89,35 @@ function sources_emulationstation-es-x() {
 }
 function build_emulationstation-es-x()        { build_emulationstation; }
 function install_emulationstation-es-x()      { install_emulationstation; }
+
+function help_icons_emulationstation-es-x() {
+    # [icon_style] for 0lder commit [5f237788] Choices: arcade snes xbox psx psx-color psx-color-2 psx-light
+    local icon_style=xbox
+
+    if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then # Get updated HelpComponent .png Icons
+        local icon_git=https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/resources
+        mkdir -p /dev/shm/helpicons
+        if [ $(cat /opt/retropie/configs/all/autoconf.cfg | grep -q 'es_swap_a_b = "1"' ; echo $?) == '0' ]; then
+            wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_b.png; #Swapped A/B
+            wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_a.png; #Swapped B/A
+        else
+            wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_a.png
+            wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_b.png
+        fi
+        wget $icon_git/help/$icon_style/all.png -O /dev/shm/helpicons/dpad_all.png
+        wget $icon_git/help/$icon_style/l.png -O /dev/shm/helpicons/button_l.png
+        wget $icon_git/help/$icon_style/leftright.png -O /dev/shm/helpicons/dpad_leftright.png
+        wget $icon_git/help/$icon_style/r.png -O /dev/shm/helpicons/button_r.png
+        wget $icon_git/help/$icon_style/select.png -O /dev/shm/helpicons/button_select.png
+        wget $icon_git/help/$icon_style/start.png -O /dev/shm/helpicons/button_start.png
+        wget $icon_git/help/$icon_style/updown.png -O /dev/shm/helpicons/dpad_updown.png
+        wget $icon_git/help/$icon_style/x.png -O /dev/shm/helpicons/button_x.png
+        wget $icon_git/help/$icon_style/y.png -O /dev/shm/helpicons/button_y.png
+        wget $icon_git/help/$icon_style/controller.svg -P /dev/shm/helpicons/
+        mv /dev/shm/helpicons/* /opt/retropie/supplementary/emulationstation-es-x/resources/help
+        rm -Rf /dev/shm/helpicons
+    fi
+}
 
 # ------------------------------------------------------------
 
@@ -210,6 +243,14 @@ function configure_emulationstation-es-x() {
         echo IMP FOUND: Setting [BackgroundMusic=false] in [es_settings.cfg]
         sed -i "s+BackgroundMusic\" value=.*+BackgroundMusic\" value=\"false\" /\>+" "$home/.emulationstation/es_settings.cfg"
     fi
+
+     # Get Latest EmulationStation-X splash from Renetrox
+     ##wget https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/resources/splash.svg -P /dev/shm/; mv /dev/shm/splash.svg /opt/retropie/supplementary/emulationstation-es-x/resources 2>/dev/null
+
+     # Get Default EmulationStation splash from RetroPie
+     wget https://raw.githubusercontent.com/RetroPie/EmulationStation/master/resources/splash.svg -P /dev/shm/; mv /dev/shm/splash.svg /opt/retropie/supplementary/emulationstation-es-x/resources 2>/dev/null
+
+    [[ "$md_mode" == "install" ]] && help_icons_emulationstation-es-x
 
     echo "ES-X configuration complete."
 }
