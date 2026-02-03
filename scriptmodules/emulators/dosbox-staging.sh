@@ -13,7 +13,7 @@ rp_module_id="dosbox-staging"
 rp_module_desc="modern DOS/x86 emulator focusing on ease of use"
 rp_module_help="ROM Extensions: [.CONF] [.BAT] [.EXE] [.COM] [.SH]\n \n[.CONF] Files Recommended for Compatibility\n \nPut DOS Games in PC Folder: roms/pc\n \nHide DOS Games in a Hidden Folder: roms/pc/.games\n \nHidden Folder (Linux) /.games == GAMES~1 (DOS)\neg. cd GAMES~1"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/dosbox-staging/dosbox-staging/master/COPYING"
-rp_module_repo="git https://github.com/dosbox-staging/dosbox-staging.git :_get_branch_dosbox-staging"
+rp_module_repo="git https://github.com/dosbox-staging/dosbox-staging.git :_get_branch_dosbox-staging :_get_commit_dosbox-staging"
 rp_module_section="opt"
 rp_module_flags="sdl2"
 
@@ -32,6 +32,13 @@ function _get_branch_dosbox-staging() {
     fi
 
     echo "$branch"
+}
+
+function _get_commit_dosbox-staging() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch_tag="$(_get_branch_dosbox-staging)"
+    local branch_commit="$(git ls-remote https://github.com/dosbox-staging/dosbox-staging.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
+    echo $branch_commit
 }
 
 function depends_dosbox-staging() {
@@ -83,16 +90,12 @@ function build_dosbox-staging() {
 
 function install_dosbox-staging() {
     ninja -C build install
-    if [[ -f "$md_build/extras/icons/svg/dosbox-staging-32.svg" ]]; then
-        md_ret_files=(        
-            'extras/icons/svg/dosbox-staging-32.svg'
-            'extras/icons/old/dosbox-old.ico'
-        )
-    else
-        md_ret_files=(        
-            'contrib/icons/svg/dosbox-staging-32.svg'
-            'contrib/icons/old/dosbox-old.ico'
-        )
+
+    local branch_tag="$(_get_branch_dosbox-staging)"
+    if [[ "$branch_tag" == "v0.80.1"  ]]; then
+        md_ret_files=('contrib/icons/small-svg/dosbox-staging-32.svg')
+    else # v0.81.2 # v0.82.x
+        md_ret_files=('contrib/icons/svg/dosbox-staging-32.svg')
     fi
 }
 
@@ -153,8 +156,7 @@ _EOF_
 }
 
 function shortcuts_icons_dosbox-staging() {
-    local shortcut_name
-    shortcut_name="DOSBox-Staging"
+    local shortcut_name="DOSBox-Staging"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
