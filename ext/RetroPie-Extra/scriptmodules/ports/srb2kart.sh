@@ -17,16 +17,26 @@ rp_module_id="srb2kart"
 rp_module_desc="Sonic Robo Blast 2 Kart - 3D Sonic the Hedgehog fan-game based on Sonic Robo Blast 2 built using a modified version of the Doom Legacy source port of Doom"
 rp_module_help="Kart Krew is in no way affiliated with SEGA or Sonic Team. We do not claim ownership of any of SEGA's intellectual property used in SRB2."
 rp_module_licence="GPL2 https://raw.githubusercontent.com/STJr/Kart-Public/master/LICENSE"
-rp_module_repo="git https://github.com/STJr/Kart-Public.git master"
+rp_module_repo="git https://github.com/STJr/Kart-Public.git v1.6 :_get_commit_srb2kart"
 rp_module_section="exp"
+
+function _get_commit_srb2kart() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch_tag=v1.6
+    local branch_commit="$(git ls-remote https://github.com/dosbox-staging/dosbox-staging.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    echo $branch_commit
+    #echo 024a140e
+}
 
 function depends_srb2kart() {
     getDepends cmake libsdl2-dev libsdl2-mixer-dev libpng-dev libcurl4-openssl-dev libgme-dev libopenmpt-dev libminiupnpc-dev
 }
 
 function sources_srb2kart() {
+    gitPullOrClone
+
     local srb2kVER=v1.6
-    gitPullOrClone "$md_build" https://github.com/STJr/Kart-Public.git $srb2kVER
     mkdir assets/installer
     downloadAndExtract https://github.com/STJr/Kart-Public/releases/download/$srb2kVER/AssetsLinuxOnly.zip "$md_build/assets/installer/"
 }
