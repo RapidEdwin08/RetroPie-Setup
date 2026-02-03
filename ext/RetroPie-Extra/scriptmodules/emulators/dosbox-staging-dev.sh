@@ -24,7 +24,7 @@ rp_module_flags="sdl2"
 function _get_commit_dosbox-staging-dev() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
     local branch_tag=main
-    local branch_commit="$(git ls-remote https://github.com/dosbox-staging/dosbox-staging.git $branch_tag HEAD | grep $branch_tag | awk '{ print $1}' | cut -c -8 | tail -1)"
+    local branch_commit="$(git ls-remote https://github.com/dosbox-staging/dosbox-staging.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     echo $branch_commit
     #echo e3b60f12
@@ -79,15 +79,9 @@ function build_dosbox-staging-dev() {
 function install_dosbox-staging-dev() {
     ninja -C build install
     if [[ -f "$md_build/extras/icons/svg/dosbox-staging-32.svg" ]]; then
-        md_ret_files=(        
-            'extras/icons/svg/dosbox-staging-32.svg'
-            'extras/icons/old/dosbox-old.ico'
-        )
+        md_ret_files=('extras/icons/svg/dosbox-staging-32.svg')
     else
-        md_ret_files=(        
-            'contrib/icons/svg/dosbox-staging-32.svg'
-            'contrib/icons/old/dosbox-old.ico'
-        )
+        md_ret_files=('contrib/icons/svg/dosbox-staging-32.svg')
     fi
 }
 
@@ -151,8 +145,7 @@ _EOF_
 }
 
 function shortcuts_icons_dosbox-staging-dev() {
-    local shortcut_name
-    shortcut_name="DOSBox-Staging"
+    local shortcut_name="DOSBox-Staging"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
