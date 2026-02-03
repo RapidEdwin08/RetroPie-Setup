@@ -17,6 +17,12 @@ rp_module_section="opt"
 
 function sources_lr-prboom() {
     gitPullOrClone
+    if ! isPlatform "64bit" ; then # Issue on 32bit OS with 64bit capable CPU
+        # error: implicit declaration of function ‘fseeko’; did you mean ‘fseek’?
+        sed -i 's+fseeko.*+fseek(stream->fp, (long)offset, whence);+' "$md_build/libretro/libretro-common/vfs/vfs_implementation.c"
+        # error: implicit declaration of function ‘ftello’; did you mean ‘ftell’?
+        sed -i 's+ftello+ftell+' "$md_build/libretro/libretro-common/vfs/vfs_implementation.c"
+    fi
 }
 
 function build_lr-prboom() {
