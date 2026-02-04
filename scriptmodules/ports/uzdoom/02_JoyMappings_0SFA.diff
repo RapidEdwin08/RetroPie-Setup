@@ -73,6 +73,8 @@ diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbin
 +joy7 togglemap
 +joy8 menu_main
 +joy9 +jump
++joy10 crouch
++joy11 +altattack
 +
 +// D-Pad Bindings Hat
 +pov1up +forward
@@ -85,8 +87,6 @@ diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbin
 +//joy15 +back
 +//joy16 +left
 +//joy17 +right
-+
-+
 +
 +
 +
