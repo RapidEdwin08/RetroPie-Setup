@@ -52,14 +52,14 @@ function sources_uzdoom() {
     # Apply Single-Board-Computer Specific Tweaks
     ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
 
-    # Apply SDL JoyPad Tweaks https://retropie.org.uk/forum/topic/16078/zdoom-and-gampad-fully-working-in-menu-with-no-keyboard
-    applyPatch "$md_data/01_sijl_tweaks.diff" # Enable JoyPad in Menu
+    # Apply JoyPad Tweaks and Preferences
+    applyPatch "$md_data/01_sijl_tweaks.diff"
     applyPatch "$md_data/02_JoyMappings_0SFA.diff"
-    applyPatch "$md_data/03_Preferences.diff" #ENABLED
+    applyPatch "$md_data/03_Preferences.diff"
 
     # VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
-        sed -i 's+CUSTOM_CVAR (Bool, vid_vsync,.*+CUSTOM_CVAR (Bool, vid_vsync, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)+' "$md_build/src/common/rendering/v_video.cpp"
+        sed -i 's+vid_vsync, false,+vid_vsync, true,+' "$md_build/src/common/rendering/v_video.cpp"
     fi
 
     # add 'ZMusic' repo
@@ -77,6 +77,24 @@ function sources_uzdoom() {
     if isPlatform "armv8"; then
         if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
+
+    # Apply 0ld Sector light mode
+    sed -i 's+gl_maplightmode, -1,+gl_maplightmode, 4,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_maplightmode, '
+
+    # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
+    # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
+    # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
+    # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
+    # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
+    # 4 (Doom Legacy): Emulates lighting of Legacy 1.4's GL renderer.
+    # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    # +gl_maplightmode will no longer save to ini after 4.11.x
+
+    # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
+    # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
+    # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
 }
 
 function build_uzdoom() {
@@ -120,37 +138,12 @@ function install_uzdoom() {
 }
 
 function add_games_uzdoom() {
-    local params=("-fullscreen -config $romdir/ports/doom/uzdoom.ini -savedir $romdir/ports/doom/uzdoom-saves")
+    local params=("-config $romdir/ports/doom/uzdoom.ini -savedir $romdir/ports/doom/uzdoom-saves")
+    ##params=("-fullscreen")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
-    
-    # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
-    # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
-    # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
-    # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
-    # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
-    # 4 (Doom Legacy): Emulates lighting of Legacy 1.4's GL renderer.
-    # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # +gl_maplightmode will no longer save to ini after 4.11.x
 
-    # [+gl_lightmode] +4.11.x Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
-    # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
-    # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-
-    params+=("+gl_maplightmode 4") # Apply Sector light mode (Doom Legacy) using [gl_maplightmode]
-    ##params+=("+gl_lightmode 2") # g4.8.0 Sector light mode (Doom) for Low-end HW
-    ##params+=("+gl_lightmode 0") # u4.14.3 Sector light mode (Classic) for Low-end HW
-
-    ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
-    params+=("'+snd_mididevice -5'")
-
-    # VSync On ## Moved to Source
-    ##if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then params+=("+vid_vsync 1"); fi
-
-    if isPlatform "kms"; then
-        params+=("-width %XRES%" "-height %YRES%")
-    fi
+    ##params+=("'+snd_mididevice -5'") # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
+    isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
 }
