@@ -1,27 +1,27 @@
-diff -ur a/src/posix/sdl/i_joystick.cpp b/src/posix/sdl/i_joystick.cpp
---- a/src/posix/sdl/i_joystick.cpp	[lzdoom 3.88b SOURCE]
-+++ b/src/posix/sdl/i_joystick.cpp	[lzdoom 3.88b SIJL]
-@@ -147,7 +147,7 @@
+diff -ur a/src/common/platform/posix/sdl/i_joystick.cpp b/src/common/platform/posix/sdl/i_joystick.cpp
+--- a/src/common/platform/posix/sdl/i_joystick.cpp	Source l4.14.3a
++++ b/src/common/platform/posix/sdl/i_joystick.cpp	Modified
+@@ -145,7 +145,7 @@
  				info.Name.Format("Axis %d", i+1);
  			else
  				info.Name.Format("Hat %d (%c)", (i-NumAxes)/2 + 1, (i-NumAxes)%2 == 0 ? 'x' : 'y');
--			info.DeadZone = MIN_DEADZONE;
-+			info.DeadZone = 0.2;
+-			info.DeadZone = DEFAULT_DEADZONE;
++			info.DeadZone = 0.25f;
  			info.Multiplier = 1.0f;
  			info.Value = 0.0;
  			info.ButtonValue = 0;
-@@ -256,7 +256,7 @@
- 	int					NumAxes;
- 	int					NumHats;
+@@ -270,7 +270,7 @@
  };
--const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Side, JOYAXIS_Forward, JOYAXIS_Pitch, JOYAXIS_Yaw, JOYAXIS_Up};
+ 
+ // [Nash 4 Feb 2024] seems like on Linux, the third axis is actually the Left Trigger, resulting in the player uncontrollably looking upwards.
+-const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Side, JOYAXIS_Forward, JOYAXIS_None, JOYAXIS_Yaw, JOYAXIS_Pitch};
 +const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Yaw, JOYAXIS_Forward, JOYAXIS_None, JOYAXIS_None, JOYAXIS_None};
  
  class SDLInputJoystickManager
  {
-diff -ur a/wadsrc/static/defbinds.txt b/wadsrc/static/defbinds.txt
---- a/wadsrc/static/defbinds.txt	[lzdoom 3.88b SOURCE]
-+++ b/wadsrc/static/defbinds.txt	[lzdoom 3.88b SIJL]
+diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbinds.txt
+--- a/wadsrc/static/engine/commonbinds.txt	Source l4.14.3a
++++ b/wadsrc/static/engine/commonbinds.txt	Modified
 @@ -45,10 +45,10 @@
  // I can't see why they shouldn't be for Doom or Chex either.
  pgup +moveup
@@ -35,38 +35,58 @@ diff -ur a/wadsrc/static/defbinds.txt b/wadsrc/static/defbinds.txt
  
  // Xbox 360 / PS2 controllers
  pad_a +use
-@@ -83,3 +83,57 @@
- mapbind kp+ +am_zoomin
- mapbind mwheelup "am_zoom 1.2"
- mapbind mwheeldown "am_zoom -1.2"
-+mapbind Joy5 +am_zoomout
-+mapbind Joy6 +am_zoomin
+@@ -65,21 +65,6 @@
+ pad_back pause
+ lthumb crouch
+ 
+-// Generic gamepad bindings
+-joy1 +use
+-joy4 +jump
+-axis6plus +attack
+-axis3plus +altattack
+-joy5 weapprev
+-joy6 weapnext
+-pov1left invprev
+-pov1right invnext
+-pov1down invuse
+-pov1up togglemap
+-joy8 menu_main
+-joy7 pause
+-joy10 crouch
+-
+ /* Default automap bindings */
+ mapbind f am_togglefollow
+ mapbind g am_togglegrid
+@@ -118,3 +103,55 @@
+ mapbind pov1down +am_pandown
+ mapbind joy5 +am_zoomout
+ mapbind joy6 +am_zoomin
 +
-+// 0ne-Size-Fits-All - Neutral Axes - Multiple D-Pad Support - 0ut-0f-Box Config for 8+Button JoyPads - Jump @Joy9 - No doublebinds
-+Joy1 "toggle cl_run"
-+Joy2 +use
-+//doublebind Joy2 invuse
-+Joy3 +attack
-+Joy4 weapnext
-+Joy5 +moveleft
-+Joy6 +moveright
-+Joy7 togglemap
-+Joy8 menu_main
-+Joy9 +jump
++// 0ne-Size-Fits-All - Neutral Axes - Multiple D-Pad Support - 0ut-0f-Box Config for 8+Button joyPads - Jump @joy9 - No doublebinds
++joy1 "toggle cl_run"
++joy2 +use
++//doublebind joy2 invuse
++joy3 +attack
++joy4 weapnext
++joy5 +moveleft
++joy6 +moveright
++joy7 togglemap
++joy8 menu_main
++joy9 +jump
++joy10 crouch
++joy11 +altattack
 +
 +// D-Pad Bindings Hat
-+POV1Up +forward
-+POV1Down +back
-+POV1Left +left
-+POV1Right +right
++pov1up +forward
++pov1down +back
++pov1left +left
++pov1right +right
 +
 +// D-Pad Bindings PS3
-+//Joy14 +forward
-+//Joy15 +back
-+//Joy16 +left
-+//Joy17 +right
-+
-+
++//joy14 +forward
++//joy15 +back
++//joy16 +left
++//joy17 +right
 +
 +
 +
@@ -92,4 +112,4 @@ diff -ur a/wadsrc/static/defbinds.txt b/wadsrc/static/defbinds.txt
 +Alt +strafe
 +/ +jump
 +
-+// @LINE #95 END +JoyMappings
++// @LINE #115 END +joyMappings

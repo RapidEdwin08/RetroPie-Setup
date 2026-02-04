@@ -1,104 +1,123 @@
 diff -ur a/src/am_map.cpp b/src/am_map.cpp
---- a/src/am_map.cpp	[lzdoom 3.88b SOURCE]
-+++ b/src/am_map.cpp	[lzdoom 3.88b SIJL]
-@@ -90,7 +90,7 @@
- CVAR (Bool,  am_showitems,			false,		CVAR_ARCHIVE);
- CVAR (Bool,  am_showtime,			true,		CVAR_ARCHIVE);
- CVAR (Bool,  am_showtotaltime,		false,		CVAR_ARCHIVE);
--CVAR (Int,   am_colorset,			0,			CVAR_ARCHIVE);
-+CVAR (Int,   am_colorset,			1,			CVAR_ARCHIVE);
- CVAR (Bool,  am_customcolors,		true,		CVAR_ARCHIVE);
- CVAR (Int,   am_map_secrets,		1,			CVAR_ARCHIVE);
- CVAR (Int,	 am_drawmapback,		1,			CVAR_ARCHIVE);
-diff -ur a/src/g_game.cpp b/src/g_game.cpp
---- a/src/g_game.cpp	[lzdoom 3.88b SOURCE]
-+++ b/src/g_game.cpp	[lzdoom 3.88b SIJL]
-@@ -129,7 +129,7 @@
- CVAR (Bool, chasedemo, false, 0);
- CVAR (Bool, storesavepic, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
- CVAR (Bool, longsavemessages, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
--CVAR (String, save_dir, "", CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
-+CVAR (String, save_dir, "$DOOMWADDIR", CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
- CVAR (Bool, cl_waitforsave, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
- CVAR (Bool, enablescriptscreenshot, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
- EXTERN_CVAR (Float, con_midtime);
-@@ -2110,7 +2110,7 @@
- 
- CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
- static int nextautosave = -1;
--CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-+CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
- CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) // [mxd]
- CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
- {
-diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
---- a/src/g_statusbar/shared_sbar.cpp	[lzdoom 3.88b SOURCE]
-+++ b/src/g_statusbar/shared_sbar.cpp	[lzdoom 3.88b SIJL]
-@@ -110,7 +110,7 @@
- CVAR (Flag, pf_hazard,		paletteflash, PF_HAZARD)
- 
- // Stretch status bar to full screen width?
--CUSTOM_CVAR (Int, st_scale, -1, CVAR_ARCHIVE)
-+CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
- {
- 	if (self < -1)
- 	{
-@@ -133,11 +133,11 @@
- }
- 
- CVAR (Bool, crosshairon, true, CVAR_ARCHIVE);
--CVAR (Int, crosshair, 0, CVAR_ARCHIVE)
--CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
--CVAR (Color, crosshaircolor, 0xff0000, CVAR_ARCHIVE);
--CVAR (Int, crosshairhealth, 1, CVAR_ARCHIVE);
--CVAR (Float, crosshairscale, 1.0, CVAR_ARCHIVE);
-+CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
-+CVAR (Bool, crosshairforce, true, CVAR_ARCHIVE)
-+CVAR (Color, crosshaircolor, 0x00ff1e, CVAR_ARCHIVE);
-+CVAR (Int, crosshairhealth, 0, CVAR_ARCHIVE);
-+CVAR (Float, crosshairscale, 0.30f, CVAR_ARCHIVE);
- CVAR (Bool, crosshairgrow, false, CVAR_ARCHIVE);
- CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
- {
-diff -ur a/src/v_draw.cpp b/src/v_draw.cpp
---- a/src/v_draw.cpp	[lzdoom 3.88b SOURCE]
-+++ b/src/v_draw.cpp	[lzdoom 3.88b SIJL]
-@@ -64,7 +64,7 @@
- #include "textures.h"
- #include "vm.h"
- 
--CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
-+CUSTOM_CVAR(Int, uiscale, 2, CVAR_ARCHIVE | CVAR_NOINITCALL)
- {
- 	if (self < 0)
- 	{
-diff -ur a/src/c_console.cpp b/src/c_console.cpp
---- a/src/c_console.cpp	2023-10-11 16:03:02.021799700 -0400
-+++ b/src/c_console.cpp	2025-01-19 12:25:28.637361400 -0500
-@@ -149,12 +149,12 @@
- 
- CVAR(Float, con_notifytime, 3.f, CVAR_ARCHIVE)
- CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
--CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
-+CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
- {
- 	if (self < 0) self = 0;
- }
+--- a/src/am_map.cpp	Source l4.14.3a
++++ b/src/am_map.cpp	Modified
+@@ -171,7 +171,7 @@
+ CVAR(Bool, am_showtime, true, CVAR_ARCHIVE);
+ CVAR(Bool, am_showtotaltime, false, CVAR_ARCHIVE);
+ CVAR(Bool, am_showlevelname, true, CVAR_ARCHIVE);
+-CVAR(Int, am_colorset, 0, CVAR_ARCHIVE);
++CVAR(Int, am_colorset, 1, CVAR_ARCHIVE);
+ CVAR(Bool, am_customcolors, true, CVAR_ARCHIVE);
+ CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
+ CVAR(Int, am_drawmapback, 1, CVAR_ARCHIVE);
+diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
+--- a/src/common/console/c_console.cpp	Source l4.14.3a
++++ b/src/common/console/c_console.cpp	Modified
+@@ -131,7 +131,7 @@
+ static char *work = NULL;
+ static int worklen = 0;
  
 -CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
 +CUSTOM_CVAR(Int, con_scale, 3, CVAR_ARCHIVE)
  {
  	if (self < 0) self = 0;
  }
-diff -ur a/src/sound/music/i_music.cpp b/src/sound/music/i_music.cpp
---- a/src/sound/music/i_music.cpp	2025-11-09 19:30:20.123363664 -0500
-+++ b/src/sound/music/i_music.cpp	2025-11-09 19:33:41.436271952 -0500
-@@ -110,7 +110,7 @@
- // Maximum volume of MOD/stream music.
- //==========================================================================
+diff -ur a/src/common/menu/savegamemanager.cpp b/src/common/menu/savegamemanager.cpp
+--- a/src/common/menu/savegamemanager.cpp	Source l4.14.3a
++++ b/src/common/menu/savegamemanager.cpp	Modified
+@@ -49,7 +49,7 @@
+ #include "m_argv.h"
+ #include "i_specialpaths.h"
  
--CUSTOM_CVAR (Float, snd_musicvolume, 0.5f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
-+CUSTOM_CVAR (Float, snd_musicvolume, 1.0f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+-CVAR(String, save_dir, "", CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_SYSTEM_ONLY);
++CVAR(String, save_dir, "$DOOMWADDIR", CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_SYSTEM_ONLY);
+ FString SavegameFolder;
+ CVAR(Int, save_sort_order, 1, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ 
+diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
+--- a/src/common/rendering/v_video.cpp	Source l4.14.3a
++++ b/src/common/rendering/v_video.cpp	Modified
+@@ -131,7 +131,7 @@
+ }
+ 
+ 
+-CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, uiscale, 3, CVAR_ARCHIVE | CVAR_NOINITCALL)
  {
- 	if (self < 0.f)
- 		self = 0.f;
+ 	if (self < 0)
+ 	{
+diff -ur a/src/common/startscreen/endoom.cpp b/src/common/startscreen/endoom.cpp
+--- a/src/common/startscreen/endoom.cpp	Source l4.14.3a
++++ b/src/common/startscreen/endoom.cpp	Modified
+@@ -67,7 +67,7 @@
+ 
+ // PUBLIC DATA DEFINITIONS -------------------------------------------------
+ 
+-CUSTOM_CVAR(Int, showendoom, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CUSTOM_CVAR(Int, showendoom, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+ 	if (self < 0) self = 0;
+ 	else if (self > 2) self=2;
+diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
+--- a/src/common/statusbar/base_sbar.cpp	Source l4.14.3a
++++ b/src/common/statusbar/base_sbar.cpp	Modified
+@@ -57,9 +57,9 @@
+ IMPLEMENT_CLASS(DHUDFont, false, false);
+ 
+ 
+-CVAR(Color, crosshaircolor, 0xff0000, CVAR_ARCHIVE);
+-CVAR(Int, crosshairhealth, 2, CVAR_ARCHIVE);
+-CVARD(Float, crosshairscale, 0.5, CVAR_ARCHIVE, "changes the size of the crosshair");
++CVAR(Color, crosshaircolor, 0x00ff1e, CVAR_ARCHIVE);
++CVAR(Int, crosshairhealth, 1, CVAR_ARCHIVE);
++CVARD(Float, crosshairscale, 0.25, CVAR_ARCHIVE, "changes the size of the crosshair");
+ CVAR(Bool, crosshairgrow, false, CVAR_ARCHIVE);
+ 
+ CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
+diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
+--- a/src/console/c_notifybuffer.cpp	Source l4.14.3a
++++ b/src/console/c_notifybuffer.cpp	Modified
+@@ -59,7 +59,7 @@
+ CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
+ CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
+ 
+-CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
+ {
+ 	if (self < 0) self = 0;
+ }
+diff -ur a/src/g_game.cpp b/src/g_game.cpp
+--- a/src/g_game.cpp	Source l4.14.3a
++++ b/src/g_game.cpp	Modified
+@@ -2262,7 +2262,7 @@
+ 
+ CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ static int nextautosave = -1;
+-CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)		// autosave can break some mods
+ CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) // [mxd]
+ CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
+--- a/src/g_statusbar/shared_sbar.cpp	Source l4.14.3a
++++ b/src/g_statusbar/shared_sbar.cpp	Modified
+@@ -106,7 +106,7 @@
+ 
+ 
+ // Stretch status bar to full screen width?
+-CUSTOM_CVAR (Int, st_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < -1)
+ 	{
+@@ -124,8 +124,8 @@
+ EXTERN_CVAR(Bool, hud_aspectscale)
+ 
+ CVAR (Bool, crosshairon, true, CVAR_ARCHIVE);
+-CVAR (Int, crosshair, 0, CVAR_ARCHIVE)
+-CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
++CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
++CVAR (Bool, crosshairforce, true, CVAR_ARCHIVE)
+ CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < 0 || self > 2) self = 2;
