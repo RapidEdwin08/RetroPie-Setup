@@ -26,6 +26,7 @@ function _get_commit_uzdoom-dev() {
     echo $branch_commit
     #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
     #echo c34025d8; # 20260129 clean up vid_fsdwmhack
+    #echo 3999c7d1; # 20260203 Replace hardcoded strings
 }
 
 function depends_uzdoom-dev() {
@@ -48,9 +49,6 @@ function sources_uzdoom-dev() {
     # 0ptional Apply Single-Board-Computer Specific Tweaks
     ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
 
-    # 0ptional Add option for testing old lighting modes to menu https://github.com/drfrag666/lzdoom/commit/afa94ae18673a9a91f1deda4b0e6564fb0223779
-    applyPatch "$md_data/01_0ld_lighting_modes.diff"
-
     # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/02_JoyMappings.diff"
     applyPatch "$md_data/03_Preferences.diff"
@@ -59,14 +57,14 @@ function sources_uzdoom-dev() {
     ##sed -i 's+CUSTOM_CVARD(Int, haptics_strength,.*+CUSTOM_CVARD(Int, haptics_strength, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"Translate linear haptics to audio taper\")+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional Haptics 0FF in Menus [MyHouse.wad]
-    sed -i 's+CVARD(Bool, haptics_do_menus,.*+CVARD(Bool, haptics_do_menus,  false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for menus\");     // MyHouse.wad+' "$md_build/src/common/engine/m_haptics.cpp"
+    sed -i 's+CVARD(Bool, haptics_do_menus,.*+CVARD(Bool, haptics_do_menus, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for menus\");     // MyHouse.wad+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional Haptics 0FF for Player Actions [Firing]
     sed -i 's+CVARD(Bool, haptics_do_action,.*+CVARD(Bool, haptics_do_action, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for player doing things\");+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
-        sed -i 's+CUSTOM_CVAR (Bool, vid_vsync,.*+CUSTOM_CVAR (Bool, vid_vsync, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)+' "$md_build/src/common/rendering/v_video.cpp"
+        sed -i 's+vid_vsync, false,+vid_vsync, true,+' "$md_build/src/common/rendering/v_video.cpp"
     fi
 
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
@@ -79,11 +77,6 @@ function sources_uzdoom-dev() {
     if isPlatform "armv8"; then
         if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
-
-    # Temp fix for trunk build until PR is Sync'd https://github.com/UZDoom/UZDoom/issues/653
-    # print(f"inconsistent language mapping {languages[po_id]} / {_po_files[po_id]["meta"]["id"]}")
-    # print(f"inconsistent language mapping {languages[po_id]} / {_po_files[po_id]['meta']['id']}")
-    sed -i "s+print(f\"inconsistent language mapping.*+print(f\"inconsistent language mapping {languages[po_id]} / {_po_files[po_id]['meta']['id']}\")+" "$md_build/libraries/Translation/scripts/compile.py"
 }
 
 function build_uzdoom-dev() {
@@ -112,9 +105,10 @@ function install_uzdoom-dev() {
 }
 
 function add_games_uzdoom-dev() {
-    local params=("-fullscreen -config $romdir/ports/doom/uzdoom-dev.ini -savedir $romdir/ports/doom/uzdoom-dev-saves")
+    local params=("-config $romdir/ports/doom/uzdoom-dev.ini -savedir $romdir/ports/doom/uzdoom-dev-saves")
+    ##params=("-fullscreen")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
-    
+
     # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
     # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
     # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
@@ -124,25 +118,16 @@ function add_games_uzdoom-dev() {
     # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # +gl_maplightmode will no longer save to ini after 4.11.x
+    ##params+=("+gl_maplightmode 4") # Apply 0ld Sector light mode (Doom Legacy)
 
-    # [+gl_lightmode] +4.11.x Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
+    # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
     # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
     # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    ##params+=("+gl_lightmode 0") # Light mode (Classic) for low-end HW
 
-    params+=("+gl_maplightmode 4") # Apply Sector light mode (Doom Legacy) using [gl_maplightmode]
-    ##params+=("+gl_lightmode 2") # g4.8.0 Sector light mode (Doom) for Low-end HW
-    ##params+=("+gl_lightmode 0") # u4.14.3 Sector light mode (Classic) for Low-end HW
-
-    ## -5 FluidSynth ## -2 Timidity++ ## -3 OPL Synth Emulation
-    params+=("'+snd_mididevice -5'")
-
-    # VSync On ## Moved to Source
-    ##if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then params+=("+vid_vsync 1"); fi
-
-    if isPlatform "kms"; then
-        params+=("-width %XRES%" "-height %YRES%")
-    fi
+    ##params+=("'+snd_mididevice -5'") # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
+    isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/uzdoom -iwad %ROM% ${params[*]}"
 }
