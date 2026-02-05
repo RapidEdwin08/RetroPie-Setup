@@ -104,8 +104,8 @@ function add_games_lzdoom-388b() {
     ##params=("+fullscreen 1")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
 
-    if ! ( isPlatform "rpi3" ) && isPlatform "arm"; then
-        params+=("'+snd_mididevice -3'"); fi # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
+    if ! ( isPlatform "rpi3" ) && isPlatform "arm"; then # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
+        params+=("'+snd_mididevice -3'")
     fi
 
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
