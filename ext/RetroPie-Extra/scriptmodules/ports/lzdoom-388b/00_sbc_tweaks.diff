@@ -1,0 +1,140 @@
+diff -ur a/src/gl/dynlights/gl_dynlight1.cpp b/src/gl/dynlights/gl_dynlight1.cpp
+--- a/src/gl/dynlights/gl_dynlight1.cpp	Source l3.88b
++++ b/src/gl/dynlights/gl_dynlight1.cpp	Modified
+@@ -53,8 +53,8 @@
+ //==========================================================================
+ 
+ CVAR (Bool, gl_lights_checkside, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+-CVAR (Bool, gl_light_sprites, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+-CVAR (Bool, gl_light_particles, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
++CVAR (Bool, gl_light_sprites, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
++CVAR (Bool, gl_light_particles, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+ 
+ 
+ //==========================================================================
+diff -ur a/src/gl/dynlights/gl_shadowmap.cpp b/src/gl/dynlights/gl_shadowmap.cpp
+--- a/src/gl/dynlights/gl_shadowmap.cpp	Source l3.88b
++++ b/src/gl/dynlights/gl_shadowmap.cpp	Modified
+@@ -77,7 +77,7 @@
+ 	return out;
+ }
+ 
+-CUSTOM_CVAR(Int, gl_shadowmap_quality, 512, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
++CUSTOM_CVAR(Int, gl_shadowmap_quality, 128, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ {
+ 	switch (self)
+ 	{
+@@ -92,7 +92,7 @@
+ 	}
+ }
+ 
+-CUSTOM_CVAR (Bool, gl_light_shadowmap, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
++CUSTOM_CVAR (Bool, gl_light_shadowmap, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ {
+     if (!self)
+     {
+diff -ur a/src/gl/renderer/gl_lightdata.cpp b/src/gl/renderer/gl_lightdata.cpp
+--- a/src/gl/renderer/gl_lightdata.cpp	Source l3.88b
++++ b/src/gl/renderer/gl_lightdata.cpp	Modified
+@@ -91,7 +91,7 @@
+ 	}
+ }
+ 
+-CUSTOM_CVAR(Int,gl_fogmode,1,CVAR_ARCHIVE|CVAR_NOINITCALL)
++CUSTOM_CVAR(Int,gl_fogmode,0,CVAR_ARCHIVE|CVAR_NOINITCALL)
+ {
+ 	if (self>2) self=2;
+ 	if (self<0) self=0;
+diff -ur a/src/gl/renderer/gl_renderstate.cpp b/src/gl/renderer/gl_renderstate.cpp
+--- a/src/gl/renderer/gl_renderstate.cpp	Source l3.88b
++++ b/src/gl/renderer/gl_renderstate.cpp	Modified
+@@ -45,7 +45,7 @@
+ 
+ CVAR(Bool, gl_direct_state_change, true, 0)
+ CVAR(Bool, gl_bandedswlight, false, CVAR_ARCHIVE)
+-CUSTOM_CVAR(Int, gl_shadowmap_filter, 1, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
++CUSTOM_CVAR(Int, gl_shadowmap_filter, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG)
+ {
+ 	if (self < 0 || self > 8) self = 1;
+ }
+diff -ur a/src/gl/system/gl_menu.cpp b/src/gl/system/gl_menu.cpp
+--- a/src/gl/system/gl_menu.cpp	Source l3.88b
++++ b/src/gl/system/gl_menu.cpp	Modified
+@@ -37,7 +37,7 @@
+ CVAR(Bool, gl_noquery, false, 0)
+ CVAR(Bool, gl_mirrors, true, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+ CVAR(Bool, gl_mirror_envmap, true, CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+-CVAR(Bool, gl_seamless, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR(Bool, gl_seamless, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ 
+ CUSTOM_CVAR(Int, r_mirror_recursions,2,CVAR_GLOBALCONFIG|CVAR_ARCHIVE)
+ {
+diff -ur a/src/gl/textures/gl_texture.cpp b/src/gl/textures/gl_texture.cpp
+--- a/src/gl/textures/gl_texture.cpp	Source l3.88b
++++ b/src/gl/textures/gl_texture.cpp	Modified
+@@ -90,7 +90,7 @@
+ 	if (GLRenderer != NULL) GLRenderer->FlushTextures();
+ }
+ 
+-CVAR(Bool, gl_precache, false, CVAR_ARCHIVE)
++CVAR(Bool, gl_precache, true, CVAR_ARCHIVE)
+ 
+ TexFilter_s TexFilter[]={
+ 	{GL_NEAREST,					GL_NEAREST,		false},
+diff -ur a/src/g_shared/a_dynlight.cpp b/src/g_shared/a_dynlight.cpp
+--- a/src/g_shared/a_dynlight.cpp	Source l3.88b
++++ b/src/g_shared/a_dynlight.cpp	Modified
+@@ -81,7 +81,7 @@
+ static TArray<FDynamicLight*> FreeList;
+ static FRandom randLight;
+ 
+-CUSTOM_CVAR (Bool, gl_lights, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
++CUSTOM_CVAR (Bool, gl_lights, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)       // dd_flashlight
+ {
+ 	if (self) AActor::RecreateAllAttachedLights();
+ 	else AActor::DeleteAllAttachedLights();
+diff -ur a/src/p_effect.cpp b/src/p_effect.cpp
+--- a/src/p_effect.cpp	Source l3.88b
++++ b/src/p_effect.cpp	Modified
+@@ -56,7 +56,7 @@
+ #include "g_levellocals.h"
+ #include "vm.h"
+ 
+-CVAR (Int, cl_rockettrails, 1, CVAR_ARCHIVE);
++CVAR (Int, cl_rockettrails, 0, CVAR_ARCHIVE);
+ CVAR (Bool, r_rail_smartspiral, 0, CVAR_ARCHIVE);
+ CVAR (Int, r_rail_spiralsparsity, 1, CVAR_ARCHIVE);
+ CVAR (Int, r_rail_trailsparsity, 1, CVAR_ARCHIVE);
+@@ -130,7 +130,7 @@
+ 
+ // [BC] Allow the maximum number of particles to be specified by a cvar (so people
+ // with lots of nice hardware can have lots of particles!).
+-CUSTOM_CVAR( Int, r_maxparticles, 4000, CVAR_ARCHIVE )
++CUSTOM_CVAR( Int, r_maxparticles, 100, CVAR_ARCHIVE )
+ {
+ 	if ( self == 0 )
+ 		self = 4000;
+diff -ur a/src/r_data/r_vanillatrans.cpp b/src/r_data/r_vanillatrans.cpp
+--- a/src/r_data/r_vanillatrans.cpp	Source l3.88b
++++ b/src/r_data/r_vanillatrans.cpp	Modified
+@@ -45,7 +45,7 @@
+ #endif
+ 
+ bool r_UseVanillaTransparency;
+-CVAR (Int, r_vanillatrans, 0, CVAR_ARCHIVE)
++CVAR (Int, r_vanillatrans, 1, CVAR_ARCHIVE)
+ 
+ namespace
+ {
+diff -ur a/src/r_utility.cpp b/src/r_utility.cpp
+--- a/src/r_utility.cpp	Source l3.88b
++++ b/src/r_utility.cpp	Modified
+@@ -1233,7 +1233,7 @@
+ //
+ //==========================================================================
+ 
+-CUSTOM_CVAR(Float, transsouls, 0.75f, CVAR_ARCHIVE)
++CUSTOM_CVAR(Float, transsouls, 1.f, CVAR_ARCHIVE)
+ {
+ 	if (self < 0.25f)
+ 	{
