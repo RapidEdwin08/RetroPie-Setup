@@ -74,17 +74,9 @@ function sources_lzdoom() {
     fi
 
     # Apply Sector light mode
-    sed -i 's+gl_maplightmode, -1,+gl_maplightmode, 4,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_maplightmode, '
-
-    # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
-    # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
-    # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
-    # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
-    # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
-    # 4 (Doom Legacy): Emulates lighting of Legacy 1.4's GL renderer.
-    # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # +gl_maplightmode will no longer save to ini after 4.11.x
+    if isPlatform "arm" || isPlatform "rpi3"; then
+        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_maplightmode, '
+    fi
 
     # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
