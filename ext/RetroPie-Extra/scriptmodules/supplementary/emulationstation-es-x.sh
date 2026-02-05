@@ -34,6 +34,12 @@ rp_module_licence="MIT https://github.com/Aloshi/EmulationStation/blob/master/LI
 # ES-X repository
 rp_module_repo="git https://github.com/Renetrox/EmulationStation-X.git main :_get_commit_emulationstation-es-x"
 
+function _set_icons_emulationstation-es-x() {
+    # PNG [icon_style] for 0lder commit [5f237788] Choices: default arcade snes xbox psx psx-color psx-color-2 psx-light
+    echo default
+    #echo xbox
+}
+
 function _get_commit_emulationstation-es-x() {
     # Pull Latest Commit SHA
     local branch_tag=main
@@ -73,8 +79,11 @@ function sources_emulationstation-es-x() {
     if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
         # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
         applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff"
-        # Update HelpComponent to xbox style .png Icons
-        sed -i 's+.svg+.png+' "$md_build/es-core/src/components/HelpComponent.cpp"
+
+        # Update HelpComponent for PNG Icons
+        if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
+            sed -i 's+.svg+.png+' "$md_build/es-core/src/components/HelpComponent.cpp"
+        fi
     fi
 
     # [x3] 0ptional JoyPad Connected Popup Changes
@@ -91,10 +100,10 @@ function build_emulationstation-es-x()        { build_emulationstation; }
 function install_emulationstation-es-x()      { install_emulationstation; }
 
 function help_icons_emulationstation-es-x() {
-    # [icon_style] for 0lder commit [5f237788] Choices: arcade snes xbox psx psx-color psx-color-2 psx-light
-    local icon_style=xbox
+    # PNG [icon_style] for 0lder commit [5f237788] Choices: default arcade snes xbox psx psx-color psx-color-2 psx-light
+    local icon_style="$(_set_icons_emulationstation-es-x)"
 
-    if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then # Get updated HelpComponent .png Icons
+    if [[ ! "$icon_style" == "default" ]] && [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then # Get updated HelpComponent .png Icons
         local icon_git=https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/resources
         mkdir -p /dev/shm/helpicons
         if [ $(cat /opt/retropie/configs/all/autoconf.cfg | grep -q 'es_swap_a_b = "1"' ; echo $?) == '0' ]; then
