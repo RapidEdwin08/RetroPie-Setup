@@ -1,0 +1,104 @@
+diff -ur a/src/am_map.cpp b/src/am_map.cpp
+--- a/src/am_map.cpp	Source l3.88b
++++ b/src/am_map.cpp	Modified
+@@ -90,7 +90,7 @@
+ CVAR (Bool,  am_showitems,			false,		CVAR_ARCHIVE);
+ CVAR (Bool,  am_showtime,			true,		CVAR_ARCHIVE);
+ CVAR (Bool,  am_showtotaltime,		false,		CVAR_ARCHIVE);
+-CVAR (Int,   am_colorset,			0,			CVAR_ARCHIVE);
++CVAR (Int,   am_colorset,			1,			CVAR_ARCHIVE);
+ CVAR (Bool,  am_customcolors,		true,		CVAR_ARCHIVE);
+ CVAR (Int,   am_map_secrets,		1,			CVAR_ARCHIVE);
+ CVAR (Int,	 am_drawmapback,		1,			CVAR_ARCHIVE);
+diff -ur a/src/g_game.cpp b/src/g_game.cpp
+--- a/src/g_game.cpp	Source l3.88b
++++ b/src/g_game.cpp	Modified
+@@ -129,7 +129,7 @@
+ CVAR (Bool, chasedemo, false, 0);
+ CVAR (Bool, storesavepic, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ CVAR (Bool, longsavemessages, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+-CVAR (String, save_dir, "", CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
++CVAR (String, save_dir, "$DOOMWADDIR", CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
+ CVAR (Bool, cl_waitforsave, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+ CVAR (Bool, enablescriptscreenshot, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG);
+ EXTERN_CVAR (Float, con_midtime);
+@@ -2110,7 +2110,7 @@
+ 
+ CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ static int nextautosave = -1;
+-CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) // [mxd]
+ CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
+--- a/src/g_statusbar/shared_sbar.cpp	Source l3.88b
++++ b/src/g_statusbar/shared_sbar.cpp	Modified
+@@ -110,7 +110,7 @@
+ CVAR (Flag, pf_hazard,		paletteflash, PF_HAZARD)
+ 
+ // Stretch status bar to full screen width?
+-CUSTOM_CVAR (Int, st_scale, -1, CVAR_ARCHIVE)
++CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < -1)
+ 	{
+@@ -133,11 +133,11 @@
+ }
+ 
+ CVAR (Bool, crosshairon, true, CVAR_ARCHIVE);
+-CVAR (Int, crosshair, 0, CVAR_ARCHIVE)
+-CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
+-CVAR (Color, crosshaircolor, 0xff0000, CVAR_ARCHIVE);
+-CVAR (Int, crosshairhealth, 1, CVAR_ARCHIVE);
+-CVAR (Float, crosshairscale, 1.0, CVAR_ARCHIVE);
++CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
++CVAR (Bool, crosshairforce, true, CVAR_ARCHIVE)
++CVAR (Color, crosshaircolor, 0x00ff1e, CVAR_ARCHIVE);
++CVAR (Int, crosshairhealth, 0, CVAR_ARCHIVE);
++CVAR (Float, crosshairscale, 0.30f, CVAR_ARCHIVE);
+ CVAR (Bool, crosshairgrow, false, CVAR_ARCHIVE);
+ CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
+ {
+diff -ur a/src/v_draw.cpp b/src/v_draw.cpp
+--- a/src/v_draw.cpp	Source l3.88b
++++ b/src/v_draw.cpp	Modified
+@@ -64,7 +64,7 @@
+ #include "textures.h"
+ #include "vm.h"
+ 
+-CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, uiscale, 3, CVAR_ARCHIVE | CVAR_NOINITCALL)
+ {
+ 	if (self < 0)
+ 	{
+diff -ur a/src/c_console.cpp b/src/c_console.cpp
+--- a/src/c_console.cpp	Source l3.88b
++++ b/src/c_console.cpp	Modified
+@@ -149,12 +149,12 @@
+ 
+ CVAR(Float, con_notifytime, 3.f, CVAR_ARCHIVE)
+ CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
+-CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
+ {
+ 	if (self < 0) self = 0;
+ }
+ 
+-CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR(Int, con_scale, 3, CVAR_ARCHIVE)
+ {
+ 	if (self < 0) self = 0;
+ }
+diff -ur a/src/sound/music/i_music.cpp b/src/sound/music/i_music.cpp
+--- a/src/sound/music/i_music.cpp	Source l3.88b
++++ b/src/sound/music/i_music.cpp	Modified
+@@ -110,7 +110,7 @@
+ // Maximum volume of MOD/stream music.
+ //==========================================================================
+ 
+-CUSTOM_CVAR (Float, snd_musicvolume, 0.5f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CUSTOM_CVAR (Float, snd_musicvolume, 1.0f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;

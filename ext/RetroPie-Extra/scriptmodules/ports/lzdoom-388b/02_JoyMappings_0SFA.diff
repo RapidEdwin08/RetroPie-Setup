@@ -1,0 +1,95 @@
+diff -ur a/src/posix/sdl/i_joystick.cpp b/src/posix/sdl/i_joystick.cpp
+--- a/src/posix/sdl/i_joystick.cpp	Source l3.88b
++++ b/src/posix/sdl/i_joystick.cpp	Modified
+@@ -147,7 +147,7 @@
+ 				info.Name.Format("Axis %d", i+1);
+ 			else
+ 				info.Name.Format("Hat %d (%c)", (i-NumAxes)/2 + 1, (i-NumAxes)%2 == 0 ? 'x' : 'y');
+-			info.DeadZone = MIN_DEADZONE;
++			info.DeadZone = 0.25f;
+ 			info.Multiplier = 1.0f;
+ 			info.Value = 0.0;
+ 			info.ButtonValue = 0;
+@@ -256,7 +256,7 @@
+ 	int					NumAxes;
+ 	int					NumHats;
+ };
+-const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Side, JOYAXIS_Forward, JOYAXIS_Pitch, JOYAXIS_Yaw, JOYAXIS_Up};
++const EJoyAxis SDLInputJoystick::DefaultAxes[5] = {JOYAXIS_Yaw, JOYAXIS_Forward, JOYAXIS_None, JOYAXIS_None, JOYAXIS_None};
+ 
+ class SDLInputJoystickManager
+ {
+diff -ur a/wadsrc/static/defbinds.txt b/wadsrc/static/defbinds.txt
+--- a/wadsrc/static/defbinds.txt	Source l3.88b
++++ b/wadsrc/static/defbinds.txt	Modified
+@@ -45,10 +45,10 @@
+ // I can't see why they shouldn't be for Doom or Chex either.
+ pgup +moveup
+ ins +movedown
+-home land
++home centerview
+ pgdn +lookup
+ del +lookdown
+-end centerview
++end land
+ 
+ // Xbox 360 / PS2 controllers
+ pad_a +use
+@@ -83,3 +83,57 @@
+ mapbind kp+ +am_zoomin
+ mapbind mwheelup "am_zoom 1.2"
+ mapbind mwheeldown "am_zoom -1.2"
++mapbind Joy5 +am_zoomout
++mapbind Joy6 +am_zoomin
++
++// 0ne-Size-Fits-All - Neutral Axes - Multiple D-Pad Support - 0ut-0f-Box Config for 8+Button JoyPads - Jump @Joy9 - No doublebinds
++Joy1 "toggle cl_run"
++Joy2 +use
++//doublebind Joy2 invuse
++Joy3 +attack
++Joy4 weapnext
++Joy5 +moveleft
++Joy6 +moveright
++Joy7 togglemap
++Joy8 menu_main
++Joy9 +jump
++Joy10 crouch
++Joy11 +altattack
++
++// D-Pad Bindings Hat
++POV1Up +forward
++POV1Down +back
++POV1Left +left
++POV1Right +right
++
++// D-Pad Bindings PS3
++//Joy14 +forward
++//Joy15 +back
++//Joy16 +left
++//Joy17 +right
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++// 0riginal D00M/Heretic Keyboard Inputs [NOT WASD]
++UpArrow +forward
++LeftArrow +left
++RightArrow +right
++DownArrow +back
++, +moveleft
++. +moveright
++Ctrl +attack
++Alt +strafe
++/ +jump
++
++// @LINE #95 END +JoyMappings
