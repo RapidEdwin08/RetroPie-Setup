@@ -1,0 +1,50 @@
+diff -ur a/src/common/engine/m_joy.cpp b/src/common/engine/m_joy.cpp
+--- a/src/common/engine/m_joy.cpp	Source g4.8.0
++++ b/src/common/engine/m_joy.cpp	Modified
+@@ -58,7 +58,7 @@
+ 
+ // PUBLIC DATA DEFINITIONS -------------------------------------------------
+ 
+-CUSTOM_CVARD(Bool, use_joystick, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL, "enables input from the joystick if it is present") 
++CUSTOM_CVARD(Bool, use_joystick, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL, "enables input from the joystick if it is present") 
+ {
+ #ifdef _WIN32
+ 	joy_ps2raw.Callback();
+diff -ur a/src/common/platform/posix/sdl/i_input.cpp b/src/common/platform/posix/sdl/i_input.cpp
+--- a/src/common/platform/posix/sdl/i_input.cpp	Source g4.8.0
++++ b/src/common/platform/posix/sdl/i_input.cpp	Modified
+@@ -181,12 +181,10 @@
+ {
+ 	// Clear out any mouse movement.
+ 	SDL_GetRelativeMouseState (NULL, NULL);
+-	SDL_SetRelativeMouseMode (SDL_TRUE);
+ }
+ 
+ void I_ReleaseMouseCapture()
+ {
+-	SDL_SetRelativeMouseMode (SDL_FALSE);
+ }
+ 
+ static void MouseRead ()
+diff -ur a/wadsrc/static/language.0 b/wadsrc/static/language.0
+--- a/wadsrc/static/language.0	Source g4.8.0
++++ b/wadsrc/static/language.0	Modified
+@@ -308,6 +308,7 @@
+ Open Load Menu,CNTRLMNU_OPEN_LOAD,,,,Načíst hru,Lademenü öffnen,,Malfermi Ŝargmenuon,Menú de Cargar Partida,,Avaa latausvalikko,Ouvrir Menu Chargement,Betöltés menü előhozása,Apri il menu di caricamento,ロードメニューを開く,불러오기 화면 열기,Menu laden openen,Otwórz Menu Wczytania,Abrir menu de carregar,,Deschide meniul de încărcare,Загрузка игры,Отвори игре за учитати
+ Open Options Menu,CNTRLMNU_OPEN_OPTIONS,,,,Nastavení,Optionsmenü öffnen,,Malfermi Agordmenuon,Menú de Opciones,,Avaa asetusvalikko,Ouvrir Menu Options,Beállítások menü előhozása,Apri il menu delle opzioni,オプションメニューを開く,설정 화면 열기,Menu Opties openen,Otwórz Menu Opcji,Abrir menu de opções,,Deschide setările,Главное меню настроек,Отвори мени опција
+ Open Display Menu,CNTRLMNU_OPEN_DISPLAY,,,,Nastavení grafiky,Anzeigemenü öffnen,,Malfermi Ekranmenuon,Menú de Opciones de Visualización,,Avaa näyttövalikko,Ouvrir Menu Affichage,Megjelenítés menü előhozása,Apri il menu del display,ディスプレイメニューを開く,디스플레이 화면 열기,Displaymenu openen,Otwórz Menu Wyświetlania,Abrir menu de vídeo,,Deschide setările de afișare,Меню настроек видео,Отвори мени приказа
++Open Main Menu,CNTRLMNU_OPEN_MAIN,,,,,,,,,,,,,,,,,,,,,,
+ Quicksave,CNTRLMNU_QUICKSAVE,,,,Rychlé uložení,Schnellspeichern,,Rapidkonservo,Guardado Rápido,,Pikatallenna,Sauv. Rapide,Gyorsmentés,Salvataggio rapido,クイックセーブ,빠른 저장,Snel opslaan,Szybki Zapis,Salvar rapidamente,Gravação rápida,Salvare rapidă,Быстрое сохранение,Брзо-сачувај
+ Quickload,CNTRLMNU_QUICKLOAD,,,,Rychlé načtení,Schnellladen,,Rapidŝargo,Cargado Rápido,,Pikalataa,Charg. Rapide,Gyorstöltés,Caricamento rapido,クイックロード,빠른 불러오기,Snel laden,Szybkie Wczytanie,Carregar rapidamente,,Încărcare rapidă,Быстрая загрузка,Брзо-учитај
+ Exit to Main Menu,CNTRLMNU_EXIT_TO_MAIN,,,,Odejít do hlavního menu,Zurück zum Hauptmenü,,Eliri al Ĉefa Menuo,Salir al Menú Principal,,Poistu päävalikkoon,Sortie Menu Principal,Kilépés a főmenübe,Esci dal menu principale,メインメニューに戻る,메뉴로 나오기,Afsluiten naar het hoofdmenu,Wyjdź do Głównego Menu,Sair para o menu principal,,Revenire la meniul principal,Выход в главное меню,Изађи у главни мени
+diff -ur a/wadsrc/static/menudef.txt b/wadsrc/static/menudef.txt
+--- a/wadsrc/static/menudef.txt	Source g4.8.0
++++ b/wadsrc/static/menudef.txt	Modified
+@@ -668,6 +668,7 @@
+ 	Control    "$CNTRLMNU_OPEN_SAVE"       , "menu_save"
+ 	Control    "$CNTRLMNU_OPEN_LOAD"       , "menu_load"
+ 	Control    "$CNTRLMNU_OPEN_OPTIONS"    , "menu_options"
++	Control    "$CNTRLMNU_OPEN_MAIN"       , "menu_main"
+ 	Control    "$CNTRLMNU_OPEN_DISPLAY"    , "menu_display"
+ 	Control    "$CNTRLMNU_EXIT_TO_MAIN"    , "menu_endgame"
+ 	Control    "$CNTRLMNU_MENU_QUIT"       , "menu_quit"

@@ -1,0 +1,195 @@
+diff -ur a/src/am_map.cpp b/src/am_map.cpp
+--- a/src/am_map.cpp	Source g4.8.0
++++ b/src/am_map.cpp	Modified
+@@ -161,7 +161,7 @@
+ CVAR(Bool, am_showitems, false, CVAR_ARCHIVE);
+ CVAR(Bool, am_showtime, true, CVAR_ARCHIVE);
+ CVAR(Bool, am_showtotaltime, false, CVAR_ARCHIVE);
+-CVAR(Int, am_colorset, 0, CVAR_ARCHIVE);
++CVAR(Int, am_colorset, 1, CVAR_ARCHIVE);
+ CVAR(Bool, am_customcolors, true, CVAR_ARCHIVE);
+ CVAR(Int, am_map_secrets, 1, CVAR_ARCHIVE);
+ CVAR(Int, am_drawmapback, 1, CVAR_ARCHIVE);
+diff -ur a/src/common/audio/music/i_music.cpp b/src/common/audio/music/i_music.cpp
+--- a/src/common/audio/music/i_music.cpp	Source g4.8.0
++++ b/src/common/audio/music/i_music.cpp	Modified
+@@ -70,7 +70,7 @@
+ // Maximum volume of MOD/stream music.
+ //==========================================================================
+ 
+-CUSTOM_CVARD(Float, snd_musicvolume, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
++CUSTOM_CVARD(Float, snd_musicvolume, 1.f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG, "controls music volume")
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
+diff -ur a/src/common/audio/sound/i_sound.cpp b/src/common/audio/sound/i_sound.cpp
+--- a/src/common/audio/sound/i_sound.cpp	Source g4.8.0
++++ b/src/common/audio/sound/i_sound.cpp	Modified
+@@ -91,7 +91,7 @@
+ // Maximum volume of all audio
+ //==========================================================================
+ 
+-CUSTOM_CVAR(Float, snd_mastervolume, 1.f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
++CUSTOM_CVAR(Float, snd_mastervolume, 0.5, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
+@@ -110,7 +110,7 @@
+ // Maximum volume of a sound effect.
+ //==========================================================================
+ 
+-CUSTOM_CVAR (Float, snd_sfxvolume, 1.f, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
++CUSTOM_CVAR (Float, snd_sfxvolume, 0.5, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
+diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
+--- a/src/common/console/c_console.cpp	Source g4.8.0
++++ b/src/common/console/c_console.cpp	Modified
+@@ -128,6 +128,11 @@
+ static char *work = NULL;
+ static int worklen = 0;
+ 
++CUSTOM_CVAR(Int, con_scale, 4, CVAR_ARCHIVE)
++{
++	if (self < 0) self = 0;
++}
++
+ CUSTOM_CVAR(Float, con_alpha, 0.75f, CVAR_ARCHIVE)
+ {
+ 	if (self < 0.f) self = 0.f;
+diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
+--- a/src/common/rendering/v_video.cpp	Source g4.8.0
++++ b/src/common/rendering/v_video.cpp	Modified
+@@ -122,7 +122,7 @@
+ }
+ 
+ 
+-CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, uiscale, 3, CVAR_ARCHIVE | CVAR_NOINITCALL)
+ {
+ 	if (self < 0)
+ 	{
+diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
+--- a/src/common/statusbar/base_sbar.cpp	Source g4.8.0
++++ b/src/common/statusbar/base_sbar.cpp	Modified
+@@ -55,9 +55,9 @@
+ IMPLEMENT_CLASS(DHUDFont, false, false);
+ 
+ 
+-CVAR(Color, crosshaircolor, 0xff0000, CVAR_ARCHIVE);
+-CVAR(Int, crosshairhealth, 2, CVAR_ARCHIVE);
+-CVARD(Float, crosshairscale, 0.5, CVAR_ARCHIVE, "changes the size of the crosshair");
++CVAR(Color, crosshaircolor, 0x00ff1e, CVAR_ARCHIVE);
++CVAR(Int, crosshairhealth, 2, CVAR_ARCHIVE);
++CVARD(Float, crosshairscale, 0.25, CVAR_ARCHIVE, "changes the size of the crosshair");
+ CVAR(Bool, crosshairgrow, false, CVAR_ARCHIVE);
+ 
+ EXTERN_CVAR(Float, hud_scalefactor)
+diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
+--- a/src/console/c_notifybuffer.cpp	Source g4.8.0
++++ b/src/console/c_notifybuffer.cpp	Modified
+@@ -59,7 +59,7 @@
+ CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
+ CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
+ 
+-CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 4, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
+ {
+ 	if (self < 0) self = 0;
+ }
+diff -ur a/src/g_game.cpp b/src/g_game.cpp
+--- a/src/g_game.cpp	Source g4.8.0
++++ b/src/g_game.cpp	Modified
+@@ -203,7 +203,7 @@
+ 
+ #define SLOWTURNTICS	6 
+ 
+-CVAR (Bool,		cl_run,			false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always run?
++CVAR (Bool,		cl_run,			true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always running from evil?
+ CVAR (Bool,		invertmouse,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look down/up?
+ CVAR (Bool,		invertmousex,	false,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Invert mouse look left/right?
+ CVAR (Bool,		freelook,		true,	CVAR_GLOBALCONFIG|CVAR_ARCHIVE)		// Always mlook?
+@@ -2190,7 +2190,7 @@
+ 
+ CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ static int nextautosave = -1;
+-CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR (Int, disableautosave, 2, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)		// autosave can break some mods
+ CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG) // [mxd]
+ CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
+--- a/src/g_statusbar/shared_sbar.cpp	Source g4.8.0
++++ b/src/g_statusbar/shared_sbar.cpp	Modified
+@@ -116,7 +116,7 @@
+ 
+ 
+ // Stretch status bar to full screen width?
+-CUSTOM_CVAR (Int, st_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < -1)
+ 	{
+@@ -129,7 +129,7 @@
+ 		setsizeneeded = true;
+ 	}
+ }
+-CUSTOM_CVAR(Bool, hud_aspectscale, false, CVAR_ARCHIVE)
++CUSTOM_CVAR(Bool, hud_aspectscale, true, CVAR_ARCHIVE)
+ {
+ 	if (StatusBar)
+ 	{
+@@ -139,8 +139,8 @@
+ }
+ 
+ CVAR (Bool, crosshairon, true, CVAR_ARCHIVE);
+-CVAR (Int, crosshair, 0, CVAR_ARCHIVE)
+-CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
++CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
++CVAR (Bool, crosshairforce, true, CVAR_ARCHIVE)
+ CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < 0 || self > 2) self = 2;
+diff -ur a/src/common/rendering/hwrenderer/data/hw_cvars.cpp b/src/common/rendering/hwrenderer/data/hw_cvars.cpp
+--- a/src/common/rendering/hwrenderer/data/hw_cvars.cpp	Source g4.8.0
++++ b/src/common/rendering/hwrenderer/data/hw_cvars.cpp	Modified
+@@ -115,12 +115,12 @@
+ // Texture CVARs
+ //
+ //==========================================================================
+-CUSTOM_CVARD(Float, gl_texture_filter_anisotropic, 8, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL, "changes the OpenGL texture anisotropy setting")
++CUSTOM_CVARD(Float, gl_texture_filter_anisotropic, 16, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL, "changes the OpenGL texture anisotropy setting")
+ {
+ 	screen->SetTextureFilterMode();
+ }
+ 
+-CUSTOM_CVARD(Int, gl_texture_filter, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL, "changes the texture filtering settings")
++CUSTOM_CVARD(Int, gl_texture_filter, 6, CVAR_ARCHIVE|CVAR_GLOBALCONFIG|CVAR_NOINITCALL, "changes the texture filtering settings")
+ {
+ 	if (self < 0 || self > 6) self=4;
+ 	screen->SetTextureFilterMode();
+diff -ur a/src/common/startscreen/endoom.cpp b/src/common/startscreen/endoom.cpp
+--- a/src/common/startscreen/endoom.cpp	Source g4.8.0
++++ b/src/common/startscreen/endoom.cpp	Modified
+@@ -67,7 +67,7 @@
+ 
+ // PUBLIC DATA DEFINITIONS -------------------------------------------------
+ 
+-CUSTOM_CVAR(Int, showendoom, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CUSTOM_CVAR(Int, showendoom, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ {
+ 	if (self < 0) self = 0;
+ 	else if (self > 2) self=2;
+diff -ur a/src/menu/doommenu.cpp b/src/menu/doommenu.cpp
+--- a/src/menu/doommenu.cpp	Source g4.8.0
++++ b/src/menu/doommenu.cpp	Modified
+@@ -75,7 +75,7 @@
+ EXTERN_CVAR(Bool, show_messages)
+ EXTERN_CVAR(Float, hud_scalefactor)
+ 
+-CVAR(Bool, m_simpleoptions, true, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
++CVAR(Bool, m_simpleoptions, false, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+ 
+ typedef void(*hfunc)();
+ DMenu* CreateMessageBoxMenu(DMenu* parent, const char* message, int messagemode, bool playsound, FName action = NAME_None, hfunc handler = nullptr);
