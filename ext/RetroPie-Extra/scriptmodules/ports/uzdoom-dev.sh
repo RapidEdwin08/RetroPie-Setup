@@ -47,7 +47,7 @@ function sources_uzdoom-dev() {
     gitPullOrClone
 
     # 0ptional Apply Single-Board-Computer Specific Tweaks
-    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/01_sbc_tweaks.diff"
+    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
 
     # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/02_JoyMappings.diff"
