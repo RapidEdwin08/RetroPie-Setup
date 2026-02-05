@@ -47,20 +47,20 @@ function sources_uzdoom-dev() {
     gitPullOrClone
 
     # 0ptional Apply Single-Board-Computer Specific Tweaks
-    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
+    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/01_sbc_tweaks.diff"
 
     # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/02_JoyMappings.diff"
     applyPatch "$md_data/03_Preferences.diff"
 
-    # 0ptional Haptics 0FF [haptics_strength, 0]
-    ##sed -i 's+CUSTOM_CVARD(Int, haptics_strength,.*+CUSTOM_CVARD(Int, haptics_strength, 0, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"Translate linear haptics to audio taper\")+' "$md_build/src/common/engine/m_haptics.cpp"
+    # 0ptional Haptics Strength [0-10]
+    ##sed -i 's+haptics_strength, 10,+haptics_strength, 0,+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional Haptics 0FF in Menus [MyHouse.wad]
-    sed -i 's+CVARD(Bool, haptics_do_menus,.*+CVARD(Bool, haptics_do_menus, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for menus\");     // MyHouse.wad+' "$md_build/src/common/engine/m_haptics.cpp"
+    sed -i 's+haptics_do_menus,  true,+haptics_do_menus,  false,+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional Haptics 0FF for Player Actions [Firing]
-    sed -i 's+CVARD(Bool, haptics_do_action,.*+CVARD(Bool, haptics_do_action, false, CVAR_ARCHIVE | CVAR_GLOBALCONFIG, \"allow haptic feedback for player doing things\");+' "$md_build/src/common/engine/m_haptics.cpp"
+    ##sed -i 's+haptics_do_action, true,+haptics_do_action, false,+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
@@ -77,6 +77,14 @@ function sources_uzdoom-dev() {
     if isPlatform "armv8"; then
         if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
+
+    # Apply Sector light mode
+    isPlatform "rpi3" && sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+
+    # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
+    # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
+    # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
+    # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
 }
 
 function build_uzdoom-dev() {
@@ -108,23 +116,6 @@ function add_games_uzdoom-dev() {
     local params=("-config $romdir/ports/doom/uzdoom-dev.ini -savedir $romdir/ports/doom/uzdoom-dev-saves")
     ##params=("-fullscreen")
     local launcher_prefix="DOOMWADDIR=$romdir/ports/doom"
-
-    # [+gl_maplightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
-    # 0 (Standard): Bright lighting model and stronger fading in bright sectors.
-    # 1 (Bright): Bright lighting model and weaker fading in bright sectors.
-    # 2 (Doom): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
-    # 3 (Dark): Dark lighting model and weaker fading in bright sectors.
-    # 4 (Doom Legacy): Emulates lighting of Legacy 1.4's GL renderer.
-    # 8 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # 16 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # +gl_maplightmode will no longer save to ini after 4.11.x
-    ##params+=("+gl_maplightmode 4") # Apply 0ld Sector light mode (Doom Legacy)
-
-    # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
-    # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
-    # 1 (Software): Emulates ZDoom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    # 2 (Vanilla): Emulates vanilla Doom software lighting. Requires GLSL 1.30 or greater (OpenGL 3.0+).
-    ##params+=("+gl_lightmode 0") # Light mode (Classic) for low-end HW
 
     ##params+=("'+snd_mididevice -5'") # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
