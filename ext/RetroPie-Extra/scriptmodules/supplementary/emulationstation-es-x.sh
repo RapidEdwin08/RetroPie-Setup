@@ -79,6 +79,7 @@ function sources_emulationstation-es-x() {
     if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
         # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
         applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff"
+        applyPatch "$md_data/UI-Mode-Fix-5f237788.diff"
 
         # Update HelpComponent for PNG Icons
         if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
@@ -251,6 +252,7 @@ function configure_emulationstation-es-x() {
     if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
         echo IMP FOUND: Setting [BackgroundMusic=false] in [es_settings.cfg]
         sed -i "s+BackgroundMusic\" value=.*+BackgroundMusic\" value=\"false\" /\>+" "$home/.emulationstation/es_settings.cfg"
+        sed -i "s+EnableBGM\" value=.*+EnableBGM\" value=\"false\" /\>+" "$home/.emulationstation/es_settings.cfg"
     fi
 
      # Get Latest EmulationStation-X splash from Renetrox
