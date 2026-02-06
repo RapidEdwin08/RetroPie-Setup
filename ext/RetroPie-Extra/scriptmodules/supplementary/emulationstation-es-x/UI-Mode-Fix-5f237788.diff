@@ -1,0 +1,45 @@
+diff -ur a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
+--- a/es-app/src/guis/GuiMenu.cpp	Source-20260103-5f237788
++++ b/es-app/src/guis/GuiMenu.cpp	Modified
+@@ -297,30 +297,31 @@
+ 
+ void GuiMenu::openUISettings()
+ {
+-	auto s = new GuiSettings(mWindow, _("UI SETTINGS").c_str());
++	auto s = new GuiSettings(mWindow, "UI SETTINGS");
+ 
+-	// UI mode
+-	auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, _("UI MODE").c_str(), false);
++	//UI mode
++	auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, "UI MODE", false);
+ 	std::vector<std::string> UImodes = UIModeController::getInstance()->getUIModes();
+ 	for (auto it = UImodes.cbegin(); it != UImodes.cend(); it++)
+ 		UImodeSelection->add(*it, *it, Settings::getInstance()->getString("UIMode") == *it);
++	s->addWithLabel("UI MODE", UImodeSelection);
+ 	Window* window = mWindow;
+-	s->addSaveFunc([UImodeSelection, window]
++	s->addSaveFunc([ UImodeSelection, window]
+ 	{
+ 		std::string selectedMode = UImodeSelection->getSelected();
+ 		if (selectedMode != "Full")
+ 		{
+-			std::string msg = _("You are changing the UI to a restricted mode:") + "\n" + selectedMode + "\n";
+-			msg += _("This will hide most menu-options to prevent changes to the system.") + "\n";
+-			msg += _("To unlock and return to the full UI, enter this code:") + " \n";
++			std::string msg = "You are changing the UI to a restricted mode:\n" + selectedMode + "\n";
++			msg += "This will hide most menu-options to prevent changes to the system.\n";
++			msg += "To unlock and return to the full UI, enter this code: \n";
+ 			msg += "\"" + UIModeController::getInstance()->getFormattedPassKeyStr() + "\"\n\n";
+-			msg += _("Do you want to proceed?");
++			msg += "Do you want to proceed?";
+ 			window->pushGui(new GuiMsgBox(window, msg,
+-				_("YES").c_str(), [selectedMode] {
++				"YES", [selectedMode] {
+ 					LOG(LogDebug) << "Setting UI mode to " << selectedMode;
+ 					Settings::getInstance()->setString("UIMode", selectedMode);
+ 					Settings::getInstance()->saveFile();
+-				}, _("NO").c_str(), nullptr));
++			}, "NO",nullptr));
+ 		}
+ 	});
+ 
