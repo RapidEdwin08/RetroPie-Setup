@@ -18,7 +18,7 @@ rp_module_flags=""
 
 function _get_commit_lzdoom() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in LZDoom Console
-    local branch_tag=l4.14.3
+    local branch_tag=l4.14.3a
     local branch_commit="$(git ls-remote https://github.com/drfrag666/lzdoom.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     echo $branch_commit
@@ -75,7 +75,7 @@ function sources_lzdoom() {
 
     # Apply Sector light mode
     if isPlatform "arm" || isPlatform "rpi3"; then
-        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_maplightmode, '
+        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
     fi
 
     # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
