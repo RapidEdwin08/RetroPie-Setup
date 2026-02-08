@@ -78,6 +78,9 @@ function sources_uzdoom-dev() {
         if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
 
+    # Disable [i_exit_on_not_found] ERROR_ABORT [1]
+    sed -i 's+i_exit_on_not_found, REQUIRE_DEFAULT,+i_exit_on_not_found, 1,+' "$md_build/src/common/utility/findfile.cpp"; cat "$md_build/src/common/utility/findfile.cpp" | grep ' i_exit_on_not_found, '
+
     # Apply Sector light mode
     isPlatform "rpi3" && sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
 
