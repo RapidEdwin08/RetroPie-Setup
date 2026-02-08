@@ -35,9 +35,9 @@ rp_module_licence="MIT https://github.com/Aloshi/EmulationStation/blob/master/LI
 rp_module_repo="git https://github.com/Renetrox/EmulationStation-X.git main :_get_commit_emulationstation-es-x"
 
 function _set_icons_emulationstation-es-x() {
-    # PNG [icon_style] for 0lder commit [5f237788] Choices: default arcade snes xbox psx psx-color psx-color-2 psx-light
-    echo default
-    #echo xbox
+    # Choose PNG [icon_style] for 0lder commit [5f237788]: default arcade snes xbox psx psx-color psx-color-2 psx-light
+    #echo default
+    echo xbox
 }
 
 function _get_commit_emulationstation-es-x() {
@@ -46,7 +46,6 @@ function _get_commit_emulationstation-es-x() {
     local branch_commit="$(git ls-remote https://github.com/Renetrox/EmulationStation-X.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     #echo $branch_commit
-    #echo 402fc3b4; # 20260127 Fix: create existing <folder> entries from gamelist when missing in tree
     echo 5f237788; # 20260103 Last commit before addition of Es-X Theme Downloader
 }
 
@@ -75,16 +74,17 @@ function sources_emulationstation-es-x() {
         fi
     fi
 
-    # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
+    # Fixes for Commit [5f237788]
     if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
-        # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
-        applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff"
-        applyPatch "$md_data/UI-Mode-Fix-5f237788.diff"
+        applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff" # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
+        applyPatch "$md_data/UI-Mode-Fix-5f237788.diff" # Fix Missing UI Mode Selection Menu (FULL, KIOSK, KID)
 
-        # Update HelpComponent for PNG Icons
+        # Only Update HelpComponent for PNG Icons if NOT [default]
         if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
             sed -i 's+.svg+.png+' "$md_build/es-core/src/components/HelpComponent.cpp"
         fi
+    else
+        applyPatch "$md_data/UI-Mode-Fix-a62f7972.diff" # Created against [a62f7972] - Subject to failure against 0ther Commit #s
     fi
 
     # [x3] 0ptional JoyPad Connected Popup Changes
@@ -114,6 +114,10 @@ function help_icons_emulationstation-es-x() {
             wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_a.png
             wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_b.png
         fi
+        wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_a.png.default
+        wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_b.png.default
+        wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_b.png.swapped
+        wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_a.png.swapped
         wget $icon_git/help/$icon_style/all.png -O /dev/shm/helpicons/dpad_all.png
         wget $icon_git/help/$icon_style/l.png -O /dev/shm/helpicons/button_l.png
         wget $icon_git/help/$icon_style/leftright.png -O /dev/shm/helpicons/dpad_leftright.png
