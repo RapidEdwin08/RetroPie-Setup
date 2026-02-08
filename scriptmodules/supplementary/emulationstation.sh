@@ -275,7 +275,7 @@ _EOF_
     if isPlatform "x11"; then
         mkdir -p /usr/local/share/{icons,applications}
         cp "$scriptdir/scriptmodules/$md_type/emulationstation/retropie.svg" "/usr/local/share/icons/"
-        cat > /usr/local/share/applications/retropie.desktop << _EOF_
+        cat > /usr/share/applications/RetroPie.desktop << _EOF_
 [Desktop Entry]
 Type=Application
 Exec=gnome-terminal --full-screen --hide-menubar -e emulationstation
@@ -300,7 +300,7 @@ function clear_input_emulationstation() {
 function remove_emulationstation() {
     rm -f "/usr/bin/emulationstation"
     if isPlatform "x11"; then
-        rm -rfv "/usr/local/share/icons/retropie.svg" "/usr/local/share/applications/retropie.desktop"
+        rm -rfv "/usr/local/share/icons/retropie.svg" "/usr/share/applications/RetroPie.desktop"
     fi
 }
 
@@ -382,6 +382,13 @@ function gui_emulationstation() {
                 local ra_swap="false"
                 getAutoConf "es_swap_a_b" && ra_swap="true"
                 iniSet "menu_swap_ok_cancel_buttons" "$ra_swap" "$configdir/all/retroarch.cfg"
+                # [emulationstation-es-x] Help Icon Swap for 0lder commit [5f237788]
+                local esxICONSdir=/opt/retropie/supplementary/emulationstation-es-x/resources/help/
+                local iconTYPE=default; if [[ "$ra_swap" == 'true' ]]; then iconTYPE=swapped; fi
+                if [[ -f "$esxICONSdir/button_a.png.$iconTYPE" ]]; then
+                    rm $esxICONSdir/button_a.png; cp $esxICONSdir/button_a.png.$iconTYPE $esxICONSdir/button_a.png
+                    rm $esxICONSdir/button_b.png; cp $esxICONSdir/button_b.png.$iconTYPE $esxICONSdir/button_b.png
+                fi
                 printMsgs "dialog" "You will need to reconfigure you controller in Emulation Station for the changes to take effect."
                 ;;
         esac
