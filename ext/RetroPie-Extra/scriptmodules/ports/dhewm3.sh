@@ -118,7 +118,6 @@ function gui_dhewm3() {
     case $choice in
         1)
             configure_dhewm3
-            game_data_dhewm3
             shortcuts_icons_dhewm3
             ;;
         2)
