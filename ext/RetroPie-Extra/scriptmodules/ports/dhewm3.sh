@@ -49,7 +49,7 @@ function build_dhewm3() {
     cd "$md_build/build"
     cmake "../neo"
     make clean
-    make
+    make -j"$(nproc)"
     md_ret_require="$md_build/build"
 
     local dhewm3_mod
