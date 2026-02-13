@@ -111,6 +111,11 @@ function create_chroot_image() {
     printMsgs "console" "Creating chroot from $image ..."
     rsync -aAHX --numeric-ids --delete "$tmp/" "$chroot/"
 
+    # fix up raspberry pi repos for buster image building (see buster_fix_apt_raspbiantools in raspbiantools.sh scriptmodule)
+    if [[ "$dist" == "rpios-buster" ]]; then
+        sed -i "s/raspbian\.raspberrypi\.org/legacy.raspbian.org/" "$chroot/etc/apt/sources.list"
+    fi
+
     umount -l "$tmp$boot_path" "$tmp"
     rm -rf "$tmp"
 
@@ -184,9 +189,10 @@ function install_rp_image() {
     [[ -z "$__chroot_repo" ]] && __chroot_repo="https://github.com/RetroPie/RetroPie-Setup.git"
     [[ -z "$__chroot_branch" ]] && __chroot_branch="master"
 
-    # fix up raspberry pi repos for buster image building (see buster_fix_apt_raspbiantools in raspbiantools.sh scriptmodule)
-    if [[ "$dist" == "rpios-buster" ]]; then
-        sed -i "s/raspbian\.raspberrypi\.org/legacy.raspbian.org/" "$chroot/etc/apt/sources.list"
+    # fix up initramfs-tools installation in a chroot (can't find root partition, workaround is to use MODULES=most)
+    local config="$chroot/etc/initramfs-tools/initramfs.conf"
+    if [[ -f "$config" ]]; then
+        sed -i "s/MODULES=dep/MODULES=most/" "$config"
     fi
 
     cat > "$chroot/home/pi/install.sh" <<_EOF_
@@ -228,6 +234,11 @@ _EOF_
 
     rm "$chroot/home/pi/install.sh"
 
+    # restore initramfs-tools config to default
+    if [[ -f "$config" ]]; then
+        sed -i "s/MODULES=most/MODULES=dep/" "$config"
+    fi
+
     # remove any ssh host keys that may have been generated during any ssh package upgrades
     rm -f "$chroot/etc/ssh/ssh_host"*
 }
@@ -240,9 +251,10 @@ function _init_chroot_image() {
     trap "_trap_chroot_image '$chroot'" INT
 
     # mount special filesystems to chroot
-    mkdir -p "$chroot"{/dev/pts,/proc}
+    mkdir -p "$chroot"{/dev/pts,/proc,/sys}
     mount none -t devpts "$chroot/dev/pts"
     mount -t proc /proc "$chroot/proc"
+    mount -t sysfs /sys "$chroot/sys"
 
     local nameserver="$__nameserver"
     [[ -z "$nameserver" ]] && nameserver="$(nmcli device show | grep IP4.DNS | awk '{print $NF; exit}')"
@@ -268,7 +280,7 @@ function _deinit_chroot_image() {
         mv "$chroot/etc/ld.so.preload.bak" "$chroot/etc/ld.so.preload"
     fi
 
-    umount -l "$chroot/proc" "$chroot/dev/pts"
+    umount -l "$chroot/proc" "$chroot/dev/pts" "$chroot/sys"
     trap INT
 }
 
