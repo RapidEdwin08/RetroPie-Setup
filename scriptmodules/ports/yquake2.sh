@@ -13,7 +13,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="yquake2"
 rp_module_desc="yquake2 - The Yamagi Quake II client"
-rp_module_help="Place Quake II Game Folders in [ports/quake2]:\nbaseq2\nxatrix\nrogue\nzaero\nctf"
+rp_module_help="Place Quake II Game Folders in [ports/quake2]:\nbaseq2\nxatrix\nrogue\nzaero\nctf\nctc"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/yquake2/yquake2/master/LICENSE"
 rp_module_repo="git https://github.com/yquake2/yquake2.git QUAKE2_8_60"
 rp_module_section="exp"
@@ -30,10 +30,21 @@ function sources_yquake2() {
     # get the add-ons sources
     gitPullOrClone "$md_build/xatrix" "https://github.com/yquake2/xatrix" "XATRIX_2_16"
     gitPullOrClone "$md_build/rogue" "https://github.com/yquake2/rogue" "ROGUE_2_15"
+    git clone --branch master --depth 1 https://github.com/yquake2/zaero.git "$md_build/zaero"
 
     # 1st enables Guide+Start to quit. 2nd restores buttons to SDL2 style (from SDL3).
     applyPatch "$md_data/hotkey_exit.diff"
     applyPatch "$md_data/sdl2_joylabels.diff"
+
+    # get the Capture The Flag add-ons sources
+    git clone --branch master --depth 1 https://github.com/yquake2/ctf.git "$md_build/ctf"
+
+    # get the Catch The Chicken add-ons sources
+    git clone --branch master --depth 1 https://github.com/haegrr/q2-ctc.git "$md_build/ctc"
+    sed -i 's+game$(ARCH).so+game.so+g' "$md_build/ctc/Makefile"
+
+    # Fix ctc build Error: multiple definition of `pTempFind'
+    if [[ "$__gcc_version" -gt 11 ]]; then sed -i 's+sPlayerList \*pTempFind;+sPlayerList \*pTempFind();+g' "$md_build/ctc/q2cam/camclient.h"; fi
 }
 
 function build_yquake2() {
@@ -49,12 +60,19 @@ function build_yquake2() {
     make ${params[@]}
 
     # build the add-ons source
-    for repo in 'xatrix' 'rogue'; do
+    for repo in 'xatrix' 'rogue' 'zaero' 'ctf'; do
         make -C "$repo" clean
         make -C "$repo"
         # add-ons: rename the 'release' folder so it's installed under '$repo' by the install func
         [[ -f "$repo/release/game.so" ]] && mv "$repo/release" "$repo/$repo"
     done
+
+    cd "$md_build/ctc"
+    make clean
+    make -j"$(nproc)"
+    #md_ret_require="$md_build/ctc/game.so"
+    mkdir -p "$md_build/ctc/ctc"; [[ -f "$md_build/ctc/game.so" ]] && mv "$md_build/ctc/game.so" "$md_build/ctc/ctc/"
+
     md_ret_require="$md_build/release/quake2"
 }
 
@@ -66,7 +84,10 @@ function install_yquake2() {
         'LICENSE'
         'README.md'
         'xatrix/xatrix'
+        'zaero/zaero'
         'rogue/rogue'
+        'ctf/ctf'
+        'ctc/ctc'
     )
 
     isPlatform "gl" || isPlatform "mesa" && md_ret_files+=('release/ref_gl1.so')
@@ -83,6 +104,7 @@ function add_games_yquake2() {
         ['rogue']="Quake II XP2 Ground Zero"
         ['zaero']="Quake II AddOn Zaero"
         ['ctf']="Quake II Capture The Flag"
+        ['ctc']="Quake II Catch The Chicken"
     )
 
     local game
@@ -90,6 +112,8 @@ function add_games_yquake2() {
         if [[ -f "$romdir/ports/quake2/$game/pak0.pak" ]]; then
             if [[ "$game" == "ctf" ]]; then
                 addPort "$md_id" "quake2" "${games[$game]}" "$cmd" "ctf +map q2ctf1 +set deathmatch 1"
+            elif [[ "$game" == "ctc" ]]; then
+                addPort "$md_id" "quake2" "${games[$game]}" "$cmd" "ctc +map arena1 +set deathmatch 1 +set allowmenu 1 +set autostart 1 +set cl_run 1 +chicken 1"
             else
                 addPort "$md_id" "quake2" "${games[$game]}" "$cmd" "$game"
             fi
@@ -106,6 +130,10 @@ function game_data_yquake2() {
         for unwanted in $(find "$romdir/ports/quake2" -maxdepth 2 -name "*.so" -o -name "*.cfg" -o -name "*.dll" -o -name "*.exe"); do
             rm -f "$unwanted"
         done
+    fi
+
+    if [[ ! -f "$romdir/ports/quake2/ctf/pak1.pak" ]] || [[ ! -f "$romdir/ports/quake2/ctc/pak0.pak" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/yquake2-rp-assets.tar.gz" "$romdir/ports/quake2"
     fi
 
     chown -R "$__user":"$__group" "$romdir/ports/quake2"
@@ -131,6 +159,10 @@ function remove_yquake2() {
     shortcut_name="Quake II Capture The Flag"
     rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
     rm -f "$romdir/ports/$shortcut_name.sh"
+
+    shortcut_name="Quake II Catch The Chicken"
+    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
+    rm -f "$romdir/ports/$shortcut_name.sh"
 }
 
 function gui_yquake2() {
@@ -140,8 +172,9 @@ function gui_yquake2() {
 
     case $choice in
         1)
-            add_games_yquake2
-            shortcuts_icons_yquake2
+            configure_yquake2
+            #add_games_yquake2
+            #shortcuts_icons_yquake2
             ;;
         2)
             echo "Canceled"
@@ -157,6 +190,12 @@ function configure_yquake2() {
     local renderer="soft"
 
     mkRomDir "ports/quake2"
+    mkRomDir "ports/quake2/baseq2"
+    mkRomDir "ports/quake2/xatrix"
+    mkRomDir "ports/quake2/rogue"
+    mkRomDir "ports/quake2/zaero"
+    mkRomDir "ports/quake2/ctf"
+    mkRomDir "ports/quake2/ctc"
 
     moveConfigDir "$home/.yq2" "$md_conf_root/quake2/yquake2"
     mkUserDir "$md_conf_root/quake2/yquake2/baseq2"
@@ -293,6 +332,28 @@ GenericName=$shortcut_name
 Comment=$shortcut_name
 Exec=$md_inst/quake2 -datadir $romdir/ports/quake2 +set game $addon_name +map q2ctf1 +set deathmatch 1
 Icon=$md_inst/QuakeIICTF_32x32.xpm
+Terminal=false
+Type=Application
+Categories=Game;Emulator
+Keywords=QuakeII;$addon_name
+StartupWMClass=QuakeII$addon_name
+Name[en_US]=$shortcut_name
+_EOF_
+    chmod 755 "$md_inst/$shortcut_name.desktop"
+    if [[ -f "$romdir/ports/quake2/$addon_name/pak0.pak" ]]; then
+        if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
+    fi
+
+    addon_name=ctc
+    shortcut_name="Quake II Catch The Chicken"
+    cat >"$md_inst/$shortcut_name.desktop" << _EOF_
+[Desktop Entry]
+Name=$shortcut_name
+GenericName=$shortcut_name
+Comment=$shortcut_name
+Exec=$md_inst/quake2 -datadir $romdir/ports/quake2 +set game $addon_name +map arena1 +set deathmatch 1 +set allowmenu 1 +set autostart 1 +set cl_run 1 +chicken 1
+Icon=$md_inst/QuakeIICTC_48x48.xpm
 Terminal=false
 Type=Application
 Categories=Game;Emulator
@@ -2760,5 +2821,165 @@ static char * QuakeII_68x68_xpm[] = {
 "                                                          r , 5             v > 5                                                       ",
 "                                                          - d               - i                                                         ",
 "                                                          w a               p ^                                                         "};
+_EOF_
+
+    cat >"$md_inst/QuakeIICTC_48x48.xpm" << _EOF_
+/* XPM */
+static char * QuakeIICTC_48x48_xpm[] = {
+"48 48 106 2",
+"   c None",
+".  c #DBDBDB",
+"+  c #1B1B17",
+"@  c #2B2B23",
+"#  c #AB2B00",
+"\$     c #CBD7DF",
+"%  c #8F1700",
+"&  c #87A7B7",
+"*  c #CBCBCB",
+"=  c #6B6B6B",
+"-  c #9B9B9B",
+";  c #ABABAB",
+">  c #5B5B5B",
+",  c #5B5B43",
+"'  c #FFFFA7",
+")  c #EF7F00",
+"!  c #3F3F3F",
+"~  c #533F1F",
+"{  c #FFFF53",
+"]  c #FFEB1F",
+"^  c #3F4F1B",
+"/  c #4B4B4B",
+"(  c #47778B",
+"_  c #FFFF27",
+":  c #CB8B23",
+"<  c #AF771F",
+"[  c #FFAB07",
+"}  c #576733",
+"|  c #FFD717",
+"1  c #FF9300",
+"2  c #B73B00",
+"3  c #7F1F0F",
+"4  c #571F13",
+"5  c #473F43",
+"6  c #9B1F00",
+"7  c #FFFF7F",
+"8  c #D35700",
+"9  c #730700",
+"0  c #433327",
+"a  c #8B2713",
+"b  c #EB9F27",
+"c  c #C74700",
+"d  c #5F0000",
+"e  c #332F2F",
+"f  c #93631B",
+"g  c #671707",
+"h  c #7B7B7B",
+"i  c #7F8363",
+"j  c #534B53",
+"k  c #7F0F00",
+"l  c #3B3737",
+"m  c #2F2F2F",
+"n  c #171717",
+"o  c #1B1B1B",
+"p  c #0F0F0B",
+"q  c #1F1F1F",
+"r  c #8B8B8B",
+"s  c #BBBBBB",
+"t  c #272727",
+"u  c #232323",
+"v  c #EBEBEB",
+"w  c #FFFFFF",
+"x  c #5B5B67",
+"y  c #574F5B",
+"z  c #231F2F",
+"A  c #27273F",
+"B  c #3F3F67",
+"C  c #373757",
+"D  c #2F2F4B",
+"E  c #474773",
+"F  c #1B1723",
+"G  c #4B4F7F",
+"H  c #4F474B",
+"I  c #574333",
+"J  c #6B2B1B",
+"K  c #130F17",
+"L  c #00171F",
+"M  c #634B23",
+"N  c #2B0F07",
+"O  c #3F1F1F",
+"P  c #001F2B",
+"Q  c #6F3B17",
+"R  c #774F17",
+"S  c #53578F",
+"T  c #5F6F3B",
+"U  c #5B431F",
+"V  c #5B2F2F",
+"W  c #3F3B3B",
+"X  c #5F4737",
+"Y  c #E36B00",
+"Z  c #532F17",
+"\`     c #000F13",
+" . c #5B3B0F",
+".. c #37372B",
+"+. c #47371B",
+"@. c #00070B",
+"#. c #331B1B",
+"\$.    c #5F3717",
+"%. c #633333",
+"&. c #0F435B",
+"*. c #4B2323",
+"=. c #734343",
+"-. c #9F5733",
+";. c #73170B",
+">. c #572B2B",
+",. c #2F2B2B",
+"                                                                                                ",
+"                                                                  .     + @ @ @ @ @ @ @ @ @     ",
+"                                      #                           .     + \$ \$ \$ \$ \$ \$ \$ \$ @     ",
+"                                    # #                         . .     + \$ \$ \$ \$ \$ \$ \$ \$ @     ",
+"                .                   # %                       . . .     + \$ \$ + + + + \$ \$ @     ",
+"                .                   # %                       . .       + & & @ @ + + & & @     ",
+"              . .                   * * =                     . .       + & & @ + + + + + +     ",
+"              . *                 - ; ; * >                   .         + & & @ + @ @ @ @ @     ",
+"              . *                 , ' ' ) !                             + & & @ + @ + @ @ @     ",
+"              .                   ~ { { ] ^ /                           + ( ( @ + @ + ( ( @     ",
+"                                _ : < < [ } >                           + ( ( @ @ @ + ( ( @     ",
+"                            # | | | 1 1 2 3 4 5                         + ( ( ( ( ( ( ( ( @     ",
+"                          6 2 7 7 | 1 1 8 # 9 0 !                       + ( ( ( ( ( ( ( ( @     ",
+"                          % a 8 8 b ) ) c # 6 d e                       + + + + + + + + + +     ",
+"                  .           # # 2 2 2 # f % g           .             + @ @ @ @ @ @ @ @ +     ",
+"            . . . .           h h i = = ! j 3 k           . . .         + \$ \$ \$ \$ \$ \$ \$ \$ +     ",
+"        . . . . .               l l m m n o   k           . . . .       + \$ \$ \$ \$ \$ \$ \$ \$ +     ",
+"        .                       l l m m p     9               . .       + + + + \$ \$ + + + +     ",
+"                              = = = / / q o       ! l         . .       + + + + & & + + + +     ",
+"                      = > ! h ; ; r h h @ m / / r - - =         . .     + + + + & & + + + +     ",
+"                  - s r s . . * * r r r t u ! m m / = r                 + + + + & & + + + +     ",
+"                  h h - v v * * * * - - / / @ t m ! / >                 + + + + ( ( + + + +     ",
+"                  r r ; w * . * * * ; ; = x t t m l j >                 + + + + ( ( + + + +     ",
+"                  = = s * . . s s * - - h > / l m l ! x                 + + + + ( ( + + + +     ",
+"        .         = = s . * . * * s r r h j ! ! t m m >                 + + + + + + + + + +     ",
+"        .         x = \$ . . \$ * * s r r = = ! ! t m l y                 + + + + + + + + + +     ",
+"      . .             s . * . s s - = = > = / m z t ! !                 + \$ \$ \$ \$ \$ \$ \$ \$ +     ",
+"    . .               ; ; ; \$ * * ; = = > x / m A ! !                   + \$ \$ \$ \$ \$ \$ \$ \$ +     ",
+"    . . B   C D - ; ; ; - - - - - r = = / = ! ! 5 x h r A z z           + \$ \$ + + + + \$ \$ +     ",
+"    . B B B D E s s s ; r h h r r = x x > y ! ! ! h - - B F F A F       + & & + + + + & & +     ",
+"    G B A A A s s - r = = > j > > > y y 5 l ! l j = h - = z z F z A     + & & + + + + + + +     ",
+"  E E C D D A - h h h j y H H H H j H H ! l m l l ! = = y z z F F z A   + & & + + + + + + +     ",
+"B G B C D D f 2 I j A z A A z A A A z z F z F F z z A 5 J z z K L F z   + & & + + + + + + +     ",
+"E E C B M M f N A F F z A A A A A A F F A A z z z z z F a O O K K L z   + ( ( + + + + ( ( +     ",
+"G E C C < < < z F F A A A A A A A A A A A P z F z z z z < Q Q F K K z   + ( ( + + + + ( ( +     ",
+"G G B C < < c F z D D D D D D D D A A A A A A P A z F z R 2 2 K K K K   + ( ( ( ( ( ( ( ( +     ",
+"G G B C R R 2 z A D D D C D D D D A A A D A A A z z F z : < < K K K F   + ( ( ( ( ( ( ( ( +     ",
+"E S B C T T < U V C D D D C C C C C C C D D A A A A z z f # # F K F K   + + + + + + + + + +     ",
+"G G B D D D : < Q D A D C D C C C D D D D C A A A A z z : f f F L K F                           ",
+"G G B C C C : Q z z A D C C C C C D C C D D D D D A W X Y Z Z K \` K K                           ",
+"G E B C 5 5 1  .F z D D C C B C C C D D C C C C D A ..) Y +.+.F @.K K       v v                 ",
+"G E B C M M ) R z A D D D C C B B C C C D C C C D A f ) 2 #.#.K K K K         v v               ",
+"G E B C f f Y ) \$.z A D D C C C C C C C C C C C A f : ) 2 F F \` K F K           v v v           ",
+"E E B B %.%.8 8 f z z D C C C &.&.C C C C C C l U Y c 2 g F F K \` F F               v           ",
+"B E D B C C *.A z A A A D C B C C C C C C C =.-.;.% c # F F F K F K F                           ",
+"B B C D C C C D D D D D D C B C C C C C D C D A A >.z F F F F F F F F                           ",
+"B C C C D D C D D C D D C C C D D C D D D D C A A A ,.q F F F F F F F                           ",
+"A A D D C C C C C C C D C C C D D D A A D D D A z F F F F F F F F F F                           "};
 _EOF_
 }
