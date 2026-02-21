@@ -21,6 +21,7 @@ rp_module_flags="sdl2"
 
 function depends_yquake2() {
     local depends=(libgl1-mesa-dev libglu1-mesa-dev libogg-dev libopenal-dev libsdl2-dev libvorbis-dev zlib1g-dev libcurl4-openssl-dev)
+    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
 
     getDepends "${depends[@]}"
 }
@@ -67,11 +68,14 @@ function build_yquake2() {
         [[ -f "$repo/release/game.so" ]] && mv "$repo/release" "$repo/$repo"
     done
 
+    # Catch The Chicken
+    if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
     cd "$md_build/ctc"
     make clean
     make -j"$(nproc)"
     #md_ret_require="$md_build/ctc/game.so"
     mkdir -p "$md_build/ctc/ctc"; [[ -f "$md_build/ctc/game.so" ]] && mv "$md_build/ctc/game.so" "$md_build/ctc/ctc/"
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
 
     md_ret_require="$md_build/release/quake2"
 }
