@@ -193,7 +193,7 @@ case \$FILENAME in
     "P00M.p8") # [CC BY-NC 4.0] https://creativecommons.org/licenses/by-nc/4.0/
         echo "[\$FILENAME]" >> /dev/shm/runcommand.log 2>&1
         [[ ! -f "$md_inst/$(_get_poomdir_pico-8)/$(_get_poombin_pico-8)" ]] && MissingPICO8
-        popd; pushd /opt/retropie/emulators/pico-8/$(_get_poomdir_pico-8)
+        popd; pushd "$md_inst/$(_get_poomdir_pico-8)"
         ./$(_get_poombin_pico-8)
     ;;
     *"Splore.p8")
