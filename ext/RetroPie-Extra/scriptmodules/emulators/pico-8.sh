@@ -192,17 +192,17 @@ pushd /opt/retropie/emulators/pico-8
 case \$FILENAME in
     "P00M.p8") # [CC BY-NC 4.0] https://creativecommons.org/licenses/by-nc/4.0/
         echo "[\$FILENAME]" >> /dev/shm/runcommand.log 2>&1
-        [[ ! -f "/opt/retropie/emulators/pico-8/poom_1.9_linux/poom_1.9" ]] && MissingPICO8
+        [[ ! -f "$md_inst/$(_get_poomdir_pico-8)/$(_get_poombin_pico-8)" ]] && MissingPICO8
         popd; pushd /opt/retropie/emulators/pico-8/$(_get_poomdir_pico-8)
         ./$(_get_poombin_pico-8)
     ;;
     *"Splore.p8")
         echo "[\$FILENAME]" >> /dev/shm/runcommand.log 2>&1
-        [[ ! -f "/opt/retropie/emulators/pico-8/$(_get_bin_pico-8)" ]] && MissingPICO8
+        [[ ! -f "$md_inst/$(_get_bin_pico-8)" ]] && MissingPICO8
         ./$(_get_bin_pico-8) -splore -root_path "\$ROMDIR"
     ;;
     *)
-        [[ ! -f "/opt/retropie/emulators/pico-8/$(_get_bin_pico-8)" ]] && MissingPICO8
+        [[ ! -f "$md_inst/$(_get_bin_pico-8)" ]] && MissingPICO8
         ./$(_get_bin_pico-8) -root_path "\$ROMDIR" -run "\$ROM"
     ;;
 esac
@@ -223,7 +223,7 @@ function shortcuts_icons_pico-8() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/pico8.sh $romdir/pico8/+Start\ Splore.p8
+Exec=$md_inst/pico8.sh $romdir/pico8/Splore.p8
 Icon=$md_inst/splore_78x78.xpm
 Terminal=false
 Type=Application
@@ -242,7 +242,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/pico8.sh $romdir/pico8/P00M.p8
+Exec=$md_inst/$(_get_poomdir_pico-8)/$(_get_poombin_pico-8)
 Icon=$md_inst/poom_128x128.xpm
 Terminal=false
 Type=Application
