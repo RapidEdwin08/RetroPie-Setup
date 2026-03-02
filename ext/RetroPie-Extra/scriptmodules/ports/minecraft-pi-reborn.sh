@@ -107,6 +107,8 @@ function remove_minecraft-pi-reborn() {
     rm -f "/usr/share/applications/Minecraft Pi Edition Reborn (Server).desktop"
     rm -f "$home/Desktop/Minecraft Pi Edition Reborn (Server).desktop"
     rm -f "$romdir/ports/+Start Minecraft Pi Edition Reborn (Server).sh"
+
+    rm -f "$home/.qjoypad3/Minecraft.lyt"
 }
 
 function configure_minecraft-pi-reborn() {
