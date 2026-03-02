@@ -78,21 +78,10 @@ function add_games_lr-tyrquake() {
 }
 
 function remove_lr-tyrquake() {
-    local shortcut_name="Quake"
-    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/ports/$shortcut_name.sh"
-
-    shortcut_name="Quake I Episode 5 (dopa)"
-    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/ports/$shortcut_name.sh"
-
-    shortcut_name="Quake I Mission Pack 1 (hipnotic)"
-    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/ports/$shortcut_name.sh"
-
-    shortcut_name="Quake I Mission Pack 2 (rogue)"
-    rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-    rm -f "$romdir/ports/$shortcut_name.sh"
+    local shortcut_name
+    for shortcut_name in "Quake" "Quake I Episode 5 (dopa)" "Quake I Mission Pack 1 (hipnotic)" "Quake I Mission Pack 2 (rogue)"; do
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"; rm -f "$romdir/ports/$shortcut_name.sh"
+    done
 }
 
 function gui_lr-tyrquake() {
@@ -102,8 +91,7 @@ function gui_lr-tyrquake() {
 
     case $choice in
         1)
-            add_games_lr-tyrquake
-            shortcuts_icons_lr-tyrquake
+            configure_lr-tyrquake
             ;;
         2)
             echo "Canceled"
