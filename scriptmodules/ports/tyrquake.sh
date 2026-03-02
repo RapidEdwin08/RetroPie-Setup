@@ -52,8 +52,9 @@ function add_games_tyrquake() {
     local params=("-basedir $romdir/ports/quake" "-game %QUAKEDIR%")
     local binary="$md_inst/bin/tyr-quake"
 
-    isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%" "+set vid_vsync 2")
-    if isPlatform "gl" || isPlatform "mesa"; then
+    isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
+    if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
+        params+=("+set vid_vsync 2")
         binary="$md_inst/bin/tyr-glquake"
     fi
 
