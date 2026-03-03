@@ -24,7 +24,8 @@ rp_module_flags="noinstclean"
 
 function depends_quakespasm() {
     #getDepends libmad0-dev libmpg123-0 libogg0 libvorbis-dev gambas3-gb-opengl-glsl glslang-dev libsdl2-dev
-    local depends=(libmad0-dev libogg0 libvorbis-dev gambas3-gb-opengl-glsl glslang-dev libsdl2-dev)
+    local depends=(libmad0-dev libogg0 libvorbis-dev gambas3-gb-opengl-glsl libsdl2-dev)
+    #depends+=(glslang-dev)
 
     # use libmpg123-0t64 for Trixie or higher
     if compareVersions $__gcc_version lt 14; then
