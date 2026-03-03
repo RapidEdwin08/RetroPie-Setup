@@ -162,10 +162,19 @@ function configure_quakespasm() {
     [[ "$md_mode" == "remove" ]] && remove_quakespasm
     [[ "$md_mode" == "remove" ]] && return
 
-    local q_width="1280"
-    local q_height="960"
-    local q_scale="2"
-    if isPlatform "rpi" && ! isPlatform "vulkan"; then q_width="800"; q_height="600"; q_scale="1.7"; fi
+    local q_vsync="0"
+    local q_width="1920"
+    local q_height="1080"
+    local q_scale="2.25"
+    local q_texturemode="GL_NEAREST_MIPMAP_LINEAR"
+    q_fullscreen="1"
+    isPlatform "kms" && q_fullscreen="0"
+    if isPlatform "rpi" && ! isPlatform "vulkan"; then q_texturemode="GL_NEAREST"; fi
+    if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
+        q_vsync="1"
+    else
+        q_width="640"; q_height="480"; q_vsync="0"; q_scale="1.2"; q_texturemode="GL_NEAREST"; q_fullscreen="0"
+    fi
     cat >"$md_inst/config.cfg" << _EOF_
 unbindall
 bind "TAB" "+showscores"
@@ -260,7 +269,7 @@ gl_overbright "1"
 gl_overbright_models "1"
 gl_subdivide_size "128"
 gl_texture_anisotropy "8"
-gl_texturemode "GL_LINEAR_MIPMAP_LINEAR"
+gl_texturemode "$q_texturemode"
 gl_triplebuffer "1"
 host_maxfps "72"
 joy_deadzone_look "0.175"
@@ -311,10 +320,10 @@ vid_borderless "0"
 vid_bpp "32"
 vid_desktopfullscreen "1"
 vid_fsaa "0"
-vid_fullscreen "1"
+vid_fullscreen "$q_fullscreen"
 vid_height "$q_height"
 vid_refreshrate "60"
-vid_vsync "1"
+vid_vsync "$q_vsync"
 vid_width "$q_width"
 viewsize "100"
 volume "0.5"
