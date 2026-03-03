@@ -167,7 +167,7 @@ function configure_quakespasm() {
     local q_height="1080"
     local q_scale="2.25"
     local q_texturemode="GL_NEAREST_MIPMAP_LINEAR"
-    q_fullscreen="1"
+    local q_fullscreen="1"
     isPlatform "kms" && q_fullscreen="0"
     if isPlatform "rpi" && ! isPlatform "vulkan"; then q_texturemode="GL_NEAREST"; fi
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
