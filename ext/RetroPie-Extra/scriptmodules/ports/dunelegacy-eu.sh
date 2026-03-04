@@ -101,8 +101,7 @@ function gui_dunelegacy-eu() {
 
     case $choice in
         1)
-            game_data_dunelegacy-eu
-            shortcuts_icons_dunelegacy-eu
+            configure_dunelegacy-eu
             ;;
         2)
             echo "Canceled"
