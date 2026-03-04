@@ -97,8 +97,7 @@ function gui_rott-huntbgin() {
 
     case $choice in
         1)
-            game_data_rott-huntbgin
-            shortcuts_icons_rott-huntbgin
+            configure_rott-huntbgin
             ;;
         2)
             echo "Canceled"
