@@ -79,7 +79,7 @@ function gui_rednukem() {
 
     case $choice in
         1)
-            shortcuts_icons_rednukem
+            configure_rednukem
             ;;
         2)
             echo "Canceled"
