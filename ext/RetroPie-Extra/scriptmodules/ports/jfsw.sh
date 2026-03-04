@@ -98,8 +98,6 @@ function gui_jfsw() {
     case $choice in
         1)
             configure_jfsw
-            gamedata_jfsw
-            shortcuts_icons_jfsw
             ;;
         2)
             echo "Canceled"
