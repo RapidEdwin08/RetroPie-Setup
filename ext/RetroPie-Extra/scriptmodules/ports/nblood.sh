@@ -79,7 +79,7 @@ function gui_nblood() {
 
     case $choice in
         1)
-            shortcuts_icons_nblood
+            configure_nblood
             ;;
         2)
             echo "Canceled"
