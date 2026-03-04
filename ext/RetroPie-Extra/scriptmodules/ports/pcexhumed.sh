@@ -82,8 +82,7 @@ function gui_pcexhumed() {
 
     case $choice in
         1)
-            game_data_pcexhumed
-            shortcuts_icons_pcexhumed
+            configure_pcexhumed
             ;;
         2)
             echo "Canceled"
