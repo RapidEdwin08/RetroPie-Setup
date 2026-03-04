@@ -96,8 +96,7 @@ function gui_hexen2-gl() {
 
     case $choice in
         1)
-            game_data_hexen2-gl
-            shortcuts_icons_hexen2-gl
+            configure_hexen2-gl
             ;;
         2)
             echo "Canceled"
