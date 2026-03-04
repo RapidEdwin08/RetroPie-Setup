@@ -91,7 +91,7 @@ function gui_rott-darkwar() {
 
     case $choice in
         1)
-            shortcuts_icons_rott-darkwar
+            configure_rott-darkwar
             ;;
         2)
             echo "Canceled"
