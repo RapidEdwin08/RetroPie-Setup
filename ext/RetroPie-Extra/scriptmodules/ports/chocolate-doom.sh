@@ -142,8 +142,7 @@ function gui_chocolate-doom() {
 
     case $choice in
         1)
-            game_data_chocolate-doom
-            shortcuts_icons_chocolate-doom
+            configure_chocolate-doom
             ;;
         2)
             echo "Canceled"
