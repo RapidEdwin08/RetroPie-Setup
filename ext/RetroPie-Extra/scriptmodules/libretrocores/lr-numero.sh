@@ -38,13 +38,13 @@ function install_lr-numero() {
 }
 
 function game_data_lr-numero() {
-    if [[ ! -f "$romdir/ti83/TIDOOM.8XG" ]] || [[ ! -f "$md_inst/TIDOOM.8XG" ]]; then
+    if [[ ! -f "$romdir/ti83/TIDOOM.8XG" ]] || [[ ! -f "$md_inst/tidoom/TIDOOM.8XG" ]]; then
         # Get Numero Assets: TI DooM, media, and gamelist.xml
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/libretrocores/numero-rp-assets.tar.gz" "$romdir/ti83"
         if [[ ! -f "$romdir/ti83/gamelist.xml" ]]; then mv "$romdir/ti83/gamelist.xml.ti83" "$romdir/ti83/gamelist.xml"; fi
-        if [[ ! -f "$md_inst/TIDOOM.8XG" ]]; then cp "$romdir/ti83/TIDOOM.8XG" "$md_inst/TIDOOM.8XG"; fi
+        if [[ ! -f "$md_inst/tidoom/TIDOOM.8XG" ]]; then mkdir -p "$md_inst/tidoom"; cp "$romdir/ti83/TIDOOM.8XG" "$md_inst/tidoom/TIDOOM.8XG"; fi
         chown -R $__user:$__user "$romdir/ti83"
-        chown $__user:$__user "$md_inst/TIDOOM.8XG"
+        chown -R $__user:$__user "$md_inst/tidoom" # tisavestateprogressti83se.sav
     fi
     # Extra Systems for carbon-2021: cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
     if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/ti83.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
@@ -113,7 +113,7 @@ function shortcuts_icons_lr-numero() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-numero/numero_libretro.so --config /opt/retropie/configs/ti83/retroarch.cfg $md_inst/TIDOOM.8XG
+Exec=/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-numero/numero_libretro.so --config /opt/retropie/configs/ti83/retroarch.cfg $md_inst/tidoom/TIDOOM.8XG
 Icon=$md_inst/TIDooM_63x128.xpm
 Terminal=false
 Type=Application
