@@ -44,6 +44,10 @@ function game_data_lr-numero() {
         if [[ ! -f "$romdir/ti83/gamelist.xml" ]]; then mv "$romdir/ti83/gamelist.xml.ti83" "$romdir/ti83/gamelist.xml"; fi
         chown -R $__user:$__user "$romdir/ti83"
     fi
+    # Extra Systems for carbon-2021: cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
+    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/ti83.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-assets.tar.gz" "/etc/emulationstation/themes"
+    fi
 }
 
 function game_bios_lr-numero() {
