@@ -81,8 +81,7 @@ function gui_jftekwar() {
 
     case $choice in
         1)
-            gamedata_jftekwar
-            shortcuts_icons_jftekwar
+            configure_jftekwar
             ;;
         2)
             echo "Canceled"
