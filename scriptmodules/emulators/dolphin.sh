@@ -53,6 +53,7 @@ function depends_dolphin() {
     # Trixie
     if [[ ! "$__os_debian_ver" -ge 13 ]]; then depends+=(libmbedtls-dev); fi
     if [[ ! $(dpkg --list | grep libmbedx509-7) == '' ]]; then echo IF BUILD ERROR ON TRIXIE OR NEWER TRY: apt remove libmbedtls-dev libmbedtls21 libmbedx509-7; fi
+    if [[ ! $(dpkg --list | grep libfmt-dev) == '' ]]; then echo IF BUILD ERROR ON TRIXIE OR NEWER TRY: apt remove libfmt-dev; fi
 
     getDepends "${depends[@]}"
 }
