@@ -15,13 +15,13 @@ rp_module_id="scummvm"
 rp_module_desc="ScummVM - Script Creation Utility for Maniac Mansion"
 rp_module_help="Place your ScummVM games in: $romdir/scummvm\n\nThe name of your game directories must be suffixed with '.svm' for direct launch in EmulationStation\n\n             Ctrl-F5 for ScummVM MENU"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/scummvm/scummvm/master/COPYING"
-rp_module_repo="git https://github.com/scummvm/scummvm.git v2.9.1"
+rp_module_repo="git https://github.com/scummvm/scummvm.git v2026.1.0"
 rp_module_section="opt"
 rp_module_flags="sdl2"
 
 function depends_scummvm() {
     local depends=(
-        liba52-0.7.4-dev libmpeg2-4-dev libogg-dev libvorbis-dev libflac-dev libgif-dev libmad0-dev libpng-dev
+        liba52-0.7.4-dev libmpeg2-4-dev libogg-dev libvorbis-dev libenet-dev libflac-dev libgif-dev libmad0-dev libpng-dev
         libtheora-dev libfaad-dev libfluidsynth-dev libfreetype6-dev zlib1g-dev
         libjpeg-dev libasound2-dev libcurl4-openssl-dev libmikmod-dev libvpx-dev
         fluid-soundfont-gm
@@ -47,17 +47,12 @@ function build_scummvm() {
         --prefix="$md_inst"
         --enable-release --enable-vkeybd
         --disable-debug --disable-eventrecorder --disable-sonivox
+        --disable-updates --disable-discord --disable-imgui --disable-gtk
     )
-    isPlatform "rpi" && isPlatform "32bit" && params+=(--host=raspberrypi)
     isPlatform "rpi" && [[ "$md_id" == "scummvm-sdl1" ]] && params+=(--opengl-mode=none)
-    # stop scummvm using arm-linux-gnueabihf-g++ which is v4.6 on
-    # wheezy and doesn't like rpi2 cpu flags
-    if isPlatform "rpi"; then
-        if [[ "$md_id" == "scummvm-sdl1" ]]; then
-            SDL_CONFIG=sdl-config CC="gcc" CXX="g++" ./configure "${params[@]}"
-        else
-            CC="gcc" CXX="g++" ./configure "${params[@]}"
-        fi
+
+    if [[ "$md_id" == "scummvm-sdl1" ]]; then
+        SDL_CONFIG=sdl-config ./configure "${params[@]}"
     else
         ./configure "${params[@]}"
     fi
