@@ -54,14 +54,14 @@ function depends_dolphin() {
     if [[ ! "$__os_debian_ver" -ge 13 ]]; then depends+=(libmbedtls-dev); fi
     if [[ ! $(dpkg --list | grep libmbedx509-7) == '' ]]; then echo IF BUILD ERROR ON TRIXIE OR NEWER TRY: apt remove libmbedtls-dev libmbedtls21 libmbedx509-7; fi
 
-    # https://github.com/dolphin-emu/dolphin/pull/14396
-    sed -i 's+fmt>=10.1+fmt>=11.0+' "$md_build/CMakeLists.txt"
-
     getDepends "${depends[@]}"
 }
 
 function sources_dolphin() {
     gitPullOrClone
+
+    # https://github.com/dolphin-emu/dolphin/pull/14396
+    sed -i 's+fmt>=10.1+fmt>=11.0+' "$md_build/CMakeLists.txt"
 }
 
 function build_dolphin() {
