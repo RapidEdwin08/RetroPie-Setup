@@ -15,10 +15,16 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="minecraft-pi-reborn"
 rp_module_desc="Minecraft Pi Edition Reborn"
-rp_module_help="Minecraft Pi Edition Reborn (also known as MCPI-Reborn) is a modding project for Minecraft Pi Edition.\n \nMCPI-Repo:\ngithub.com/MCPI-Revival/minecraft-pi-reborn\n \nMCPI-Repo Seeds:\nmcpi-revival.github.io/mcpi-repo/seeds/\n \nMinecraft's sound is NOT Distributed with MCPI-Reborn.\nSound can found in MinecraftPocketEdition v0.6.12 APK.\n \nEXTRACT [libminecraftpe.so] from APK and Place into:\n$home/.minecraft-pi/overrides/libminecraftpe.so\n \nRecommend [PE-a0.11.1-2-x86.apk]:\narchive.org/download/MCPEAlpha/PE-a0.11.1-2-x86.apk"
+rp_module_help="Minecraft Pi Edition Reborn (also known as MCPI-Reborn) is a modding project for Minecraft Pi Edition.\n \nMCPI-Repo:\ngithub.com/MCPI-Revival/minecraft-pi-reborn\n \nMCPI-Repo Seeds:\nmcpi-revival.github.io/mcpi-repo/seeds/\n \nMinecraft's sound is NOT Distributed with MCPI-Reborn.\nSound can found in MinecraftPocketEdition v0.6.12 APK.\n \nEXTRACT [libminecraftpe.so] from APK and Place into:\n$home/.minecraft-pi/overrides/libminecraftpe.so\n \nRecommend [PE-a0.11.1-2-x86.apk]:\narchive.org/download/MCPEAlpha/PE-a0.11.1-2-x86.apk\n\nhttps://download1638.mediafire.com/skz80sv2sm8ge7rJ5w-lvGDpGxeSk-GQ_SxwbFNb2q_HiDNpJLi-EpkOlkQv223ObBOmrJQ0eh86J_lvgdL9GzWMC4820cdMAeTCs4w9zVX9LkUhHdHanUaYOHqKwFmltj4gnfnWnvadpAYssR7u3bHlo93Y3FaKprQnWlwCYUtFrw/g2dxfbjbgwxz931/PE-a0.11.1-2-x86.apk"
 rp_module_licence="MIT https://raw.githubusercontent.com/MCPI-Revival/minecraft-pi-reborn/master/LICENSE"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
+
+function _mcpe_link_minecraft-pi-reborn() {
+    # Add Minecraft Pocket Edition (alpha) Link here to Attempt to Download and Extract {/lib/armeabi-v7a/libminecraftpe.so}
+    #echo https://archive.org/download/MCPEAlpha/PE-a0.11.1-2-x86.apk
+    echo https://dn721800.ca.archive.org/0/items/minecraft-pocket-edition-library/Minecraft%20PE%200.9.0-build5.apk
+}
 
 function depends_minecraft-pi-reborn() {
     local depends=(libsdl2-dev libopenal1)
@@ -109,6 +115,51 @@ function remove_minecraft-pi-reborn() {
     rm -f "$romdir/ports/+Start Minecraft Pi Edition Reborn (Server).sh"
 
     rm -f "$home/.qjoypad3/Minecraft.lyt"
+}
+
+function game_audio_minecraft-pi-reborn() {
+    rm -Rf /dev/shm/mc; mkUserDir /dev/shm/mc
+    pushd /dev/shm/mc > /dev/null 2>&1
+    #wget -q https://dn721800.ca.archive.org/0/items/minecraft-pocket-edition-library/Minecraft%20PE%200.9.0-build5.apk -O /dev/shm/mc/mcpe.zip
+    echo "$(_mcpe_link_minecraft-pi-reborn)"
+    wget -q "$(_mcpe_link_minecraft-pi-reborn)" -O /dev/shm/mc/mcpe.zip
+    if [[ ! "$?" == "0" ]]; then
+        rm -Rf /dev/shm/mc
+        popd
+        md_ret_errors+=("$md_desc Failed to Download {libminecraftpe.so} MinecraftPocketEdition alpha \n\nTry here:\n\nhttps://download1638.mediafire.com/skz80sv2sm8ge7rJ5w-lvGDpGxeSk-GQ_SxwbFNb2q_HiDNpJLi-EpkOlkQv223ObBOmrJQ0eh86J_lvgdL9GzWMC4820cdMAeTCs4w9zVX9LkUhHdHanUaYOHqKwFmltj4gnfnWnvadpAYssR7u3bHlo93Y3FaKprQnWlwCYUtFrw/g2dxfbjbgwxz931/PE-a0.11.1-2-x86.apk")
+        return
+    fi
+
+    7z x /dev/shm/mc/mcpe.zip -aoa
+    if [[ ! -f "/home/$__user/.minecraft-pi/overrides/libminecraftpe.so" ]]; then
+        mkUserDir "/home/$__user/.minecraft-pi"; mkUserDir "/home/$__user/.minecraft-pi/overrides"
+        mv '/dev/shm/mc/lib/armeabi-v7a/libminecraftpe.so' "/home/$__user/.minecraft-pi/overrides/libminecraftpe.so"
+    fi
+    chown -R $__user:$__user "/home/$__user/.minecraft-pi"
+    chown $__user:$__user "/home/$__user/.minecraft-pi/overrides/libminecraftpe.so"
+    popd
+    rm -Rf /dev/shm/mc
+
+    dialog --no-collapse --title "Finished" --ok-label Back --msgbox "[/home/$__user/.minecraft-pi/overrides]:\n$(ls /home/$__user/.minecraft-pi/overrides )"  25 75
+}
+
+function gui_minecraft-pi-reborn() {
+    if [[ ! -d "/home/$__user/.minecraft-pi/overrides" ]]; then mkUserDir /home/$__user/.minecraft-pi/overrides; fi
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Attempt to Download MinecraftPocketEdition Audio File(s)\n\nSee [Package Help] for Details\n\n[/home/$__user/.minecraft-pi/overrides]:\n$(ls /home/$__user/.minecraft-pi/overrides )" 15 60 5 \
+        "1" "{libminecraftpe.so} MinecraftPocketEdition (alpha)" \
+        "2" "Cancel" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            game_audio_minecraft-pi-reborn
+            ;;
+        2)
+            echo "Canceled"
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
 }
 
 function configure_minecraft-pi-reborn() {
