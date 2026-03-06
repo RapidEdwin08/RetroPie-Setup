@@ -53,19 +53,39 @@ function game_data_lr-numero() {
 }
 
 function game_bios_lr-numero() {
+    local ti_link
+    local ti_rom
     if [[ "$1"  == 'ti83se' ]]; then
-        download https://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83se.rom "/home/$__user/RetroPie/BIOS"
-        chown $__user:$__user "/home/$__user/RetroPie/BIOS/ti83se.rom"
+        ti_rom=ti83se.rom
+        ti_link=https://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83se.rom
     fi
     if [[ "$1"  == 'ti83plus' ]]; then
-        download https://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom "/home/$__user/RetroPie/BIOS"
-        chown $__user:$__user "/home/$__user/RetroPie/BIOS/ti83plus.rom"
+        ti_rom=ti83plus.rom
+        ti_link=https://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom
     fi
-    dialog --no-collapse --title "Finished" --ok-label Back --msgbox "[../RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )"  25 75
+
+    rm -Rf /dev/shm/$ti_rom > /dev/null 2>&1
+    echo "$ti_link"
+    wget -q "$ti_link" -O /dev/shm/$ti_rom
+    if [[ ! "$?" == "0" ]]; then
+        rm -Rf /dev/shm/$ti_rom > /dev/null 2>&1
+        md_ret_errors+=("$md_desc Failed to Download {$ti_rom} \n\n$ti_link")
+        return
+    fi
+
+    if [[ ! -f "/home/$__user/RetroPie/BIOS/$ti_rom" ]]; then
+        mkUserDir "/home/$__user/RetroPie/BIOS"
+        mv "/dev/shm/$ti_rom" "/home/$__user/RetroPie/BIOS/$ti_rom"
+    fi
+    chown -R $__user:$__user "/home/$__user/RetroPie/BIOS"
+    chown $__user:$__user "/home/$__user/RetroPie/BIOS/$ti_rom"
+    rm -Rf /dev/shm/$ti_rom > /dev/null 2>&1
+
+    dialog --no-collapse --title "Finished" --ok-label Back --msgbox "[/home/$__user/RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )"  25 75
 }
 
 function gui_lr-numero() {
-    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Attempt to Download TI-83 BIOS File(s)\n\nSee [Package Help] for Details\n\n[../RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )" 15 60 5 \
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Attempt to Download TI-83 BIOS File(s)\n\nSee [Package Help] for Details\n\n[/home/$__user/RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )" 15 60 5 \
         "1" "{ti83se.rom}   TI-83 Silver Edition *Recommended*" \
         "2" "{ti83plus.rom} TI-83 Plus" \
         "3" "Cancel" 2>&1 >/dev/tty)
