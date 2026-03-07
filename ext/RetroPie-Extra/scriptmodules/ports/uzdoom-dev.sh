@@ -91,6 +91,8 @@ function sources_uzdoom-dev() {
 }
 
 function build_uzdoom-dev() {
+    local make_jproc="-j$(nproc)"
+    isPlatform "rpi3" && make_jproc="-j2"
     rpSwap on 2304
     mkdir -p "$md_build/build"
     cd "$md_build/build"
@@ -99,7 +101,7 @@ function build_uzdoom-dev() {
     ! hasFlag "vulkan" && params+=(-DHAVE_VULKAN=OFF)
 
     cmake "${params[@]}" ..
-    cmake --build .
+    cmake --build . $make_jproc
     rpSwap off
     md_ret_require="$md_build/build/uzdoom"
 }
