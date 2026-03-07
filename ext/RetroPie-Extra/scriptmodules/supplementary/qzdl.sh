@@ -53,7 +53,11 @@ function sources_qzdl() {
 }
 
 function build_qzdl() {
-    rpSwap on 1024
+    if isPlatform "64bit"; then
+        rpSwap on 2304
+    else
+        rpSwap on 1280
+    fi
     cd $md_build
     mkdir build
     cd build
