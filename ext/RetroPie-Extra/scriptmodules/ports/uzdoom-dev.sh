@@ -91,11 +91,7 @@ function sources_uzdoom-dev() {
 }
 
 function build_uzdoom-dev() {
-    if isPlatform "64bit"; then
-        rpSwap on 2048
-    else
-        rpSwap on 1024
-    fi
+    rpSwap on 2304
     mkdir -p "$md_build/build"
     cd "$md_build/build"
     local params=(-DCMAKE_BUILD_TYPE=RelWithDebInfo) # options are: Debug Release RelWithDebInfo MinSizeRel
