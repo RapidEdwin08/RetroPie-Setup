@@ -30,13 +30,17 @@ function sources_openbor-v4() {
 }
 
 function build_openbor-v4() {
+    local make_jproc="-j$(nproc)"
+    isPlatform "rpi3" && make_jproc="-j2"
+    rpSwap on 1280
     btarget=universal; dtarget="UNIVERSAL"
     if [[ "$__platform_arch" =~ (i386|i686) ]]; then btarget=x86; dtarget="X86"; fi
     if [[ "$__platform_arch" == 'x86_64' ]]; then btarget=amd64; dtarget="AMD64"; fi
     if isPlatform "aarch64"; then btarget=arm64; dtarget="ARM64"; fi
-    cmake -DBUILD_LINUX=ON -DUSE_SDL=ON -DTARGET_ARCH=$dtarget -S . -B build.lin.$btarget && cmake --build build.lin.$btarget --config Release -- -j
+    cmake -DBUILD_LINUX=ON -DUSE_SDL=ON -DTARGET_ARCH=$dtarget -S . -B build.lin.$btarget && cmake --build build.lin.$btarget --config Release -- $make_jproc
     cd "$md_build/tools/borpak/source"
     chmod 755 ./build.sh; ./build.sh Linux
+    rpSwap off
     md_ret_require=(
         "$md_build/build.lin.$btarget/OpenBOR"
         "$md_build/tools/borpak/source/borpak"
