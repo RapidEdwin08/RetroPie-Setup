@@ -18,7 +18,7 @@ rp_module_section="opt"
 rp_module_flags=""
 
 function _get_release_ppsspp() {
-    local tagged_version="v1.16.6"
+    local tagged_version="v1.20.1"; # Prior v1.16.6
     #  the V3D Mesa driver before 21.x has issues with v1.14 and later
     if [[ "$__os_debian_ver" -lt 11 ]] && isPlatform "kms" && isPlatform "rpi"; then
         tagged_version="v1.13.2"
@@ -55,10 +55,8 @@ function sources_ppsspp() {
     sed -n -i "p; s/^set(CMAKE_EXE_LINKER_FLAGS/set(CMAKE_SHARED_LINKER_FLAGS/p" cmake/Toolchains/raspberry.armv?.cmake
 
     # fix missing defines on opengles2 on v1.16.6 lr-ppsspp/ppsspp
-    # fix building with recent SDL_TTF on v1.16.6 for ppsspp
     if [[ "$md_id" == "ppsspp" && "$(_get_release_ppsspp)" == "v1.16.6" ]]; then
         applyPatch "${__mod_info[ppsspp/path]%/*}/ppsspp/gles2_fix.diff"
-        applyPatch "${__mod_info[ppsspp/path]%/*}/ppsspp/sdl_ttf_fix_before_1.19.diff"
     fi
 
     if hasPackage cmake 3.6 lt; then
