@@ -15,22 +15,11 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="lr-ppsspp-dev"
 rp_module_desc="PlayStation Portable emu - PPSSPP port for libretro - latest development version"
-rp_module_help="ROM Extensions: .iso .pbp .cso\n\nCopy your PlayStation Portable roms to $romdir/psp"
+rp_module_help="ROM Extensions: .chd .iso .pbp .cso\n\nCopy your PlayStation Portable roms to $romdir/psp"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/RetroPie/ppsspp/master/LICENSE.TXT"
-rp_module_repo="git https://github.com/hrydgard/ppsspp.git master :_get_commit_lr-ppsspp-dev"
+rp_module_repo="git https://github.com/hrydgard/ppsspp.git master :_get_commit_ppsspp-dev"
 rp_module_section="exp"
 rp_module_flags=""
-
-function _get_commit_lr-ppsspp-dev() {
-    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
-    local branch=master
-    local branch_commit="$(git ls-remote https://github.com/hrydgard/ppsspp.git $branch HEAD | grep $branch | tail -1 | awk '{ print $1}' | cut -c -8)"
-
-    ##echo $branch_commit
-    #echo 40a53315; # 20250910 Delete reference to prebuilt libfreetype, pull in the source instead - CMake Error at ext/freetype/CMakeLists.txt:223 (message): In-source builds are not permitted! Make a separate folder for building
-    #echo 28f8ce64; # 20250910 Add freetype as a submodule (2.14.0) - Last Commit Before CMake Error
-    #echo eb859735; # 20260303 v1.20.1
-}
 
 function depends_lr-ppsspp-dev() {
     depends_ppsspp-dev
@@ -46,8 +35,8 @@ function build_lr-ppsspp-dev() {
 
 function install_lr-ppsspp-dev() {
     md_ret_files=(
-        'ppsspp/lib/ppsspp_libretro.so'
-        'ppsspp/assets'
+        'ppsspp/build/lib/ppsspp_libretro.so'
+        'ppsspp/build/assets'
     )
 }
 
@@ -67,7 +56,7 @@ function configure_lr-ppsspp-dev() {
     fi
 
     addEmulator 1 "$md_id" "psp" "$md_inst/ppsspp_libretro.so"
-    addSystem "psp" "PSP" ".gui"
+    addSystem "psp" "PSP" ".gui .chd .iso .pbp .cso" # Additional .GUI Extension to hide +Start PPSSPP.gui (dev) from Game List + Load without Errors
 
     # if we are removing the last remaining psp emu - remove the symlink
     if [[ "$md_mode" == "remove" ]]; then
