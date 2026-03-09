@@ -53,7 +53,11 @@ function build_dosbox-x-sdl2() {
 }
 
 function install_dosbox-x-sdl2() {
-    make -j"$(nproc)" install
+    local make_jproc="-j$(nproc)"
+    isPlatform "rpi3" && make_jproc="-j2"
+    rpSwap on 1280
+	make $make_jproc install
+    rpSwap off
 }
 
 function game_data_dosbox-x-sdl2() { # Can DOSBox-X Run Doom?
