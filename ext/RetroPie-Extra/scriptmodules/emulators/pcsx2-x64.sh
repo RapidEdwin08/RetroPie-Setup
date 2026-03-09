@@ -37,7 +37,8 @@ function depends_pcsx2-x64() {
 
 function install_bin_pcsx2-x64() {
     #local pcsx2_ver="v2.0.2"; # 2f46e5a8 20240712
-    local pcsx2_ver="v2.4.0"; # e4af1c42 20250629
+    #local pcsx2_ver="v2.4.0"; # e4af1c42 20250629
+    local pcsx2_ver="v2.6.3"; # bc8151d2 20260128
 
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/pcsx2-x64-rp-assets.tar.gz" "$md_build"
     download "https://github.com/PCSX2/pcsx2/releases/download/${pcsx2_ver}/pcsx2-${pcsx2_ver}-linux-appimage-x64-Qt.AppImage" "$md_build"
