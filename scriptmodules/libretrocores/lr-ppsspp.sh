@@ -63,7 +63,7 @@ function configure_lr-ppsspp() {
     fi
 
     addEmulator 1 "$md_id" "psp" "$md_inst/ppsspp_libretro.so"
-    addSystem "psp" "PSP" ".gui"
+    addSystem "psp" "PSP" ".gui .chd .iso .pbp .cso" # Additional .GUI Extension to hide +Start PPSSPP.gui (dev) from Game List + Load without Errors
 
     # if we are removing the last remaining psp emu - remove the symlink
     if [[ "$md_mode" == "remove" ]]; then
