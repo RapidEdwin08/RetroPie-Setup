@@ -18,20 +18,27 @@ rp_module_section="opt"
 rp_module_flags=""
 
 function _get_release_ppsspp() {
-    local tagged_version="v1.20.1"; # Prior v1.16.6
-    #  the V3D Mesa driver before 21.x has issues with v1.14 and later
-    if [[ "$__os_debian_ver" -lt 11 ]] && isPlatform "kms" && isPlatform "rpi"; then
-        tagged_version="v1.13.2"
+    local tagged_version="v1.20.1"
+    # buster and older can't compile recent PPSSPP
+    if [[ "$__os_debian_ver" -lt 11 ]]; then
+        #  the V3D Mesa driver before 21.x has issues with v1.14 and later
+        if isPlatform "kms" && isPlatform "rpi"; then
+            tagged_version="v1.13.2"
+        else
+            tagged_version="v1.16.6"
+        fi
     fi
     echo $tagged_version
 }
 
 function depends_ppsspp() {
-    local depends=(cmake libsdl2-dev libsnappy-dev libzip-dev zlib1g-dev)
+    local depends=(cmake libbrotli-dev libsnappy-dev libbz2-dev libzip-dev zlib1g-dev libzstd-dev libminiupnpc-dev)
+    [[ $md_id != "lr-ppsspp" ]] && depends+=(libsdl2-dev libsdl2-ttf-dev libfontconfig-dev)
+    [[ $md_id != "lr-ppsspp" ]] && isPlatform "x11" && depends+=(libx11-dev wayland-protocols libwayland-dev)
+    isPlatform "x86" && depends+=(nasm)
     isPlatform "videocore" && depends+=(libraspberrypi-dev)
     isPlatform "mesa" && depends+=(libgles2-mesa-dev)
     isPlatform "vero4k" && depends+=(vero3-userland-dev-osmc)
-    isPlatform "vulkan" && depends+=(libvulkan-dev)
     getDepends "${depends[@]}"
 }
 
@@ -55,14 +62,10 @@ function sources_ppsspp() {
     sed -n -i "p; s/^set(CMAKE_EXE_LINKER_FLAGS/set(CMAKE_SHARED_LINKER_FLAGS/p" cmake/Toolchains/raspberry.armv?.cmake
 
     # fix missing defines on opengles2 on v1.16.6 lr-ppsspp/ppsspp
+    # fix building with recent SDL_TTF on v1.16.6 for ppsspp
     if [[ "$md_id" == "ppsspp" && "$(_get_release_ppsspp)" == "v1.16.6" ]]; then
         applyPatch "${__mod_info[ppsspp/path]%/*}/ppsspp/gles2_fix.diff"
-    fi
-
-    if hasPackage cmake 3.6 lt; then
-        cd ..
-        mkdir -p cmake
-        downloadAndExtract "$__archive_url/cmake-3.6.2.tar.gz" "$md_build/cmake" --strip-components 1
+        applyPatch "${__mod_info[ppsspp/path]%/*}/ppsspp/sdl_ttf_fix_before_1.19.diff"
     fi
 }
 
@@ -84,7 +87,8 @@ function build_ffmpeg_ppsspp() {
     elif isPlatform "aarch64"; then
         arch="aarch64"
     fi
-    isPlatform "vero4k" && local extra_params='--arch=arm'
+    # force to arm arch on arm - fixes building on 32bit arm userland with aarch64 kernel
+    isPlatform "arm" && local extra_params='--arch=arm'
 
     local MODULES
     local VIDEO_DECODERS
@@ -120,26 +124,16 @@ function build_ffmpeg_ppsspp() {
     make install
 }
 
-function build_cmake_ppsspp() {
-    cd "$md_build/cmake"
-    ./bootstrap
-    make
-}
-
 function build_ppsspp() {
     local ppsspp_binary="PPSSPPSDL"
-    local cmake="cmake"
-    if hasPackage cmake 3.6 lt; then
-        build_cmake_ppsspp
-        cmake="$md_build/cmake/bin/cmake"
-    fi
 
     # build ffmpeg
     build_ffmpeg_ppsspp "$md_build/ppsspp/ffmpeg"
 
     # build ppsspp
     cd "$md_build/ppsspp"
-    rm -rf CMakeCache.txt CMakeFiles
+    rm -fr "build" && mkdir "build"
+    cd "build"
     local params=()
     if isPlatform "videocore"; then
         if isPlatform "armv6"; then
@@ -149,6 +143,14 @@ function build_ppsspp() {
         fi
     elif isPlatform "mesa"; then
         params+=(-DUSING_GLES2=ON -DUSING_EGL=OFF)
+        # force arm target on arm platforms to fix building on arm 32bit userland with aarch64 kernel
+        if isPlatform "arm"; then
+            if isPlatform "armv6"; then
+                params+=(-DFORCED_CPU=armv6)
+            else
+                params+=(-DFORCED_CPU=armv7)
+            fi
+        fi
     elif isPlatform "mali"; then
         params+=(-DUSING_GLES2=ON -DUSING_FBDEV=ON)
         # remove -DGL_GLEXT_PROTOTYPES on odroid-xu/tinker to avoid errors due to header prototype differences
@@ -161,21 +163,29 @@ function build_ppsspp() {
     if isPlatform "arm" && ! isPlatform "vulkan"; then
         params+=(-DARM_NO_VULKAN=ON)
     fi
+    if isPlatform "vulkan"; then
+        params+=(-DUSE_VULKAN_DISPLAY_KHR=ON)
+    fi
+    if isPlatform "x11"; then
+        params+=(-DUSE_WAYLAND_WSI=ON -DUSING_X11_VULKAN=ON)
+    fi
     if [[ "$md_id" == "lr-ppsspp" ]]; then
         params+=(-DLIBRETRO=On)
         ppsspp_binary="lib/ppsspp_libretro.so"
     fi
-    "$cmake" "${params[@]}" .
+    params+=(-DUSE_SYSTEM_SNAPPY=ON -DUSE_SYSTEM_ZSTD=ON -DUSE_SYSTEM_LIBZIP=ON -DUSE_SYSTEM_LIBSDL2=ON -DUSE_SYSTEM_ZSTD=ON -DUSE_SYSTEM_MINIUPNPC=ON)
+    params+=(-DUSE_DISCORD=OFF)
+    cmake "${params[@]}" ..
     make clean
     make
 
-    md_ret_require="$md_build/ppsspp/$ppsspp_binary"
+    md_ret_require="$md_build/ppsspp/build/$ppsspp_binary"
 }
 
 function install_ppsspp() {
     md_ret_files=(
-        'ppsspp/assets'
-        'ppsspp/PPSSPPSDL'
+        'ppsspp/build/assets'
+        'ppsspp/build/PPSSPPSDL'
     )
 }
 
@@ -193,7 +203,7 @@ function configure_ppsspp() {
     fi
 
     addEmulator 0 "$md_id" "psp" "pushd $md_inst; $md_inst/PPSSPPSDL ${extra_params[*]} %ROM%; popd"
-    addSystem "psp" "PSP" ".gui"
+    addSystem "psp"
 
     # if we are removing the last remaining psp emu - remove the symlink
     if [[ "$md_mode" == "remove" ]]; then
