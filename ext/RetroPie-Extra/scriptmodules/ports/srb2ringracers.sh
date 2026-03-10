@@ -60,13 +60,13 @@ function sources_srb2ringracers() {
     gitPullOrClone
 
     # Legacy GL is incomplete and will eventually be replaced but is useful for now at 1st Run Setup if there are Issues with Software Renderer
-    ! isPlatform "gl3" && sed -i 's+"renderer", "Software"+"renderer", "Legacy GL"+' "$md_build/src/cvars.cpp" && echo "[Legacy GL]"
+    ! ( isPlatform "gl3" || isPlatform "kms" ) && sed -i 's+"renderer", "Software"+"renderer", "Legacy GL"+' "$md_build/src/cvars.cpp" && echo "[Legacy GL]"
 
     if ( isPlatform "rpi"* || isPlatform "arm" ); then
         echo "[SBC Tweaks]"
         sed -i 's+"scr_effect", "Sharp Bilinear"+"scr_effect", "Nearest"+' "$md_build/src/cvars.cpp"
-        sed -i 's+"drawdist_precip", "Normal"+"drawdist_precip", "Short"+' "$md_build/src/cvars.cpp"
-        sed -i 's+"drawdist", "Normal"+"drawdist", "Short"+' "$md_build/src/cvars.cpp"
+        sed -i 's+"drawdist_precip", "Normal"+"drawdist_precip", "Shorter"+' "$md_build/src/cvars.cpp"
+        sed -i 's+"drawdist", "Normal"+"drawdist", "Shorter"+' "$md_build/src/cvars.cpp"
         sed -i 's+gr_shaders", "On"+gr_shaders", "Off"+' "$md_build/src/cvars.cpp"
     fi
 
