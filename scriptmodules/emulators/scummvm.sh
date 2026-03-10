@@ -42,7 +42,7 @@ function sources_scummvm() {
 }
 
 function build_scummvm() {
-    rpSwap on 1536
+    rpSwap on 2048
     local params=(
         --prefix="$md_inst"
         --enable-release --enable-vkeybd
