@@ -17,6 +17,9 @@ rp_module_id="srb2ringracers"
 rp_module_desc="Sonic Robo Blast 2 Dr. Robotnik's Ring Racers Ring Racers - 3D Sonic the Hedgehog fan-game based on Sonic Robo Blast 2 built using a modified version of the Doom Legacy source port of Doom"
 rp_module_help="Kart Krew is in no way affiliated with SEGA or Sonic Team. We do not claim ownership of any of SEGA's intellectual property used in SRB2.
 
+Copy your SRB2RingRacers AddOns to:
+$romdir/ports/doom/mods/srb2ringracers
+
 ======================================================
                    MINOR PASSWORDS                  
 ======================================================                                  
@@ -71,7 +74,11 @@ function sources_srb2ringracers() {
     fi
 
     mkdir assets/installer
-    downloadAndExtract https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip "$md_build/assets/installer/"
+    #downloadAndExtract https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip "$md_build/assets/installer/" # curl: (23) Failure writing output to destination
+    pushd "$md_build"
+    wget https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip
+    unzip "$md_build/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip" -d "$md_build/assets/installer/"
+    popd
 }
 
 function build_srb2ringracers() {
