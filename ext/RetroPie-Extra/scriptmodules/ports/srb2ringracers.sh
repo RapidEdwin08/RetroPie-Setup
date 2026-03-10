@@ -59,8 +59,16 @@ function depends_srb2ringracers() {
 function sources_srb2ringracers() {
     gitPullOrClone
 
-    # Legacy GL "renderer", "Software"
+    # Legacy GL is incomplete and will eventually be replaced but is useful for now at 1st Run Setup if there are Issues with Software Renderer
     ! isPlatform "gl3" && sed -i 's+"renderer", "Software"+"renderer", "Legacy GL"+' "$md_build/src/cvars.cpp" && echo "[Legacy GL]"
+
+    if ( isPlatform "rpi"* || isPlatform "arm" ); then
+        echo "[SBC Tweaks]"
+        sed -i 's+"scr_effect", "Sharp Bilinear"+"scr_effect", "Nearest"+' "$md_build/src/cvars.cpp"
+        sed -i 's+"drawdist_precip", "Normal"+"drawdist_precip", "Short"+' "$md_build/src/cvars.cpp"
+        sed -i 's+"drawdist", "Normal"+"drawdist", "Short"+' "$md_build/src/cvars.cpp"
+        sed -i 's+gr_shaders", "On"+gr_shaders", "Off"+' "$md_build/src/cvars.cpp"
+    fi
 
     mkdir assets/installer
     downloadAndExtract https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip "$md_build/assets/installer/"
@@ -101,6 +109,9 @@ function remove_srb2ringracers() {
 function configure_srb2ringracers() {
     addPort "$md_id" "srb2ringracers" "Sonic Robo Blast 2 Ring Racers" "pushd $md_inst; ./ringracers_$(_get_branch_srb2ringracers); popd"
     moveConfigDir "$home/.ringracers"  "$md_conf_root/$md_id"
+
+    mkRomDir "ports/doom"; mkRomDir "ports/doom/mods"; mkRomDir "ports/doom/mods/srb2ringracers"
+    moveConfigDir "$romdir/ports/doom/mods/srb2ringracers" "$md_conf_root/$md_id/addons"
 
     cat >"$md_inst/srb2ringracers.sh" << _EOF_
 #!/bin/bash
