@@ -32,7 +32,7 @@ function _get_commit_scummvm-dev() {
 
 function depends_scummvm-dev() {
     local depends=(
-        liba52-0.7.4-dev libmpeg2-4-dev libogg-dev libvorbis-dev libflac-dev libgif-dev libmad0-dev libpng-dev
+        liba52-0.7.4-dev libmpeg2-4-dev libogg-dev libvorbis-dev libenet-dev libflac-dev libgif-dev libmad0-dev libpng-dev
         libtheora-dev libfaad-dev libfluidsynth-dev libfreetype6-dev zlib1g-dev
         libjpeg-dev libasound2-dev libcurl4-openssl-dev libmikmod-dev libvpx-dev
         fluid-soundfont-gm
@@ -53,7 +53,7 @@ function sources_scummvm-dev() {
 }
 
 function build_scummvm-dev() {
-    rpSwap on 750
+    rpSwap on 1536
     local params=(
         --prefix="$md_inst"
         --enable-release --enable-vkeybd
