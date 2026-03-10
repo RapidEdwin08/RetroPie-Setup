@@ -204,7 +204,7 @@ function configure_ppsspp-dev() {
 
     local launch_prefix
     ## Use XINIT to Prevent [runcommand.log] Vulkan with working device not detected. DEBUG: Vulkan is not available, not using Vulkan.
-    if ( isPlatform "kms" ) && ( isPlatform "vulkan" ); then launch_prefix="XINIT-WMC:"; fi
+    ##if ( isPlatform "kms" ) && ( isPlatform "vulkan" ); then launch_prefix="XINIT-WMC:"; fi # v1.20.1 VulkanMayBeAvailable: Device allowed ('SDL:Linux')
 
     ##addEmulator 0 "$md_id" "psp" "pushd $md_inst; $md_inst/PPSSPPSDL ${extra_params[*]} %ROM%; popd"
     ##addSystem "psp"
