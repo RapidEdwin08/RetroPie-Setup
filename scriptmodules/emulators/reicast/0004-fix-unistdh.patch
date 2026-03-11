@@ -1,0 +1,68 @@
+diff -ur a/core/deps/libzip/mkstemp.c b/core/deps/libzip/mkstemp.c
+--- a/core/deps/libzip/mkstemp.c	2019-07-05 08:16:55.000000000 -0400
++++ b/core/deps/libzip/mkstemp.c	2026-03-08 00:19:01.131240774 -0400
+@@ -35,7 +35,7 @@
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-
++#include <unistd.h>
+ #include <assert.h>
+ #include <ctype.h>
+ #include <errno.h>
+diff -ur a/core/deps/libzip/zip_close.c b/core/deps/libzip/zip_close.c
+--- a/core/deps/libzip/zip_close.c	2019-07-05 08:16:55.000000000 -0400
++++ b/core/deps/libzip/zip_close.c	2026-03-08 00:20:01.401914826 -0400
+@@ -39,7 +39,7 @@
+ #include <errno.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-
++#include <unistd.h>
+ #include "zipint.h"
+ 
+ static int add_data(struct zip *, struct zip_source *, struct zip_dirent *,
+diff -ur a/core/deps/zlib/gzlib.c b/core/deps/zlib/gzlib.c
+--- a/core/deps/zlib/gzlib.c	2019-07-05 08:16:55.000000000 -0400
++++ b/core/deps/zlib/gzlib.c	2026-03-08 00:28:39.059703155 -0500
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "gzguts.h"
++#include <unistd.h>
+ 
+ #if defined(_WIN32) && !defined(__BORLANDC__)
+ #  define LSEEK _lseeki64
+diff -ur a/core/deps/zlib/gzread.c b/core/deps/zlib/gzread.c
+--- a/core/deps/zlib/gzread.c	2019-07-05 08:16:55.000000000 -0400
++++ b/core/deps/zlib/gzread.c	2026-03-08 00:10:03.750301721 -0500
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "gzguts.h"
++#include <unistd.h>
+ 
+ /* Local functions */
+ local int gz_load OF((gz_statep, unsigned char *, unsigned, unsigned *));
+diff -ur a/core/deps/zlib/gzwrite.c b/core/deps/zlib/gzwrite.c
+--- a/core/deps/zlib/gzwrite.c	2019-07-05 08:16:55.000000000 -0400
++++ b/core/deps/zlib/gzwrite.c	2026-03-08 00:10:21.406336308 -0500
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "gzguts.h"
++#include <unistd.h>
+ 
+ /* Local functions */
+ local int gz_init OF((gz_statep));
+diff -ur a/core/deps/zlib/zutil.c b/core/deps/zlib/zutil.c
+--- a/core/deps/zlib/zutil.c	2019-07-05 08:16:55.000000000 -0400
++++ b/core/deps/zlib/zutil.c	2026-03-08 00:11:06.462425003 -0500
+@@ -8,6 +8,7 @@
+ #include "zutil.h"
+ #ifndef Z_SOLO
+ #  include "gzguts.h"
++#  include <unistd.h>
+ #endif
+ 
+ #ifndef NO_DUMMY_DECL
