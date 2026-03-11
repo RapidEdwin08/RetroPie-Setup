@@ -28,6 +28,12 @@ function install_bin_redream() {
     downloadAndExtract "$(__binary_url_redream)" "$md_inst"
 }
 
+function game_data_redream() {
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/redream-rp-assets.tar.gz" "$romdir/dreamcast"
+    if [[ ! -f "$romdir/dreamcast/gamelist.xml" ]]; then mv "$romdir/dreamcast/gamelist.xml.redream" "$romdir/dreamcast/gamelist.xml"; fi
+    chown -R $__user:$__user "$romdir/dreamcast"
+}
+
 function remove_redream() {
     rm -f /usr/share/applications/Redream.desktop
     rm -f "$home/Desktop/Redream.desktop"
@@ -80,6 +86,7 @@ _EOF_
     ln -sf "$biosdir/dc/dc_boot.bin" "$md_inst/boot.bin"
     ln -sf "$biosdir/dc/dc_flash.bin" "$md_inst/flash.bin"
 
+    [[ "$md_mode" == "install" ]] && game_data_reicast
     [[ "$md_mode" == "install" ]] && shortcuts_icons_redream
 }
 
