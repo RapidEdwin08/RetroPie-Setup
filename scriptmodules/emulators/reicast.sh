@@ -37,6 +37,11 @@ function sources_reicast() {
     applyPatch "$md_data/0002-enable-vsync.patch"
     applyPatch "$md_data/0003-fix-sdl2-sighandler-conflict.patch"
     sed -i "s#/usr/bin/env python#/usr/bin/env python3#" shell/linux/tools/reicast-joyconfig.py
+
+    # ../core/deps/zlib/gzlib.c:14:17: error: implicit declaration of function ‘lseek’; did you mean ‘fseek’?
+    # ../core/deps/zlib/gzread.c:591:11:  error: implicit declaration of function ‘close’; did you mean ‘pclose’?
+    # ../core/deps/libzip/mkstemp.c:66:15: error: implicit declaration of function ‘getpid’ 
+    applyPatch "$md_data/0004-fix-unistdh.patch"
 }
 
 function _params_reicast() {
@@ -92,6 +97,12 @@ function install_reicast() {
         'LICENSE'
         'README.md'
     )
+}
+
+function game_data_reicast() {
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/reicast-rp-assets.tar.gz" "$romdir/dreamcast"
+    if [[ ! -f "$romdir/dreamcast/gamelist.xml" ]]; then mv "$romdir/dreamcast/gamelist.xml.reicast" "$romdir/dreamcast/gamelist.xml"; fi
+    chown -R $__user:$__user "$romdir/dreamcast"
 }
 
 function remove_reicast() {
@@ -160,6 +171,7 @@ _EOF_
     addAutoConf reicast_input 1
 
     [[ "$md_mode" == "remove" ]] && remove_reicast
+    [[ "$md_mode" == "install" ]] && game_data_reicast
     [[ "$md_mode" == "install" ]] && shortcuts_icons_reicast
 }
 
