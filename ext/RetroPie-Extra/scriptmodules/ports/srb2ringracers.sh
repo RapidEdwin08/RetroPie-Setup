@@ -14,11 +14,15 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="srb2ringracers"
-rp_module_desc="Sonic Robo Blast 2 Dr. Robotnik's Ring Racers Ring Racers - 3D Sonic the Hedgehog fan-game based on Sonic Robo Blast 2 built using a modified version of the Doom Legacy source port of Doom"
+rp_module_desc="Sonic Robo Blast 2 Dr. Robotnik's Ring Racers - 3D Sonic the Hedgehog fan-game based on Sonic Robo Blast 2 built using a modified version of the Doom Legacy source port of Doom"
 rp_module_help="Kart Krew is in no way affiliated with SEGA or Sonic Team. We do not claim ownership of any of SEGA's intellectual property used in SRB2.
 
 Copy your SRB2RingRacers AddOns to:
 $romdir/ports/doom/mods/srb2ringracers
+
+Be sure to Set Video Renderer accordingly on 1st Run
+Software is the Preferred Renderer if capable
+Legacy GL is incomplete and will eventually be replaced
 
 ======================================================
                    MINOR PASSWORDS                  
@@ -62,6 +66,9 @@ function depends_srb2ringracers() {
 function sources_srb2ringracers() {
     gitPullOrClone
 
+    # I can't drive %55
+    sed -i 's+"speedometer", "Percentage"+"speedometer", "Miles"+' "$md_build/src/cvars.cpp"
+
     # Legacy GL is incomplete and will eventually be replaced but is useful for now at 1st Run Setup if there are Issues with Software Renderer
     ! ( isPlatform "gl3" || isPlatform "kms" ) && sed -i 's+"renderer", "Software"+"renderer", "Legacy GL"+' "$md_build/src/cvars.cpp" && echo "[Legacy GL]"
 
@@ -73,12 +80,11 @@ function sources_srb2ringracers() {
         sed -i 's+gr_shaders", "On"+gr_shaders", "Off"+' "$md_build/src/cvars.cpp"
     fi
 
-    mkdir assets/installer
-    #downloadAndExtract https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip "$md_build/assets/installer/" # curl: (23) Failure writing output to destination
-    pushd "$md_build"
-    wget https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip
-    unzip "$md_build/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip" -d "$md_build/assets/installer/"
-    popd
+    mkdir -p assets/installer
+    # curl: (23) Failure writing output to destination with downloadAndExtract - use wget
+    ##downloadAndExtract https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip "$md_build/assets/installer/"
+    wget https://github.com/KartKrewDev/RingRacers/releases/download/$(_get_branch_srb2ringracers)/Dr.Robotnik.s-Ring-Racers-$(_get_branch_srb2ringracers)-Assets.zip -O "$md_build/srb2rr-assets.zip"
+    unzip "$md_build/srb2rr-assets.zip" -d "$md_build/assets/installer/"
 }
 
 function build_srb2ringracers() {
@@ -115,13 +121,31 @@ function remove_srb2ringracers() {
 
 function configure_srb2ringracers() {
     addPort "$md_id" "srb2ringracers" "Sonic Robo Blast 2 Ring Racers" "pushd $md_inst; ./ringracers_$(_get_branch_srb2ringracers); popd"
+
     moveConfigDir "$home/.ringracers"  "$md_conf_root/$md_id"
 
-    mkRomDir "ports/doom"; mkRomDir "ports/doom/mods"; mkRomDir "ports/doom/mods/srb2ringracers"
-    moveConfigDir "$romdir/ports/doom/mods/srb2ringracers" "$md_conf_root/$md_id/addons"
+    [[ "$md_mode" == "remove" ]] && remove_srb2ringracers
+    [[ "$md_mode" == "remove" ]] && return
+
+    mkUserDir "$md_conf_root/$md_id/addons"; mkUserDir "$romdir/ports/doom/mods/srb2ringracers"
+    moveConfigDir "$md_conf_root/$md_id/addons" "$romdir/ports/doom/mods/srb2ringracers"
+    echo 'Copy your Sonic Robo Blast 2 Dr. Robotniks Ring Racers Add-On Files here' > "$romdir/ports/doom/mods/srb2ringracers/README.txt"
+    cp "$md_inst/PASSWORDS.txt" "$romdir/ports/doom/mods/srb2ringracers/PASSWORDS.txt"
+    chown -R $__user:$__user "$romdir/ports/doom/mods/srb2ringracers"
 
     cat >"$md_inst/srb2ringracers.sh" << _EOF_
 #!/bin/bash
+
+if [[ ! -d "$romdir/ports/doom/mods/srb2ringracers" ]]; then
+    mkdir -p "$romdir/ports/doom/mods/srb2ringracers"
+    chown -R $__user:$__user "$romdir/ports/doom/mods/srb2ringracers"
+fi
+
+if [[ ! -d "$md_conf_root/$md_id/addons" ]]; then
+    ln -s "$romdir/ports/doom/mods/srb2ringracers" "$md_conf_root/$md_id/addons"
+    chown -R $__user:$__user "$md_conf_root/$md_id/addons"
+fi
+
 pushd $md_inst; ./ringracers_$(_get_branch_srb2ringracers); popd
 _EOF_
     chmod 755 "$md_inst/srb2ringracers.sh"
@@ -146,5 +170,4 @@ _EOF_
     if [[ -d "$home/Desktop" ]]; then rm -f "$home/Desktop/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "$home/Desktop/$shortcut_name.desktop"; chown $__user:$__user "$home/Desktop/$shortcut_name.desktop"; fi
     rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
 
-    [[ "$md_mode" == "remove" ]] && remove_srb2ringracers
 }
