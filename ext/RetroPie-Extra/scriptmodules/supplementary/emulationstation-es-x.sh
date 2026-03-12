@@ -35,9 +35,9 @@ rp_module_licence="MIT https://github.com/Aloshi/EmulationStation/blob/master/LI
 rp_module_repo="git https://github.com/Renetrox/EmulationStation-X.git main :_get_commit_emulationstation-es-x"
 
 function _set_icons_emulationstation-es-x() {
-    # Choose PNG [icon_style] for 0lder commit [5f237788]: default arcade snes xbox psx psx-color psx-color-2 psx-light
+    # Choose PNG [icon_style] for 0lder commit [5f237788]: default custom
     #echo default
-    echo xbox
+    echo custom
 }
 
 function _get_commit_emulationstation-es-x() {
@@ -53,8 +53,12 @@ function _get_commit_emulationstation-es-x() {
 # Link to base EmulationStation build system
 # ------------------------------------------------------------
 function _update_hook_emulationstation-es-x() { _update_hook_emulationstation; }
-function depends_emulationstation-es-x()      { depends_emulationstation; }
-#function sources_emulationstation-es-x()      { sources_emulationstation; }
+
+function depends_emulationstation-es-x() {
+    depends_emulationstation
+    getDepends libsdl2-mixer-dev
+}
+
 function sources_emulationstation-es-x() {
     sources_emulationstation
 
@@ -66,11 +70,9 @@ function sources_emulationstation-es-x() {
 
     # Disable Built-In BGM Menu Button IF IMP found
     if [[ -d /opt/retropie/configs/imp ]] || [[ -d /home/$__user/imp ]]; then
-        echo IMP FOUND: BGM [On/Off] Button Will NOT be Included in [ES-X]
         if [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then
             applyPatch "$md_data/bgm-menu-remove-5f237788.diff"
-        else
-            applyPatch "$md_data/bgm-menu-remove.diff"
+            echo IMP FOUND: BGM [On/Off] Button Will NOT be Included in [ES-X]
         fi
     fi
 
@@ -79,12 +81,16 @@ function sources_emulationstation-es-x() {
         applyPatch "$md_data/Hidden-Folders-Fix-402fc3b4.diff" # Commit [402fc3b4] Fix: create existing <folder> entries from gamelist when missing in tree
         applyPatch "$md_data/UI-Mode-Fix-5f237788.diff" # Fix Missing UI Mode Selection Menu (FULL, KIOSK, KID)
 
+        # b726559a Add clock format option (12H / 24H)
+        applyPatch "$md_data/Clock-Format-b726559a.diff" 
+        wget https://github.com/Renetrox/EmulationStation-X/raw/b726559a666bf597125ca4a104568cb89c089738/libes-core.a -O /tmp/libes-core.a
+        mv /tmp/libes-core.a "$md_build"
+
         # Only Update HelpComponent for PNG Icons if NOT [default]
         if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
             sed -i 's+.svg+.png+' "$md_build/es-core/src/components/HelpComponent.cpp"
+            ##sed -i 's+.svg+.png+' "$md_build/es-core/src/guis/GuiInputConfig.cpp" # Better with Dark Theme
         fi
-    else
-        applyPatch "$md_data/UI-Mode-Fix-a62f7972.diff" # Created against [a62f7972] - Subject to failure against 0ther Commit #s
     fi
 
     # [x3] 0ptional JoyPad Connected Popup Changes
@@ -105,31 +111,12 @@ function help_icons_emulationstation-es-x() {
     local icon_style="$(_set_icons_emulationstation-es-x)"
 
     if [[ ! "$icon_style" == "default" ]] && [[ "$(_get_commit_emulationstation-es-x)" == "5f237788" ]]; then # Get updated HelpComponent .png Icons
-        local icon_git=https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/resources
-        mkdir -p /dev/shm/helpicons
+        local esxICONSdir=/opt/retropie/supplementary/emulationstation-es-x/resources/help/
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-icons.tar.gz" "$esxICONSdir"
         if [ $(cat /opt/retropie/configs/all/autoconf.cfg | grep -q 'es_swap_a_b = "1"' ; echo $?) == '0' ]; then
-            wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_b.png; #Swapped A/B
-            wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_a.png; #Swapped B/A
-        else
-            wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_a.png
-            wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_b.png
+            rm $esxICONSdir/button_a.png; cp $esxICONSdir/button_a.png.swapped $esxICONSdir/button_a.png
+            rm $esxICONSdir/button_b.png; cp $esxICONSdir/button_b.png.swapped $esxICONSdir/button_b.png
         fi
-        wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_a.png.default
-        wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_b.png.default
-        wget $icon_git/help/$icon_style/a.png -O /dev/shm/helpicons/button_b.png.swapped
-        wget $icon_git/help/$icon_style/b.png -O /dev/shm/helpicons/button_a.png.swapped
-        wget $icon_git/help/$icon_style/all.png -O /dev/shm/helpicons/dpad_all.png
-        wget $icon_git/help/$icon_style/l.png -O /dev/shm/helpicons/button_l.png
-        wget $icon_git/help/$icon_style/leftright.png -O /dev/shm/helpicons/dpad_leftright.png
-        wget $icon_git/help/$icon_style/r.png -O /dev/shm/helpicons/button_r.png
-        wget $icon_git/help/$icon_style/select.png -O /dev/shm/helpicons/button_select.png
-        wget $icon_git/help/$icon_style/start.png -O /dev/shm/helpicons/button_start.png
-        wget $icon_git/help/$icon_style/updown.png -O /dev/shm/helpicons/dpad_updown.png
-        wget $icon_git/help/$icon_style/x.png -O /dev/shm/helpicons/button_x.png
-        wget $icon_git/help/$icon_style/y.png -O /dev/shm/helpicons/button_y.png
-        wget $icon_git/help/$icon_style/controller.svg -P /dev/shm/helpicons/
-        mv /dev/shm/helpicons/* /opt/retropie/supplementary/emulationstation-es-x/resources/help
-        rm -Rf /dev/shm/helpicons
     fi
 }
 
