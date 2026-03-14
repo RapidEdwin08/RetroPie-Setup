@@ -180,11 +180,10 @@ function configure_pico-8() {
 MissingPICO8() {
 echo Pico-8 is NOT INSTALLED! INSTALL Pico-8 1st! >> /dev/shm/runcommand.log
 if [[ -f /opt/retropie/emulators/pico-8/MissingPico8.png ]]; then
-    sudo fbi -T 1 -a -noverbose /opt/retropie/emulators/pico-8/MissingPico8.png > /dev/null 2>&1
-    sleep 9
-    sudo kill \$(pgrep fbi) > /dev/null 2>&1
-    clear & clear
-fi
+    local joy2key=/opt/retropie/admin/joy2key/joy2key
+    sudo \$joy2key stop; sudo \$joy2key start
+    sudo fbi -T 1 -a -noverbose /opt/retropie/emulators/pico-8/MissingPico8.png > /dev/null 2>&1; sleep 9; sudo kill \$(pgrep fbi) > /dev/null 2>&1; clear & clear
+    sudo \$joy2key stop
 exit 0
 }
 
