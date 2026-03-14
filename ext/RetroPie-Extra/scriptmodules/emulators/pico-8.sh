@@ -179,7 +179,12 @@ function configure_pico-8() {
 
 MissingPICO8() {
 echo Pico-8 is NOT INSTALLED! INSTALL Pico-8 1st! >> /dev/shm/runcommand.log
-[[ -f /opt/retropie/emulators/pico-8/MissingPico8.png ]] && sudo fbi -T 1 -a -noverbose /opt/retropie/emulators/pico-8/MissingPico8.png > /dev/null 2>&1; sleep 9; sudo kill \$(pgrep fbi) > /dev/null 2>&1; clear & clear
+if [[ -f /opt/retropie/emulators/pico-8/MissingPico8.png ]]; then
+    sudo fbi -T 1 -a -noverbose /opt/retropie/emulators/pico-8/MissingPico8.png > /dev/null 2>&1
+    sleep 9
+    sudo kill \$(pgrep fbi) > /dev/null 2>&1
+    clear & clear
+fi
 exit 0
 }
 
