@@ -13,13 +13,11 @@
 # Workaround for GPU Reset Issues on RPi3 Suggested by mitu Converted to RetroPie Script by RapidEdwin08
 # https://retropie.org.uk/forum/topic/35734/a-temporary-unofficial-patch-fixes-the-gpu-reset-malfunction-on-the-rpi-3-and-rpi-zero-2/13
 #
-# If no user is specified (for RetroPie below v4.8.9)
-if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="vc4-dkms"
 rp_module_desc="Modified vc4 Linux kernel module for RPi3 + KMS\n\nhttps://github.com/cmitu/vc4-dkms/\n\nDownstream Raspberry Pi Linux kernel version with the following modifications/patches:\n\n- workaround for GPU reset error\n  raspberrypi/linux#5780\n\n- enable interlaced video modes for the DPI port\n  raspberrypi/linux#2668"
 rp_module_section="config"
-rp_module_flags="!all rpi3 !:\$__os_debian_ver:-gt:13 !:\$__os_debian_ver:-lt:11"
+rp_module_flags="!all rpi3 !:\$__os_debian_ver:-gt:13 !:\$__os_debian_ver:-lt:12"
 
 function _install_vc4dkms() {
     getDepends dkms
@@ -87,7 +85,7 @@ function gui_vc4-dkms() {
                     _remove_vc4dkms
                     ;;
                 3)
-                    dialog --defaultno --yesno "This will Attempt to CLEAN [vc4-dkms] Source from [/opt/vc4-dkms]\n \nAre you sure you want to continue ?\n\n dkms status:\n$(dkms status | grep vc4-dkms)" 22 76 2>&1 >/dev/tty
+                    dialog --defaultno --yesno "This will Attempt to CLEAN [vc4-dkms] Source from [/opt/vc4-dkms]\n \nAre you sure you want to continue ?\n\n$(ls /opt/vc4-dkms/* 2>/dev/null)" 22 76 2>&1 >/dev/tty
                     [[ $? -ne 0 ]] && continue
                     _clean_vc4dkms
                     ;;
