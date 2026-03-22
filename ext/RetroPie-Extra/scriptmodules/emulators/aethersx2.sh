@@ -133,9 +133,6 @@ function remove_aethersx2() {
 }
 
 function configure_aethersx2() {
-    if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
-    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2-editor' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2-editor"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
-
     addSystem "ps2"
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
@@ -144,6 +141,8 @@ function configure_aethersx2() {
     addEmulator 0 "$md_id-editor" "ps2" "$launch_prefix$md_inst/aethersx2.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix$md_inst/aethersx2-qjoy.sh --editor"
+        if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
+        if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartAetherSX2 = "aethersx2-editor+qjoypad' ; echo $?) == '1' ]]; then echo 'ps2_StartAetherSX2 = "aethersx2-editor+qjoypad"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_aethersx2
