@@ -96,6 +96,8 @@ function remove_duckstation() {
 }
 
 function configure_duckstation() {
+    if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
+    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psx_StartDuckStation = "duckstation"' ; echo $?) == '1' ]]; then echo 'psx_StartDuckStation = "duckstation"' >> /opt/retropie/configs/all/emulators.cfg; fi
     addSystem "psx"
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
@@ -104,8 +106,6 @@ function configure_duckstation() {
     addEmulator 0 "$md_id-editor" "psx" "$launch_prefix$md_inst/duckstation.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "psx" "$launch_prefix$md_inst/duckstation-qjoy.sh --editor"
-        if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
-        if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'psx_StartDuckStation = "duckstation-editor+qjoypad"' ; echo $?) == '1' ]]; then echo 'psx_StartDuckStation = "duckstation-editor+qjoypad"' >> /opt/retropie/configs/all/emulators.cfg; fi
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_duckstation
