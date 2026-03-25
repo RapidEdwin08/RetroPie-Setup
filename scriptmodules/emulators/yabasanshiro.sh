@@ -19,6 +19,7 @@ rp_module_flags="!all rpi !videocore"
 
 function depends_yabasanshiro() {
     local depends=(cmake pkg-config protobuf-compiler libprotobuf-dev libsecret-1-dev libssl-dev libsdl2-dev libboost-all-dev)
+    [[ "$__gcc_version" -gt 12 ]] && depends+=(gcc-12 g++-12)
     getDepends "${depends[@]}"
 }
 
@@ -27,6 +28,7 @@ function sources_yabasanshiro() {
 }
 
 function build_yabasanshiro() {
+    if [[ "$__gcc_version" -gt 12 ]]; then export CC=/usr/bin/gcc-12; export CXX=/usr/bin/g++-12; fi
     local params=(-DGIT_EXECUTABLE=/usr/bin/git -DUSE_EGL=ON -DYAB_PORTS=retro_arena -DYAB_WANT_DYNAREC_DEVMIYAX=ON -DYAB_WANT_ARM7=ON -DYAB_WANT_OPENAL=OFF -DCMAKE_INSTALL_PREFIX="$md_inst")
     isPlatform "32bit" && params+=(-DCMAKE_SYSTEM_PROCESSOR=armv7-a)
     isPlatform "64bit" && params+=(-DCMAKE_SYSTEM_PROCESSOR=aarch64)
@@ -38,6 +40,7 @@ function build_yabasanshiro() {
     cd build
     cmake ../yabause/ "${params[@]}"
     make
+    if [[ "$__gcc_version" -gt 12 ]]; then unset CC; unset CXX; fi
     md_ret_require="$md_build/build/src/retro_arena/yabasanshiro"
 }
 
