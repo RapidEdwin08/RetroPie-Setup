@@ -6,25 +6,38 @@
 # https://github.com/RetroPie/RetroPie-Setup
 # https://github.com/Exarkuniv/RetroPie-Extra
 # https://github.com/RapidEdwin08/RetroPie-Setup
+# https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size
 #
 # See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
-# [lr-genesis-plus-gx-EX + Expanded Rom Size Support] https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size.git +P4PR1UM Compatibility (202507)
-#
-# If no user is specified (for RetroPie below v4.8.9)
-if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="lr-genesis-plus-gx-EX"
-rp_module_desc="Fork of lr-genesis-plus-gx + Expanded Rom Size Support"
-rp_module_help="Place Genesis roms in:\n$romdir/megadrive\n\nSegaChannelRevival requires Expanded Rom Size Support\n\nUse [lr-genesis-plus-gx-EX] for SegaChannelRevival ROMs\n\nP4PR1UM requires +/-2.5GB Memory to run in its entirety\n\nUse [lr-genesis-plus-gx-EX-SWAP] for LOW RAM Hardware"
+rp_module_desc="Fork of [lr-genesis-plus-gx] + Expanded Rom Size Support + P4PR1UM Support + swapfile Support [+/-2.5GB]"
+rp_module_help="Place Genesis roms in:\n$romdir/megadrive\n\nSegaChannelRevival requires Expanded Rom Size Support\n\nP4PR1UM requires +/-2.5GB Memory to run in its entirety\n            {20250704 Prior to HW_YX5200}\n\nUse [lr-genesis-plus-gx-EX] for SegaChannelRevival\nUse [lr-genesis-plus-gx-EX-SWAP] for P4PR1UM\n\nNOTE: The 0fficial Branch will Not Merge P4PR1UM Support\nhttps://github.com/libretro/Genesis-Plus-GX/pull/378"
 rp_module_licence="NONCOM https://raw.githubusercontent.com/libretro/Genesis-Plus-GX/master/LICENSE.txt"
-rp_module_repo="git https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size.git master"
+#rp_module_repo="git https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size.git master"
+#rp_module_repo="git https://github.com/RapidEdwin08/Genesis-Plus-GX-Expanded-Rom-Size.git master"
+if [[ "$__os_debian_ver" -gt 10 ]] || compareVersions "$__os_ubuntu_ver" gt 23.04; then
+    rp_module_repo="git https://github.com/libretro/Genesis-Plus-GX.git master e1b0d20b" # 20250622
+else
+    rp_module_repo="git https://github.com/libretro/Genesis-Plus-GX.git master e366ca81" # 20220501
+fi
 rp_module_section="exp"
 
 function sources_lr-genesis-plus-gx-EX() {
-    gitPullOrClone "$md_build" https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size.git
-    sed -i 's+MAX_ROM_SIZE.*+MAX_ROM_SIZE = 93554432+g' "$md_build/Makefile.libretro"
+    gitPullOrClone
+
+    # https://github.com/libretro/Genesis-Plus-GX/pull/378
+    if [[ "$__os_debian_ver" -gt 10 ]] || compareVersions "$__os_ubuntu_ver" gt 23.04; then
+        applyPatch "$md_data/paprium_e1b0d20b.diff"
+    else
+        applyPatch "$md_data/paprium_e366ca81.diff"
+    fi
+
+    # https://github.com/BillyTimeGames/Genesis-Plus-GX-Expanded-Rom-Size.git
+    sed -i 's+MAX_ROM_SIZE =.*+MAX_ROM_SIZE = 93554432+g' "$md_build/Makefile.libretro"
+    sed -i 's+define MAXROMSIZE.*+define MAXROMSIZE 93554432+g' "$md_build/core/loadrom.h"
 }
 
 function build_lr-genesis-plus-gx-EX() {
