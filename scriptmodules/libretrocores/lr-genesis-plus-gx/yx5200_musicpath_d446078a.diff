@@ -1,6 +1,6 @@
 diff -urN a/core/cart_hw/yx5200.c b/core/cart_hw/yx5200.c
---- a/core/cart_hw/yx5200.c	2026-03-27 23:43:35.705300964 -0400
-+++ b/core/cart_hw/yx5200.c	2026-03-27 23:46:09.301974184 -0400
+--- a/core/cart_hw/yx5200.c	2026-03-28 23:24:52.090739062 -0400
++++ b/core/cart_hw/yx5200.c	2026-03-28 23:27:16.023430352 -0400
 @@ -9,7 +9,7 @@
   *
   *  Limitations:
@@ -27,19 +27,26 @@ diff -urN a/core/cart_hw/yx5200.c b/core/cart_hw/yx5200.c
    /* YX5200 audio playback rate depends on loaded audio track */
    /* Audio stream is resampled to desired rate using Blip Buffer */
    if (yx5200.trackIndex)
-@@ -417,7 +420,8 @@
+@@ -417,7 +420,7 @@
    /* attempt to open MP3 file */
    for (i=0; i<4; i++)
    {
 -    sprintf(fname, fmt[i], rompath, index);
 +    sprintf(fname, fmt[i], musicpath, index); // <loadrom.c> [musicpath]
-+    printf("[yx5200_load_track]: %s\n", fname); // Logging for HW_YX5200 track loaded
      mp3io.read_data = mp3io.seek_data = cdStreamOpen(fname);
      if (mp3io.read_data)
      {
+@@ -428,6 +431,7 @@
+       if ((res == 0) && (mp3dec.info.channels > 0) && (mp3dec.info.channels <= 2))
+       {
+         /* indicate audio track is loaded */
++        printf("[yx5200_load_track]: %s\n", fname); // Logging for HW_YX5200 track loaded
+         yx5200.trackIndex = index;
+ 
+         /* start audio playback */
 diff -urN a/core/loadrom.c b/core/loadrom.c
---- a/core/loadrom.c	2026-03-27 23:43:35.721301034 -0400
-+++ b/core/loadrom.c	2026-03-27 23:44:06.589436731 -0400
+--- a/core/loadrom.c	2026-03-28 23:24:52.106739140 -0400
++++ b/core/loadrom.c	2026-03-28 23:25:23.042887827 -0400
 @@ -93,6 +93,7 @@
  ROMINFO rominfo;
  uint8 romtype;
@@ -65,8 +72,8 @@ diff -urN a/core/loadrom.c b/core/loadrom.c
  }
  
 diff -urN a/core/loadrom.h b/core/loadrom.h
---- a/core/loadrom.h	2026-03-27 23:43:35.721301034 -0400
-+++ b/core/loadrom.h	2026-03-27 23:44:06.589436731 -0400
+--- a/core/loadrom.h	2026-03-28 23:24:52.106739140 -0400
++++ b/core/loadrom.h	2026-03-28 23:25:23.042887827 -0400
 @@ -65,6 +65,7 @@
  extern ROMINFO rominfo;
  extern uint8 romtype;
