@@ -31,10 +31,19 @@ diff -ur a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
  	// theme set
  	auto themeSets = ThemeData::getThemeSets();
  
-@@ -442,53 +419,6 @@
- 		s->addRow(theme_row);
+@@ -433,61 +410,14 @@
  	}
  
+ 	// THEME OPTIONS (GUI interna de ES-X)
+-	{
+-		ComponentListRow theme_row;
+-		theme_row.elements.clear();
+-		theme_row.addElement(std::make_shared<TextComponent>(mWindow, _("THEME OPTIONS"), Font::get(FONT_SIZE_MEDIUM), getMenuTextColor()), true);
+-		theme_row.addElement(makeArrow(mWindow), false);
+-		theme_row.makeAcceptInputHandler(std::bind(&GuiMenu::openThemeOptions, this));
+-		s->addRow(theme_row);
+-	}
+-
 -	// LANGUAGE (usando .ini en ~/.emulationstation/lang)
 -	{
 -		auto language_list = std::make_shared< OptionListComponent<std::string> >(mWindow, _("LANGUAGE").c_str(), false);
@@ -81,10 +90,17 @@ diff -ur a/es-app/src/guis/GuiMenu.cpp b/es-app/src/guis/GuiMenu.cpp
 -			LocaleES::getInstance().loadFromSettings();
 -		});
 -	}
--
++	// {
++		// ComponentListRow theme_row;
++		// theme_row.elements.clear();
++		// theme_row.addElement(std::make_shared<TextComponent>(mWindow, _("THEME OPTIONS"), Font::get(FONT_SIZE_MEDIUM), getMenuTextColor()), true);
++		// theme_row.addElement(makeArrow(mWindow), false);
++		// theme_row.makeAcceptInputHandler(std::bind(&GuiMenu::openThemeOptions, this));
++		// s->addRow(theme_row);
++	// }
+ 
  	// GameList view style
  	auto gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE").c_str(), false);
- 	std::vector<std::string> styles;
 @@ -510,6 +440,35 @@
  			ViewController::get()->reloadAll();
  	});
@@ -679,7 +695,7 @@ diff -ur a/lang/es.ini b/lang/es.ini
 +cancel=cancelar
 diff -ur a/lang/fr.ini b/lang/fr.ini
 --- a/lang/fr.ini	Source
-+++ b/lang/fr.ini	Nash https://retropie.org.uk/forum/topic/37304/es-x-batocera-recalbox-like-features-without-breaking-retropie-compatibility/69
++++ b/lang/fr.ini	Modified
 @@ -2,7 +2,6 @@
  CODE=fr
  NAME=Français
