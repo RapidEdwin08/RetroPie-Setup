@@ -1,0 +1,629 @@
+diff -ur a/es-app/src/guis/GuiGameScraper.cpp b/es-app/src/guis/GuiGameScraper.cpp
+--- a/es-app/src/guis/GuiGameScraper.cpp	Source
++++ b/es-app/src/guis/GuiGameScraper.cpp	Modified
+@@ -6,77 +6,98 @@
+ #include "FileData.h"
+ #include "PowerSaver.h"
+ #include "SystemData.h"
++#include "Settings.h"
+ 
+-GuiGameScraper::GuiGameScraper(Window* window, ScraperSearchParams params, std::function<void(const ScraperSearchResult&)> doneFunc) : GuiComponent(window),
+-	mGrid(window, Vector2i(1, 7)),
+-	mBox(window, ":/frame.png"),
+-	mSearchParams(params),
+-	mClose(false)
++namespace
++{
++	inline unsigned int getPrimaryTextColor()
++	{
++		return Settings::getInstance()->getBool("MenuDark") ? 0xFFFFFFFF : 0x777777FF;
++	}
++
++	inline unsigned int getSecondaryTextColor()
++	{
++		return Settings::getInstance()->getBool("MenuDark") ? 0xBBBBBBFF : 0x888888FF;
++	}
++
++	inline const char* getFramePath()
++	{
++		return Settings::getInstance()->getBool("MenuDark") ? ":/frame_dark.png" : ":/frame.png";
++	}
++}
++
++GuiGameScraper::GuiGameScraper(Window* window, ScraperSearchParams params, std::function<void(const ScraperSearchResult&)> doneFunc)
++	: GuiComponent(window),
++	  mGrid(window, Vector2i(1, 7)),
++	  mBox(window, getFramePath()),
++	  mSearchParams(params),
++	  mClose(false)
+ {
+ 	PowerSaver::pause();
+ 	addChild(&mBox);
+ 	addChild(&mGrid);
+ 
+-	// row 0 is a spacer
++	// row 0 spacer
+ 
+-	mGameName = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(Utils::FileSystem::getFileName(mSearchParams.game->getPath())),
+-		Font::get(FONT_SIZE_MEDIUM), 0x777777FF, ALIGN_CENTER);
++	mGameName = std::make_shared<TextComponent>(
++		mWindow,
++		Utils::String::toUpper(Utils::FileSystem::getFileName(mSearchParams.game->getPath())),
++		Font::get(FONT_SIZE_MEDIUM),
++		getPrimaryTextColor(),
++		ALIGN_CENTER
++	);
+ 	mGrid.setEntry(mGameName, Vector2i(0, 1), false, true);
+ 
+-	// row 2 is a spacer
++	// row 2 spacer
+ 
+-	mSystemName = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(mSearchParams.system->getFullName()), Font::get(FONT_SIZE_SMALL),
+-		0x888888FF, ALIGN_CENTER);
++	mSystemName = std::make_shared<TextComponent>(
++		mWindow,
++		Utils::String::toUpper(mSearchParams.system->getFullName()),
++		Font::get(FONT_SIZE_SMALL),
++		getSecondaryTextColor(),
++		ALIGN_CENTER
++	);
+ 	mGrid.setEntry(mSystemName, Vector2i(0, 3), false, true);
+ 
+-	// row 4 is a spacer
++	// row 4 spacer
+ 
+ 	// ScraperSearchComponent
+ 	mSearch = std::make_shared<ScraperSearchComponent>(window, ScraperSearchComponent::NEVER_AUTO_ACCEPT);
+ 	mGrid.setEntry(mSearch, Vector2i(0, 5), true);
+ 
+ 	// buttons
+-	std::vector< std::shared_ptr<ButtonComponent> > buttons;
++	std::vector<std::shared_ptr<ButtonComponent>> buttons;
+ 
+ 	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, "INPUT", "search", [&] {
+ 		mSearch->openInputScreen(mSearchParams);
+ 		mGrid.resetCursor();
+ 	}));
+-	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, "CANCEL", "cancel", [&] { delete this; }));
+-	mButtonGrid = makeButtonGrid(mWindow, buttons);
+ 
++	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, "CANCEL", "cancel", [&] {
++		delete this;
++	}));
++
++	mButtonGrid = makeButtonGrid(mWindow, buttons);
+ 	mGrid.setEntry(mButtonGrid, Vector2i(0, 6), true, false);
+ 
+-	// we call this->close() instead of just delete this; in the accept callback:
+-	// this is because of how GuiComponent::update works.  if it was just delete this, this would happen when the metadata resolver is done:
+-	//     GuiGameScraper::update()
+-	//       GuiComponent::update()
+-	//         it = mChildren.cbegin();
+-	//         mBox::update()
+-	//         it++;
+-	//         mSearchComponent::update()
+-	//           acceptCallback -> delete this
+-	//         it++; // error, mChildren has been deleted because it was part of this
+-
+-	// so instead we do this:
+-	//     GuiGameScraper::update()
+-	//       GuiComponent::update()
+-	//         it = mChildren.cbegin();
+-	//         mBox::update()
+-	//         it++;
+-	//         mSearchComponent::update()
+-	//           acceptCallback -> close() -> mClose = true
+-	//         it++; // ok
+-	//       if(mClose)
+-	//         delete this;
+-	mSearch->setAcceptCallback([this, doneFunc](const ScraperSearchResult& result) { doneFunc(result); close(); });
+-	mSearch->setCancelCallback([&] { delete this; });
++	// callbacks seguros
++	mSearch->setAcceptCallback([this, doneFunc](const ScraperSearchResult& result) {
++		doneFunc(result);
++		close();
++	});
++
++	mSearch->setCancelCallback([&] {
++		delete this;
++	});
+ 
+ 	setSize(Renderer::getScreenWidth() * 0.95f, Renderer::getScreenHeight() * 0.747f);
+-	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
++	setPosition(
++		(Renderer::getScreenWidth() - mSize.x()) / 2,
++		(Renderer::getScreenHeight() - mSize.y()) / 2
++	);
+ 
+ 	mGrid.resetCursor();
+-	mSearch->search(params); // start the search
++	mSearch->search(params);
+ }
+ 
+ void GuiGameScraper::onSizeChanged()
+@@ -84,17 +105,18 @@
+ 	mBox.fitTo(mSize, Vector3f::Zero(), Vector2f(-32, -32));
+ 
+ 	mGrid.setRowHeightPerc(0, 0.04f, false);
+-	mGrid.setRowHeightPerc(1, mGameName->getFont()->getLetterHeight() / mSize.y(), false); // game name
++	mGrid.setRowHeightPerc(1, mGameName->getFont()->getLetterHeight() / mSize.y(), false);
+ 	mGrid.setRowHeightPerc(2, 0.04f, false);
+-	mGrid.setRowHeightPerc(3, mSystemName->getFont()->getLetterHeight() / mSize.y(), false); // system name
++	mGrid.setRowHeightPerc(3, mSystemName->getFont()->getLetterHeight() / mSize.y(), false);
+ 	mGrid.setRowHeightPerc(4, 0.04f, false);
+-	mGrid.setRowHeightPerc(6, mButtonGrid->getSize().y() / mSize.y(), false); // buttons
++	mGrid.setRowHeightPerc(6, mButtonGrid->getSize().y() / mSize.y(), false);
++
+ 	mGrid.setSize(mSize);
+ }
+ 
+ bool GuiGameScraper::input(InputConfig* config, Input input)
+ {
+-	if(config->isMappedTo("b", input) && input.value)
++	if (config->isMappedTo("b", input) && input.value)
+ 	{
+ 		PowerSaver::resume();
+ 		delete this;
+@@ -108,7 +130,7 @@
+ {
+ 	GuiComponent::update(deltaTime);
+ 
+-	if(mClose)
++	if (mClose)
+ 		delete this;
+ }
+ 
+diff -ur a/es-app/src/guis/GuiMetaDataEd.cpp b/es-app/src/guis/GuiMetaDataEd.cpp
+--- a/es-app/src/guis/GuiMetaDataEd.cpp	Source
++++ b/es-app/src/guis/GuiMetaDataEd.cpp	Modified
+@@ -21,12 +21,46 @@
+ #include "SystemData.h"
+ #include "Window.h"
+ #include "Log.h"
++#include "Settings.h"
++
++namespace
++{
++	inline bool isMenuDark()
++	{
++		return Settings::getInstance()->getBool("MenuDark");
++	}
++
++	inline unsigned int getTitleColor()
++	{
++		return isMenuDark() ? 0xFFFFFFFF : 0x555555FF;
++	}
++
++	inline unsigned int getPrimaryTextColor()
++	{
++		return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++	}
++
++	inline unsigned int getSecondaryTextColor()
++	{
++		return isMenuDark() ? 0xBBBBBBFF : 0x777777FF;
++	}
++
++	inline const char* getFramePath()
++	{
++		return isMenuDark() ? ":/frame_dark.png" : ":/frame.png";
++	}
++
++	inline const char* getArrowPath()
++	{
++		return isMenuDark() ? ":/arrow_dark.svg" : ":/arrow.svg";
++	}
++}
+ 
+ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector<MetaDataDecl>& mdd, ScraperSearchParams scraperParams,
+ 	const std::string& /*header*/, std::function<void()> saveCallback, std::function<void()> deleteFunc) : GuiComponent(window),
+ 	mScraperParams(scraperParams),
+ 
+-	mBackground(window, ":/frame.png"),
++	mBackground(window, getFramePath()),
+ 	mGrid(window, Vector2i(1, 3)),
+ 
+ 	mMetaDataDecl(mdd),
+@@ -39,10 +73,11 @@
+ 
+ 	mHeaderGrid = std::make_shared<ComponentGrid>(mWindow, Vector2i(1, 5));
+ 
+-	mTitle = std::make_shared<TextComponent>(mWindow, "EDIT METADATA", Font::get(FONT_SIZE_LARGE), 0x555555FF, ALIGN_CENTER);
++
++	mTitle = std::make_shared<TextComponent>(mWindow, "EDIT METADATA", Font::get(FONT_SIZE_LARGE), getTitleColor(), ALIGN_CENTER);
+ 	std::string tgt = md->getType() == GAME_METADATA ? "GAME" : "FOLDER";
+ 	std::string subt = tgt + ": " + Utils::String::toUpper(Utils::FileSystem::getFileName(scraperParams.game->getPath()));
+-	mSubtitle = std::make_shared<TextComponent>(mWindow, subt, Font::get(FONT_SIZE_SMALL), 0x777777FF, ALIGN_CENTER);
++	mSubtitle = std::make_shared<TextComponent>(mWindow, subt, Font::get(FONT_SIZE_SMALL), getPrimaryTextColor(), ALIGN_CENTER);
+ 	mHeaderGrid->setEntry(mTitle, Vector2i(0, 1), false, true);
+ 	mHeaderGrid->setEntry(mSubtitle, Vector2i(0, 3), false, true);
+ 
+@@ -67,7 +102,7 @@
+ 		if (iter->type == MD_DATE) {
+ 			lblTxt += " (" + DateTimeComponent::getDateformatTip() + ")";
+ 		}
+-		auto lbl = std::make_shared<TextComponent>(mWindow, lblTxt, Font::get(FONT_SIZE_SMALL), 0x777777FF);
++		auto lbl = std::make_shared<TextComponent>(mWindow, lblTxt, Font::get(FONT_SIZE_SMALL), getPrimaryTextColor());
+ 		row.addElement(lbl, true); // label
+ 
+ 		switch(iter->type)
+@@ -118,7 +153,7 @@
+ 		default:
+ 			{
+ 				// MD_STRING
+-				ed = std::make_shared<TextComponent>(window, "", Font::get(FONT_SIZE_SMALL, FONT_PATH_LIGHT), 0x777777FF, ALIGN_RIGHT);
++				ed = std::make_shared<TextComponent>(window, "", Font::get(FONT_SIZE_SMALL, FONT_PATH_LIGHT), getSecondaryTextColor(), ALIGN_RIGHT);
+ 				const float height = lbl->getSize().y() * 0.71f;
+ 				ed->setSize(0, height);
+ 				row.addElement(ed, true);
+@@ -128,7 +163,7 @@
+ 				row.addElement(spacer, false);
+ 
+ 				auto bracket = std::make_shared<ImageComponent>(mWindow);
+-				bracket->setImage(":/arrow.svg");
++				bracket->setImage(getArrowPath());
+ 				bracket->setResize(Vector2f(0, lbl->getFont()->getLetterHeight()));
+ 				row.addElement(bracket, false);
+ 
+diff -ur a/es-app/src/guis/GuiScraperMulti.cpp b/es-app/src/guis/GuiScraperMulti.cpp
+--- a/es-app/src/guis/GuiScraperMulti.cpp	Source
++++ b/es-app/src/guis/GuiScraperMulti.cpp	Modified
+@@ -10,10 +10,39 @@
+ #include "PowerSaver.h"
+ #include "SystemData.h"
+ #include "Window.h"
+-#include "LocaleESHook.h"   // ← traducción (es_translate)
++#include "LocaleESHook.h"
++#include "Settings.h"
++
++namespace
++{
++	inline bool isMenuDark()
++	{
++		return Settings::getInstance()->getBool("MenuDark");
++	}
++
++	inline const char* getFramePath()
++	{
++		return isMenuDark() ? ":/frame_dark.png" : ":/frame.png";
++	}
++
++	inline unsigned int getTitleColor()
++	{
++		return isMenuDark() ? 0xFFFFFFFF : 0x555555FF;
++	}
++
++	inline unsigned int getPrimaryTextColor()
++	{
++		return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++	}
++
++	inline unsigned int getSecondaryTextColor()
++	{
++		return isMenuDark() ? 0xBBBBBBFF : 0x888888FF;
++	}
++}
+ 
+ GuiScraperMulti::GuiScraperMulti(Window* window, const std::queue<ScraperSearchParams>& searches, bool approveResults) :
+-	GuiComponent(window), mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 5)),
++	GuiComponent(window), mBackground(window, getFramePath()), mGrid(window, Vector2i(1, 5)),
+ 	mSearchQueue(searches)
+ {
+ 	assert(mSearchQueue.size());
+@@ -34,7 +63,7 @@
+ 		mWindow,
+ 		es_translate("SCRAPING IN PROGRESS"),
+ 		Font::get(FONT_SIZE_LARGE),
+-		0x555555FF,
++		getTitleColor(),
+ 		ALIGN_CENTER);
+ 	mGrid.setEntry(mTitle, Vector2i(0, 0), false, true);
+ 
+@@ -43,7 +72,7 @@
+ 		mWindow,
+ 		es_translate("SYSTEM"),
+ 		Font::get(FONT_SIZE_MEDIUM),
+-		0x777777FF,
++		getPrimaryTextColor(),
+ 		ALIGN_CENTER);
+ 	mGrid.setEntry(mSystem, Vector2i(0, 1), false, true);
+ 
+@@ -52,7 +81,7 @@
+ 		mWindow,
+ 		"",
+ 		Font::get(FONT_SIZE_SMALL),
+-		0x888888FF,
++		getSecondaryTextColor(),
+ 		ALIGN_CENTER);
+ 	mGrid.setEntry(mSubtitle, Vector2i(0, 2), false, true);
+ 
+diff -ur a/es-core/src/guis/GuiDetectDevice.cpp b/es-core/src/guis/GuiDetectDevice.cpp
+--- a/es-core/src/guis/GuiDetectDevice.cpp	Source
++++ b/es-core/src/guis/GuiDetectDevice.cpp	Modified
+@@ -9,9 +9,48 @@
+ #include "Window.h"
+ 
+ #define HOLD_TIME 1000
++#include "Settings.h"
++
++namespace
++{
++	inline bool isMenuDark()
++	{
++		return Settings::getInstance()->getBool("MenuDark");
++	}
++
++	inline const char* getFramePath()
++	{
++		return isMenuDark() ? ":/frame_dark.png" : ":/frame.png";
++	}
++
++	inline unsigned int getTitleColor()
++	{
++		return isMenuDark() ? 0xFFFFFFFF : 0x555555FF;
++	}
++
++	inline unsigned int getHintColor()
++	{
++		return isMenuDark() ? 0xA8A8A8FF : 0x999999FF;
++	}
++
++	inline unsigned int getLabelColor()
++	{
++		return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++	}
++
++	inline unsigned int getValueColor()
++	{
++		return isMenuDark() ? 0xBEBEBEFF : 0xFFFFFFFF;
++	}
++
++	inline unsigned int getIconColor()
++	{
++		return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++	}
++}
+ 
+ GuiDetectDevice::GuiDetectDevice(Window* window, bool firstRun, const std::function<void()>& doneCallback) : GuiComponent(window), mFirstRun(firstRun),
+-	mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 5))
++	mBackground(window, getFramePath()), mGrid(window, Vector2i(1, 5))
+ {
+ 	mHoldingConfig = NULL;
+ 	mHoldTime = 0;
+@@ -22,7 +61,7 @@
+ 
+ 	// title
+ 	mTitle = std::make_shared<TextComponent>(mWindow, firstRun ? "WELCOME" : "CONFIGURE INPUT",
+-		Font::get(FONT_SIZE_LARGE), 0x555555FF, ALIGN_CENTER);
++		Font::get(FONT_SIZE_LARGE), getTitleColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mTitle, Vector2i(0, 0), false, true, Vector2i(1, 1), GridFlags::BORDER_BOTTOM);
+ 
+ 	// device info
+@@ -33,19 +72,19 @@
+ 		deviceInfo << numDevices << " GAMEPAD" << (numDevices > 1 ? "S" : "") << " DETECTED";
+ 	else
+ 		deviceInfo << "NO GAMEPADS DETECTED";
+-	mDeviceInfo = std::make_shared<TextComponent>(mWindow, deviceInfo.str(), Font::get(FONT_SIZE_SMALL), 0x999999FF, ALIGN_CENTER);
++	mDeviceInfo = std::make_shared<TextComponent>(mWindow, deviceInfo.str(), Font::get(FONT_SIZE_SMALL), getHintColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mDeviceInfo, Vector2i(0, 1), false, true);
+ 
+ 	// message
+-	mMsg1 = std::make_shared<TextComponent>(mWindow, "HOLD A BUTTON ON YOUR DEVICE TO CONFIGURE IT.", Font::get(FONT_SIZE_SMALL), 0x777777FF, ALIGN_CENTER);
++	mMsg1 = std::make_shared<TextComponent>(mWindow, "HOLD A BUTTON ON YOUR DEVICE TO CONFIGURE IT.", Font::get(FONT_SIZE_SMALL), getLabelColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mMsg1, Vector2i(0, 2), false, true);
+ 
+ 	const char* msg2str = firstRun ? "PRESS F4 TO QUIT AT ANY TIME." : "PRESS ESC TO CANCEL.";
+-	mMsg2 = std::make_shared<TextComponent>(mWindow, msg2str, Font::get(FONT_SIZE_SMALL), 0x777777FF, ALIGN_CENTER);
++	mMsg2 = std::make_shared<TextComponent>(mWindow, msg2str, Font::get(FONT_SIZE_SMALL), getIconColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mMsg2, Vector2i(0, 3), false, true);
+ 
+ 	// currently held device
+-	mDeviceHeld = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_MEDIUM), 0xFFFFFFFF, ALIGN_CENTER);
++	mDeviceHeld = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_MEDIUM), getValueColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mDeviceHeld, Vector2i(0, 4), false, true);
+ 
+ 	setSize(Renderer::getScreenWidth() * 0.6f, Renderer::getScreenHeight() * 0.5f);
+diff -ur a/es-core/src/guis/GuiInputConfig.cpp b/es-core/src/guis/GuiInputConfig.cpp
+--- a/es-core/src/guis/GuiInputConfig.cpp	Source
++++ b/es-core/src/guis/GuiInputConfig.cpp	Modified
+@@ -6,6 +6,60 @@
+ #include "InputManager.h"
+ #include "Log.h"
+ #include "Window.h"
++#include "Settings.h"
++
++namespace
++{
++	inline bool isMenuDark()
++	{
++		return Settings::getInstance()->getBool("MenuDark");
++	}
++
++	inline const char* getFramePath()
++	{
++		return isMenuDark() ? ":/frame_dark.png" : ":/frame.png";
++	}
++
++	inline unsigned int getTitleColor()
++	{
++		return isMenuDark() ? 0xFFFFFFFF : 0x555555FF;
++	}
++
++	inline unsigned int getSubtitleColor()
++	{
++		return isMenuDark() ? 0xD0D0D0FF : 0x555555FF;
++	}
++
++	inline unsigned int getHintColor()
++	{
++		return isMenuDark() ? 0xA8A8A8FF : 0x999999FF;
++	}
++
++	inline unsigned int getLabelColor()
++	{
++		return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++	}
++
++	inline unsigned int getValueColor()
++	{
++		return isMenuDark() ? 0xBEBEBEFF : 0x999999FF;
++	}
++
++	inline unsigned int getActiveColor()
++	{
++		return isMenuDark() ? 0xFFFFFFFF : 0x656565FF;
++	}
++
++	inline unsigned int getErrorColor()
++	{
++		return isMenuDark() ? 0xFF9090FF : 0x656565FF;
++	}
++
++	inline unsigned int getIconColor()
++	{
++		return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++	}
++}
+ 
+ struct InputConfigStructure
+ {
+@@ -51,7 +105,7 @@
+ #define HOLD_TO_SKIP_MS 1000
+ 
+ GuiInputConfig::GuiInputConfig(Window* window, InputConfig* target, bool reconfigureAll, const std::function<void()>& okCallback) : GuiComponent(window),
+-	mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 7)),
++	mBackground(window, getFramePath()), mGrid(window, Vector2i(1, 7)),
+ 	mTargetConfig(target), mHoldingInput(false), mBusyAnim(window)
+ {
+ 	LOG(LogInfo) << "Configuring device " << target->getDeviceId() << " (" << target->getDeviceName() << ").";
+@@ -68,7 +122,7 @@
+ 	// 0 is a spacer row
+ 	mGrid.setEntry(std::make_shared<GuiComponent>(mWindow), Vector2i(0, 0), false);
+ 
+-	mTitle = std::make_shared<TextComponent>(mWindow, "CONFIGURING", Font::get(FONT_SIZE_LARGE), 0x555555FF, ALIGN_CENTER);
++	mTitle = std::make_shared<TextComponent>(mWindow, "CONFIGURING", Font::get(FONT_SIZE_LARGE), getTitleColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mTitle, Vector2i(0, 1), false, true);
+ 
+ 	std::stringstream ss;
+@@ -78,10 +132,10 @@
+ 		ss << "CEC";
+ 	else
+ 		ss << "GAMEPAD " << (target->getDeviceId() + 1);
+-	mSubtitle1 = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(ss.str()), Font::get(FONT_SIZE_MEDIUM), 0x555555FF, ALIGN_CENTER);
++	mSubtitle1 = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(ss.str()), Font::get(FONT_SIZE_MEDIUM), getSubtitleColor(), ALIGN_CENTER);
+ 	mGrid.setEntry(mSubtitle1, Vector2i(0, 2), false, true);
+ 
+-	mSubtitle2 = std::make_shared<TextComponent>(mWindow, "HOLD ANY BUTTON TO SKIP", Font::get(FONT_SIZE_SMALL), 0x999999FF, ALIGN_CENTER);
++	mSubtitle2 = std::make_shared<TextComponent>(mWindow, "HOLD ANY BUTTON TO SKIP", Font::get(FONT_SIZE_SMALL), getHintColor(), ALIGN_CENTER);
+ 	mSubtitle2->setOpacity(GUI_INPUT_CONFIG_LIST[0].skippable * 255);
+ 	mGrid.setEntry(mSubtitle2, Vector2i(0, 3), false, true);
+ 
+@@ -96,7 +150,7 @@
+ 		// icon
+ 		auto icon = std::make_shared<ImageComponent>(mWindow);
+ 		icon->setImage(GUI_INPUT_CONFIG_LIST[i].icon);
+-		icon->setColorShift(0x777777FF);
++		icon->setColorShift(getIconColor());
+ 		icon->setResize(0, Font::get(FONT_SIZE_MEDIUM)->getLetterHeight() * 1.25f);
+ 		row.addElement(icon, false);
+ 
+@@ -105,10 +159,10 @@
+ 		spacer->setSize(16, 0);
+ 		row.addElement(spacer, false);
+ 
+-		auto text = std::make_shared<TextComponent>(mWindow, GUI_INPUT_CONFIG_LIST[i].dispName, Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
++		auto text = std::make_shared<TextComponent>(mWindow, GUI_INPUT_CONFIG_LIST[i].dispName, Font::get(FONT_SIZE_MEDIUM), getLabelColor());
+ 		row.addElement(text, true);
+ 
+-		auto mapping = std::make_shared<TextComponent>(mWindow, "-NOT DEFINED-", Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT), 0x999999FF, ALIGN_RIGHT);
++		auto mapping = std::make_shared<TextComponent>(mWindow, "-NOT DEFINED-", Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT), getValueColor(), ALIGN_RIGHT);
+ 		setNotDefined(mapping); // overrides text and color set above
+ 		row.addElement(mapping, true);
+ 		mMappings.push_back(mapping);
+@@ -258,7 +312,7 @@
+ 				std::stringstream ss;
+ 				ss << "HOLD FOR " << HOLD_TO_SKIP_MS/1000 - curSec << "S TO SKIP";
+ 				text->setText(ss.str());
+-				text->setColor(0x777777FF);
++				text->setColor(getLabelColor());
+ 			}
+ 		}
+ 	}
+@@ -289,25 +343,25 @@
+ void GuiInputConfig::setPress(const std::shared_ptr<TextComponent>& text)
+ {
+ 	text->setText("PRESS ANYTHING");
+-	text->setColor(0x656565FF);
++	text->setColor(getActiveColor());
+ }
+ 
+ void GuiInputConfig::setNotDefined(const std::shared_ptr<TextComponent>& text)
+ {
+ 	text->setText("-NOT DEFINED-");
+-	text->setColor(0x999999FF);
++	text->setColor(getValueColor());
+ }
+ 
+ void GuiInputConfig::setAssignedTo(const std::shared_ptr<TextComponent>& text, Input input)
+ {
+ 	text->setText(Utils::String::toUpper(input.string()));
+-	text->setColor(0x777777FF);
++	text->setColor(getLabelColor());
+ }
+ 
+ void GuiInputConfig::error(const std::shared_ptr<TextComponent>& text, const std::string& /*msg*/)
+ {
+ 	text->setText("ALREADY TAKEN");
+-	text->setColor(0x656565FF);
++	text->setColor(getErrorColor());
+ }
+ 
+ bool GuiInputConfig::assign(Input input, int inputId)
+diff -ur a/es-core/src/guis/GuiMsgBox.cpp b/es-core/src/guis/GuiMsgBox.cpp
+--- a/es-core/src/guis/GuiMsgBox.cpp	Source
++++ b/es-core/src/guis/GuiMsgBox.cpp	Modified
+@@ -5,15 +5,34 @@
+ #include "components/ButtonComponent.h"
+ #include "components/MenuComponent.h"
+ #include "../LocaleESHook.h"  // Para es_translate
++#include "Settings.h"
+ 
+ #define HORIZONTAL_PADDING_PX 20
+ 
++namespace
++{
++    inline bool isMenuDark()
++    {
++        return Settings::getInstance()->getBool("MenuDark");
++    }
++
++    inline unsigned int getMessageTextColor()
++    {
++        return isMenuDark() ? 0xE0E0E0FF : 0x777777FF;
++    }
++
++    inline const char* getFramePath()
++    {
++        return isMenuDark() ? ":/frame_dark.png" : ":/frame.png";
++    }
++}
++
+ GuiMsgBox::GuiMsgBox(Window* window, const std::string& text,
+     const std::string& name1, const std::function<void()>& func1,
+     const std::string& name2, const std::function<void()>& func2,
+     const std::string& name3, const std::function<void()>& func3)
+     : GuiComponent(window)
+-    , mBackground(window, ":/frame.png")
++    , mBackground(window, getFramePath())
+     , mGrid(window, Vector2i(1, 2))
+ {
+     float width    = Renderer::getScreenWidth() * 0.6f; // max width
+@@ -24,7 +43,7 @@
+         mWindow,
+         es_translate(text),
+         Font::get(FONT_SIZE_MEDIUM),
+-        0x777777FF,
++        getMessageTextColor(),
+         ALIGN_CENTER
+     );
+     mGrid.setEntry(mMsg, Vector2i(0, 0), false, false);
