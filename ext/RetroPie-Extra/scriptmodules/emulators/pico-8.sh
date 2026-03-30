@@ -184,8 +184,8 @@ if [[ -f /opt/retropie/emulators/pico-8/MissingPico8.png ]]; then
     sudo \$joy2key stop; sudo \$joy2key start
     sudo fbi -T 1 -a -noverbose /opt/retropie/emulators/pico-8/MissingPico8.png > /dev/null 2>&1; sleep 9; sudo kill \$(pgrep fbi) > /dev/null 2>&1; clear & clear
     sudo \$joy2key stop
+    exit 0
 fi
-exit 0
 }
 
 ROMDIR="$home/RetroPie/roms/pico8"
