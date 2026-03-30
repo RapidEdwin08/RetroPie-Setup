@@ -83,13 +83,18 @@ function sources_emulationstation-es-x() {
 
         # b726559a Add clock format option (12H / 24H)
         applyPatch "$md_data/Clock-Format-b726559a.diff" 
-        wget https://github.com/Renetrox/EmulationStation-X/raw/b726559a666bf597125ca4a104568cb89c089738/libes-core.a -O /tmp/libes-core.a
+        ##wget https://github.com/Renetrox/EmulationStation-X/raw/b726559a666bf597125ca4a104568cb89c089738/libes-core.a -O /tmp/libes-core.a
+        ##mv /tmp/libes-core.a "$md_build"
+
+        # 68c9136d Improve dark menu styling across major ES-X dialogs
+        applyPatch "$md_data/More-Dark-Menus-68c9136d.diff" 
+        wget https://github.com/Renetrox/EmulationStation-X/raw/68c9136d917edc40fc84c56703d7c29107f471ee/libes-core.a -O /tmp/libes-core.a
         mv /tmp/libes-core.a "$md_build"
 
         # Only Update HelpComponent for PNG Icons if NOT [default]
         if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
             sed -i 's+.svg+.png+' "$md_build/es-core/src/components/HelpComponent.cpp"
-            ##sed -i 's+.svg+.png+' "$md_build/es-core/src/guis/GuiInputConfig.cpp" # Better with Dark Theme
+            #sed -i 's+.svg+.png+' "$md_build/es-core/src/guis/GuiInputConfig.cpp" # These could be better...
         fi
     fi
 
