@@ -1,0 +1,84 @@
+diff -urN a/core/cart_hw/yx5200.c b/core/cart_hw/yx5200.c
+--- a/core/cart_hw/yx5200.c	2026-03-28 23:24:52.090739062 -0400
++++ b/core/cart_hw/yx5200.c	2026-03-28 23:27:16.023430352 -0400
+@@ -9,7 +9,7 @@
+  *
+  *  Limitations:
+  *   - MP3 files support only (no WAV/WMA support)
+- *   - MP3 files need to be stored in same directory as game file (single device root directory playback only)
++ *   - MP3 files need to be stored in rompath/rombasename {eg. /megadrive/Death_and_Lead} (single device root directory playback only)
+  *   - limited set of commands support (track selection, volume setting and playback control)
+  *   - no command format or checksum verification
+  *   - no command feedback support
+@@ -50,6 +50,7 @@
+ #define MINIMP3_IMPLEMENTATION
+ 
+ #include "shared.h"
++#include "loadrom.h"
+ #include "minimp3_ex.h"
+ 
+ /* YX5200 UART interface RX message size */
+@@ -94,6 +95,8 @@
+ 
+ void yx5200_init(int samplerate)
+ {
++  printf("[yx5200 Music Path]: %s\n", musicpath); // Logging for HW_YX5200 loaded
++
+   /* YX5200 audio playback rate depends on loaded audio track */
+   /* Audio stream is resampled to desired rate using Blip Buffer */
+   if (yx5200.trackIndex)
+@@ -417,7 +420,7 @@
+   /* attempt to open MP3 file */
+   for (i=0; i<4; i++)
+   {
+-    sprintf(fname, fmt[i], rompath, index);
++    sprintf(fname, fmt[i], musicpath, index); // <loadrom.c> [musicpath]
+     mp3io.read_data = mp3io.seek_data = cdStreamOpen(fname);
+     if (mp3io.read_data)
+     {
+@@ -428,6 +431,7 @@
+       if ((res == 0) && (mp3dec.info.channels > 0) && (mp3dec.info.channels <= 2))
+       {
+         /* indicate audio track is loaded */
++        printf("[yx5200_load_track]: %s\n", fname); // Logging for HW_YX5200 track loaded
+         yx5200.trackIndex = index;
+ 
+         /* start audio playback */
+diff -urN a/core/loadrom.c b/core/loadrom.c
+--- a/core/loadrom.c	2026-03-28 23:24:52.106739140 -0400
++++ b/core/loadrom.c	2026-03-28 23:25:23.042887827 -0400
+@@ -93,6 +93,7 @@
+ ROMINFO rominfo;
+ uint8 romtype;
+ char rompath[256];
++char musicpath[256];
+ 
+ static uint8 rom_region;
+ 
+@@ -1043,6 +1044,15 @@
+   while ((i>0) && (rompath[i-1]!='/') && (rompath[i-1]!='\\')) i--;
+   rompath[i] = 0;
+ 
++  /* extract auxiliary musicpath for HW_YX5200 <yx5200.c> */
++  int len;
++  char fname[256];
++  len = strlen(filename);
++  while ((len && (filename[len] != '.')) || (len > 251)) len--;
++  strncpy(musicpath, filename, len);
++  strcpy(&musicpath[len], "/");
++  musicpath[len+1] = 0;
++
+   return(1);
+ }
+ 
+diff -urN a/core/loadrom.h b/core/loadrom.h
+--- a/core/loadrom.h	2026-03-28 23:24:52.106739140 -0400
++++ b/core/loadrom.h	2026-03-28 23:25:23.042887827 -0400
+@@ -65,6 +65,7 @@
+ extern ROMINFO rominfo;
+ extern uint8 romtype;
+ extern char rompath[256];
++extern char musicpath[256];
+ 
+ /* Function prototypes */
+ extern int load_bios(int system);
