@@ -21,15 +21,15 @@ function _get_commit_lr-genesis-plus-gx() {
     local branch_tag=master
     local branch_commit="$(git ls-remote https://github.com/libretro/Genesis-Plus-GX.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
-    #echo d446078a # 20260306
+    #echo ee71e47c; # 20260331 add linux-aarch64 build (#401)
     echo $branch_commit
 }
 
 function sources_lr-genesis-plus-gx() {
     gitPullOrClone
-    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "d446078a" ]]; then
-        applyPatch "$md_data/death_and_lead_d446078a.diff" # 033df9b7
-        applyPatch "$md_data/yx5200_musicpath_d446078a.diff" # musicpath [rompath/rombasename] for HW_YX5200
+    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "ee71e47c" ]]; then
+        applyPatch "$md_data/death_and_lead_ee71e47c.diff" # 033df9b7
+        applyPatch "$md_data/yx5200_musicpath_ee71e47c.diff" # musicpath [rompath/rombasename] for HW_YX5200
     fi
 }
 
