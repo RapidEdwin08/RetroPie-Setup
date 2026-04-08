@@ -116,7 +116,7 @@ function _add_games_quakespasm() {
 }
 
 function add_games_quakespasm() {
-    local params=("%QUAKEDIR%")
+    local params=("%ROM%"); #local params=("%QUAKEDIR%")
     local binary="$md_inst/quakespasm.sh"
 
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
@@ -340,11 +340,23 @@ _EOF_
     cat >"$md_inst/quakespasm.sh" << _EOF_
 #!/bin/bash
 
-# Called by [emulators.cfg] with %QUAKEDIR%
-if [[ "\$1" == 'id1' ]]; then # [-game id1] fails to play Shareware Episode
-    $md_inst/quakespasm -basedir $romdir/ports/quake
+# get Params: remove everything up to pak - [+map dm7sp]
+quake_params="\${@##*pak}"
+
+# get basedir: remove everything up to /quake/ - [dm7sp/pak0.pak +map dm7sp]
+quake_dir="\${1##*/quake/}"
+
+# get basedir: remove filename - [dm7sp]
+quake_dir="\${quake_dir%/*}"
+
+# Logging
+echo -basedir: [\$quake_dir] +Params: [\$quake_params] >> /dev/shm/runcommand.log
+
+# Called by [emulators.cfg] with %ROM% instead of %QUAKEDIR%
+if [[ "\$quake_dir" == 'id1' ]]; then # [-game id1] fails to play Shareware Episode
+    /opt/retropie/ports/quakespasm/quakespasm -basedir $romdir/ports/quake
 else
-    $md_inst/quakespasm -basedir $romdir/ports/quake -game "\$@"
+    /opt/retropie/ports/quakespasm/quakespasm -basedir $romdir/ports/quake -game \$quake_dir \$quake_params
 fi
 
 _EOF_
