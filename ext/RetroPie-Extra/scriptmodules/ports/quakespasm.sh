@@ -120,6 +120,9 @@ function add_games_quakespasm() {
     local binary="$md_inst/quakespasm.sh"
 
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
+    if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
+        params+=("+set vid_vsync 2")
+    fi
 
     _add_games_quakespasm "$binary ${params[*]}"
 }
