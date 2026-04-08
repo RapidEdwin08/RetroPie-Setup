@@ -370,6 +370,10 @@ _EOF_
 
 function shortcuts_icons_quakespasm() {
     local params=("-basedir $romdir/ports/quake")
+    local suffix
+    if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
+        suffix=("+set vid_vsync 1")
+    fi
     local binary="$md_inst/quakespasm"
 
     local shortcut_name
@@ -379,7 +383,7 @@ function shortcuts_icons_quakespasm() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$binary ${params[*]}
+Exec=$binary ${params[*]} $suffix
 Icon=$md_inst/Quake_72x72.xpm
 Terminal=false
 Type=Application
@@ -400,7 +404,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$binary ${params[*]} -game $addon_name
+Exec=$binary ${params[*]} -game $addon_name $suffix
 Icon=$md_inst/Quake_74x74.xpm
 Terminal=false
 Type=Application
@@ -422,7 +426,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$binary ${params[*]} -game $addon_name
+Exec=$binary ${params[*]} -game $addon_name $suffix
 Icon=$md_inst/Quake_70x70.xpm
 Terminal=false
 Type=Application
@@ -444,7 +448,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$binary ${params[*]} -game $addon_name
+Exec=$binary ${params[*]} -game $addon_name $suffix
 Icon=$md_inst/Quake_70x70.xpm
 Terminal=false
 Type=Application
@@ -466,7 +470,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$binary ${params[*]} -game $addon_name
+Exec=$binary ${params[*]} -game $addon_name $suffix
 Icon=$md_inst/QuakeHoney_70x70.xpm
 Terminal=false
 Type=Application
