@@ -350,7 +350,7 @@ quake_dir="\${1##*/quake/}"
 quake_dir="\${quake_dir%/*}"
 
 # Logging
-echo -basedir: [\$quake_dir] +Params: [\$quake_params] >> /dev/shm/runcommand.log
+echo -game: [\$quake_dir] +Params: [\$quake_params] >> /dev/shm/runcommand.log
 
 # Called by [emulators.cfg] with %ROM% instead of %QUAKEDIR%
 if [[ "\$quake_dir" == 'id1' ]]; then # [-game id1] fails to play Shareware Episode
