@@ -121,7 +121,7 @@ function add_games_quakespasm() {
 
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
-        params+=("+set vid_vsync 1")
+        params+=("set vid_vsync 1")
     fi
 
     _add_games_quakespasm "$binary ${params[*]}"
@@ -372,7 +372,7 @@ function shortcuts_icons_quakespasm() {
     local params=("-basedir $romdir/ports/quake")
     local suffix
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
-        suffix=("+set vid_vsync 1")
+        suffix=("set vid_vsync 1")
     fi
     local binary="$md_inst/quakespasm"
 
