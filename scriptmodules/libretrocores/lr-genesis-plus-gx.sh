@@ -22,13 +22,13 @@ function _get_commit_lr-genesis-plus-gx() {
     local branch_commit="$(git ls-remote https://github.com/libretro/Genesis-Plus-GX.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     #echo ee71e47c; # 20260331 add linux-aarch64 build (#401)
-    #echo b72b8c96; # 20260403 Fetch translations & Recreate libretro_core_options_intl.h
+    #echo c4d1afb1; # 20260417 Fetch translations & Recreate libretro_core_options_intl.h
     echo $branch_commit
 }
 
 function sources_lr-genesis-plus-gx() {
     gitPullOrClone
-    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "b72b8c96" ]]; then
+    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "c4d1afb1" ]]; then
         applyPatch "$md_data/death_and_lead_ee71e47c.diff" # 033df9b7
         applyPatch "$md_data/yx5200_musicpath_ee71e47c.diff" # musicpath [rompath/rombasename] for HW_YX5200
     fi
