@@ -83,13 +83,19 @@ function sources_emulationstation-es-x() {
 
         # b726559a Add clock format option (12H / 24H)
         applyPatch "$md_data/Clock-Format-b726559a.diff" 
-        ##wget https://github.com/Renetrox/EmulationStation-X/raw/b726559a666bf597125ca4a104568cb89c089738/libes-core.a -O /tmp/libes-core.a
-        ##mv /tmp/libes-core.a "$md_build"
+        ##wget https://github.com/Renetrox/EmulationStation-X/raw/b726559a666bf597125ca4a104568cb89c089738/libes-core.a -O /tmp/libes-core.a; mv /tmp/libes-core.a "$md_build"
 
         # 68c9136d Improve dark menu styling across major ES-X dialogs
         applyPatch "$md_data/More-Dark-Menus-68c9136d.diff" 
-        wget https://github.com/Renetrox/EmulationStation-X/raw/68c9136d917edc40fc84c56703d7c29107f471ee/libes-core.a -O /tmp/libes-core.a
-        mv /tmp/libes-core.a "$md_build"
+        wget https://github.com/Renetrox/EmulationStation-X/raw/68c9136d917edc40fc84c56703d7c29107f471ee/libes-core.a -O /tmp/libes-core.a; mv /tmp/libes-core.a "$md_build"
+
+        # Get language.ini for Commit [5f237788] - LocaleES: no language file found for 'en'
+        rm -f $md_build/lang/*
+        for lang_ini in "de.ini" "en.ini" "es.ini" "fr.ini" "gn_PY.ini" "it.ini" "ja.ini" "pt.ini" "ru.ini"; do
+            ##wget https://github.com/Renetrox/EmulationStation-X/raw/68c9136d917edc40fc84c56703d7c29107f471ee/lang/$lang_ini -O /tmp/$lang_ini
+            wget https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/lang/$lang_ini -O /tmp/$lang_ini
+            mv /tmp/$lang_ini "$md_build/lang/"
+        done
 
         # Only Update HelpComponent for PNG Icons if NOT [default]
         if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
@@ -251,11 +257,11 @@ function configure_emulationstation-es-x() {
         sed -i "s+EnableBGM\" value=.*+EnableBGM\" value=\"false\" /\>+" "$home/.emulationstation/es_settings.cfg"
     fi
 
-     # Get Latest EmulationStation-X splash from Renetrox
-     ##wget https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/resources/splash.svg -P /dev/shm/; mv /dev/shm/splash.svg /opt/retropie/supplementary/emulationstation-es-x/resources 2>/dev/null
+    # Get Latest EmulationStation-X splash from Renetrox
+    ##wget https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/resources/splash.svg -P /dev/shm/; mv /dev/shm/splash.svg /opt/retropie/supplementary/emulationstation-es-x/resources 2>/dev/null
 
-     # Get Default EmulationStation splash from RetroPie
-     wget https://raw.githubusercontent.com/RetroPie/EmulationStation/master/resources/splash.svg -P /dev/shm/; mv /dev/shm/splash.svg /opt/retropie/supplementary/emulationstation-es-x/resources 2>/dev/null
+    # Get Default EmulationStation splash from RetroPie
+    wget https://raw.githubusercontent.com/RetroPie/EmulationStation/master/resources/splash.svg -P /dev/shm/; mv /dev/shm/splash.svg /opt/retropie/supplementary/emulationstation-es-x/resources 2>/dev/null
 
     [[ "$md_mode" == "install" ]] && help_icons_emulationstation-es-x
 
