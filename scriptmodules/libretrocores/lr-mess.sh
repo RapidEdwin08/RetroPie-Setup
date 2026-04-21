@@ -14,6 +14,7 @@ rp_module_desc="MESS emulator - MESS Port for libretro"
 rp_module_help="see wiki for detailed explanation"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/libretro/mame/master/COPYING"
 rp_module_repo="git https://github.com/libretro/mame.git :_get_version_lr-mame"
+#rp_module_repo="git https://github.com/libretro/mame.git master dd2bcd1d"
 rp_module_section="exp"
 rp_module_flags=""
 
