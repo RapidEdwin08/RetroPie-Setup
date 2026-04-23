@@ -68,6 +68,7 @@ function install_lr-freej2me() {
 
 function configure_lr-freej2me() {
     mkRomDir "j2me"
+    defaultRAConfig "j2me"
     ensureSystemretroconfig "j2me"
 
     addEmulator 1 "$md_id" "j2me" "$md_inst/freej2me_libretro.so"
