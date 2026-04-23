@@ -41,6 +41,7 @@ function install_lr-same_cdi() {
 
 function configure_lr-same_cdi() {
     mkRomDir "cdimono1"
+    defaultRAConfig "cdimono1"
     ensureSystemretroconfig "cdimono1"
 
     addEmulator 1 "$md_id" "cdimono1" "$md_inst/same_cdi_libretro.so"
