@@ -113,6 +113,7 @@ function remove_lr-numero() {
 
 function configure_lr-numero() {
     mkRomDir "ti83"
+    defaultRAConfig "ti83"
     ensureSystemretroconfig "ti83"
 
     addEmulator 1 "$md_id" "ti83" "$md_inst/numero_libretro.so"
