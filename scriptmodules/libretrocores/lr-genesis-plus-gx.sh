@@ -23,12 +23,13 @@ function _get_commit_lr-genesis-plus-gx() {
 
     #echo ee71e47c; # 20260331 add linux-aarch64 build (#401)
     #echo 1656ce52; # 20260420 libretro: add webOS to CI (#402)
+    #echo eb421624; #20260424 Fetch translations & Recreate libretro_core_options_intl.h
     echo $branch_commit
 }
 
 function sources_lr-genesis-plus-gx() {
     gitPullOrClone
-    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "1656ce52" ]]; then
+    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "eb421624" ]]; then
         applyPatch "$md_data/death_and_lead_ee71e47c.diff" # 033df9b7
         applyPatch "$md_data/yx5200_musicpath_ee71e47c.diff" # musicpath [rompath/rombasename] for HW_YX5200
     fi
