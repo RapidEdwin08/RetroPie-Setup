@@ -22,9 +22,15 @@ function _get_commit_lr-dosbox-pure() {
     local branch_tag=main
     local branch_commit="$(git ls-remote https://github.com/libretro/dosbox-pure.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
 
-    echo $branch_commit
-    #echo 10945cfc; # 20250730 Make 3dfx Voodoo set to "Auto (default)" use hardware acceleration even on OpenGLES devices - Graphics Issue on rpi3
-    #echo 10823c1e; # 20250729 Set version to 1.0-preview2 - Last Commit Before Graphics Issue on rpi3
+    #echo $branch_commit
+    #echo 2b03ff1f; # 20250521 Fix file open order when overlaying multiple patch file systems {Prior to OSK Changes}
+    #echo 10823c1e; # 20250729 Set version to 1.0-preview2 {Last Commit Before Graphics Issue on rpi3} *OSK Crash
+    #echo 10945cfc; # 20250730 Make 3dfx Voodoo set to "Auto (default)" use hardware acceleration even on OpenGLES devices {Graphics Issue on rpi3} *OSK Crash
+    if ( isPlatform "rpi2" || isPlatform "rpi3" ); then
+        echo 2b03ff1f
+    else
+        echo $branch_commit
+    fi
 }
 
 function depends_lr-dosbox-pure() {
@@ -37,7 +43,7 @@ function sources_lr-dosbox-pure() {
     gitPullOrClone
 
     # Revert [10945cfc] Make 3dfx Voodoo set to "Auto (default)" use hardware acceleration even on OpenGLES devices # https://github.com/libretro/dosbox-pure/commit/10945cfc809171c96007f62ec654c3a078096162
-    if isPlatform "rpi3"; then
+    if [[ "$(_get_commit_lr-dosbox-pure)" == "10945cfc" ]]; then
         sed -i 's+for (int test = -1.*+for (int test = -1; test != (voodoo_perf[0] == '\''a'\'' ? 0 : 5); test\+\+)+' "$md_build/dosbox_pure_libretro.cpp"
         sed -i 's+if (preffered_hw_render == RETRO_HW_CONTEXT_OPENGL).*;+//if (preffered_hw_render == RETRO_HW_CONTEXT_OPENGL) testmax = 4;+' "$md_build/dosbox_pure_libretro.cpp"
     fi
