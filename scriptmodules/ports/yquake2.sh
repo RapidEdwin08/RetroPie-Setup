@@ -207,6 +207,13 @@ function configure_yquake2() {
     copyDefaultConfig "$md_data/yq2.cfg" "$config"
     iniConfig " " '"' "$config"
 
+    # bind chicken menu
+    if [[ ! -f "$md_conf_root/quake2/yquake2/ctc/config.cfg" ]]; then
+        mkUserDir "$md_conf_root/quake2/yquake2/ctc"
+        echo 'bind BTN_BACK "cmd chicken menu"' >> "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+        chown "$__user":"$__user" "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+    fi
+
     # Don't apply GL1 mobile optimizations to x86
     if isPlatform "x86"; then
         iniSet "set gl1_discardfb" "0"
