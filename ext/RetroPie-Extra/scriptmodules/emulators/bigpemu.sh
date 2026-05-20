@@ -32,7 +32,7 @@ function depends_bigpemu() {
 }
 
 function install_bin_bigpemu() {
-    local bigpemu_version="v119"
+    local bigpemu_version="v1221"
     local bigpemu_platform=Linux64
     if isPlatform "aarch64"; then bigpemu_platform=LinuxARM64; fi
     local bigpemu_tar="BigPEmu_${bigpemu_platform}_${bigpemu_version}.tar.gz"
