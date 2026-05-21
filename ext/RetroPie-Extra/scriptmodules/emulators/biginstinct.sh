@@ -107,7 +107,7 @@ function configure_biginstinct() {
     addEmulator 0 "$md_id-ui" "arcade" "$launch_prefix$md_inst/biginstinct"
 
     [[ "$md_mode" == "remove" ]] && remove_biginstinct
-    #[[ "$md_mode" == "install" ]] && game_data_biginstinct
+    [[ "$md_mode" == "install" ]] && game_data_biginstinct
     [[ "$md_mode" == "install" ]] && shortcuts_icons_biginstinct
 }
 
