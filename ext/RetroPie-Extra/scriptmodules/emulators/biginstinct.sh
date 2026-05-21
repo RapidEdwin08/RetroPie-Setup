@@ -67,8 +67,10 @@ function game_data_biginstinct() {
     download "https://www.richwhitehouse.com/ki/hard/bighardmaker_v10_linux.tar.gz" "$home/bighardmaker"
     download "https://www.richwhitehouse.com/ki/hard/BigHardMaker_v10_Win_x64.zip" "$home/bighardmaker"
     cp "$romdir/arcade/run_bighardmaker.sh" /dev/shm/tmp.sh; mv /dev/shm/tmp.sh "$home/RetroPie/retropiemenu/run_bighardmaker.sh"
+    sed -i "s+^__user=.*+__user=\"$__user\"+g" "$home/RetroPie/retropiemenu/run_bighardmaker.sh"
     chmod 755 "$home/RetroPie/retropiemenu/run_bighardmaker.sh"; chown $__user:$__user "$home/RetroPie/retropiemenu/run_bighardmaker.sh"
     mv "$romdir/arcade/run_bighardmaker.sh" "$home/bighardmaker" # biginstinct-rp-assets.tar.gz
+    sed -i "s+^__user=.*+__user=\"$__user\"+g" "$home/bighardmaker/run_bighardmaker.sh"
     chmod 755 "$home/bighardmaker/run_bighardmaker.sh"
     chown -R $__user:$__user "$home/bighardmaker"
 }
