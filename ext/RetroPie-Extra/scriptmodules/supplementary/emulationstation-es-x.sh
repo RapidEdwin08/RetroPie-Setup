@@ -96,6 +96,7 @@ function sources_emulationstation-es-x() {
             wget https://raw.githubusercontent.com/Renetrox/EmulationStation-X/main/lang/$lang_ini -O /tmp/$lang_ini
             mv /tmp/$lang_ini "$md_build/lang/"
         done
+        sed -i 's+^FAVORITES=.*+FAVORITES=FAVORITES+g' "$md_build/lang/en.ini" # FAVS?
 
         # Only Update HelpComponent for PNG Icons if NOT [default]
         if [[ ! "$(_set_icons_emulationstation-es-x)" == "default" ]]; then
