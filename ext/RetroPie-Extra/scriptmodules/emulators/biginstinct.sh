@@ -103,7 +103,9 @@ function configure_biginstinct() {
     touch "$romdir/arcade/+Start BigInstinct.bighard"; chown -R $__user:$__user "$romdir/arcade"
 
     local launch_prefix
-    isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    local big_workaround="$md_inst/bigworkaround.sh"
+    ##isPlatform "kms" && launch_prefix="XINIT-WMC:"
+    isPlatform "kms" && launch_prefix="$big_workaround & " # Workaround for [Go to Website] Freeze on KMS
 
     addEmulator 1 "$md_id" "arcade" "$launch_prefix$md_inst/biginstinct %ROM%"
     addEmulator 0 "$md_id-ui" "arcade" "$launch_prefix$md_inst/biginstinct"
@@ -111,6 +113,26 @@ function configure_biginstinct() {
     [[ "$md_mode" == "remove" ]] && remove_biginstinct
     [[ "$md_mode" == "install" ]] && game_data_biginstinct
     [[ "$md_mode" == "install" ]] && shortcuts_icons_biginstinct
+
+    if [[ "$md_mode" == "install" ]]; then
+        # Workaround for [Go to Website] Freeze on KMS - I dunno, it's quick and cheap
+        cat > "$big_workaround" << _EOF_
+#!/bin/bash
+
+# [Go to Website] will Freeze {Big} Emulators Without XINIT on KMS
+# Script will Check for + Kill {www-browser} while {BigBinary} running
+
+BigBinary=$md_id
+
+sleep 14
+while ps -p \$(pgrep \$BigBinary) > /dev/null 2>&1; do
+    if [[ ! "\$(pgrep www-browser)" == '' ]]; then kill \$(pgrep www-browser); fi
+    sleep 7 # Hopefully you don't throw your controller at the screen by then...
+done
+
+_EOF_
+        chmod 755 "$big_workaround"
+    fi
 }
 
 function shortcuts_icons_biginstinct() {
