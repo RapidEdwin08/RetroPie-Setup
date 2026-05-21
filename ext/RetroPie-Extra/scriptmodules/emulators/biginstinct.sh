@@ -107,6 +107,8 @@ function configure_biginstinct() {
     ##isPlatform "kms" && launch_prefix="XINIT-WMC:"
     isPlatform "kms" && launch_prefix="$big_workaround & " # Workaround for [Go to Website] Freeze on KMS
 
+    delEmulator "$md_id" "arcade"; delEmulator "$md_id-ui" "arcade" # big_workaround &
+
     addEmulator 1 "$md_id" "arcade" "${launch_prefix}$md_inst/biginstinct %ROM%"
     addEmulator 0 "$md_id-ui" "arcade" "${launch_prefix}$md_inst/biginstinct"
 
