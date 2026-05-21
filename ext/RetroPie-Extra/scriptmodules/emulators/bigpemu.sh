@@ -96,6 +96,9 @@ function configure_bigpemu() {
     ##isPlatform "kms" && launch_prefix="XINIT-WMC:"
     isPlatform "kms" && launch_prefix="$big_workaround & " # Workaround for [Go to Website] Freeze on KMS
 
+    delEmulator "$md_id" "atarijaguar"; delEmulator "$md_id-ui" "atarijaguar" # big_workaround &
+    delEmulator "$md_id" "jaguarcd"; delEmulator "$md_id-ui" "jaguarcd" # big_workaround &
+
     addEmulator 1 "$md_id" "atarijaguar" "${launch_prefix}$md_inst/bigpemu %ROM%"
     addEmulator 0 "$md_id-ui" "atarijaguar" "${launch_prefix}$md_inst/bigpemu"
 
