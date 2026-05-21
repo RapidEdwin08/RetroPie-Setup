@@ -16,7 +16,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="biginstinct"
 rp_module_desc="BigInstinct Killer Instinct 1/2 Emulator"
-rp_module_help="1) Prepare Killer Instinct roms for BigHardMaker:\n$home/bighardmaker/kinst.zip\n$home/bighardmaker/kinst/kinst.chd\n\n$home/bighardmaker/kinst2.zip\n$home/bighardmaker/kinst2/kinst2.chd\n\n2) Create Killer Instinct roms with BigHardMaker:\neg. [PC]  ~/bighardmaker/bighardmaker_x64\neg. [Pi]  ~/bighardmaker/bighardmaker_arm64\n\n3) Copy {.bighard} Killer Instinct roms to:\n$romdir/arcade/kinst.bighard\n$romdir/arcade/kinst2.bighard"
+rp_module_help="1) Prepare Arcade Killer Instinct roms for BigHardMaker:\n$home/bighardmaker/kinst.zip\n$home/bighardmaker/kinst/kinst.chd\n\n$home/bighardmaker/kinst2.zip\n$home/bighardmaker/kinst2/kinst2.chd\n\n2) Create Killer Instinct roms with BigHardMaker:\neg. [PC]  ~/bighardmaker/bighardmaker_x64\neg. [Pi]  ~/bighardmaker/bighardmaker_arm64\n\n3) Copy {.bighard} Killer Instinct roms to:\n$romdir/arcade/kinst.bighard\n$romdir/arcade/kinst2.bighard"
 rp_module_licence="MIT https://www.richwhitehouse.com/ki/index.php?content=faq"
 rp_module_section="exp"
 rp_module_flags="!all aarch64 x86_64"
@@ -66,6 +66,7 @@ function game_data_biginstinct() {
     mkdir -p "$home/bighardmaker"
     download "https://www.richwhitehouse.com/ki/hard/bighardmaker_v10_linux.tar.gz" "$home/bighardmaker"
     download "https://www.richwhitehouse.com/ki/hard/BigHardMaker_v10_Win_x64.zip" "$home/bighardmaker"
+
     sed -i "s+^__user=.*+__user=\"$__user\"+g" "$romdir/arcade/run_bighardmaker.sh"
     cp "$romdir/arcade/run_bighardmaker.sh" /dev/shm/tmp.sh; mv /dev/shm/tmp.sh "$home/RetroPie/retropiemenu/run_bighardmaker.sh"
     chmod 755 "$home/RetroPie/retropiemenu/run_bighardmaker.sh"; chown $__user:$__user "$home/RetroPie/retropiemenu/run_bighardmaker.sh"
