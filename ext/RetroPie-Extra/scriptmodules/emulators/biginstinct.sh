@@ -86,7 +86,7 @@ function remove_biginstinct() {
 
 function configure_biginstinct() {
     mkRomDir "arcade"
-    ln -s "$romdir/arcade" "$md_inst/arcade" # Emulator does not see the Symbolic Link :(
+    ##ln -s "$romdir/arcade" "$md_inst/arcade" # Emulator does not see the Symbolic Link :(
 
     mkdir -p "$home/.biginstinct_userdata"
     mkdir -p "$md_conf_root/arcade"
