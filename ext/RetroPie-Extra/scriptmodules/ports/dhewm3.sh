@@ -16,14 +16,17 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 rp_module_id="dhewm3"
 rp_module_desc="dhewm3 - Doom 3 GPL Source Port"
 rp_module_licence="GPL3 https://github.com/dhewm/dhewm3/blob/master/COPYING.txt"
-if isPlatform "kms"; then
-    rp_module_repo="git https://github.com/warriormaster12/dhewm3.git master"
-else
-    rp_module_repo="git https://github.com/dhewm/dhewm3.git master"
-fi
-rp_module_help="Place Doom 3 Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Resurrection of Evil Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4\n\nPlace The Lost Mission Files in [ports/doom3/d3le]:\nlm_pak*.pk4\n\nPlace 0ther Doom 3 Mod Files in [ports/doom3/*]:\nbloodmod/ bloodmod_roe/\ncdoom/\nd2d3/ (Doom II for Doom 3)\ndentonmod/\ndesolated/\neldoom/\neoc/\nfitz/\ngrimm/\nhardcorps/\nlibrecoop/ librecoopd3xp/\nperfected/ perfected_roe/\nrealgibs/\nrivensin/\nsikkmod/ sikkmodd3xp/"
+rp_module_repo="git https://github.com/dhewm/dhewm3.git :_get_branch_dhewm3"
+##rp_module_repo="git https://github.com/warriormaster12/dhewm3.git master"
+rp_module_help="Place Doom 3 Files in [ports/doom3/base]:\npak000.pk4\npak001.pk4\npak002.pk4\npak003.pk4\npak004.pk4\npak005.pk4\npak006.pk4\npak007.pk4\npak008.pk4\n\nPlace Resurrection of Evil Files in [ports/doom3/d3xp]:\npak000.pk4\npak001.pk4\n\nPlace The Lost Mission Files in [ports/doom3/d3le]:\nlm_pak*.pk4\n\nPlace commonly known Doom 3 Mods in [ports/doom3/*]:\nbloodmod/\nbloodmod_roe/\ncdoom/\nd2d3/ (Doom II for Doom 3)\ndentonmod/\ndesolated/\neldoom/\neoc/\nfitz/\ngrimm/\nhardcorps/\nlibrecoop/\nlibrecoopd3xp/\nperfected/\nperfected_roe/\nrealgibs/\nrivensin/\nsikkmod/\nsikkmodd3xp/\n\nPlace 0ther Doom 3 Mods in [ports/doom3/addon]:\npak0*_0ther_addon.pk4"
 rp_module_section="exp"
 rp_module_flags=""
+
+function _get_branch_dhewm3() {
+    local branch_tag=master
+    isPlatform "kms" && branch_tag=1.5.5_RC2
+    echo $branch_tag
+}
 
 function depends_dhewm3() {
     #getDepends cmake libsdl2-dev libopenal-dev libogg-dev libvorbis-dev zlib1g-dev libcurl4-openssl-dev xorg
@@ -100,12 +103,18 @@ function install_dhewm3() {
 
 function remove_dhewm3() {
     local shortcut_name
-    for shortcut_name in "Doom 3" "Doom 3 Resurrection of Evil" "Doom 3 The Lost Mission" "Doom III Dentons Enhanced" "Doom III Desolated The Crying Fate" "Doom III Doom I (Classic)" "Doom III Doom II" "Doom III ELDOOM" "Doom III Fitz Packerton" "Doom III Grimm Quest for the Gatherers Key" "Doom III Hard Corps" "Doom III HeXen Edge Of Chaos" "Doom III LibreCoop" "Doom III LibreCoop Resurrection of Evil" "Doom III Perfected" "Doom III Perfected Resurrection of Evil" "Doom III Scarlet Rivensin (Ruiner)" "Doom III Real Gibs" "Doom III Blood Mod" "Doom III Blood Mod Resurrection of Evil" "Doom III Sikkmod" "Doom III Sikkmod Resurrection of Evil"; do
+    for shortcut_name in "Doom 3" "Doom 3 Resurrection of Evil" "Doom 3 The Lost Mission" "Doom III Dentons Enhanced" "Doom III Desolated The Crying Fate" "Doom III Doom I (Classic)" "Doom III Doom II" "Doom III ELDOOM" "Doom III Fitz Packerton" "Doom III Grimm Quest for the Gatherers Key" "Doom III Hard Corps" "Doom III HeXen Edge Of Chaos" "Doom III LibreCoop" "Doom III LibreCoop Resurrection of Evil" "Doom III Perfected" "Doom III Perfected Resurrection of Evil" "Doom III Scarlet Rivensin (Ruiner)" "Doom III Real Gibs" "Doom III Blood Mod" "Doom III Blood Mod Resurrection of Evil" "Doom III Sikkmod" "Doom III Sikkmod Resurrection of Evil" "Doom III HeXen Edge Of Chaos3"; do
         rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
     done
 
     rmdir "$md_conf_root/doom3" > /dev/null 2>&1
+
+    # Legacy Clean Up
+    local dhewm3_mod; local port_suffix
+    if isPlatform "kms" && isPlatform "vulkan"; then port_suffix='-vulkan'; fi
     for dhewm3_mod in d3xp cdoom d2d3 d3le dentonmod desolated eldoom eoc fitz grimm hardcorps rivensin perfected perfected_roe librecoop librecoopd3xp realgibs bloodmod bloodmod_roe sikkmod sikkmodd3xp; do
+        ##delEmulator "doom3-$dhewm3_mod$port_suffix" "doom3-$dhewm3_mod"
+        rm -f "$md_conf_root/doom3-$dhewm3_mod/emulators.cfg" > /dev/null 2>&1
         rmdir "$md_conf_root/doom3-$dhewm3_mod" > /dev/null 2>&1
     done
 }
@@ -130,12 +139,13 @@ function gui_dhewm3() {
 }
 
 function configure_dhewm3() {
-    local launch_prefix; local launch_suffix; local port_suffix
+    local launch_prefix
     if isPlatform "rpi" && ! isPlatform "kms"; then launch_prefix="XINIT:"; fi
-    if isPlatform "kms" && isPlatform "vulkan"; then launch_suffix=" +set r_renderApi 1"; port_suffix='-vulkan'; fi
+    local launch_bin="$launch_prefix$md_inst/dhewm3.sh %ROM%"
 
-    addPort "$md_id$port_suffix" "doom3" "Doom 3" "$launch_prefix$md_inst/dhewm3$launch_suffix"
-    addPort "$md_id-d3xp$port_suffix" "doom3-d3xp" "Doom 3 Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game d3xp$launch_suffix"
+    addPort "$md_id" "doom3" "Doom 3" "$launch_bin"
+    addPort "$md_id" "doom3" "Doom 3 Resurrection of Evil" "$launch_bin" "+set fs_game d3xp"
+    addPort "$md_id" "doom3" "Doom 3 (addon)" "$launch_bin" "+set fs_game addon"
 
     local dhewm3_rom # Perfected Desolated
     if [[ "$md_mode" == "install" ]]; then
@@ -147,64 +157,73 @@ function configure_dhewm3() {
     fi
 
     if [[ -f "$romdir/ports/doom3/fitz/pak000.pk4" ]]; then
-        addPort "$md_id-fitz$port_suffix" "doom3-fitz" "Doom III Fitz Packerton" "$launch_prefix$md_inst/dhewm3 +set fs_game fitz +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Fitz Packerton" "$launch_bin" "+set fs_game fitz +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/d3le/lm_pak.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-d3le$port_suffix" "doom3-d3le" "Doom 3 The Lost Mission" "$launch_prefix$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom 3 The Lost Mission" "$launch_bin" "+set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/desolated/deso_pak00.pk4" ]]; then
-        addPort "$md_id-desolated$port_suffix" "doom3-desolated" "Doom III Desolated The Crying Fate" "$launch_prefix$md_inst/dhewm3 +set fs_game desolated +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Desolated The Crying Fate" "$launch_bin" "+set fs_game desolated +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/cdoom/cdoom_main.pk4" ]]; then
-        addPort "$md_id-cdoom$port_suffix" "doom3-cdoom" "Doom III Doom I (Classic)" "$launch_prefix$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Doom I (Classic)" "$launch_bin" "+set fs_game cdoom +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/d2d3/tga_00.pk4" ]]; then
-        addPort "$md_id-d2d3$port_suffix" "doom3-d2d3" "Doom III Doom II" "$launch_prefix$md_inst/dhewm3 +set fs_game d2d3 +map entryway +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Doom II" "$launch_bin" "+set fs_game d2d3 +map entryway +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/eldoom/pak_eldoom.pk4" ]]; then
-        addPort "$md_id-eldoom$port_suffix" "doom3-eldoom" "Doom III ELDOOM" "$launch_prefix$md_inst/dhewm3 +set fs_game eldoom +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III ELDOOM" "$launch_bin" "+set fs_game eldoom +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/grimm/pak_grimmfiles.pk4" ]]; then
-        addPort "$md_id-grimm$port_suffix" "doom3-grimm" "Doom III Grimm Quest for the Gatherers Key" "$launch_prefix$md_inst/dhewm3 +set fs_game grimm +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Grimm Quest for the Gatherers Key" "$launch_bin" "+set fs_game grimm +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/hardcorps/pak666.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-hardcorps$port_suffix" "doom3-hardcorps" "Doom III Hard Corps" "$launch_prefix$md_inst/dhewm3 +set fs_game hardcorps +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Hard Corps" "$launch_bin" "+set fs_game hardcorps +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/eoc/eoc_main.pk4" ]]; then
-        addPort "$md_id-eoc$port_suffix" "doom3-eoc" "Doom III HeXen Edge Of Chaos" "$launch_prefix$md_inst/dhewm3 +set fs_game eoc +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III HeXen Edge Of Chaos" "$launch_bin" "+set fs_game eoc +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/librecoop/librecoop.pk4" ]]; then
-        addPort "$md_id-librecoop$port_suffix" "doom3-librecoop" "Doom III LibreCoop" "$launch_prefix$md_inst/dhewm3 +set fs_game librecoop +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III LibreCoop" "$launch_bin" "+set fs_game librecoop +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/librecoopd3xp/librecoopd3xp.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-librecoopd3xp$port_suffix" "doom3-librecoopd3xp" "Doom III LibreCoop Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game librecoopd3xp +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III LibreCoop Resurrection of Evil" "$launch_bin" "+set fs_game librecoopd3xp +set fs_game_base d3xp +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/perfected/game99.pk4" ]]; then
-        addPort "$md_id-perfected$port_suffix" "doom3-perfected" "Doom III Perfected" "$launch_prefix$md_inst/dhewm3 +set fs_game perfected +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Perfected" "$launch_bin" "+set fs_game perfected +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/perfected_roe/game99_roe.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-perfected_roe$port_suffix" "doom3-perfected_roe" "Doom III Perfected Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game perfected_roe +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Perfected Resurrection of Evil" "$launch_bin" "+set fs_game perfected_roe +set fs_game_base d3xp +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/rivensin/pak0976.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-rivensin$port_suffix" "doom3-rivensin" "Doom III Scarlet Rivensin (Ruiner)" "$launch_prefix$md_inst/dhewm3 +set fs_game rivensin +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Scarlet Rivensin (Ruiner)" "$launch_bin" "+set fs_game rivensin +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/realgibs/zneuro_gibimp.pk4" ]]; then
-        addPort "$md_id-realgibs$port_suffix" "doom3-realgibs" "Doom III Real Gibs" "$launch_prefix$md_inst/dhewm3 +set fs_game realgibs +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Real Gibs" "$launch_bin" "+set fs_game realgibs +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/dentonmod/dentonmodv2final.pk4" ]] || [[ -f "$romdir/ports/doom3/dentonmod/dentondll.pk4" ]]; then
-        addPort "$md_id-dentonmod$port_suffix" "doom3-dentonmod" "Doom III Dentons Enhanced" "$launch_prefix$md_inst/dhewm3 +set fs_game dentonmod +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Dentons Enhanced" "$launch_bin" "+set fs_game dentonmod +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/bloodmod/z_bloodmod_1.8.pk4" ]]; then
-        addPort "$md_id-bloodmod$port_suffix" "doom3-bloodmod" "Doom III Blood Mod" "$launch_prefix$md_inst/dhewm3 +set fs_game bloodmod +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Blood Mod" "$launch_bin" "+set fs_game bloodmod +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/bloodmod_roe/z_bloodmod_roe_1.8.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-bloodmod_roe$port_suffix" "doom3-bloodmod_roe" "Doom III Blood Mod Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game bloodmod_roe +set fs_game_base d3xp +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Blood Mod Resurrection of Evil" "$launch_bin" "+set fs_game bloodmod_roe +set fs_game_base d3xp +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/sikkmod/game00.pk4" ]]; then
-        addPort "$md_id-sikkmod$port_suffix" "doom3-sikkmod" "Doom III Sikkmod" "$launch_prefix$md_inst/dhewm3 +set fs_game sikkmod +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Sikkmod" "$launch_bin" "+set fs_game sikkmod +set com_allowconsole 1"
     fi
     if [[ -f "$romdir/ports/doom3/sikkmodd3xp/game99.pk4" ]] && [[ -f "$romdir/ports/doom3/d3xp/pak000.pk4" ]]; then # Requires Resurrection of Evil
-        addPort "$md_id-sikkmodd3xp$port_suffix" "doom3-sikkmodd3xp" "Doom III Sikkmod Resurrection of Evil" "$launch_prefix$md_inst/dhewm3 +set fs_game sikkmodd3xp +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix"
+        addPort "$md_id" "doom3" "Doom III Sikkmod Resurrection of Evil" "$launch_bin" "+set fs_game sikkmodd3xp +set fs_game_base d3xp +set com_allowconsole 1"
+    fi
+
+    if [[ "$md_mode" == "install" ]]; then
+        # launcher script to strip quotes from runcommand's generated arguments
+        cat > "$md_inst/dhewm3.sh" << _EOF_
+#!/bin/bash
+VC4_DEBUG=always_sync $md_inst/dhewm3 \$*
+_EOF_
+        chmod 755 "$md_inst/dhewm3.sh"
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_dhewm3
@@ -212,7 +231,7 @@ function configure_dhewm3() {
 
     mkUserDir "$home/.local/share/dhewm3"
     local dhewm3_mod
-    for dhewm3_mod in base d3xp cdoom d2d3 d3le dentonmod desolated eldoom eoc fitz grimm hardcorps rivensin perfected perfected_roe librecoop librecoopd3xp realgibs bloodmod bloodmod_roe sikkmod sikkmodd3xp; do
+    for dhewm3_mod in addon base d3xp cdoom d2d3 d3le dentonmod desolated eldoom eoc fitz grimm hardcorps rivensin perfected perfected_roe librecoop librecoopd3xp realgibs bloodmod bloodmod_roe sikkmod sikkmodd3xp; do
         mkUserDir "$home/.config/dhewm3/$dhewm3_mod"
         mkRomDir "ports/doom3/$dhewm3_mod"
         moveConfigDir "$md_inst/$dhewm3_mod" "$romdir/ports/doom3/$dhewm3_mod"
@@ -221,10 +240,10 @@ function configure_dhewm3() {
     moveConfigDir "$home/.local/share/dhewm3" "$md_conf_root/doom3"
     chown -R $__user:$__user "$md_conf_root/doom3"
 
-    if [[ -f "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh" ]]; then
+    if [[ -f "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh" ]]; then # warriormaster12
         mv "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh" "$romdir/ports/doom3/base/renderprogs/ShaderCompiler.sh.0ff"
     fi
-    if [[ -f "$romdir/ports/doom3/eldoom/double_barrel_shotgun/dbs-linux.sh" ]]; then
+    if [[ -f "$romdir/ports/doom3/eldoom/double_barrel_shotgun/dbs-linux.sh" ]]; then # ELDOOM
         mv "$romdir/ports/doom3/eldoom/double_barrel_shotgun/dbs-linux.sh" "$romdir/ports/doom3/eldoom/double_barrel_shotgun/dbs-linux.sh.0ff"
     fi
     chown -R $__user:$__user "$romdir/ports/doom3"
@@ -323,38 +342,15 @@ seta r_renderer "best"
 seta r_mode "5"
 seta ui_name "DoomGuy"
 _EOF_
-    if [[ ! -f "$home/.config/dhewm3/base/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/base/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/base/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/cdoom/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/cdoom/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/cdoom/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/d2d3/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/d2d3/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/d2d3/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/fitz/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/fitz/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/fitz/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/realgibs/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/realgibs/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/realgibs/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/dentonmod/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/dentonmod/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/dentonmod/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/bloodmod/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/bloodmod/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/bloodmod/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/sikkmod/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/sikkmod/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/sikkmod/dhewm.cfg"
-    fi
+
+    local dhewm3_cfg
+    for dhewm3_cfg in addon base cdoom d2d3 fitz realgibs dentonmod bloodmod sikkmod; do
+        if [[ ! -f "$home/.config/dhewm3/$dhewm3_cfg/dhewm.cfg" ]]; then
+            mkUserDir "$home/.config/dhewm3/$dhewm3_cfg"
+            cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/$dhewm3_cfg/dhewm.cfg"
+            chown $__user:$__user "$home/.config/dhewm3/$dhewm3_cfg/dhewm.cfg"
+        fi
+    done
 
     cat >"$md_inst/dhewm-d3xp.cfg" << _EOF_
 unbindall
@@ -599,30 +595,14 @@ seta si_name "dhewm server"
 seta g_spectatorChat "0"
 seta net_clientLagOMeter "1"
 _EOF_
-    if [[ ! -f "$home/.config/dhewm3/d3xp/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/d3xp/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/d3xp/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/d3le/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/d3le/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/d3le/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/librecoopd3xp/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/librecoopd3xp/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/librecoopd3xp/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/perfected_roe/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/perfected_roe/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/perfected_roe/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/bloodmod_roe/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/bloodmod_roe/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/bloodmod_roe/dhewm.cfg"
-    fi
-    if [[ ! -f "$home/.config/dhewm3/sikkmodd3xp/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/sikkmodd3xp/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/sikkmodd3xp/dhewm.cfg"
-    fi
+    local dhewm3xp_cfg
+    for dhewm3xp_cfg in d3xp d3le librecoopd3xp perfected_roe bloodmod_roe sikkmodd3xp; do
+        if [[ ! -f "$home/.config/dhewm3/$dhewm3xp_cfg/dhewm.cfg" ]]; then
+            mkUserDir "$home/.config/dhewm3/$dhewm3xp_cfg"
+            cp "$md_inst/dhewm-d3xp.cfg" "$home/.config/dhewm3/$dhewm3xp_cfg/dhewm.cfg"
+            chown $__user:$__user "$home/.config/dhewm3/$dhewm3xp_cfg/dhewm.cfg"
+        fi
+    done
 
     cat >"$md_inst/dhewm-eoc.cfg" << _EOF_
 unbindall
@@ -2188,8 +2168,6 @@ _EOF_
 }
 
 function shortcuts_icons_dhewm3() {
-    local launch_suffix
-    if isPlatform "kms" && isPlatform "vulkan"; then launch_suffix=" +set r_renderApi 1"; fi
     local shortcut_name
 
     shortcut_name="Doom 3"
@@ -2198,7 +2176,7 @@ function shortcuts_icons_dhewm3() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3$launch_suffix
+Exec=$md_inst/dhewm3
 Icon=$md_inst/Doom3_72x72.xpm
 Terminal=false
 Type=Application
@@ -2217,7 +2195,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game d3xp$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game d3xp
 Icon=$md_inst/Doom3-d3xp_72x72.xpm
 Terminal=false
 Type=Application
@@ -2236,7 +2214,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game desolated +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game desolated +set com_allowconsole 1
 Icon=$md_inst/desolated_128x128.xpm
 Terminal=false
 Type=Application
@@ -2257,7 +2235,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game eldoom +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game eldoom +set com_allowconsole 1
 Icon=$md_inst/eldoom_128x128.xpm
 Terminal=false
 Type=Application
@@ -2278,7 +2256,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game librecoop +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game librecoop +set com_allowconsole 1
 Icon=$md_inst/librecoop_128x128.xpm
 Terminal=false
 Type=Application
@@ -2299,7 +2277,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game librecoopd3xp +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game librecoopd3xp +set fs_game_base d3xp +set com_allowconsole 1
 Icon=$md_inst/librecoopd3xp_128x128.xpm
 Terminal=false
 Type=Application
@@ -2320,7 +2298,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game perfected +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game perfected +set com_allowconsole 1
 Icon=$md_inst/perfected_128x128.xpm
 Terminal=false
 Type=Application
@@ -2341,7 +2319,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game perfected_roe +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game perfected_roe +set fs_game_base d3xp +set com_allowconsole 1
 Icon=$md_inst/perfected_roe_72x72.xpm
 Terminal=false
 Type=Application
@@ -2362,7 +2340,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game d3le +set fs_game_base d3xp +set com_allowconsole 1
 Icon=$md_inst/Lm_72x72.xpm
 Terminal=false
 Type=Application
@@ -2383,7 +2361,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game cdoom +set com_allowconsole 1
 Icon=$md_inst/cdoom_48x48.xpm
 Terminal=false
 Type=Application
@@ -2404,7 +2382,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game d2d3 +map entryway +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game d2d3 +map entryway +set com_allowconsole 1
 Icon=$md_inst/d2d3_78x78.xpm
 Terminal=false
 Type=Application
@@ -2419,13 +2397,13 @@ _EOF_
         rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
 
-    shortcut_name="Doom III HeXen Edge Of Chaos3"
+    shortcut_name="Doom III HeXen Edge Of Chaos"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game eoc +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game eoc +set com_allowconsole 1
 Icon=$md_inst/eoc_128x128.xpm
 Terminal=false
 Type=Application
@@ -2446,7 +2424,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game grimm +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game grimm +set com_allowconsole 1
 Icon=$md_inst/grimm_50x50.xpm
 Terminal=false
 Type=Application
@@ -2467,7 +2445,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game rivensin +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game rivensin +set com_allowconsole 1
 Icon=$md_inst/rivensin_48x48.xpm
 Terminal=false
 Type=Application
@@ -2488,7 +2466,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game hardcorps +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game hardcorps +set com_allowconsole 1
 Icon=$md_inst/hardcorps_48x48.xpm
 Terminal=false
 Type=Application
@@ -2509,7 +2487,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game fitz +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game fitz +set com_allowconsole 1
 Icon=$md_inst/fitz_128x128.xpm
 Terminal=false
 Type=Application
@@ -2530,7 +2508,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game realgibs +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game realgibs +set com_allowconsole 1
 Icon=$md_inst/realgibs_128x128.xpm
 Terminal=false
 Type=Application
@@ -2551,7 +2529,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game dentonmod +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game dentonmod +set com_allowconsole 1
 Icon=$md_inst/dentonmod_94x94.xpm
 Terminal=false
 Type=Application
@@ -2572,7 +2550,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game bloodmod +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game bloodmod +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1
 Icon=$md_inst/bloodmod_128x128.xpm
 Terminal=false
 Type=Application
@@ -2593,7 +2571,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game bloodmod_roe +set fs_game_base d3xp +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game bloodmod_roe +set fs_game_base d3xp +set g_gib_power 10 +set g_gib_shadows 0 +set g_gib_remove_time 300 +set r_useSoftParticles 0 +set gui_mediumFontLimit 0 +set gui_smallFontLimit 0 +set com_allowconsole 1
 Icon=$md_inst/bloodmod_roe_128x128.xpm
 Terminal=false
 Type=Application
@@ -2614,7 +2592,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game sikkmod +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game sikkmod +set com_allowconsole 1
 Icon=$md_inst/sikkmod_48x48.xpm
 Terminal=false
 Type=Application
@@ -2635,7 +2613,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/dhewm3 +set fs_game sikkmodd3xp +set fs_game_base d3xp +set com_allowconsole 1$launch_suffix
+Exec=$md_inst/dhewm3 +set fs_game sikkmodd3xp +set fs_game_base d3xp +set com_allowconsole 1
 Icon=$md_inst/sikkmodd3xp_48x48.xpm
 Terminal=false
 Type=Application
