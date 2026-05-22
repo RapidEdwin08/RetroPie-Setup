@@ -145,7 +145,7 @@ function configure_dhewm3() {
 
     addPort "$md_id" "doom3" "Doom 3" "$launch_bin"
     addPort "$md_id" "doom3" "Doom 3 Resurrection of Evil" "$launch_bin" "+set fs_game d3xp"
-    addPort "$md_id" "doom3" "Doom 3 (addon)" "$launch_bin" "+set fs_game addon"
+    addPort "$md_id" "doom3" "Doom 3 (addon)" "$launch_bin" "+set fs_game addon +set com_allowconsole 1"
 
     local dhewm3_rom # Perfected Desolated
     if [[ "$md_mode" == "install" ]]; then
