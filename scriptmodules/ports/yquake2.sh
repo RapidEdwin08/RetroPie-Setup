@@ -207,13 +207,6 @@ function configure_yquake2() {
     copyDefaultConfig "$md_data/yq2.cfg" "$config"
     iniConfig " " '"' "$config"
 
-    # bind chicken menu
-    if [[ ! -f "$md_conf_root/quake2/yquake2/ctc/config.cfg" ]]; then
-        mkUserDir "$md_conf_root/quake2/yquake2/ctc"
-        echo 'bind BTN_BACK "cmd chicken menu"' >> "$md_conf_root/quake2/yquake2/ctc/config.cfg"
-        chown "$__user":"$__user" "$md_conf_root/quake2/yquake2/ctc/config.cfg"
-    fi
-
     # Don't apply GL1 mobile optimizations to x86
     if isPlatform "x86"; then
         iniSet "set gl1_discardfb" "0"
@@ -237,8 +230,37 @@ function configure_yquake2() {
     iniSet "set vid_renderer" "$renderer"
     chown -R "$__user":"$__group" "$md_conf_root/quake2/yquake2"
 
+    # Copy final config
+    local q2cfg_dir
+    for q2cfg_dir in baseq2 xatrix rogue zaero ctf ctc; do
+        if [[ ! -f "$md_conf_root/quake2/yquake2/$q2cfg_dir/config.cfg" ]]; then
+            mkUserDir "$md_conf_root/quake2/yquake2/$q2cfg_dir"
+            cp "$config" "$md_conf_root/quake2/yquake2/$q2cfg_dir/config.cfg"
+            chown -R $__user:$__user "$md_conf_root/quake2/yquake2/$q2cfg_dir"
+        fi
+    done
+
+    # bind chicken menu
+    sed -i 's+ "inven"+ "cmd chicken menu"+g' "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+    if [[ $(cat "$md_conf_root/quake2/yquake2/ctc/config.cfg" | grep -q 'cmd chicken menu' ; echo $?) == '1' ]]; then
+        sed -i '/^bind BTN_BACK/d' "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+        echo 'bind BTN_BACK "cmd chicken menu"' >> "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+        echo 'bind BTN_BACK_ALT "cmd chicken menu"' >> "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+    fi
+    chown "$__user":"$__user" "$md_conf_root/quake2/yquake2/ctc/config.cfg"
+
     [[ "$md_mode" == "install" ]] && game_data_yquake2
-    add_games_yquake2 "$md_inst/quake2 -datadir $romdir/ports/quake2 +set game %ROM%"
+    ##add_games_yquake2 "$md_inst/quake2 -datadir $romdir/ports/quake2 +set game %ROM%"
+    add_games_yquake2 "$md_inst/quake2.sh %ROM%"
+
+    if [[ "$md_mode" == "install" ]]; then
+        # launcher script to strip quotes from runcommand's generated arguments
+        cat > "$md_inst/quake2.sh" << _EOF_
+#!/bin/bash
+VC4_DEBUG=always_sync $md_inst/quake2 -datadir $romdir/ports/quake2 +set game \$*
+_EOF_
+        chmod 755 "$md_inst/quake2.sh"
+    fi
 
     [[ "$md_mode" == "remove" ]] && remove_yquake2
     [[ "$md_mode" == "remove" ]] && return
