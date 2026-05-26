@@ -231,11 +231,18 @@ _EOF_
 
     mkUserDir "$home/.local/share/dhewm3"
     local dhewm3_mod
-    for dhewm3_mod in addon base d3xp cdoom d2d3 d3le dentonmod desolated eldoom eoc fitz grimm hardcorps rivensin perfected perfected_roe librecoop librecoopd3xp realgibs bloodmod bloodmod_roe sikkmod sikkmodd3xp; do
+    for dhewm3_mod in addon base d3xp cdoom d2d3 d3le dentonmod desolated eldoom eoc fitz grimm hardcorps rivensin rivensin-jillbsaa rivensin-jillstars perfected perfected_roe librecoop librecoopd3xp realgibs bloodmod bloodmod_roe sikkmod sikkmodd3xp; do
         mkUserDir "$home/.config/dhewm3/$dhewm3_mod"
         mkRomDir "ports/doom3/$dhewm3_mod"
         moveConfigDir "$md_inst/$dhewm3_mod" "$romdir/ports/doom3/$dhewm3_mod"
     done
+
+    # Create symbolic link in [md_inst] to any additional [mod_dir] found
+    local mod_dir
+    for mod_dir in $(ls -d $romdir/ports/doom3/*/); do
+        if [[ ! -d "$md_inst/$(basename $mod_dir)" ]]; then moveConfigDir "$md_inst/$(basename $mod_dir)" "$romdir/ports/doom3/$(basename $mod_dir)"; fi
+    done
+
     moveConfigDir "$home/.config/dhewm3" "$md_conf_root/doom3"
     moveConfigDir "$home/.local/share/dhewm3" "$md_conf_root/doom3"
     chown -R $__user:$__user "$md_conf_root/doom3"
@@ -1132,10 +1139,13 @@ seta pm_thirdPersonAngle "0"
 seta pm_thirdPersonHeight "0"
 seta pm_thirdPersonRange "75"
 _EOF_
-    if [[ ! -f "$home/.config/dhewm3/rivensin/dhewm.cfg" ]]; then
-        cp "$md_inst/dhewm-rivensin.cfg" "$home/.config/dhewm3/rivensin/dhewm.cfg"
-        chown $__user:$__user "$home/.config/dhewm3/rivensin/dhewm.cfg"
-    fi
+    local rivensin_mod
+    for rivensin_mod in rivensin rivensin-jillbsaa rivensin-jillstars; do
+        if [[ ! -f "$home/.config/dhewm3/$rivensin_mod/dhewm.cfg" ]]; then
+            cp "$md_inst/dhewm-rivensin.cfg" "$home/.config/dhewm3/$rivensin_mod/dhewm.cfg"
+            chown $__user:$__user "$home/.config/dhewm3/$rivensin_mod/dhewm.cfg"
+        fi
+    done
 
     cat >"$md_inst/dhewm-grimm.cfg" << _EOF_
 unbindall
@@ -2163,6 +2173,16 @@ _EOF_
         cp "$md_inst/dhewm-desolated.cfg" "$home/.config/dhewm3/desolated/dhewm.cfg"
         chown $__user:$__user "$home/.config/dhewm3/desolated/dhewm.cfg"
     fi
+
+    # Copy [cfg] for any additional [mod_dir] found
+    local mod_dir
+    for mod_dir in $(ls -d $romdir/ports/doom3/*/); do
+        mkUserDir "$home/.config/dhewm3/$(basename $mod_dir)"
+        if [[ ! -f "$home/.config/dhewm3/$(basename $mod_dir)/dhewm.cfg" ]]; then
+            cp "$md_inst/dhewm.cfg" "$home/.config/dhewm3/$(basename $mod_dir)/dhewm.cfg"
+            chown $__user:$__user "$home/.config/dhewm3/$(basename $mod_dir)/dhewm.cfg"
+        fi
+    done
 
     [[ "$md_mode" == "install" ]] && shortcuts_icons_dhewm3
 }
