@@ -85,16 +85,55 @@ function game_data_ioquake3() {
     chown -R "$__user":"$__user" "$romdir/ports/quake3"
 }
 
+function game_data_openarena_ioquake3() {
+    mkRomDir "ports/quake3/baseoa"
+    mkRomDir "ports/quake3/missionpack"
+    mkRomDir "ports/quake3/oacmp-mod"
+    rm -Rf /tmp/q3oa/; mkdir -p /tmp/q3oa
+    # curl: (23) Failure writing output to destination with downloadAndExtract - use wget
+    ##downloadAndExtract https://sourceforge.net/projects/oarena/files/latest/download -O /tmp/q3oa/openarena-0.8.8.zip
+
+    wget https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip -O /tmp/q3oa/openarena-0.8.8.zip
+    unzip /tmp/q3oa/openarena-0.8.8.zip -d /tmp/q3oa/
+    mv /tmp/q3oa/openarena-0.8.8/baseoa/*.pk3 $romdir/ports/quake3/baseoa
+    mv /tmp/q3oa/openarena-0.8.8/missionpack/*.pk3 $romdir/ports/quake3/missionpack
+    local oa_file
+    for oa_file in CHANGES COPYING CREDITS LINUXNOTES readme_085.txt readme_088.txt README WENEED; do
+        mv /tmp/q3oa/openarena-0.8.8/$oa_file $romdir/ports/quake3/baseoa
+    done
+
+    wget http://sourceforge.net/projects/libsdl-android/files/OpenArena/0.8.8/oacmp-volume1-v3.zip  -O /tmp/q3oa/oacmp-volume1-v3.zip
+    unzip /tmp/q3oa/oacmp-volume1-v3.zip -d /tmp/q3oa/
+    mv /tmp/q3oa/baseoa/*.pk3 $romdir/ports/quake3/baseoa
+    mv /tmp/q3oa/oacmp-mod/* $romdir/ports/quake3/oacmp-mod
+    mkRomDir "ports/quake3/baseoa/docs-oacmp"
+    mv /tmp/q3oa/docs/* $romdir/ports/quake3/baseoa/docs-oacmp
+    mv /tmp/q3oa/sources/mapsources.txt $romdir/ports/quake3/baseoa/docs-oacmp
+
+    rm -Rf /tmp/q3oa/
+    chown -R "$__user":"$__user" "$romdir/ports/quake3/baseoa"
+    chown -R "$__user":"$__user" "$romdir/ports/quake3/missionpack"
+    chown -R "$__user":"$__user" "$romdir/ports/quake3/oacmp-mod"
+}
+
 function gui_ioquake3() {
     choice=$(dialog --title "[$md_id] Configuration Options" --menu "      Get Additional Desktop Shortcuts + Icons\n\nGet Desktop Shortcuts for Additional Episodes + Add-Ons that may not have been present at Install\n\nSee [Package Help] for Details" 15 60 5 \
         "1" "Get Shortcuts + Icons" \
-        "2" "Cancel" 2>&1 >/dev/tty)
+        "2" "Get OpenArena (425mb+) + OACMP (88mb+)" \
+        "3" "Cancel" 2>&1 >/dev/tty)
 
     case $choice in
         1)
             configure_ioquake3
             #game_data_ioquake3
             #shortcuts_icons_ioquake3
+            ;;
+        2)
+            game_data_openarena_ioquake3
+            #configure_ioquake3
+            #game_data_ioquake3
+            #shortcuts_icons_ioquake3
+            dialog --ok --msgbox "[$romdir/ports/quake3/baseoa]: $(ls $romdir/ports/quake3/baseoa) [$romdir/ports/quake3/oacmp-mod]: $(ls $romdir/ports/quake3/oacmp-mod)" 22 76 2>&1 >/dev/tty
             ;;
         2)
             echo "Canceled"
@@ -107,9 +146,9 @@ function gui_ioquake3() {
 
 function remove_ioquake3() {
     local shortcut_name
-    for shortcut_name in "Quake III Arena" "Quake III Team Arena" "Quake III Chronic" "Quake III Capture The Flag" "Quake III Catch The Chicken" "Quake III OpenArena" "Quake III Arena DeFRaG" "Quake III Doom E1M1 Hangar" "Quake III Doom E1M3 Toxin Refinery" "Quake III Doom MAP01 Entryway"; do
-        rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop"
-        rm -f "$romdir/ports/$shortcut_name.sh"
+    for shortcut_name in "Quake III Arena" "Quake III Team Arena" "Quake III Chronic" "Quake III Capture The Flag" "Quake III Catch The Chicken" "Quake III OpenArena" "Quake III Arena DeFRaG" "Quake III Doom E1M1 Hangar" "Quake III Doom E1M3 Toxin Refinery" "Quake III Doom MAP01 Entryway" "Quake III Doom Maps"; do
+        rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop" > /dev/null 2>&1
+        rm -f "$romdir/ports/$shortcut_name.sh" > /dev/null 2>&1
     done
 
     for quake3_mod in addon missionpack chronic threewave q3ctc defrag doom backrooms; do
@@ -128,14 +167,14 @@ function configure_ioquake3() {
     fi
 
     # [+set g_gametype] 0 = deathmatch # 1 = one on one (tournament) # 2 = single player deathmatch # 3 = team deathmatch # 4 = capture the flag
-    # Q2DM1 Remake: NODM10 is a straight remake | NOCA1 is an altered version optimised for clan arena (hiding places removed)
+    # Q2DM1 Remake: nodm10 is a straight remake | noca1 is an altered version optimised for clan arena (hiding places removed)
     addPort "$md_id" "quake3" "Quake III Team Arena" "${launcher[*]}" "+set fs_game missionpack +map noca1 +set g_gametype 3 +set g_teamAutoJoin 1 +set g_teamForceBalance 1 +bot_enable 1 +addbot daemia 3 blue 1 +addbot phobos 3 red 1 +addbot orbb 3 blue 1 +addbot bones 3 red 1 +addbot sorlag 3 blue 1 +set sv_maxclients 10 +set g_blueTeam Stroggs +set g_redTeam Pagans"
 
     addPort "$md_id" "quake3" "Quake III Chronic" "${launcher[*]}" "+set fs_game chronic +map chronic +set g_gametype 0 +bot_enable 1 +addbot eminem 3 red 1 +addbot dre 3 blue 1"
 
     # [+set g_gametype] 0 = deathmatch # 1 = one on one (tournament) # 2 = single player deathmatch # 3 = team deathmatch # 4 = capture the flag # 10 = classic capture the flag
     local gtype=4; if [[ -f "$romdir/ports/quake3/threewave/pak00.pk3" ]] || [[ -f "$romdir/ports/quake3/threewave/PAK00.pk3" ]]; then gtype=10; fi # 10 = Classic CTF + Grapple
-    addPort "$md_id" "quake3" "Quake III Capture The Flag" "${launcher[*]}" "+set fs_game threewave +map q3mkctf1 +set g_gametype $gtype +set g_teamAutoJoin 1 +set g_teamForceBalance 1 +bot_enable 1 +addbot grunt 3 blue 1 +addbot sarge 3 blue 1 +addbot major 3 red 1 +set sv_maxclients 10 +set g_offhandGrapple 0"
+    addPort "$md_id" "quake3" "Quake III Capture The Flag" "${launcher[*]}" "+set fs_game threewave +map q3mkctf1 +set g_gametype $gtype +set g_teamAutoJoin 1 +set g_teamForceBalance 1 +bot_enable 1 +addbot grunt 3 red 1 +addbot sarge 3 blue 1 +addbot major 3 red 1 +set sv_maxclients 10 +set g_offhandGrapple 0"
 
     addPort "$md_id" "quake3" "Quake III Catch The Chicken" "${launcher[*]}" "+set fs_game q3ctc +map q3dm7 +set g_gametype 0 +bot_enable 1 +addbot major 3 red 1 +addbot grunt 3 blue 1 +set chickmenu 1"
 
@@ -240,9 +279,9 @@ bind PAD0_B "+button2"
 bind PAD0_X "+movedown"
 bind PAD0_Y "+zoom"
 bind PAD0_BACK "+scores"
-bind PAD0_GUIDE "+zoom"
+bind PAD0_GUIDE "+movedown"
 bind PAD0_START "togglemenu"
-bind PAD0_LEFTSTICK_CLICK "+movedown"
+bind PAD0_LEFTSTICK_CLICK "+zoom"
 bind PAD0_RIGHTSTICK_CLICK "centerview"
 bind PAD0_LEFTSHOULDER "weapprev"
 bind PAD0_RIGHTSHOULDER "weapnext"
@@ -692,7 +731,7 @@ _EOF_
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=Three Wave Capture The Flag
-Exec=${launcher[*]} +set fs_basegame baseq3 +set fs_game threewave +map q3mkctf1 +set g_gametype $gtype +set g_teamAutoJoin 1 +set g_teamForceBalance 1 +bot_enable 1 +addbot grunt 3 blue 1 +addbot sarge 3 blue 1 +addbot major 3 red 1 +set sv_maxclients 10 +set g_offhandGrapple 0
+Exec=${launcher[*]} +set fs_basegame baseq3 +set fs_game threewave +map q3mkctf1 +set g_gametype $gtype +set g_teamAutoJoin 1 +set g_teamForceBalance 1 +bot_enable 1 +addbot grunt 3 red 1 +addbot sarge 3 blue 1 +addbot major 3 red 1 +set sv_maxclients 10 +set g_offhandGrapple 0
 Icon=$md_inst/quake3ctf_82x82.xpm
 Terminal=false
 Type=Application
@@ -750,7 +789,7 @@ _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
-Comment=OpenArena
+Comment=DeFRaG
 Exec=${launcher[*]} +set fs_basegame baseq3 +set fs_game defrag
 Icon=$md_inst/defrag_64x64.xpm
 Terminal=false
@@ -766,12 +805,12 @@ _EOF_
         rm -f "/usr/share/applications/$shortcut_name.desktop"; cp "$md_inst/$shortcut_name.desktop" "/usr/share/applications/$shortcut_name.desktop"; chown $__user:$__user "/usr/share/applications/$shortcut_name.desktop"
     fi
 
-    shortcut_name="Quake III Doom E1M1 Hangar"
+    shortcut_name="Quake III Doom Maps"
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
-Comment=OpenArena
+Comment=Doomhangar Doomtoxic doomentryway
 Exec=${launcher[*]} +set fs_basegame baseq3 +set fs_game doom +map Doomhangar +set g_gametype 0 +bot_enable 1 +addbot major 3 red 1 +addbot grunt 3 blue 1
 Icon=$md_inst/quake3doomguy_72x72.xpm
 Terminal=false
