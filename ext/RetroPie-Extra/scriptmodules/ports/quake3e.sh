@@ -245,8 +245,8 @@ Joystick 1 {
     Button 6: key 35
     Button 7: key 23
     Button 8: key 9
-    Button 9: mouse 2
-    Button 10: key 54
+    Button 9: key 54
+    Button 10: mouse 2
     Button 11: key 115
     Button 12: key 34
     Button 13: key 35
