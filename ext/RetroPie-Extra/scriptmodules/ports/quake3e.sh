@@ -35,7 +35,7 @@ function depends_quake3e() {
     ##if ! isPlatform "64bit" ; then
         #dialog --ok --msgbox "Installer is for a 64bit system Only!" 22 76 2>&1 >/dev/tty
         ##md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
-    fi
+    ##fi
     getDepends cmake libsdl2-dev libgl1-mesa-dev libxxf86dga-dev libcurl4-openssl-dev
 }
 
