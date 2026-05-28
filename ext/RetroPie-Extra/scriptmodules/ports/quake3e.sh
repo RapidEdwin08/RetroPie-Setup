@@ -156,7 +156,7 @@ function gui_quake3e() {
 
 function remove_quake3e() {
     local shortcut_name
-    for shortcut_name in "Quake III Arena" "Quake III Team Arena" "Quake III Chronic" "Quake III Capture The Flag" "Quake III Catch The Chicken" "Quake III OpenArena" "Quake III Arena DeFRaG" "Quake III Doom E1M1 Hangar" "Quake III Doom E1M3 Toxin Refinery" "Quake III Doom MAP01 Entryway" "Quake III Doom Maps"; do
+    for shortcut_name in "Quake III Arena" "Quake III Team Arena" "Quake III Chronic" "Quake III Capture The Flag" "Quake III Catch The Chicken" "Quake III OpenArena" "Quake III Arena DeFRaG" "Quake III Doom E1M1 Hangar" "Quake III Doom E1M3 Toxin Refinery" "Quake III Doom MAP01 Entryway" "Quake III Doom Maps" "Quake III The Backrooms"; do
         rm -f "/usr/share/applications/$shortcut_name.desktop"; rm -f "$home/Desktop/$shortcut_name.desktop" > /dev/null 2>&1
         rm -f "$romdir/ports/$shortcut_name.sh" > /dev/null 2>&1
     done
