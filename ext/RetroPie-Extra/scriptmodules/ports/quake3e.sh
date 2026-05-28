@@ -245,7 +245,7 @@ Joystick 1 {
     Button 6: key 35
     Button 7: key 23
     Button 8: key 9
-    Button 9: key 54
+    Button 9: key 42
     Button 10: mouse 2
     Button 11: key 115
     Button 12: key 34
@@ -616,7 +616,7 @@ seta ui_browserSortKey "4"
 seta ui_browserShowFull "1"
 seta ui_browserShowEmpty "1"
 seta cg_brassTime "2500"
-seta cg_drawCrosshair "4"
+seta cg_drawCrosshair "2"
 seta cg_drawCrosshairNames "1"
 seta cg_marks "1"
 seta server1 ""
