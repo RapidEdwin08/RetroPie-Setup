@@ -28,6 +28,8 @@ function _get_commit_ioquake3() {
 
 function depends_ioquake3() {
     getDepends cmake libsdl2-dev libgl1-mesa-dev
+    # make sure joy2key is installed
+    ! rp_isInstalled joy2key && rp_callModule joy2key _auto_
 }
 
 function sources_ioquake3() {
@@ -192,10 +194,21 @@ function configure_ioquake3() {
     addPort "$md_id-oa" "quake3" "Quake III OpenArena" "${launcher[*]} +set fs_basegame baseoa %ROM%" "+set +map oa_minia +set g_gametype 0 +bot_enable 1 +addbot grunt 3 blue 1 +addbot sarge 3 blue 1 +addbot major 3 red 1 +set sv_maxclients 10"
 
     if [[ "$md_mode" == "install" ]]; then
+        # Use [joy2key] button-to-keyboard mappings for control in Menu
+        rm -Rf "$md_inst/joy2key"; cp -R /opt/retropie/admin/joy2key/ "$md_inst"
+        # def_buttons = ['left', 'right', 'up', 'down', 'a'] # * cursor keys for axis/dpad # * enter, 'a'
+        sed -i 's+params=(kcu.*+params=(kcub1 kcuf1 kcuu1 kcud1 0x0a)+' "$md_inst/joy2key/joy2key"
+
         # launcher script to strip quotes from runcommand's generated arguments
         cat > "$md_inst/ioquake3.sh" << _EOF_
 #!/bin/bash
+
+joy2key="$md_inst/joy2key/joy2key"
+\$joy2key stop 2>/dev/null; \$joy2key start
+
 VC4_DEBUG=always_sync $md_inst/ioquake3 \$*
+
+\$joy2key stop 2>/dev/null
 _EOF_
         chmod 755 "$md_inst/ioquake3.sh"
     fi
@@ -279,7 +292,7 @@ bind PAD0_B "+button2"
 bind PAD0_X "+movedown"
 bind PAD0_Y "+zoom"
 bind PAD0_BACK "+scores"
-bind PAD0_GUIDE "+movedown"
+bind PAD0_GUIDE "+button3"
 bind PAD0_START "togglemenu"
 bind PAD0_LEFTSTICK_CLICK "+zoom"
 bind PAD0_RIGHTSTICK_CLICK "centerview"
@@ -656,7 +669,7 @@ _EOF_
 }
 
 function shortcuts_icons_ioquake3() {
-    local launcher=("$md_inst/ioquake3")
+    local launcher=("$md_inst/ioquake3.sh")
     isPlatform "mesa" && launcher+=("+set cl_renderer opengl1")
     #isPlatform "kms" && launcher+=("+set r_mode -1" "+set r_swapInterval 1")
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
