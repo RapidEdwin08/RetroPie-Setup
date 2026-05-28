@@ -196,6 +196,7 @@ function configure_ioquake3() {
     if [[ "$md_mode" == "install" ]]; then
         # Use [joy2key] button-to-keyboard mappings for control in Menu
         rm -Rf "$md_inst/joy2key"; cp -R /opt/retropie/admin/joy2key/ "$md_inst"
+        chmod 755 $md_inst/joy2key/*.py; chmod 755 $md_inst/joy2key/joy2key
         # def_buttons = ['left', 'right', 'up', 'down', 'a'] # * cursor keys for axis/dpad # * enter, 'a'
         sed -i 's+params=(kcu.*+params=(kcub1 kcuf1 kcuu1 kcud1 0x0a)+' "$md_inst/joy2key/joy2key"
 
