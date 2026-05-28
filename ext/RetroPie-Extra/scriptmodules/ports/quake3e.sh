@@ -32,9 +32,9 @@ function _get_commit_quake3e() {
 }
 
 function depends_quake3e() {
-    if ! isPlatform "64bit" ; then
+    ##if ! isPlatform "64bit" ; then
         #dialog --ok --msgbox "Installer is for a 64bit system Only!" 22 76 2>&1 >/dev/tty
-        md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
+        ##md_ret_errors+=("$md_desc Installer is for a 64bit system Only!")
     fi
     getDepends cmake libsdl2-dev libgl1-mesa-dev libxxf86dga-dev libcurl4-openssl-dev
 }
@@ -44,12 +44,12 @@ function sources_quake3e() {
 }
 
 function _arch_bin() {
-    local arch_q3bin="$(uname -m | sed -e 's/x86_64/x64/' | sed -e 's/^arm.*/arm/' | sed -e 's/arm64/aarch64/')"
+    local arch_q3bin="$(uname -m | sed -e 's/i.86/x86/' | sed -e 's/x86_64/x64/' | sed -e 's/^arm.*/arm/' | sed -e 's/arm64/aarch64/')"
     echo "${arch_q3bin}"
 }
 
 function _arch_rel() {
-    local arch_q3rel="$(uname -m | sed -e 's/^arm.*/arm/' | sed -e 's/arm64/aarch64/')"
+    local arch_q3rel="$(uname -m | sed -e 's/i.86/x86/' | sed -e 's/^arm.*/arm/' | sed -e 's/arm64/aarch64/')"
     echo "${arch_q3rel}"
 }
 
