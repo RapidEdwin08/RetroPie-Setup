@@ -53,7 +53,7 @@ function _arch_rel() {
     echo "${arch_q3rel}"
 }
 
-function _release_dir() {
+function _release_dir_q3e() {
     echo "build/release-linux-$(_arch_rel)"
 }
 
@@ -61,15 +61,15 @@ function build_quake3e() {
     make clean
     make -j"$(nproc)"
     #make -j"$(nproc)" install DESTDIR="$md_inst"
-    md_ret_require="$md_build/$(_release_dir)/quake3e.$(_arch_bin)"
+    md_ret_require="$md_build/$(_release_dir_q3e)/quake3e.$(_arch_bin)"
 }
 
 function install_quake3e() {
      md_ret_files=(
-        "$(_release_dir)/quake3e.$(_arch_bin)"
-        "$(_release_dir)/quake3e.ded.$(_arch_bin)"
-        "$(_release_dir)/quake3e_opengl_$(_arch_rel).so"
-        "$(_release_dir)/quake3e_vulkan_$(_arch_rel).so"
+        "$(_release_dir_q3e)/quake3e.$(_arch_bin)"
+        "$(_release_dir_q3e)/quake3e.ded.$(_arch_bin)"
+        "$(_release_dir_q3e)/quake3e_opengl_$(_arch_rel).so"
+        "$(_release_dir_q3e)/quake3e_vulkan_$(_arch_rel).so"
     )
 }
 
@@ -356,7 +356,7 @@ bind PAD0_B "+button2"
 bind PAD0_X "+movedown"
 bind PAD0_Y "+zoom"
 bind PAD0_BACK "+scores"
-bind PAD0_GUIDE "+movedown"
+bind PAD0_GUIDE "+button3"
 bind PAD0_START "togglemenu"
 bind PAD0_LEFTSTICK_CLICK "+zoom"
 bind PAD0_RIGHTSTICK_CLICK "centerview"
