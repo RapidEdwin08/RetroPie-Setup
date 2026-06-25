@@ -1,0 +1,57 @@
+diff -ur a/source/build/src/polymost1Frag.glsl b/source/build/src/polymost1Frag.glsl
+--- a/source/build/src/polymost1Frag.glsl	Source dibollinger-master-d6a40c36
++++ b/source/build/src/polymost1Frag.glsl	Modified replace-gl_red
+@@ -75,13 +75,13 @@
+ 
+     float shade = clamp((u_shade+clamp(u_visFactor*v_distance-0.5*u_shadeInterpolate,c_zero,u_numShades.x)), c_zero, u_numShades.x-c_one);
+     float shadeFrac = mod(shade, c_one);
+-    float colorIndex = texture2D(s_palswap, vec2(color.r, floor(shade)*u_numShades.y)*u_palswapSize+u_palswapPos).r * c_basepalScale + c_basepalOffset;
+-    float colorIndexNext = texture2D(s_palswap, u_palswapSize*vec2(color.r, (floor(shade)+c_one)*u_numShades.y)+u_palswapPos).r * c_basepalScale + c_basepalOffset;
++    float colorIndex = texture2D(s_palswap, vec2(color.a, floor(shade)*u_numShades.y)*u_palswapSize+u_palswapPos).a * c_basepalScale + c_basepalOffset;
++    float colorIndexNext = texture2D(s_palswap, u_palswapSize*vec2(color.a, (floor(shade)+c_one)*u_numShades.y)+u_palswapPos).a * c_basepalScale + c_basepalOffset;
+     vec4 palettedColor = texture2D(s_palette, vec2(colorIndex, c_zero));
+     vec4 palettedColorNext = texture2D(s_palette, vec2(colorIndexNext, c_zero));
+     palettedColor.rgb = mix(palettedColor.rgb, palettedColorNext.rgb, shadeFrac*u_shadeInterpolate);
+     float fullbright = mix(u_usePalette*palettedColor.a, c_zero, u_useColorOnly);
+-    palettedColor.a = c_one-floor(color.r);
++    palettedColor.a = c_one-floor(color.a);
+     color = mix(color, palettedColor, u_usePalette);
+ 
+ #ifdef POLYMOST1_EXTENDED
+diff -ur a/source/build/src/polymost.cpp b/source/build/src/polymost.cpp
+--- a/source/build/src/polymost.cpp	Source dibollinger-master-d6a40c36
++++ b/source/build/src/polymost.cpp	Modified replace-gl_red
+@@ -1877,11 +1877,11 @@
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.f);
+ 
+-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, siz.y, siz.x, 0, GL_RED, GL_UNSIGNED_BYTE, (void*) tile);
++        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, siz.y, siz.x, 0, GL_ALPHA, GL_UNSIGNED_BYTE, (void*) tile);
+     }
+     else
+     {
+-        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, siz.y, siz.x, GL_RED, GL_UNSIGNED_BYTE, (void*) tile);
++        glTexSubImage2D(GL_TEXTURE_2D, 0, offset.x, offset.y, siz.y, siz.x, GL_ALPHA, GL_UNSIGNED_BYTE, (void*) tile);
+     }
+ }
+ 
+@@ -1957,7 +1957,7 @@
+         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.f);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, PALSWAP_TEXTURE_SIZE, PALSWAP_TEXTURE_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
++        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, PALSWAP_TEXTURE_SIZE, PALSWAP_TEXTURE_SIZE, 0, GL_ALPHA, GL_UNSIGNED_BYTE, NULL);
+     }
+ 
+     int32_t column = palookupnum%(PALSWAP_TEXTURE_SIZE/256);
+@@ -1971,8 +1971,8 @@
+     //POGO: There was a reason why having an extra row of black pixels was necessary along the edge of the palswap (I believe it affected a particular IHV/GPU).
+     //      It may be worth investigating what this reason was again, but for now, make sure we properly initialize this row.
+     static char blackPixels256[256] = {0};
+-    glTexSubImage2D(GL_TEXTURE_2D, 0, 256*column, rowOffset+numshades, 256, 1, GL_RED, GL_UNSIGNED_BYTE, blackPixels256);
+-    glTexSubImage2D(GL_TEXTURE_2D, 0, 256*column, rowOffset, 256, numshades, GL_RED, GL_UNSIGNED_BYTE, palookup[palookupnum]);
++    glTexSubImage2D(GL_TEXTURE_2D, 0, 256*column, rowOffset+numshades, 256, 1, GL_ALPHA, GL_UNSIGNED_BYTE, blackPixels256);
++    glTexSubImage2D(GL_TEXTURE_2D, 0, 256*column, rowOffset, 256, numshades, GL_ALPHA, GL_UNSIGNED_BYTE, palookup[palookupnum]);
+ }
+ 
+ 

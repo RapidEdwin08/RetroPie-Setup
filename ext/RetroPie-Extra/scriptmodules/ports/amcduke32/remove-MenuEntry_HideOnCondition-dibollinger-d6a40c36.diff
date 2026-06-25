@@ -1,0 +1,46 @@
+diff -ur a/source/duke3d/src/menus.cpp b/source/duke3d/src/menus.cpp
+--- a/source/duke3d/src/menus.cpp	Source dibollinger-master-d6a40c36
++++ b/source/duke3d/src/menus.cpp	Modified remove-MenuEntry_HideOnCondition
+@@ -880,8 +880,7 @@
+ #ifdef USE_OPENGL
+     &ME_VIDEOSETUP_RENDERER_ALL,
+ # ifdef POLYMER
+-    &ME_VIDEOSETUP_RENDERER_NOCLASSIC,
+-    &ME_VIDEOSETUP_RENDERER_NOPOLYMER,
++    &ME_VIDEOSETUP_RENDERER_ALL,
+ # endif
+ #endif
+     &ME_VIDEOSETUP_DISPLAY,
+@@ -2675,19 +2674,19 @@
+         || (newrendermode != REND_CLASSIC && resolution[nr].bppmax <= 8));
+     MenuEntry_DisableOnCondition(&ME_VIDEOSETUP_BORDERLESS, newfullscreen);
+ 
+-#ifdef USE_OPENGL
+-    auto const forbidClassic = (g_gameType & GAMEFLAG_NOCLASSIC) && rendermode != REND_CLASSIC;
+-#ifdef POLYMER
+-    auto const forbidPolymer = (g_gameType & GAMEFLAG_NOPOLYMER) && rendermode != REND_POLYMER;
+-    auto const forbidNeither = !(g_gameType & (GAMEFLAG_NOCLASSIC|GAMEFLAG_NOPOLYMER));
+-    auto const forbidBoth = forbidClassic && forbidPolymer;
+-    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_ALL, forbidClassic || forbidPolymer);
+-    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_NOCLASSIC, !forbidClassic || forbidNeither || forbidBoth);
+-    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_NOPOLYMER, !forbidPolymer || forbidNeither || forbidBoth);
+-#else
+-    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_ALL, forbidClassic);
+-#endif
+-#endif
++//#ifdef USE_OPENGL
++//    auto const forbidClassic = (g_gameType & GAMEFLAG_NOCLASSIC) && rendermode != REND_CLASSIC;
++//#ifdef POLYMER
++//    auto const forbidPolymer = (g_gameType & GAMEFLAG_NOPOLYMER) && rendermode != REND_POLYMER;
++//    auto const forbidNeither = !(g_gameType & (GAMEFLAG_NOCLASSIC|GAMEFLAG_NOPOLYMER));
++//    auto const forbidBoth = forbidClassic && forbidPolymer;
++//    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_ALL, forbidClassic || forbidPolymer);
++//    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_NOCLASSIC, !forbidClassic || forbidNeither || forbidBoth);
++//    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_NOPOLYMER, !forbidPolymer || forbidNeither || forbidBoth);
++//#else
++//    MenuEntry_HideOnCondition(&ME_VIDEOSETUP_RENDERER_ALL, forbidClassic);
++//#endif
++//#endif
+ }
+ 
+ static void Menu_PopulateLanguages()
