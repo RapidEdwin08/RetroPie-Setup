@@ -12,12 +12,44 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="ionfury"
-rp_module_desc="Ion Fury/Aftershock Commercial FPS game based on eduke32"
+rp_module_desc="Ion Fury/Aftershock Commercial FPS game based on Ken Silverman's Build Engine"
 rp_module_licence="GPL2 https://voidpoint.io/terminx/eduke32/-/raw/master/package/common/gpl-2.0.txt?inline=false"
 rp_module_help="Place Ion Fury Files in [ports/ksbuild/ionfury]:\nfury.grp\nfury.def\nfury.grpinfo\n \nPlace Aftershock Files in [ports/ksbuild/aftershock]:\nfury.grp\nfury.grpinfo"
-#rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08" # Default RetroPie
-rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master e5aad188" # 20250913 +IonFuryAftershockV3 Support, NO HW Renderer for RPi5/4 Vulkan Bookworm since b6740a7b
+rp_module_repo="git :_get_repo_ionfury master :_get_commit_ionfury"
 rp_module_section="exp"
+
+function _get_repo_ionfury() {
+    local git_repo
+
+    # terminx-master # Default eduke32 Repo
+    git_repo=https://voidpoint.io/terminx/eduke32.git
+
+    # sirlemonhead-master-3191b5f4 # 20210712 [Bookworm] RPi4/5 +HW Renderer +IonFuryV1, -IonFuryV3Aftershock NOT Supported
+    ##git_repo=https://voidpoint.io/sirlemonhead/eduke32.git
+
+    echo $git_repo
+}
+
+function _get_commit_ionfury() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch_tag=master
+    local branch_commit="$(git ls-remote https://voidpoint.io/terminx/eduke32.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    # terminx-master-ba6b7bb1 Last Tested commit on RPi4/5 Trixie # +IonFuryV1 +IonFuryV3Aftershock Support
+    ( isPlatform "rpi"* || isPlatform "arm" ) && branch_commit=ba6b7bb1
+
+    # terminx-master-dfc16b08 RetroPie commit of choice for Buster # +IonFuryV1, -IonFuryV3Aftershock NOT Supported
+    [[ "$__os_debian_ver" -le 10 ]] && branch_commit=dfc16b08
+
+    #branch_commit=661883a5; # terminx-master 20211112 Last working commit on RPi4/5 Vulkan Bookworm +HW Renderer
+    #branch_commit=b6740a7b; # terminx-master 20211112 This commit broke +HW Renderer on RPi4/5 Vulkan Bookworm # https://voidpoint.io/terminx/eduke32/-/work_items/309
+    #branch_commit=ba6b7bb1; # terminx-master 20260203 Engine: Avoid crash when given an OOB voxel ID
+
+    # sirlemonhead-master-3191b5f4 # 20210712 [Bookworm] RPi4/5 +HW Renderer +IonFuryV1, -IonFuryV3Aftershock NOT Supported
+    [[ "$(_get_repo_ionfury)" == "https://voidpoint.io/sirlemonhead/eduke32.git" ]] && branch_commit=3191b5f4
+
+    echo $branch_commit
+}
 
 function depends_ionfury() {
     depends_eduke32
@@ -54,7 +86,7 @@ function gui_ionfury() {
 
     case $choice in
         1)
-            shortcuts_icons_ionfury
+            configure_ionfury
             ;;
         2)
             echo "Canceled"
