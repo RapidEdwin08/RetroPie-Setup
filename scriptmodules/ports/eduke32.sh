@@ -15,30 +15,69 @@ rp_module_id="eduke32"
 rp_module_desc="Duke3D Source Port - Ken Silverman's Build Engine"
 rp_module_help="Place Game Files in [ports/ksbuild]:\n \nports/ksbuild/duke3d\nDUKE3D.GRP\nDUKE.RTS\n \nports/ksbuild/duke3d/addons/dc\nports/ksbuild/duke3d/addons/nw\nports/ksbuild/duke3d/addons/vacation\nports/ksbuild/duke3d/addons/nam"
 rp_module_licence="GPL2 https://voidpoint.io/terminx/eduke32/-/raw/master/package/common/gpl-2.0.txt?inline=false"
-if [[ "$__os_debian_ver" -le 10 ]]; then
-    rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master dfc16b08" # Default RetroPie
-#elif [[ "$__os_debian_ver" -ge 11 ]] && isPlatform "rpi"; then
-elif [[ ! "$md_id" == "ionfury" ]] && isPlatform "rpi"; then
-    rp_module_repo="git https://voidpoint.io/sirlemonhead/eduke32.git master 3191b5f4" # 20210712 RPi5/4 Vulkan Bookworm +HW Renderer +IonFuryV1, -IonFuryAftershockV3 NOT Supported
-    #rp_module_repo="git https://voidpoint.io/dgurney/eduke32.git master 76bc19e2" # 20210627 RPi5/4 Vulkan Bookworm +HW Renderer +IonFuryV1, black skybox
-    #rp_module_repo="git https://voidpoint.io/dgurney/eduke32.git interpolation 104eff0e" # 20200808 OrangePi
-    #rp_module_repo="git https://github.com/emileb/eduke32_mobile.git main 9741acb5" # 20210928 eduke32_mobile
-elif [[ "$md_id" == "ionfury" ]]; then
-    rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master e5aad188" # 20250913 +IonFuryAftershockV3 Support, NO HW Renderer for RPi5/4 Vulkan Bookworm since b6740a7b
-else
-    rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master"
-    #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master b6740a7b" # 20211112 This commit broke +HW Renderer on RPi5/4 Vulkan Bookworm
-    #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master 661883a5" # 20211112 Last working commit on RPi5/4 Vulkan Bookworm +HW Renderer
-    #rp_module_repo="git https://voidpoint.io/terminx/eduke32.git master b3a831c6" # 20211124 Adds htfloorzoffset htwaterzoffset
-fi
+rp_module_repo="git :_get_repo_eduke32 :_get_branch_eduke32 :_get_commit_eduke32"
 rp_module_section="opt"
+
+function _get_repo_eduke32() {
+    local git_repo
+
+    # terminx-master # Default eduke32 Repo
+    git_repo=https://voidpoint.io/terminx/eduke32.git
+
+    # emileb-main-9741acb5 # 20210928 [Trixie] eduke32_mobile # RPi4/5 +HW Renderer
+    ( isPlatform "rpi"* || isPlatform "arm" ) && git_repo=https://github.com/emileb/eduke32_mobile.git
+
+    # terminx-master-dfc16b08 RetroPie commit of choice for Buster
+    [[ "$__os_debian_ver" -le 10 ]] && git_repo=https://voidpoint.io/terminx/eduke32.git
+
+    # terminx-master # Default eduke32 Repo +IonFuryV1 +IonFuryV3Aftershock
+    [[ "$md_id" == "ionfury" ]] && git_repo=https://voidpoint.io/terminx/eduke32.git
+
+    # sirlemonhead-master-3191b5f4 # 20210712 [Bookworm] RPi4/5 +HW Renderer +IonFuryV1, -IonFuryV3Aftershock NOT Supported
+    ##git_repo=https://voidpoint.io/sirlemonhead/eduke32.git
+
+    echo $git_repo
+}
+
+function _get_branch_eduke32() {
+    local branch_tag=master
+
+    # emileb-main-9741acb5 # 20210928 [Trixie] eduke32_mobile # RPi4/5 +HW Renderer
+    [[ "$(_get_repo_eduke32)" == "https://github.com/emileb/eduke32_mobile.git" ]] && branch_tag=main
+
+    echo $branch_tag
+}
+
+function _get_commit_eduke32() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch_tag=$(_get_branch_eduke32)
+    local branch_commit="$(git ls-remote $(_get_repo_eduke32) $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    # terminx-master-ba6b7bb1 Last Tested commit on RPi4/5 Trixie
+    ( isPlatform "rpi"* || isPlatform "arm" ) && branch_commit=ba6b7bb1
+
+    # terminx-master-dfc16b08 RetroPie commit of choice for Buster
+    [[ "$__os_debian_ver" -le 10 ]] && branch_commit=dfc16b08
+
+    #branch_commit=661883a5; # terminx-master 20211112 Last working commit on RPi4/5 Vulkan Bookworm +HW Renderer
+    #branch_commit=b6740a7b; # terminx-master 20211112 This commit broke +HW Renderer on RPi4/5 Vulkan Bookworm # https://voidpoint.io/terminx/eduke32/-/work_items/309
+    #branch_commit=ba6b7bb1; # terminx-master 20260203 Engine: Avoid crash when given an OOB voxel ID
+
+    # emileb-main-9741acb5 # 20210928 [Trixie] eduke32_mobile # RPi4/5 +HW Renderer
+    [[ "$(_get_repo_eduke32)" == "https://github.com/emileb/eduke32_mobile.git" ]] && branch_commit=9741acb5
+
+    # sirlemonhead-master-3191b5f4 # 20210712 [Bookworm] RPi4/5 +HW Renderer +IonFuryV1, -IonFuryV3Aftershock NOT Supported
+    [[ "$(_get_repo_eduke32)" == "https://voidpoint.io/sirlemonhead/eduke32.git" ]] && branch_commit=3191b5f4
+
+    echo $branch_commit
+}
 
 function depends_eduke32() {
     local depends=(
         flac libflac-dev libvorbis-dev libpng-dev libvpx-dev freepats
         libsdl2-dev libsdl2-mixer-dev unzip
     )
-
+    depends+=(libsdl1.2-dev libsdl-mixer1.2-dev)
     isPlatform "x86" && depends+=(nasm)
     isPlatform "gl" || isPlatform "mesa" && depends+=(libgl1-mesa-dev libglu1-mesa-dev)
     isPlatform "x11" && depends+=(libgtk2.0-dev)
@@ -47,13 +86,15 @@ function depends_eduke32() {
 
 function sources_eduke32() {
     gitPullOrClone
+
+    ### Testing ###
     #downloadAndExtract "https://dukeworld.duke4.net/eduke32/synthesis/latest/eduke32_src_20250913-10627-e5aad1886.tar.xz" "$md_build"; mv -f "$md_build/eduke32_20250913-10627-e5aad1886/"* "$md_build" # 20250913 Dev
     #downloadAndExtract "https://dukeworld.duke4.net/eduke32/synthesis/20211112-9787-47e24d2b0/eduke32_src_20211112-9787-47e24d2b0.tar.xz" "$md_build"; mv -f "$md_build/eduke32_20211112-9787-47e24d2b0/"* "$md_build" # 20211112 This commit broke RPi Bookworm
     #downloadAndExtract "https://dukeworld.duke4.net/eduke32/synthesis/20211112-9782-661883a52/eduke32_src_20211112-9782-661883a52.tar.xz" "$md_build"; mv -f "$md_build/eduke32_20211112-9782-661883a52/"* "$md_build" # 20211112 Last working commit on RPi Bookworm
 
-    if [[ "$__os_debian_ver" -le 10 ]]; then
-        # Updated Controller config
-        applyPatch "$md_data/0000-controller-buttons-legacy.diff"
+    ### terminx-master-dfc16b08 RetroPie commit of choice for Buster ###
+    if [[ "$(_get_commit_eduke32)" == "dfc16b08" ]]; then
+        applyPatch "$md_data/controller-buttons-terminx-dfc16b08.diff" # Updated Controller config
         # r6918 causes a 20+ second delay on startup on ARM devices
         isPlatform "arm" && applyPatch "$md_data/0001-revert-r6918.patch"
         # r7424 gives a black skybox when r_useindexedcolortextures is 0
@@ -67,26 +108,34 @@ function sources_eduke32() {
         applyPatch "$md_data/0005-e1m4-shrinker-bug.patch"
         # two more commits r8241 + r8247 fixing a bug in E4M4 (instant death in water)
         applyPatch "$md_data/0006-e4m4-water-bug.patch"
-    #elif [[ "$__os_debian_ver" -ge 11 ]] && isPlatform "rpi"; then
-    elif [[ ! "$md_id" == "ionfury" ]] && isPlatform "rpi"; then
-        # Updated Controller config
-        #applyPatch "$md_data/0000-controller-buttons-dgurney.diff"
-        #applyPatch "$md_data/0000-controller-buttons-emileb.diff"
-        applyPatch "$md_data/0000-controller-buttons-sirlemonhead.diff"
-        # gcc 6.3.x compiler fix
-        applyPatch "$md_data/0004-recast-function.patch"
-        # useindexedcolortextures 0FF
-        sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
-        # VC4 & V3D + Kernel 6.12.x render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
-        sed -i s+int32_t\ r_usenewshading\ =.*+int32_t\ r_usenewshading\ =\ 3\;+ $md_build/source/build/src/polymost.cpp
-        # Fix FURY=1 Build Error using RETAIL_MENU=1: source/duke3d/src/menus.cpp:2323:39: error: ‘ME_SOUND_MIDIDRIVER’ was not declared in this scope
-        #sed -i s+RETAIL_MENU.*+RETAIL_MENU\ :=\ 0+ $md_build/GNUmakefile
-        if [[ "$md_id" == "ionfury" ]]; then applyPatch "$md_data/0007-retailmenu-mididriver.diff"; fi
-    else
-        # Updated Controller config
-        applyPatch "$md_data/0000-controller-buttons-terminx.diff"
-        # useindexedcolortextures 0FF
-        sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
+
+    ### emileb-main-9741acb5 # 20210928 [Trixie] eduke32_mobile # RPi4/5 +HW Renderer ###
+    elif [[ "$(_get_repo_eduke32)" == "https://github.com/emileb/eduke32_mobile.git" ]]; then
+        applyPatch "$md_data/controller-buttons-emileb-9741acb5.diff" # Updated Controller config
+
+    ### sirlemonhead-master-3191b5f4 # 20210712 [Bookworm] RPi4/5 +HW Renderer +IonFuryV1, -IonFuryV3Aftershock NOT Supported ###
+    elif [[ "$(_get_repo_eduke32)" == "https://voidpoint.io/sirlemonhead/eduke32.git" ]]; then
+        applyPatch "$md_data/controller-buttons-sirlemonhead-3191b5f4.diff" # Updated Controller config
+        applyPatch "$md_data/0004-recast-function.patch" # gcc 6.3.x compiler fix
+        # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
+        isPlatform "kms" && sed -i s+int32_t\ r_usenewshading\ =.*+int32_t\ r_usenewshading\ =\ 3\;+ $md_build/source/build/src/polymost.cpp
+        # useindexedcolortextures 0FF # the VC4 & V3D drivers render menu splash colors incorrectly without this
+        isPlatform "kms" && sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
+
+    else ### terminx-master # Default eduke32 Repo +IonFuryV1 +IonFuryV3Aftershock ###
+        applyPatch "$md_data/controller-buttons-terminx-ba6b7bb1.diff" # Updated Controller config
+        if [[ "$md_id" == "ionfury" ]]; then
+            # Remove [MenuEntry_HideOnCondition] for the [Renderer:] Entry in Menu # [~] console -> [setrendermode 0]
+            ( isPlatform "gl" || isPlatform "mesa" ) && applyPatch "$md_data/remove-MenuEntry_HideOnCondition-terminx-ba6b7bb1.diff"
+        fi
+        if ( isPlatform "rpi"* || isPlatform "arm" ); then
+            # https://voidpoint.io/terminx/eduke32/-/work_items/309
+            applyPatch "$md_data/sbc-opengl-terminx-ba6b7bb1.diff"
+            # emileb-main_mobile-b564dd63 # Update indexed textures as GL_ALPHA instead of GL_RED to avoid promotion to GL_RGB inside GL4ES, saves 50% memory
+            applyPatch "$md_data/replace-gl_red-terminx-ba6b7bb1.diff"
+        fi
+        # useindexedcolortextures 0FF # the VC4 & V3D drivers render menu splash colors incorrectly without this
+        isPlatform "kms" && sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
     fi
 }
 
@@ -96,11 +145,12 @@ function build_eduke32() {
     #[[ "$md_id" == "ionfury" ]] && params+=(FURY=1)
     if [[ "$md_id" == "ionfury" ]]; then
         params+=(APPBASENAME=fury APPNAME=IonFury NETCODE=0 STANDALONE=1 USE_LIBVPX=0 RETAIL_MENU=1 POLYMER=0)
-        isPlatform "rpi" && params+=(USE_OPENGL=0) # e5aad188
+        if [[ "$(_get_commit_eduke32)" == "dfc16b08" ]]; then
+            ( isPlatform "rpi"* || isPlatform "arm" ) && params+=(USE_OPENGL=0)
+        fi
     fi
     ! isPlatform "x86" && params+=(NOASM=1)
     ! isPlatform "x11" && params+=(HAVE_GTK2=0)
-    #! isPlatform "gl3" && params+=(POLYMER=0) # Add vulkan
     ! ( isPlatform "gl3" || isPlatform "vulkan" ) && params+=(POLYMER=0)
     ! ( isPlatform "gl" || isPlatform "mesa" ) && params+=(USE_OPENGL=0)
     # r7242 requires >1GB memory allocation due to netcode changes.
@@ -165,9 +215,7 @@ function gui_eduke32() {
 
     case $choice in
         1)
-            game_data_eduke32
-            add_games_eduke32
-            shortcuts_icons_eduke32
+            configure_eduke32
             ;;
         2)
             echo "Canceled"
@@ -211,19 +259,20 @@ function configure_eduke32() {
         touch "$config"
         iniConfig " " '"' "$config"
 
-        # enforce vsync #for kms targets
-        #isPlatform "kms" && iniSet "r_swapinterval" "1"
-        iniSet "r_swapinterval" "1"
-        iniSet "r_vsync" "1"
-        iniSet "r_useindexedcolortextures" "0"
+        # enforce vsync
+        if [[ "$(_get_commit_eduke32)" == "dfc16b08" ]]; then
+            iniSet "r_swapinterval" "1"
+        else
+            iniSet "r_vsync" "1"
+        fi
 
-        # the VC4 & V3D drivers render menu splash colours incorrectly without this
-        if [[ "$__os_debian_ver" -ge 12 ]] && isPlatform "rpi"; then
-            #iniSet "r_useindexedcolortextures" "0"
-            # VC4 & V3D + Kernel 6.12.x render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
+        # the VC4 & V3D drivers render menu splash colors incorrectly without this
+        ( isPlatform "kms" || isPlatform "mesa" ) && iniSet "r_useindexedcolortextures" "0"
+        ##isPlatform "kms" && iniSet "r_shadows" "1"
+
+        if [[ "$(_get_repo_eduke32)" == "https://voidpoint.io/sirlemonhead/eduke32.git" ]] && isPlatform "kms"; then
+            # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
             iniSet "r_usenewshading" "3"
-        #else
-            #isPlatform "mesa" && iniSet "r_useindexedcolortextures" "0"
         fi
         chown -R "$__user":"$__group" "$config"
 
