@@ -1,0 +1,20 @@
+diff -ur a/source/build/src/sdlayer.cpp b/source/build/src/sdlayer.cpp
+--- a/source/build/src/sdlayer.cpp	Source terminx-master-ba6b7bb1
++++ b/source/build/src/sdlayer.cpp	Modified sbc-opengl
+@@ -1849,11 +1849,11 @@
+             int32_t value;
+         } sdlayer_gl_attributes[] =
+         {
+-              { SDL_GL_CONTEXT_FLAGS,
+-#ifndef NDEBUG
+-              SDL_GL_CONTEXT_DEBUG_FLAG |
+-#endif
+-              SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG },
++//              { SDL_GL_CONTEXT_FLAGS,
++//#ifndef NDEBUG
++//              SDL_GL_CONTEXT_DEBUG_FLAG |
++//#endif
++//              SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG },
+               { SDL_GL_CONTEXT_RESET_NOTIFICATION, SDL_GL_CONTEXT_RESET_LOSE_CONTEXT },
+               { SDL_GL_DOUBLEBUFFER, 1 },
+ 
