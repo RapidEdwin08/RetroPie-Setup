@@ -1,0 +1,30 @@
+diff -ur a/libnumero/libretro/libretronew.cpp b/libnumero/libretro/libretronew.cpp
+--- a/libnumero/libretro/libretronew.cpp	2026-06-26 01:26:48.161892647 -0400
++++ b/libnumero/libretro/libretronew.cpp	2026-06-26 18:56:03.818809819 -0400
+@@ -94,7 +94,7 @@
+ char savetempdir[400];
+ char saveprogressdir[400];
+ void setSaveDir();
+-void setProgressDir(char* rom_name);
++void setProgressDir(const char* rom_name);
+ 
+ typedef struct {
+     const char* text;
+@@ -573,7 +573,7 @@
+     mycalc.slot = 0;
+ 
+     //look for silver edition
+-    char* rom_name = "ti83se.rom";
++    const char* rom_name = "ti83se.rom";
+     has_ti_rom = file_present_in_system(rom_name);
+     setProgressDir("ti83se");
+ 
+@@ -642,7 +642,7 @@
+ }
+ 
+ 
+-void setProgressDir(char* rom_name)
++void setProgressDir(const char* rom_name)
+ {
+     const char* tmp = NULL;
+     environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &tmp);
