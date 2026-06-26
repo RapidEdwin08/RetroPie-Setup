@@ -13,20 +13,37 @@
 # If no user is specified (for RetroPie below v4.8.9)
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
+
 rp_module_id="lr-numero"
 rp_module_desc="lr-numero - Numero is a libretro core for emulating the TI-83 family of graphing calculators."
-rp_module_help="ROM Extensions: .8xp .8xk .8xg\n\nPlace TI-83 ROMs in: $romdir/ti83/\n\nPlace TI-83 BIOS in: $biosdir/\nti83se.rom      TI-83 Silver Edition   *Recommended*\nti83plus.rom    TI-83 Plus\nti83.rom        TI-83\n\n{RESET/RESTART in RetroArch to CLEAR the Entire Memory}\n\nMore Info:\ngithub.com/nbarkhina/numero/blob/master/README.md\n\n{ti83se.rom}:\nhttps://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83se.rom\n\n{ti83plus.rom}\nhttps://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom"
+rp_module_help="ROM Extensions: .8xp .8xk .8xg\n\nPlace TI-83 ROMs in: $romdir/ti83/\n\nPlace TI-83 BIOS in: $biosdir/\nti83se.rom      TI-83 Silver Edition   *Recommended*\nti83plus.rom    TI-83 Plus\nti83.rom        TI-83\n\n{RESET/RESTART in RetroArch to CLEAR the Entire Memory}\n\nMore Info:\ngithub.com/nbarkhina/numero/blob/master/README.md"
 rp_module_repo="git https://github.com/nbarkhina/numero.git master"
 rp_module_section="exp"
 rp_module_flags=""
 
 function sources_lr-numero() {
     gitPullOrClone
+
+    # warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+    applyPatch "$md_data/const-char-rom_name.diff"
+
+    # rpi5 CFLAGS += -mcpu=cortex-a76 -mtune=cortex-a76
+    applyPatch "$md_data/platform-cortex-a76.diff"
 }
 
 function build_lr-numero() {
+    local tiplatform=unix
+    isPlatform "rpi1" && tiplatform=rpi1
+    isPlatform "rpi2" && tiplatform=rpi2
+    if ( isPlatform "rpi3" ); then
+        ! isPlatform "64bit" && tiplatform=rpi3
+        isPlatform "64bit" && tiplatform=rpi3_64
+    fi
+    isPlatform "rpi4" && tiplatform=rpi4
+    isPlatform "rpi5" && tiplatform=rpi5
+    echo [platform]: "${tiplatform[@]}"
     make -f Makefile.libretro clean
-    make -f Makefile.libretro
+    make -f Makefile.libretro platform="${tiplatform[@]}"
     md_ret_require="$md_build/numero_libretro.so"
 }
 
@@ -44,7 +61,7 @@ function game_data_lr-numero() {
         if [[ ! -f "$romdir/ti83/gamelist.xml" ]]; then mv "$romdir/ti83/gamelist.xml.ti83" "$romdir/ti83/gamelist.xml"; fi
         if [[ ! -f "$md_inst/tidoom/TIDOOM.8XG" ]]; then mkdir -p "$md_inst/tidoom"; cp "$romdir/ti83/TIDOOM.8XG" "$md_inst/tidoom/TIDOOM.8XG"; fi
         chown -R $__user:$__user "$romdir/ti83"
-        chown -R $__user:$__user "$md_inst/tidoom" # tisavestateprogressti83se.sav
+        chown -R $__user:$__user "$md_inst/tidoom" # tisavestateprogressti83*.sav
     fi
     # Extra Systems for carbon-2021: cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
     if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/ti83.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
@@ -57,14 +74,26 @@ function game_bios_lr-numero() {
     local ti_rom
     if [[ "$1"  == 'ti83se' ]]; then
         ti_rom=ti83se.rom
-        ti_link=https://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83se.rom
+        ti_link=https://raw.githubusercontent.com/Quuxplusone/ti83/master/ti83se.rom
+        ##ti_link=https://web.archive.org/web/20231217022137/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83se.rom
     fi
     if [[ "$1"  == 'ti83plus' ]]; then
         ti_rom=ti83plus.rom
-        ti_link=https://web.archive.org/web/20230208002249/http://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom
+        ##ti_link=https://web.archive.org/web/20231217022138/https://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom
+        ti_link=https://web.archive.org/web/20221007152001/https://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom
+        ##ti_link=https://web.archive.org/web/20220612213504/https://tiroms.weebly.com/uploads/1/1/0/5/110560031/ti83plus.rom
+    fi
+    if [[ "$1"  == 'ti83' ]]; then
+        ti_rom=ti83.rom
+        ti_link=https://raw.githubusercontent.com/Quuxplusone/ti83/master/ti83.rom
     fi
 
     rm -Rf /dev/shm/$ti_rom > /dev/null 2>&1
+    if [[ "$2"  == 'DEL' ]]; then
+        rm -Rf "/home/$__user/RetroPie/BIOS/$ti_rom" > /dev/null 2>&1
+        dialog --no-collapse --title "DELETE [$ti_rom] Finished" --ok-label Back --msgbox "[/home/$__user/RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )"  25 75
+        return
+    fi
     echo "$ti_link"
     wget -q "$ti_link" -O /dev/shm/$ti_rom
     if [[ ! "$?" == "0" ]]; then
@@ -85,10 +114,14 @@ function game_bios_lr-numero() {
 }
 
 function gui_lr-numero() {
-    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Attempt to Download TI-83 BIOS File(s)\n\nSee [Package Help] for Details\n\n[/home/$__user/RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )" 15 60 5 \
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Attempt to Download TI-83 BIOS File(s)\n\nSee [Package Help] for Details\n\n[/home/$__user/RetroPie/BIOS]:\n$(ls /home/$__user/RetroPie/BIOS | grep ti83 )" 20 60 5 \
         "1" "{ti83se.rom}   TI-83 Silver Edition *Recommended*" \
         "2" "{ti83plus.rom} TI-83 Plus" \
-        "3" "Cancel" 2>&1 >/dev/tty)
+        "3" "{ti83.rom}     TI-83" \
+        "4" "READ ME!" \
+        "5" "DELETE {ti83se.rom}" \
+        "6" "DELETE {ti83plus.rom}" \
+        "7" "DELETE {ti83.rom}" 2>&1 >/dev/tty)
 
     case $choice in
         1)
@@ -98,7 +131,20 @@ function gui_lr-numero() {
             game_bios_lr-numero ti83plus
             ;;
         3)
-            echo "Canceled"
+            game_bios_lr-numero ti83
+            ;;
+        4)
+            dialog --no-collapse --title "* Behavior/Issues may vary across different BIOS/TI-83 models *" --ok-label Back --msgbox "\n       ~ Pertains to Devices such as WiiU and Rasperry Pi ~\n\n[ti83se.rom] c6ff8204c5c81b7be34614dbbd690c8b:\n - touch screen input works\n - math results are never returned at all\n   calculator goes into thinking mode forever\n\n[ti83plus.rom] 8011181f810b5ec4e9d6a03f0e14257a:\n - touch screen input works\n - math results are never returned at all\n   calculator goes into thinking mode forever\n\n[ti83.rom] d4448d09bbfde687c04f9e3310e023ab:\n - touch screen input does not work\n - math results are faulty eg. 1+1 = 2E}0\n\nSEE HERE FOR MORE: https://github.com/nbarkhina/numero/issues/5"  25 75
+            return
+            ;;
+        5)
+            game_bios_lr-numero ti83se DEL
+            ;;
+        6)
+            game_bios_lr-numero ti83plus DEL
+            ;;
+        7)
+            game_bios_lr-numero ti83 DEL
             ;;
         *)
             echo "Invalid Selection"
