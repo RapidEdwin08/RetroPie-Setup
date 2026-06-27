@@ -18,7 +18,7 @@ rp_module_section="opt"
 rp_module_flags=""
 
 function _get_release_ppsspp() {
-    local tagged_version="v1.20.3"
+    local tagged_version="v1.20.4"
     # buster and older can't compile recent PPSSPP
     if [[ "$__os_debian_ver" -lt 11 ]]; then
         #  the V3D Mesa driver before 21.x has issues with v1.14 and later
