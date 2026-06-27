@@ -112,6 +112,10 @@ function sources_eduke32() {
     ### emileb-main-9741acb5 # 20210928 [Trixie] eduke32_mobile # RPi4/5 +HW Renderer ###
     elif [[ "$(_get_repo_eduke32)" == "https://github.com/emileb/eduke32_mobile.git" ]]; then
         applyPatch "$md_data/controller-buttons-emileb-9741acb5.diff" # Updated Controller config
+        # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
+        isPlatform "kms" && sed -i s+int32_t\ r_usenewshading\ =.*+int32_t\ r_usenewshading\ =\ 3\;+ $md_build/source/build/src/polymost.cpp
+        # useindexedcolortextures 0FF # the VC4 & V3D drivers render menu splash colors incorrectly without this
+        isPlatform "kms" && sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
 
     ### sirlemonhead-master-3191b5f4 # 20210712 [Bookworm] RPi4/5 +HW Renderer +IonFuryV1, -IonFuryV3Aftershock NOT Supported ###
     elif [[ "$(_get_repo_eduke32)" == "https://voidpoint.io/sirlemonhead/eduke32.git" ]]; then
@@ -134,6 +138,8 @@ function sources_eduke32() {
             # emileb-main_mobile-b564dd63 # Update indexed textures as GL_ALPHA instead of GL_RED to avoid promotion to GL_RGB inside GL4ES, saves 50% memory
             applyPatch "$md_data/replace-gl_red-terminx-ba6b7bb1.diff"
         fi
+        # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
+        isPlatform "kms" && sed -i s+int32_t\ r_usenewshading\ =.*+int32_t\ r_usenewshading\ =\ 3\;+ $md_build/source/build/src/polymost.cpp
         # useindexedcolortextures 0FF # the VC4 & V3D drivers render menu splash colors incorrectly without this
         isPlatform "kms" && sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
     fi
@@ -268,12 +274,11 @@ function configure_eduke32() {
 
         # the VC4 & V3D drivers render menu splash colors incorrectly without this
         ( isPlatform "kms" || isPlatform "mesa" ) && iniSet "r_useindexedcolortextures" "0"
+
+        # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
+        isPlatform "kms" && iniSet "r_usenewshading" "3"
         ##isPlatform "kms" && iniSet "r_shadows" "1"
 
-        if [[ "$(_get_repo_eduke32)" == "https://voidpoint.io/sirlemonhead/eduke32.git" ]] && isPlatform "kms"; then
-            # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
-            iniSet "r_usenewshading" "3"
-        fi
         chown -R "$__user":"$__group" "$config"
 
         if [[ "$md_id" == "eduke32" ]]; then
