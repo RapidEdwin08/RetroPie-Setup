@@ -126,7 +126,7 @@ function sources_eduke32() {
             ( isPlatform "gl" || isPlatform "mesa" ) && applyPatch "$md_data/remove-MenuEntry_HideOnCondition-terminx-ba6b7bb1.diff"
         fi
         # https://voidpoint.io/terminx/eduke32/-/work_items/309
-        if ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/sbc-opengl-terminx-ba6b7bb1.diff"
+        ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/sbc-opengl-terminx-ba6b7bb1.diff"
     fi
 
     # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
