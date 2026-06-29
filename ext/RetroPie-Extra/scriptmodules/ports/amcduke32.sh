@@ -52,9 +52,6 @@ function sources_amcduke32() {
 
     # Remove [MenuEntry_HideOnCondition] for the [Renderer:] Entry in Menu # [~] console -> [setrendermode 0]
     ( isPlatform "gl" || isPlatform "mesa" ) && applyPatch "$md_data/remove-MenuEntry_HideOnCondition-dibollinger-d6a40c36.diff"
-
-    # emileb-main_mobile-b564dd63 # Update indexed textures as GL_ALPHA instead of GL_RED to avoid promotion to GL_RGB inside GL4ES, saves 50% memory
-    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/replace-gl_red-dibollinger-d6a40c36.diff"
 }
 
 function build_amcduke32() {
