@@ -125,20 +125,17 @@ function sources_eduke32() {
             # Remove [MenuEntry_HideOnCondition] for the [Renderer:] Entry in Menu # [~] console -> [setrendermode 0]
             ( isPlatform "gl" || isPlatform "mesa" ) && applyPatch "$md_data/remove-MenuEntry_HideOnCondition-terminx-ba6b7bb1.diff"
         fi
-        if ( isPlatform "rpi"* || isPlatform "arm" ); then
-            # https://voidpoint.io/terminx/eduke32/-/work_items/309
-            applyPatch "$md_data/sbc-opengl-terminx-ba6b7bb1.diff"
-            # emileb-main_mobile-b564dd63 # Update indexed textures as GL_ALPHA instead of GL_RED to avoid promotion to GL_RGB inside GL4ES, saves 50% memory
-            applyPatch "$md_data/replace-gl_red-terminx-ba6b7bb1.diff"
-        fi
+        # https://voidpoint.io/terminx/eduke32/-/work_items/309
+        if ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/sbc-opengl-terminx-ba6b7bb1.diff"
     fi
 
-    if ! [[ "$(_get_commit_eduke32)" == "dfc16b08" ]]; then
-        # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
-        isPlatform "kms" && sed -i s+int32_t\ r_usenewshading\ =.*+int32_t\ r_usenewshading\ =\ 2\;+ $md_build/source/build/src/polymost.cpp
-        # useindexedcolortextures 0FF # the VC4 & V3D drivers render menu splash colors incorrectly without this
-        isPlatform "kms" && sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
+    # VC4 & V3D render shading incorrectly when using [r_usenewshading = 4] + [r_useindexedcolortextures = 0] eg. E1M1 Theatre
+    if [[ ! "$(_get_commit_eduke32)" == "dfc16b08" ]] && ( isPlatform "kms" || isPlatform "mesa" ); then
+        sed -i s+int32_t\ r_usenewshading\ =.*+int32_t\ r_usenewshading\ =\ 2\;+ $md_build/source/build/src/polymost.cpp
     fi
+
+    # useindexedcolortextures 0FF # the VC4 & V3D drivers render menu splash colors incorrectly without this
+    ( isPlatform "kms" || isPlatform "mesa" ) && sed -i s+int32_t\ r_useindexedcolortextures\ =.*+int32_t\ r_useindexedcolortextures\ =\ 0\;+ $md_build/source/build/src/polymost.cpp
 }
 
 function build_eduke32() {
@@ -155,7 +152,7 @@ function build_eduke32() {
     ! isPlatform "x11" && params+=(HAVE_GTK2=0)
     ! ( isPlatform "gl3" || isPlatform "vulkan" || isPlatform "kms" ) && params+=(POLYMER=0)
     ! ( isPlatform "gl" || isPlatform "mesa" ) && params+=(USE_OPENGL=0)
-    if ( isPlatform "rpi3" || isPlatform "rpi2" ) && ( isPlatform "kms" ); then params+=(USE_OPENGL=0); fi
+    if ( isPlatform "rpi3" || isPlatform "rpi2" ) && ( isPlatform "kms" ); then params+=(USE_OPENGL=0); fi ## eduke32-gl ##
     # r7242 requires >1GB memory allocation due to netcode changes.
     isPlatform "arm" && params+=(NETCODE=0)
 
@@ -354,6 +351,28 @@ ControllerAnalogDead3 = 4500
 ControllerAnalogDead4 = 4500
 _EOF_
 
+            cat > "$md_conf_root/duke3d/supernukembros.cfg" << _EOF_
+[Controls]
+ControllerButton0 = "Jump"
+ControllerButton1 = "Open"
+ControllerButton2 = "Toggle_Crouch"
+ControllerButton3 = "Quick_Kick"
+ControllerButton4 = "Map"
+ControllerButton5 = "Third_Person_View"
+ControllerButton7 = "Run"
+ControllerButton8 = "Center_View"
+ControllerButton9 = "Previous_Weapon"
+ControllerButton10 = "Next_Weapon"
+ControllerButton11 = "AutoRun"
+ControllerButton12 = "Inventory"
+ControllerButton13 = "Inventory_Left"
+ControllerButton14 = "Inventory_Right"
+ControllerAnalogDead1 = 4500
+ControllerAnalogDead2 = 4500
+ControllerAnalogDead3 = 4500
+ControllerAnalogDead4 = 4500
+_EOF_
+
             chown -R $__user:$__user "$md_conf_root/duke3d"
         fi
         if [[ "$md_id" == "ionfury" ]]; then chown -R $__user:$__user "$md_conf_root/ionfury"; fi
@@ -388,7 +407,13 @@ function add_games_eduke32() {
         if [[ -d "$romdir/ports/ksbuild/$portname/${!game_path}" ]]; then
            addPort "$md_id" "$portname" "${!game_launcher}" "pushd $md_conf_root/$portname; ${binary}.sh %ROM%; popd" "-j$romdir/ports/ksbuild/$portname/${game0[1]} -j$romdir/ports/ksbuild/$portname/${!game_path} ${!game_args}"
         fi
+
     done
+
+    if [[ ! "$md_id" == "ionfury" ]] && [[ -d /opt/retropie/ports/eduke32-gl ]]; then ## eduke32-gl ##
+        addPort "eduke32-gl" "duke3d" "Duke Nukem 3D" "pushd $md_conf_root/duke3d; /opt/retropie/ports/eduke32-gl/eduke32.sh %ROM%; popd" "-j$romdir/ports/ksbuild/duke3d/ -addon 0"
+        sed -i 's+/eduke32/eduke32+/eduke32-gl/eduke32+' /opt/retropie/ports/eduke32-gl/eduke32.sh
+    fi
 
     if [[ "$md_mode" == "install" ]]; then
         # we need to use a dumb launcher script to strip quotes from runcommand's generated arguments
@@ -409,6 +434,11 @@ game=\$(head -3 /dev/shm/runcommand.info | tail +3 | grep '\-cfg'  | rev | cut -
 cfg_dir=/opt/retropie/configs/ports/duke3d/
 last_run=\$cfg_dir/last.run
 
+if [ "\$(head -2 /dev/shm/runcommand.info | tail -1)" == "eduke32-gl" ]; then ## eduke32-gl ##
+    sed -i 's+ScreenBPP =.*+ScreenBPP = 32+' \$cfg_dir/eduke32.cfg
+    chown $__user:$__user \$cfg_dir/eduke32.cfg
+fi
+
 if [ "\$1" == "onstart" ]; then
     if [ "\$game" == '' ]; then exit 0; fi
     # Create [-cfg] Name Dir for saves - Create [-cfg] Name files based on [eduke32.cfg] and [settings.cfg] if not found
@@ -418,6 +448,10 @@ if [ "\$1" == "onstart" ]; then
     if [[ -f "\$last_run" ]]; then mkdir \$cfg_dir/\$(cat \$last_run); mv \$cfg_dir/save* \$cfg_dir/\$(cat \$last_run)/ > /dev/null 2>&1; fi
     echo \$game > \$last_run
     mv \$cfg_dir/\$game/save* \$cfg_dir > /dev/null 2>&1
+    if [ "\$(head -2 /dev/shm/runcommand.info | tail -1)" == "eduke32-gl" ]; then ## eduke32-gl ##
+        sed -i 's+ScreenBPP =.*+ScreenBPP = 32+' \$cfg_dir/\$game.cfg
+        chown $__user:$__user \$cfg_dir/\$game.cfg
+    fi
     exit 0
 fi
 
