@@ -61,6 +61,7 @@ function build_amcduke32() {
     local params=(LTO=0 SDL_TARGET=2 STARTUP_WINDOW=0)
     params+=(APPBASENAME=amcsquad APPNAME=AMCDuke32 NETCODE=0 POLYMER=0) # AMCDuke32
     if ! ( isPlatform "gl" || isPlatform "mesa" ); then params+=(USE_OPENGL=0); fi
+    if ( isPlatform "rpi3" || isPlatform "rpi2" ) && ( isPlatform "kms" ); then params+=(USE_OPENGL=0); fi
     #! isPlatform "x86" && params+=(NOASM=1) # AMCDuke32 Autosave 0N
     ! isPlatform "x11" && params+=(HAVE_GTK2=0)
 
