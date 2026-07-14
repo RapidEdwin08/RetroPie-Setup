@@ -195,6 +195,7 @@ function configure_ioquake3() {
         chmod 755 $md_inst/joy2key/*.py; chmod 755 $md_inst/joy2key/joy2key
         # def_buttons = ['left', 'right', 'up', 'down', 'a'] # * cursor keys for axis/dpad # * enter, 'a'
         sed -i 's+params=(kcu.*+params=(kcub1 kcuf1 kcuu1 kcud1 0x0a)+' "$md_inst/joy2key/joy2key"
+        sed -i "s+/opt/retropie/admin/joy2key/+$md_inst/joy2key/+" "$md_inst/joy2key/joy2key"
 
         # launcher script to strip quotes from runcommand's generated arguments
         cat > "$md_inst/ioquake3.sh" << _EOF_
