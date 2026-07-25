@@ -18,7 +18,7 @@ rp_module_section="main"
 rp_module_flags="sdl2 nodistcc"
 
 function depends_mupen64plus() {
-    local depends=(cmake libsamplerate0-dev libspeexdsp-dev libsdl2-dev libpng-dev libfreetype6-dev fonts-freefont-ttf libboost-filesystem-dev libglu1-mesa-dev)
+    local depends=(cmake libsamplerate0-dev libspeexdsp-dev libsdl2-dev libpng-dev libzstd-dev libfreetype6-dev fonts-freefont-ttf libboost-filesystem-dev libglu1-mesa-dev)
     isPlatform "videocore" && depends+=(libraspberrypi-dev)
     isPlatform "mesa" && depends+=(libgles2-mesa-dev)
     isPlatform "x86" && depends+=(nasm)
@@ -151,6 +151,13 @@ function sources_mupen64plus() {
     if isPlatform "armv8"; then
         # remove -ffast-math as it causes build errors building on cortex-a76 (rpi5)
         applyPatch "$md_data/remove_fast_math.diff"
+    fi
+
+    # fix CMake detection for zstd
+    sed -i 's/ZSTD REQUIRED/zstd REQUIRED/g' GLideN64/src/GLideNHQ/CMakeLists.txt
+    # on Ubuntu 24.04, link to the `zstd` shared libs instead of the static ones, because of LP#2086543
+    if [[ -n "$__os_ubuntu_ver" ]] && compareVersions "$__os_ubuntu_ver" eq 24.04; then
+        sed -i 's/zstd::libzstd_static/zstd::libzstd_shared/g' GLideN64/src/GLideNHQ/CMakeLists.txt
     fi
 
     local config_version=$(grep -oP '(?<=CONFIG_VERSION_CURRENT ).+?(?=U)' GLideN64/src/Config.h)
