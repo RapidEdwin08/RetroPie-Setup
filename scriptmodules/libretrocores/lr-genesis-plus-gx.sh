@@ -22,14 +22,14 @@ function _get_commit_lr-genesis-plus-gx() {
     local branch_commit="$(git ls-remote https://github.com/libretro/Genesis-Plus-GX.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     #echo ee71e47c; #20260331 add linux-aarch64 build (#401)
-    #echo 173bf8af; #20260625 Merge branch 'master' of https://github.com/ekeeke/Genesis-Plus-GX into rebase
     #echo fa4dca56; #20260710 Fetch translations & Recreate libretro_core_options_intl.h
+    echo f687c49d; #20260727 Fix statically linked libretro targets
     echo $branch_commit
 }
 
 function sources_lr-genesis-plus-gx() {
     gitPullOrClone
-    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "fa4dca56" ]]; then
+    if [[ "$(_get_commit_lr-genesis-plus-gx)" == "f687c49d" ]]; then
         ##applyPatch "$md_data/death_and_lead_ee71e47c.diff" # 033df9b7 ### Now Included since 173bf8af ###
         applyPatch "$md_data/yx5200_musicpath_173bf8af.diff" # musicpath [rompath/rombasename] for HW_YX5200
     fi
