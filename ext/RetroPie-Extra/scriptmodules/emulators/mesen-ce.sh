@@ -143,6 +143,7 @@ function configure_mesen-ce() {
         mkRomDir "$system"
         defaultRAConfig "$system"
         addEmulator 0 "$md_id" "$system" "${launch_prefix}$md_inst/mesence.sh %ROM% --fullscreen"
+        isPlatform "kms" && launch_prefix="XINIT-WMC:"
         addEmulator 0 "$md_id-ui" "$system" "${launch_prefix}$md_inst/mesence.sh %ROM%"
         if [[ "$qjoyui" == '1' ]]; then
             addEmulator 0 "$md_id-ui-qjoy" "$system" "${launch_prefix}$md_inst/mesence-qjoy.sh %ROM%"
