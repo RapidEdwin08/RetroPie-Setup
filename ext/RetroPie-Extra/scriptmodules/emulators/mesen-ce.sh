@@ -14,16 +14,39 @@
 if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$(id -un)"; fi
 
 rp_module_id="mesen-ce"
-rp_module_desc="MesenCE is a community-managed fork of Mesen multi-system emulator for NES, SNES, Game Boy, Game Boy Advance, PC Engine, SMS/Game Gear, and WonderSwan."
+rp_module_desc="MesenCE is a community-managed fork of Mesen multi-system emulator for NES, SNES, Game Boy, Game Boy Advance, PC Engine, SMS/Game Gear, and WonderSwan.\nIncludes support for SNES FX3 (new release of Doom)"
 rp_module_help="ROM Folders: nes, snes, gb, gbc, gba, pcengine, mastersystem, gamegear, wonderswan, wonderswancolor.\n\n   * Required Microsoft .NET 10 SDK Dependencies *\n\n[dotnet-sdk-10.0] CAN BE UNINSTALLED WITH:\nsudo apt-get remove dotnet-sdk-10.0 dotnet-apphost-pack-10.0 aspnetcore-targeting-pack-10.0 dotnet-targeting-pack-10.0 aspnetcore-runtime-10.0 dotnet-runtime-10.0 dotnet-runtime-deps-10.0 dotnet-hostfxr-10.0 dotnet-host\n\n[packages-microsoft-prod] CAN BE UNINSTALLED WITH:\nsudo dpkg --purge packages-microsoft-prod"
-rp_module_licence="GNU https://raw.githubusercontent.com/RapidEdwin08/MesenCE/refs/heads/master/LICENSE"
-rp_module_repo="git https://github.com/RapidEdwin08/MesenCE.git master"
+rp_module_licence="GNU https://raw.githubusercontent.com/nesdev-org/MesenCE/refs/heads/master/LICENSE"
+rp_module_repo="git :_get_repo_mesen-ce master :_get_commit_mesen-ce"
 rp_module_section="exp"
 rp_module_flags="!all aarch64 x86_64 !:\$__os_debian_ver:-gt:13 !:\$__os_debian_ver:-lt:12"
 
+function _get_repo_mesen-ce() {
+    local git_repo
+
+    # 5504bbef; #20260711 D00M-2026-LRG
+    ##git_repo=https://github.com/RapidEdwin08/MesenCE.git
+
+    # d7ad2aab; #20260717 SNES: Added support for FX3 (new release of Doom) (#222)
+    git_repo=https://github.com/nesdev-org/MesenCE.git
+
+    echo $git_repo
+}
+
+function _get_commit_mesen-ce() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local branch_tag=master
+    local branch_commit="$(git ls-remote $(_get_repo_mesen-ce) $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    #echo 5504bbef; #20260711 D00M-2026-LRG
+    #echo 49c9a3a4; #20260711 GB: Added overclock and remove sprite limit options (#216)
+    #echo d7ad2aab; #20260717 SNES: Added support for FX3 (new release of Doom) (#222)
+    #echo 3b8e7fa3; #20260802 Clang: Fixed warnings on recent versions of Clang (#245)
+    echo $branch_commit
+}
+
 function depends_mesen-ce() {
     local depends=(cmake clang zlib1g zlib1g-dev libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev)
-    #depends+=(libsdl-net1.2-dev)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 
@@ -142,7 +165,7 @@ function configure_mesen-ce() {
     for system in nes snes gb gbc gba pcengine mastersystem gamegear wonderswan wonderswancolor; do
         mkRomDir "$system"
         defaultRAConfig "$system"
-        addEmulator 0 "$md_id" "$system" "${launch_prefix}$md_inst/mesence.sh %ROM% --fullscreen"
+        addEmulator 0 "$md_id" "$system" "${launch_prefix}$md_inst/mesence.sh %ROM%"
         isPlatform "kms" && launch_prefix="XINIT-WMC:"
         addEmulator 0 "$md_id-ui" "$system" "${launch_prefix}$md_inst/mesence.sh %ROM%"
         if [[ "$qjoyui" == '1' ]]; then
@@ -172,7 +195,7 @@ function configure_mesen-ce() {
 if [[ "\$1" == '' ]] || [[ "\$1" == *"+Start Mesen"* ]]; then
     VC4_DEBUG=always_sync $md_inst/Mesen
 else
-    VC4_DEBUG=always_sync $md_inst/Mesen \$*
+    VC4_DEBUG=always_sync $md_inst/Mesen "\$*" --fullscreen
 fi
 _EOF_
     chmod 755 "$md_inst/mesence.sh"
@@ -207,7 +230,7 @@ qjoypad "\$qjoyLAYOUT" &
 if [[ "\$1" == '' ]] || [[ "\$1" == *"+Start Mesen"* ]]; then
     VC4_DEBUG=always_sync $md_inst/Mesen
 else
-    VC4_DEBUG=always_sync $md_inst/Mesen \$*
+    VC4_DEBUG=always_sync $md_inst/Mesen "\$*" --fullscreen
 fi
 
 # Kill qjoypad
