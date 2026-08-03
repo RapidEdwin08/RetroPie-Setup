@@ -22,7 +22,7 @@ rp_module_section="exp"
 rp_module_flags="!all aarch64 x86_64 !:\$__os_debian_ver:-gt:13 !:\$__os_debian_ver:-lt:12"
 
 function depends_mesen-ce() {
-    local depends=(cmake zlib1g zlib1g-dev libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev)
+    local depends=(cmake clang zlib1g zlib1g-dev libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev)
     #depends+=(libsdl-net1.2-dev)
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
