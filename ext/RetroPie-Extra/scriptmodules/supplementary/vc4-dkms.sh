@@ -41,7 +41,8 @@ function _remove_vc4dkms() {
         popd
     fi
     pushd /opt > /dev/null 2>&1
-    dkms remove -m vc4-dkms -v 1.0
+    #dkms remove -m vc4-dkms -v 1.0
+    dkms remove vc4-dkms/1.0 --all
     popd
 }
 
