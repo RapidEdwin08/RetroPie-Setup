@@ -140,21 +140,40 @@ function remove_pico-8() {
 
 function gui_pico-8() {
     choice=$(dialog --title "[$md_id] Configuration Options" --menu "                 INSTALL [pico-8] Binary \n\n     **** YOU MUST PROVIDE THE PICO-8 BINARY ****\n\n$(_get_pico8_version)\n\nEXTRACT + PLACE your [Pico-8.zip/pico-8/*] Files into:\n $home/pico-8/" 20 60 5 \
-        "1" "INSTALL [pico-8] Binary" \
-        "2" "Cancel" 2>&1 >/dev/tty)
+        "1" " VIEW   [pico-8] Folders" \
+        "2" "INSTALL [pico-8] from [$home/pico-8]" \
+        "3" "Cancel" 2>&1 >/dev/tty)
 
     case $choice in
         1)
-            check_bin_pico-8
-            #shortcuts_icons_pico-8
+            view_pico-8
             ;;
         2)
+            check_bin_pico-8
+            view_pico-8
+            ;;
+        3)
             echo "Canceled"
             ;;
         *)
             echo "Invalid Selection"
             ;;
     esac
+}
+
+function view_pico-8() {
+    choice=$(dialog --title "[pico-8] Folders" --menu "$home/pico-8:\n$(ls $home/pico-8 2>/dev/null)\n\n$md_inst:\n$(ls $md_inst 2>/dev/null | grep -v .xpm | grep -v retropie | grep -v .desktop | grep -v MissingPico8 | grep -v poom | grep -v pico8.sh)" 20 60 5 \
+        "1" "Done" 2>&1 >/dev/tty)
+
+    case $choice in
+        1)
+            echo ""
+            ;;
+        *)
+            echo "Invalid Selection"
+            ;;
+    esac
+    gui_pico-8
 }
 
 function configure_pico-8() {
