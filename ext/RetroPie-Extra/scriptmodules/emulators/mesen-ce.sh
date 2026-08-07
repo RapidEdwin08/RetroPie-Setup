@@ -15,7 +15,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="mesen-ce"
 rp_module_desc="MesenCE is a community-managed fork of Mesen multi-system emulator for NES, SNES, Game Boy, Game Boy Advance, PC Engine, SMS/Game Gear, and WonderSwan.\nIncludes support for SNES FX3 (new release of Doom)"
-rp_module_help="ROM Folders: nes, snes, gb, gbc, gba, pcengine, mastersystem, gamegear, wonderswan, wonderswancolor.\n\n   * Required Microsoft .NET 10 SDK Dependencies *\n\n[dotnet-sdk-10.0] CAN BE UNINSTALLED WITH:\nsudo apt-get remove dotnet-sdk-10.0 dotnet-apphost-pack-10.0 aspnetcore-targeting-pack-10.0 dotnet-targeting-pack-10.0 aspnetcore-runtime-10.0 dotnet-runtime-10.0 dotnet-runtime-deps-10.0 dotnet-hostfxr-10.0 dotnet-host\n\n[packages-microsoft-prod] CAN BE UNINSTALLED WITH:\nsudo dpkg --purge packages-microsoft-prod"
+rp_module_help="ROM Folders: nes, snes, gb, gbc, gba, pcengine, mastersystem, gamegear, wonderswan, wonderswancolor, coleco.\n\n   * Required Microsoft .NET 10 SDK Dependencies *\n\n[dotnet-sdk-10.0] CAN BE UNINSTALLED WITH:\nsudo apt-get remove dotnet-sdk-10.0 dotnet-apphost-pack-10.0 aspnetcore-targeting-pack-10.0 dotnet-targeting-pack-10.0 aspnetcore-runtime-10.0 dotnet-runtime-10.0 dotnet-runtime-deps-10.0 dotnet-hostfxr-10.0 dotnet-host\n\n[packages-microsoft-prod] CAN BE UNINSTALLED WITH:\nsudo dpkg --purge packages-microsoft-prod"
 rp_module_licence="GNU https://raw.githubusercontent.com/nesdev-org/MesenCE/refs/heads/master/LICENSE"
 rp_module_repo="git :_get_repo_mesen-ce master :_get_commit_mesen-ce"
 rp_module_section="exp"
@@ -162,7 +162,7 @@ function configure_mesen-ce() {
     local qjoyui
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then qjoyui=1; fi
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    for system in nes snes gb gbc gba pcengine mastersystem gamegear wonderswan wonderswancolor; do
+    for system in nes snes gb gbc gba pcengine mastersystem gamegear wonderswan wonderswancolor coleco; do
         mkRomDir "$system"
         defaultRAConfig "$system"
         addEmulator 0 "$md_id" "$system" "${launch_prefix}$md_inst/mesence.sh %ROM%"
