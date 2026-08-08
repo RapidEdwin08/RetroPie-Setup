@@ -32,6 +32,7 @@ function _get_commit_uzdoom-dev() {
 
     #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
     #echo 3999c7d1; # 20260203 Replace hardcoded strings #trunk
+    #echo 00b63359; # 20260307 Cleared Behaviors on the previous pawn when spawning a new one #trunk
     #echo 7b8bea80; # 20260728 This is 5.0.0-rc.1 #5.0
     #echo d82dfa8c; # 20260805 writeini must now always write in the config directory #trunk
     echo $branch_commit
@@ -57,6 +58,12 @@ function sources_uzdoom-dev() {
     # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/JoyMappings.diff"
 
+    # GLES for KMSDRM (-X11): Unsupported OpenGL version. At least OpenGL 3.3 required to run UZDoom # +vid_preferbackend 2
+    if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then
+        ##applyPatch "$md_data/backend_default_gles2.diff"
+        sed -i 's+vid_preferbackend, BACKEND_DEFAULT,+vid_preferbackend, BACKEND_OPENGLES,+' "$md_build/src/common/rendering/v_video.cpp"
+    fi
+
     ##! 0ptional Single-Board-Computer Specific Tweaks ##applyPatch "$md_data/sbc_tweaks.diff"
     if ( isPlatform "rpi"* || isPlatform "arm" ); then
         sed -i 's+gl_fogmode, 2,+gl_fogmode, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
@@ -75,7 +82,7 @@ function sources_uzdoom-dev() {
         sed -i 's+con_scale, 0,+con_scale, 4,+' "$md_build/src/common/console/c_console.cpp"
         sed -i 's+uiscale, 0,+uiscale, 3,+' "$md_build/src/common/rendering/v_video.cpp"
         sed -i 's+crosshaircolor,     0xff0000,+crosshaircolor,     0x00ff1e,+' "$md_build/src/common/statusbar/base_sbar.cpp"
-        sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.25,+' "$md_build/src/common/statusbar/base_sbar.cpp"
+        sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.7,+' "$md_build/src/common/statusbar/base_sbar.cpp"
         sed -i 's+con_scaletext, 0,+con_scaletext, 4,+' "$md_build/src/console/c_notifybuffer.cpp"
         sed -i 's+cl_run,     false,+cl_run,     true,+' "$md_build/src/g_game.cpp"
         sed -i 's+cl_analog_run,               true,+cl_analog_run,               false,+' "$md_build/src/g_game.cpp"
@@ -86,14 +93,14 @@ function sources_uzdoom-dev() {
         sed -i 's+crosshairforce, false,+crosshairforce, true,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
     fi
 
-    # 0ptional Haptics Strength [0-10]
-    ##sed -i 's+haptics_strength, 10,+haptics_strength, 0,+' "$md_build/src/common/engine/m_haptics.cpp"
-
     # 0ptional Haptics 0FF in Menus [MyHouse.wad]
     sed -i 's+haptics_do_menus,  true,+haptics_do_menus,  false,+' "$md_build/src/common/engine/m_haptics.cpp"
 
     # 0ptional Haptics 0FF for Player Actions [Firing]
     ##sed -i 's+haptics_do_action, true,+haptics_do_action, false,+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    # 0ptional Haptics Strength [0-10]
+    ##sed -i 's+haptics_strength, 10,+haptics_strength, 0,+' "$md_build/src/common/engine/m_haptics.cpp"
 
     ##! 0ptional VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
@@ -132,6 +139,8 @@ function build_uzdoom-dev() {
     local params=(-DCMAKE_BUILD_TYPE=RelWithDebInfo) # options are: Debug Release RelWithDebInfo MinSizeRel
     local params=(-DCMAKE_INSTALL_PREFIX="$md_inst" -DPK3_QUIET_ZIPDIR=ON -DDYN_OPENAL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF -G Ninja)
     ! hasFlag "vulkan" && params+=(-DHAVE_VULKAN=OFF)
+    hasFlag "vulkan" && params+=(-DHAVE_VULKAN=ON)
+    isPlatform "gles" && params+=(-DHAVE_GLES2=ON)
 
     cmake "${params[@]}" ..
     cmake --build . $make_jproc
@@ -159,6 +168,9 @@ function add_games_uzdoom-dev() {
 
     ##params+=("'+snd_mididevice -5'") # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
+
+    # GLES for KMSDRM (-X11): Unsupported OpenGL version. At least OpenGL 3.3 required to run UZDoom # +vid_preferbackend 2
+    ##if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then params+=("+vid_preferbackend 2"); fi
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/uzdoom -iwad %ROM% ${params[*]}"
 }
