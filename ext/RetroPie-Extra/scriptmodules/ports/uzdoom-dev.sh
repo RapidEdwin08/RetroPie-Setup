@@ -12,21 +12,29 @@
 #
 
 rp_module_id="uzdoom-dev"
-rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v4.14.3 is the continuation of ZDoom and GZDoom"
+rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v5.0.0+ is the continuation of ZDoom and GZDoom"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git trunk :_get_commit_uzdoom-dev"
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git :_get_branch_uzdoom-dev :_get_commit_uzdoom-dev"
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
 
+function _get_branch_uzdoom-dev() {
+    ##local branch_tag=trunk
+    local branch_tag=5.0
+
+    echo $branch_tag
+}
+
 function _get_commit_uzdoom-dev() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
-    local branch_tag=trunk
+    local branch_tag=$(_get_branch_uzdoom-dev)
     local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
-    echo $branch_commit
     #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
-    #echo c34025d8; # 20260129 clean up vid_fsdwmhack
-    #echo 3999c7d1; # 20260203 Replace hardcoded strings
+    #echo 3999c7d1; # 20260203 Replace hardcoded strings #trunk
+    #echo 7b8bea80; # 20260728 This is 5.0.0-rc.1 #5.0
+    #echo d82dfa8c; # 20260805 writeini must now always write in the config directory #trunk
+    echo $branch_commit
 }
 
 function depends_uzdoom-dev() {
@@ -46,12 +54,37 @@ function depends_uzdoom-dev() {
 function sources_uzdoom-dev() {
     gitPullOrClone
 
-    # 0ptional Apply Single-Board-Computer Specific Tweaks
-    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
-
     # 0ptional Apply JoyPad + Preference Tweaks
-    applyPatch "$md_data/02_JoyMappings.diff"
-    applyPatch "$md_data/03_Preferences.diff"
+    applyPatch "$md_data/JoyMappings.diff"
+
+    ##! 0ptional Single-Board-Computer Specific Tweaks ##applyPatch "$md_data/sbc_tweaks.diff"
+    if ( isPlatform "rpi"* || isPlatform "arm" ); then
+        sed -i 's+gl_fogmode, 2,+gl_fogmode, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_seamless, true,+gl_seamless, false,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_precache, false,+gl_precache, true,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_shadowmap_filter, 1,+gl_shadowmap_filter, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_shadowmap_quality, 1024,+gl_shadowmap_quality, 128,+' "$md_build/src/common/rendering/hwrenderer/data/hw_shadowmap.cpp"
+        sed -i 's+transsouls, 0.75f,+transsouls, 1.f,+' "$md_build/src/common/rendering/v_video.cpp"
+        sed -i 's+r_maxparticles, 4000,+r_maxparticles, 100,+' "$md_build/src/g_cvars.cpp"
+        sed -i 's+r_vanillatrans, 0,+r_vanillatrans, 1,+' "$md_build/src/r_data/r_vanillatrans.cpp"
+        sed -i 's+gl_light_particles, true,+gl_light_particles, false,+' "$md_build/src/rendering/hwrenderer/hw_dynlightdata.cpp"
+    fi
+
+    ##! 0ptional Preferences ##applyPatch "$md_data/Preferences.diff"
+    if ( isPlatform "64bit" ); then
+        sed -i 's+con_scale, 0,+con_scale, 4,+' "$md_build/src/common/console/c_console.cpp"
+        sed -i 's+uiscale, 0,+uiscale, 3,+' "$md_build/src/common/rendering/v_video.cpp"
+        sed -i 's+crosshaircolor,     0xff0000,+crosshaircolor,     0x00ff1e,+' "$md_build/src/common/statusbar/base_sbar.cpp"
+        sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.25,+' "$md_build/src/common/statusbar/base_sbar.cpp"
+        sed -i 's+con_scaletext, 0,+con_scaletext, 4,+' "$md_build/src/console/c_notifybuffer.cpp"
+        sed -i 's+cl_run,     false,+cl_run,     true,+' "$md_build/src/g_game.cpp"
+        sed -i 's+cl_analog_run,               true,+cl_analog_run,               false,+' "$md_build/src/g_game.cpp"
+        sed -i 's+disableautosave, 0,+disableautosave, 1,+' "$md_build/src/g_game.cpp"
+        sed -i 's+hud_scale, -1,+hud_scale, 0,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+st_scale, -1,+st_scale, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+crosshair, 1,+crosshair, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+crosshairforce, false,+crosshairforce, true,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+    fi
 
     # 0ptional Haptics Strength [0-10]
     ##sed -i 's+haptics_strength, 10,+haptics_strength, 0,+' "$md_build/src/common/engine/m_haptics.cpp"
@@ -62,7 +95,7 @@ function sources_uzdoom-dev() {
     # 0ptional Haptics 0FF for Player Actions [Firing]
     ##sed -i 's+haptics_do_action, true,+haptics_do_action, false,+' "$md_build/src/common/engine/m_haptics.cpp"
 
-    # 0ptional VSync On
+    ##! 0ptional VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
         sed -i 's+vid_vsync, false,+vid_vsync, true,+' "$md_build/src/common/rendering/v_video.cpp"
     fi
@@ -79,10 +112,10 @@ function sources_uzdoom-dev() {
     fi
 
     # Disable [i_exit_on_not_found] ERROR_ABORT [1]
-    sed -i 's+i_exit_on_not_found, REQUIRE_DEFAULT,+i_exit_on_not_found, 1,+' "$md_build/src/common/utility/findfile.cpp"; cat "$md_build/src/common/utility/findfile.cpp" | grep ' i_exit_on_not_found, '
+    sed -i 's+i_exit_on_not_found, REQUIRE_DEFAULT,+i_exit_on_not_found, 1,+' "$md_build/src/common/utility/findfile.cpp"
 
     # Apply Sector light mode
-    isPlatform "rpi3" && sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+    isPlatform "rpi3" && sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"
 
     # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
