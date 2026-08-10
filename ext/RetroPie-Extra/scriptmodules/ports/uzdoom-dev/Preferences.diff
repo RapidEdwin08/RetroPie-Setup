@@ -1,3 +1,15 @@
+diff -ur a/src/common/audio/sound/i_sound.cpp b/src/common/audio/sound/i_sound.cpp
+--- a/src/common/audio/sound/i_sound.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/common/audio/sound/i_sound.cpp	Modified
+@@ -80,7 +80,7 @@
+ // Maximum volume of all audio
+ //==========================================================================
+ 
+-CUSTOM_CVAR(Float, snd_mastervolume, 0.5f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
++CUSTOM_CVAR(Float, snd_mastervolume, 1.f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
 diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
 --- a/src/common/console/c_console.cpp	Source 20260728-5.0-7b8bea80
 +++ b/src/common/console/c_console.cpp	Modified
@@ -6,7 +18,7 @@ diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
  static int worklen = 0;
  
 -CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
-+CUSTOM_CVAR(Int, con_scale, 4, CVAR_ARCHIVE)
++CUSTOM_CVAR(Int, con_scale, 3, CVAR_ARCHIVE)
  {
  	if (self < 0) self = 0;
  }
@@ -18,7 +30,7 @@ diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
  }
  
 -CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
-+CUSTOM_CVAR(Int, uiscale, 3, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, uiscale, 2, CVAR_ARCHIVE | CVAR_NOINITCALL)
  {
  	if (self < 0)
  	{
@@ -39,7 +51,7 @@ diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.c
  	ALLOW_DEPRECATED((crosshairhealth = self), "for backwards compatibility");
  };
 -CVARD(Float, crosshairscale, 1.0, CVAR_ARCHIVE, "changes the size of the crosshair");
-+CVARD(Float, crosshairscale, 0.25, CVAR_ARCHIVE, "changes the size of the crosshair");
++CVARD(Float, crosshairscale, 0.75, CVAR_ARCHIVE, "changes the size of the crosshair");
  CVARD(Bool, crosshairgrow, false, CVAR_ARCHIVE, "grow crosshair upon pickup");
  
  CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
@@ -51,7 +63,7 @@ diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
  CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
  
 -CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
-+CUSTOM_CVAR(Int, con_scaletext, 4, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
  {
  	if (self < 0) self = 0;
  }
