@@ -31,10 +31,9 @@ function _get_commit_uzdoom-dev() {
     local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
     #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
-    #echo 3999c7d1; # 20260203 Replace hardcoded strings #trunk
     #echo 00b63359; # 20260307 Cleared Behaviors on the previous pawn when spawning a new one #trunk
-    #echo 7b8bea80; # 20260728 This is 5.0.0-rc.1 #5.0
-    #echo d82dfa8c; # 20260805 writeini must now always write in the config directory #trunk
+    #echo 0ffcba95; # 20260413 Add auto-theme detection for linux #5.0 # Introduced gdbus timeout at Start-Up on KMSDRM
+    #echo 08b19217; # 20260809 P_DrawRailTrail reverts to using the playerpawn for sound-position calculations if player->camera is null #trunk
     echo $branch_commit
 }
 
@@ -58,14 +57,19 @@ function sources_uzdoom-dev() {
     # 0ptional Apply JoyPad + Preference Tweaks
     applyPatch "$md_data/JoyMappings.diff"
 
-    # GLES for KMSDRM (-X11): Unsupported OpenGL version. At least OpenGL 3.3 required to run UZDoom # +vid_preferbackend 2
-    if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then
-        ##applyPatch "$md_data/backend_default_gles2.diff"
+    # 0ffcba95 Introduced gdbus timeout at Start-Up on KMSDRM # gdbus takes too long and/or hits timeout on some systems. Don't call if not needed
+    isPlatform "kms" && applyPatch "$md_data/dark_theme_linux.diff" # result = Dark;
+
+    # GLES2 for KMSDRM (-X11): BACKEND_OPENGLES # +vid_preferbackend 2
+    # OpenGL on KMSDRM (-X11): Unsupported OpenGL version. At least OpenGL 3.3 required to run UZDoom
+    # Vulkan on KMSDRM (-X11): ERROR: Could not restore CRTC # ERROR: Could not set videomode on CRTC # ERROR: Could not queue pageflip: -13 # Initialization of Vulkan failed: No Vulkan device found supports the minimum requirements of this application
+    # Vulkan on KMSDRM (+X11): Works but poor performance on Raspberry Pi aarch64
+    if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then ##applyPatch "$md_data/backend_default_gles2.diff"
         sed -i 's+vid_preferbackend, BACKEND_DEFAULT,+vid_preferbackend, BACKEND_OPENGLES,+' "$md_build/src/common/rendering/v_video.cpp"
     fi
 
-    ##! 0ptional Single-Board-Computer Specific Tweaks ##applyPatch "$md_data/sbc_tweaks.diff"
-    if ( isPlatform "rpi"* || isPlatform "arm" ); then
+    ##! 0ptional Single-Board-Computer Specific Tweaks # Bring on Potato Mode already...
+    if ( isPlatform "rpi"* || isPlatform "arm" ); then ##applyPatch "$md_data/sbc_tweaks.diff"
         sed -i 's+gl_fogmode, 2,+gl_fogmode, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
         sed -i 's+gl_seamless, true,+gl_seamless, false,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
         sed -i 's+gl_precache, false,+gl_precache, true,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
@@ -77,13 +81,13 @@ function sources_uzdoom-dev() {
         sed -i 's+gl_light_particles, true,+gl_light_particles, false,+' "$md_build/src/rendering/hwrenderer/hw_dynlightdata.cpp"
     fi
 
-    ##! 0ptional Preferences ##applyPatch "$md_data/Preferences.diff"
-    if ( isPlatform "64bit" ); then
-        sed -i 's+con_scale, 0,+con_scale, 4,+' "$md_build/src/common/console/c_console.cpp"
-        sed -i 's+uiscale, 0,+uiscale, 3,+' "$md_build/src/common/rendering/v_video.cpp"
+    ##! 0ptional Preferences
+    if ( isPlatform "64bit" ); then ##applyPatch "$md_data/Preferences.diff"
+        sed -i 's+con_scale, 0,+con_scale, 3,+' "$md_build/src/common/console/c_console.cpp"
+        sed -i 's+uiscale, 0,+uiscale, 2,+' "$md_build/src/common/rendering/v_video.cpp"
         sed -i 's+crosshaircolor,     0xff0000,+crosshaircolor,     0x00ff1e,+' "$md_build/src/common/statusbar/base_sbar.cpp"
-        sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.7,+' "$md_build/src/common/statusbar/base_sbar.cpp"
-        sed -i 's+con_scaletext, 0,+con_scaletext, 4,+' "$md_build/src/console/c_notifybuffer.cpp"
+        sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.75,+' "$md_build/src/common/statusbar/base_sbar.cpp"
+        sed -i 's+con_scaletext, 0,+con_scaletext, 3,+' "$md_build/src/console/c_notifybuffer.cpp"
         sed -i 's+cl_run,     false,+cl_run,     true,+' "$md_build/src/g_game.cpp"
         sed -i 's+cl_analog_run,               true,+cl_analog_run,               false,+' "$md_build/src/g_game.cpp"
         sed -i 's+disableautosave, 0,+disableautosave, 1,+' "$md_build/src/g_game.cpp"
@@ -91,6 +95,7 @@ function sources_uzdoom-dev() {
         sed -i 's+st_scale, -1,+st_scale, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
         sed -i 's+crosshair, 1,+crosshair, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
         sed -i 's+crosshairforce, false,+crosshairforce, true,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+snd_mastervolume, 0.5f,+snd_mastervolume, 1.f,+' "$md_build/src/common/audio/sound/i_sound.cpp"
     fi
 
     # 0ptional Haptics 0FF in Menus [MyHouse.wad]
@@ -138,8 +143,9 @@ function build_uzdoom-dev() {
     cd "$md_build/build"
     local params=(-DCMAKE_BUILD_TYPE=RelWithDebInfo) # options are: Debug Release RelWithDebInfo MinSizeRel
     local params=(-DCMAKE_INSTALL_PREFIX="$md_inst" -DPK3_QUIET_ZIPDIR=ON -DDYN_OPENAL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF -G Ninja)
-    ! hasFlag "vulkan" && params+=(-DHAVE_VULKAN=OFF)
-    hasFlag "vulkan" && params+=(-DHAVE_VULKAN=ON)
+    ! isPlatform "vulkan" && params+=(-DHAVE_VULKAN=OFF)
+    isPlatform "vulkan" && params+=(-DHAVE_VULKAN=ON)
+    if ( isPlatform "vulkan" ) && ( isPlatform "kms" ) then params+=(-DVULKAN_USE_WAYLAND=0); fi
     isPlatform "gles" && params+=(-DHAVE_GLES2=ON)
 
     cmake "${params[@]}" ..
@@ -169,7 +175,7 @@ function add_games_uzdoom-dev() {
     ##params+=("'+snd_mididevice -5'") # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
 
-    # GLES for KMSDRM (-X11): Unsupported OpenGL version. At least OpenGL 3.3 required to run UZDoom # +vid_preferbackend 2
+    # GLES2 for KMSDRM (-X11): BACKEND_OPENGLES # +vid_preferbackend 2
     ##if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then params+=("+vid_preferbackend 2"); fi
 
     _add_games_lr-prboom "$launcher_prefix $md_inst/uzdoom -iwad %ROM% ${params[*]}"
