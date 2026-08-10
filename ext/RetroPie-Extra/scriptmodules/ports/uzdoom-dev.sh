@@ -33,6 +33,7 @@ function _get_commit_uzdoom-dev() {
     #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
     #echo 00b63359; # 20260307 Cleared Behaviors on the previous pawn when spawning a new one #trunk
     #echo 0ffcba95; # 20260413 Add auto-theme detection for linux #5.0 # Introduced gdbus timeout at Start-Up on KMSDRM
+    #echo 7b8bea80; # 20260728 This is 5.0.0-rc.1 #5.0
     #echo 08b19217; # 20260809 P_DrawRailTrail reverts to using the playerpawn for sound-position calculations if player->camera is null #trunk
     echo $branch_commit
 }
