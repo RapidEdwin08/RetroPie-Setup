@@ -138,7 +138,7 @@ function sources_uzdoom-dev() {
 
 function build_uzdoom-dev() {
     local make_jproc="-j$(nproc)"
-    isPlatform "rpi3" && make_jproc="-j2"
+    isPlatform "rpi3" && make_jproc=''
     rpSwap on 2304
     mkdir -p "$md_build/build"
     cd "$md_build/build"
