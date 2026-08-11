@@ -15,7 +15,7 @@ rp_module_id="scummvm"
 rp_module_desc="ScummVM - Script Creation Utility for Maniac Mansion"
 rp_module_help="Place your ScummVM games in: $romdir/scummvm\n\nThe name of your game directories must be suffixed with '.svm' for direct launch in EmulationStation\n\n             Ctrl-F5 for ScummVM MENU"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/scummvm/scummvm/master/COPYING"
-rp_module_repo="git https://github.com/scummvm/scummvm.git v2026.1.0"
+rp_module_repo="git https://github.com/scummvm/scummvm.git v2026.3.0"
 rp_module_section="opt"
 rp_module_flags="sdl2"
 
