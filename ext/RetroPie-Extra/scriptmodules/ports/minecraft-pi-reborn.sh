@@ -34,6 +34,7 @@ function depends_minecraft-pi-reborn() {
         depends+=(libfuse2t64 libglib2.0-0t64)
     fi
     isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    depends+=(build-essential python3-venv python3-tk p7zip-full)
     getDepends "${depends[@]}"
 }
 
@@ -73,10 +74,16 @@ function install_bin_minecraft-pi-reborn() {
     chmod 755 "Minecraft Pi Edition Reborn (Server).desktop"; cp "Minecraft Pi Edition Reborn (Server).desktop" "$md_inst"; cp "Minecraft Pi Edition Reborn (Server).desktop" "/usr/share/applications/"
     if [[ -d "$home/Desktop" ]]; then mv -f "Minecraft Pi Edition Reborn (Server).desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/Minecraft Pi Edition Reborn (Server).desktop"; fi
 
+    sed -i s+'/home/pi/'+"$home/"+g "Minecraft Pi Edition Reborn (Editor).desktop"
+    chmod 755 "Minecraft Pi Edition Reborn (Editor).desktop"; cp "Minecraft Pi Edition Reborn (Editor).desktop" "$md_inst"; cp "Minecraft Pi Edition Reborn (Editor).desktop" "/usr/share/applications/"
+    if [[ -d "$home/Desktop" ]]; then mv -f "Minecraft Pi Edition Reborn (Editor).desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/Minecraft Pi Edition Reborn (Editor).desktop"; fi
+
+    sed -i s+'/home/pi/'+"$home/"+g "mcpiedit.sh"; chmod 755 "mcpiedit.sh"; mv "mcpiedit.sh" "$md_inst"
+    sed -i s+'/home/pi/'+"$home/"+g "mcpiedit-qjoy.sh"; chmod 755 "mcpiedit-qjoy.sh"; mv "mcpiedit-qjoy.sh" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "minecraft.sh"; chmod 755 "minecraft.sh"; mv "minecraft.sh" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "minecraft-qjoy.sh"; chmod 755 "minecraft-qjoy.sh"; mv "minecraft-qjoy.sh" "$md_inst"
     sed -i s+'/home/pi/'+"$home/"+g "minecraft-es-server.sh"; chmod 755 "minecraft-es-server.sh"; mv "minecraft-es-server.sh" "$md_inst"
-    mv "minecraft-pi-reborn_128x128.xpm" "$md_inst"; mv "minecraft-pi-reborn_256x256.xpm" "$md_inst"
+    mv "minecraft-pi-reborn_128x128.xpm" "$md_inst"; mv "minecraft-pi-reborn_256x256.xpm" "$md_inst"; mv "mcpiedit_256x256.xpm" "$md_inst"
 
     mkdir -p "$home/.minecraft-pi"
     mkdir -p "$home/.minecraft-pi/overrides"
@@ -97,24 +104,41 @@ function install_bin_minecraft-pi-reborn() {
     mkRomDir "ports/media"; mkRomDir "ports/media/image"; mkRomDir "ports/media/marquee"; mkRomDir "ports/media/video"
     mv 'media/image/Minecraft Pi Edition Reborn.png' "$romdir/ports/media/image"; mv 'media/marquee/Minecraft Pi Edition Reborn.png' "$romdir/ports/media/marquee"
     mv 'media/image/Minecraft Pi Edition Reborn (Server).png' "$romdir/ports/media/image"; mv 'media/marquee/Minecraft Pi Edition Reborn (Server).png' "$romdir/ports/media/marquee"
+    mv 'media/image/MCPIedit.png' "$romdir/ports/media/image"; mv 'media/marquee/MCPIedit.png' "$romdir/ports/media/marquee"
     if [[ ! -f "$romdir/ports/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/ports"; else mv 'gamelist.xml' "$romdir/ports/gamelist.xml.minecraft-pi"; fi
     if [[ ! -f "$romdir/ports/README-MCPI-Reborn.txt" ]]; then cp "$home/.minecraft-pi/README-MCPI-Reborn.txt" "$romdir/ports"; fi
     chown -R $__user:$__user "$romdir/ports"
 
-    if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
+    if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
+
+    ### MCPIedit ###
+    rm -Rf "$home/.mcpiedit" # Remove 0ld MCPIedit Folder
+    git clone https://github.com/RapidEdwin08/MCPIedit.git "$home/.mcpiedit"
+
+    # Install MCPIedit modules in isolated virtual environment
+    pushd "$home/.mcpiedit" # Path of ./virtual_environment
+    python3 -m venv envmcpiedit
+    source envmcpiedit/bin/activate
+    pip3 install mutf8 pynbt tk
+    deactivate
+    popd
+
+    chown -R $__user:$__user "$home/.mcpiedit"
+    touch $md_inst/mcpiedit.on
 }
 
 function remove_minecraft-pi-reborn() {
-    rm -f "/usr/share/applications/Minecraft Pi Edition Reborn.desktop"
-    rm -f "$home/Desktop/Minecraft Pi Edition Reborn.desktop"
-    rm -f "$romdir/ports/+Start Minecraft Pi Edition Reborn.sh"
-
-    rm -f "/usr/share/applications/Minecraft Pi Edition Reborn (Server).desktop"
-    rm -f "$home/Desktop/Minecraft Pi Edition Reborn (Server).desktop"
-    rm -f "$romdir/ports/+Start Minecraft Pi Edition Reborn (Server).sh"
+    for _shortcut in "Minecraft Pi Edition Reborn" "Minecraft Pi Edition Reborn (Server)" "MCPIedit" "Minecraft Pi Edition Reborn (Editor)"; do
+        rm -f "/usr/share/applications/$_shortcut.desktop"
+        rm -f "$home/Desktop/$_shortcut.desktop"
+        rm -f "$romdir/ports/+Start $_shortcut.sh"
+    done
 
     rm -f "$home/.qjoypad3/Minecraft.lyt"
+
+    rm -Rf envmcpiedit # Remove 0ld isolated virtual environment
+    rm -Rf "$home/.mcpiedit" # Remove 0ld MCPIedit Folder
 }
 
 function game_audio_minecraft-pi-reborn() {
@@ -144,16 +168,30 @@ function game_audio_minecraft-pi-reborn() {
 }
 
 function gui_minecraft-pi-reborn() {
+    local _mcpiedit_at_start=ENABLED
+    if [[ ! -f "$md_inst/mcpiedit.on" ]]; then _mcpiedit_at_start=DISABLED; fi
     if [[ ! -d "/home/$__user/.minecraft-pi/overrides" ]]; then mkUserDir /home/$__user/.minecraft-pi/overrides; fi
-    choice=$(dialog --title "[$md_id] Configuration Options" --menu "Attempt to Download MinecraftPocketEdition Audio File(s)\n\nSee [Package Help] for Details\n\n[/home/$__user/.minecraft-pi/overrides]:\n$(ls /home/$__user/.minecraft-pi/overrides )" 15 60 5 \
-        "1" "{libminecraftpe.so} MinecraftPocketEdition (alpha)" \
-        "2" "Cancel" 2>&1 >/dev/tty)
+    choice=$(dialog --title "[$md_id] Configuration Options" --menu "\nToggle MCPIEdit at Start-Up: $_mcpiedit_at_start \n\nAttempt to Download MinecraftPocketEdition Audio File(s)\n\nSee [Package Help] for Details\n\n[/home/$__user/.minecraft-pi/overrides]:\n$(ls /home/$__user/.minecraft-pi/overrides )" 25 75 5 \
+        "1" "ENABLE  MCPIedit at Start-Up" \
+        "2" "DISABLE MCPIedit at Start-Up" \
+        "3" "GET {libminecraftpe.so} MinecraftPocketEdition (alpha)" \
+        "4" "Cancel" 2>&1 >/dev/tty)
 
     case $choice in
         1)
-            game_audio_minecraft-pi-reborn
+            echo "ENABLED  MCPIedit at Start-Up"
+            touch $md_inst/mcpiedit.on
+            gui_minecraft-pi-reborn
             ;;
         2)
+            echo "DISABLED MCPIedit at Start-Up"
+            rm -f $md_inst/mcpiedit.on
+            gui_minecraft-pi-reborn
+            ;;
+        3)
+            game_audio_minecraft-pi-reborn
+            ;;
+        4)
             echo "Canceled"
             ;;
         *)
@@ -176,6 +214,12 @@ function configure_minecraft-pi-reborn() {
     # --server will call Dialog.sh withOUT retropiemenu launch when called from .desktop Shortcut
     # --es-server will call Dialog.sh with RetroPie-Setup/retropie_packages.sh retropiemenu launch for JoyPad Support when called from ES
     addPort "$md_id-server" "minecraft-pi-reborn-server" "+Start Minecraft Pi Edition Reborn (Server)" "$md_inst/minecraft.sh --es-server"
+
+    # MCPIedit
+    addPort "$md_id-edit" "minecraft-pi-reborn-edit" "+Start MCPIedit" "$launch_prefix$md_inst/mcpiedit.sh"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+        addPort "$md_id-edit+qjoypad" "minecraft-pi-reborn-edit" "+Start MCPIedit" "$launch_prefix$md_inst/mcpiedit-qjoy.sh"
+    fi
 
     [[ "$md_mode" == "remove" ]] && remove_minecraft-pi-reborn
 }
