@@ -47,4 +47,9 @@ function configure_lr-bennugd() {
     addEmulator 1 "$md_id" "bennugd" "$md_inst/bennugd_libretro.so"
 
     addSystem "bennugd" "BennuGD" ".dat .dcb"
+
+    # Extra Systems for carbon-2021: bennugd cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
+    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/bennugd.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-assets.tar.gz" "/etc/emulationstation/themes"
+    fi
 }
