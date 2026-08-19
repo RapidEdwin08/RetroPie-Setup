@@ -222,8 +222,8 @@ function configure_emulationstation-es-x() {
     #install_esx_theme "https://github.com/Renetrox/Mini" "Mini"
     install_esx_theme "https://github.com/RapidEdwin08/metapixel-doomed" "metapixel-doomed"
 
-    # Extra Systems for carbon-2021: cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
-    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/ti83.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
+    # Extra Systems for carbon-2021: bennugd cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
+    if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/bennugd.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-assets.tar.gz" "/etc/emulationstation/themes"
     fi
 
