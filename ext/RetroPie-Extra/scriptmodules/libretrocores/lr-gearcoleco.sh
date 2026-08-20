@@ -5,6 +5,7 @@
 #
 # https://github.com/RetroPie/RetroPie-Setup
 # https://github.com/Exarkuniv/RetroPie-Extra
+# https://github.com/RapidEdwin08/RetroPie-Setup
 #
 # See the LICENSE file distributed with this source and at
 # https://raw.githubusercontent.com/Exarkuniv/RetroPie-Extra/master/LICENSE
@@ -45,6 +46,6 @@ function configure_lr-gearcoleco() {
         mkRomDir "$system"
         defaultRAConfig "$system"
         addEmulator 0 "$md_id" "$system" "$md_inst/gearcoleco_libretro.so"
-        addSystem "$system"
+        addSystem "$system" "$system" ".bin .col .rom .zip"
     done
 }
