@@ -40,6 +40,23 @@ function install_lr-bennugd() {
     )
 }
 
+function game_data_lr-bennugd() {
+    if [[ ! -f "$romdir/bennugd/media/image/Skull.png" ]] || [[ ! -f "/opt/retropie/configs/bennugd/BennuGD/Skull.rmp" ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/libretrocores/bennugd-rp-assets.tar.gz" "$romdir/bennugd"
+
+        if [[ ! -f "/opt/retropie/configs/bennugd/BennuGD/Skull.rmp" ]]; then
+            mkdir -p /opt/retropie/configs/bennugd/BennuGD
+            mv "$romdir/bennugd/Skull.rmp" "/opt/retropie/configs/bennugd/BennuGD"
+            chown -R $__user:$__user "/opt/retropie/configs/bennugd/BennuGD"
+        else
+            rm -f "$romdir/bennugd/Skull.rmp"
+        fi
+
+        if [[ ! -f "$romdir/bennugd/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/bennugd/gamelist.xml" ]]; then mv "$romdir/bennugd/gamelist.xml.bennugd" "$romdir/bennugd/gamelist.xml"; fi
+        chown -R $__user:$__user "$romdir/bennugd"
+    fi
+}
+
 function configure_lr-bennugd() {
     mkRomDir "bennugd"
     defaultRAConfig "bennugd"
@@ -48,8 +65,16 @@ function configure_lr-bennugd() {
 
     addSystem "bennugd" "BennuGD" ".dat .dcb"
 
+    #local core_config="$md_conf_root/bennugd/retroarch-core-options.cfg"
+    local core_config="/opt/retropie/configs/all/retroarch-core-options.cfg"
+    iniConfig " = " '"' "$core_config"
+    iniSet "bennugd_mouse_emulation" "right analog" "$core_config"
+    chown "$__user":"$__group" "$core_config"
+
     # Extra Systems for carbon-2021: bennugd cdimono1 cd-i cloud doom godot-engine j2me jaguarcd openbor ti83 wine
     if [[ ! -f "/etc/emulationstation/themes/carbon-2021/art/systems/bennugd.svg" ]] && [[ -d "/etc/emulationstation/themes/carbon-2021" ]]; then
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/supplementary/emulationstation-es-x-rp-assets.tar.gz" "/etc/emulationstation/themes"
     fi
+
+    [[ "$md_mode" == "install" ]] && game_data_lr-bennugd
 }
