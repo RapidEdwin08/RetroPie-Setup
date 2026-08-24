@@ -124,13 +124,6 @@ function install_bin_minecraft-pi-reborn() {
 
     chown -R $__user:$__user "$home/.mcpiedit"
     touch $md_inst/mcpiedit.on
-
-    # Add MCPIedit to [/opt/retropie/configs/all/runcommand-menu]
-    mkdir -p /opt/retropie/configs/all/runcommand-menu
-    cp "$launch_prefix$md_inst/mcpiedit.sh" /dev/shm/mcpiedit.sh; mv /dev/shm/mcpiedit.sh /opt/retropie/configs/all/runcommand-menu/mcpiedit.sh
-    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
-        cp "$launch_prefix$md_inst/mcpiedit-qjoy.sh" /dev/shm/mcpiedit-qjoy.sh; mv /dev/shm/mcpiedit-qjoy.sh /opt/retropie/configs/all/runcommand-menu/mcpiedit-qjoy.sh
-    fi
 }
 
 function remove_minecraft-pi-reborn() {
