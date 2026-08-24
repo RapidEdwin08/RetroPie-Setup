@@ -145,9 +145,6 @@ function remove_minecraft-pi-reborn() {
     rm -f "$romdir/ports/media/marquee/MCPIedit.png"
     rm -f "$romdir/ports/media/marquee/Minecraft Pi Edition Reborn.png"
     rm -f "$romdir/ports/media/marquee/Minecraft Pi Edition Reborn (Server).png"
-
-    rm -f /opt/retropie/configs/all/runcommand-menu/mcpiedit.sh
-    rm -f /opt/retropie/configs/all/runcommand-menu/mcpiedit-qjoy.sh
 }
 
 function game_audio_minecraft-pi-reborn() {
