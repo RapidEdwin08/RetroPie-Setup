@@ -57,8 +57,11 @@ function depends_lr-applewin() {
         ninja-build
         xxd
     )
-    if [[ "$__os_debian_ver" -gt 10 ]]; then
+    if [[ "$__os_debian_ver" -gt 10 ]]; then # sudo apt-get remove libslirp0
         depends+=(libslirp-dev)
+        if [[ "$md_mode" == "install" ]] && [[ ! $(dpkg -l | grep libslirp0) == '' ]]; then
+            echo ***libslirp0 FOUND*** IF BUILD FAILS TRY TO REMOVE libslirp0: sudo apt-get remove libslirp0
+        fi
     fi
     getDepends "${depends[@]}"
 }
