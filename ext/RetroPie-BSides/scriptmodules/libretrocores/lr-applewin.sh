@@ -35,10 +35,10 @@
 
 rp_module_id="lr-applewin"
 rp_module_desc="Apple2e emulator: AppleWin (current) libretro core for RetroArch"
-rp_module_help="ROM Extension: .po .dsk .nib .PO .DSK .NIB .zip\n\nCopy your roms to $romdir/apple2"
+rp_module_help="ROM Extension: .po .dsk .nib .PO .DSK .NIB .zip\n\nCopy your roms to $romdir/apple2\n\nRetroPie scriptmodule SOURCE:\n\nhttps://github.com/Gemba/RetroPie-BSides.git\n\nhttps://github.com/Gemba/RetroPie-BSides/blob/main/docs/Libretro_AppleWin.md"
 rp_module_licence="GPL2 https://raw.githubusercontent.com/audetto/AppleWin/master/LICENSE"
 rp_module_repo="git https://github.com/audetto/AppleWin.git master"
-rp_module_section="opt"
+rp_module_section="exp"
 rp_module_flags=""
 
 
