@@ -15,7 +15,7 @@ if [[ -z "$__user" ]]; then __user="$SUDO_USER"; [[ -z "$__user" ]] && __user="$
 
 rp_module_id="minecraft-pi-reborn"
 rp_module_desc="Minecraft Pi Edition Reborn"
-rp_module_help="Minecraft Pi Edition Reborn (also known as MCPI-Reborn) is a modding project for Minecraft Pi Edition.\n\nMinecraft's sound is NOT Distributed with MCPI-Reborn.\nSound can found in MinecraftPocketEdition v0.6.12 APK.\n         Recommend [PE-a0.11.1-2-x86.apk]\n\nEXTRACT [libminecraftpe.so] from APK and Place into:\n$home/.minecraft-pi/overrides/libminecraftpe.so\n\nIF USING PI RECOMMEND USERS *UN-CHECK* THESE SETTINGS:\n [ ] Multithreaded Chunk Rebuilding \n [ ] Use OpenGL Display Lists \n [ ] Proper Entity Shading \n\nIF USING PI RECOMMEND USERS *CHECK* THESE SETTINGS:\n [X] Increase Render Chunk Size\n\nIF USING QJOYPAD RECOMMEND USERS *CHECK* THESE SETTINGS: \n [X] Disable Raw Mouse Motion\n\nMCPI-Repo:\ngithub.com/MCPI-Revival/minecraft-pi-reborn\n\nMCPI-Repo Seeds:\nmcpi-revival.github.io/mcpi-repo/seeds/"
+rp_module_help="Minecraft Pi Edition Reborn (also known as MCPI-Reborn) is a modding project for Minecraft Pi Edition.\n\nMinecraft's sound is NOT Distributed with MCPI-Reborn.\nSound can found in MinecraftPocketEdition v0.6.12 APK\n\nEXTRACT [libminecraftpe.so] from APK and Place into:\n$home/.minecraft-pi/overrides/libminecraftpe.so\n\nIF USING PI RECOMMEND USERS *UN-CHECK* THESE SETTINGS:\n [ ] Multithreaded Chunk Rebuilding \n [ ] Use OpenGL Display Lists \n [ ] Proper Entity Shading \n [ ] Disable V-Sync\n\nIF USING PI RECOMMEND USERS *CHECK* THESE SETTINGS:\n [X] Increase Render Chunk Size\n\nIF USING QJOYPAD RECOMMEND USERS *CHECK* THESE SETTINGS: \n [X] Disable Raw Mouse Motion\n\nMCPI-Repo:\ngithub.com/MCPI-Revival/minecraft-pi-reborn\n\nMCPI-Repo Seeds:\nmcpi-revival.github.io/mcpi-repo/seeds/"
 rp_module_licence="MIT https://raw.githubusercontent.com/MCPI-Revival/minecraft-pi-reborn/master/LICENSE"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
@@ -85,6 +85,7 @@ function install_bin_minecraft-pi-reborn() {
     if [[ ! -f "$home/.minecraft-pi/options.txt" ]]; then mv "options.txt" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/server.properties" ]]; then mv "server.properties" "$home/.minecraft-pi"; fi
     if [[ ! -f "$home/.minecraft-pi/README-MCPI-Reborn.txt" ]]; then mv "README-MCPI-Reborn.txt" "$home/.minecraft-pi"; fi
+    if [[ ! -f "$home/.minecraft-pi/RecommendedSettingsForPi.png" ]]; then mv "RecommendedSettingsForPi.png" "$home/.minecraft-pi"; fi
 
     if [[ ! -d "$home/.minecraft-pi/games/com.mojang/minecraftWorlds/Server" ]]; then
         mkdir -p "$home/.minecraft-pi/games/com.mojang/minecraftWorlds"
@@ -139,6 +140,7 @@ function remove_minecraft-pi-reborn() {
     rm -Rf envmcpiedit # Remove 0ld isolated virtual environment
     rm -Rf "$home/.mcpiedit" # Remove 0ld MCPIedit Folder
 
+    rm -f "$home/.minecraft-pi/RecommendedSettingsForPi.png"
     rm -f "$home/.minecraft-pi/README-MCPI-Reborn.txt"
     rm -f "$romdir/ports/README-MCPI-Reborn.txt"
 
