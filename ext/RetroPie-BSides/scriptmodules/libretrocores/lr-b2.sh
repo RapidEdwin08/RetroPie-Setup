@@ -92,6 +92,6 @@ function configure_lr-b2() {
         mkRomDir "$system_name"
     fi
 
-    addEmulator 0 "$md_id" "$system_name" "$md_inst/b2_libretro.so"
-    addSystem "$system_name"
+    addEmulator 0 "$md_id" "bbcmicro" "$md_inst/b2_libretro.so"
+    addSystem "bbcmicro" "BBC Micro" ".dsd .ssd"
 }
