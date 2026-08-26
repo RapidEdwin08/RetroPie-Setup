@@ -25,7 +25,17 @@ function sources_lr-geolith() {
 function build_lr-geolith() {
     pushd "$md_build/libretro"
     make clean
-    make
+
+    # /usr/lib/gcc/arm-linux-gnueabihf/8/include/arm_neon.h:10401:22: fatal error: You must enable NEON instructions (e.g. -mfloat-abi=softfp -mfpu=neon) to use these intrinsics.
+    if [[ "$__os_debian_ver" -le 10 ]]; then # Buster rpi1/2/3/4
+        isPlatform "armv6" && CFLAGS="-march=armv6j" make
+        isPlatform "armv7" && CFLAGS="-march=armv7-a" make
+        isPlatform "armv8" && CFLAGS="-mcpu=cortex-a35" make
+        isPlatform "rpi4" && CFLAGS="-mcpu=cortex-a72" make
+    else
+        make
+    fi
+
     popd
     md_ret_require="$md_build/libretro/geolith_libretro.so"
 }
