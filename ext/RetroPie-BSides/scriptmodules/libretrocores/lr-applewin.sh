@@ -69,13 +69,20 @@ function depends_lr-applewin() {
 function sources_lr-applewin() {
     if [[ "$__os_debian_ver" -le 10 ]]; then
         # no libslirp-dev package in Buster
-        rm -rf "$md_build/../libslirp"
+        rm -Rf "$md_build/../libslirp"
         gitPullOrClone "$md_build/../libslirp" https://gitlab.freedesktop.org/slirp/libslirp.git
     fi
     gitPullOrClone
     # make sure resources/ will be looked up at /opt/retropie/libretrocores/lr-applewin/
     sed -i s,CMAKE_SOURCE_DIR,\"$md_inst\", \
         $md_build/source/frontends/common2/gnuframe.cpp
+
+    # Buster: /source/frontends/common2/argparser.cpp:89:48: error: ‘setw’ is not a member of ‘std’
+    if [[ "$__os_debian_ver" -le 10 ]]; then
+        echo '#include <iomanip>' > /tmp/argparser.cpp
+        cat "$md_build/source/frontends/common2/argparser.cpp" >> /tmp/argparser.cpp
+        mv /tmp/argparser.cpp "$md_build/source/frontends/common2"
+    fi
 }
 
 function build_lr-applewin() {
@@ -125,4 +132,6 @@ function configure_lr-applewin() {
 
     addEmulator 0 "$md_id" "apple2" "$md_inst/applewin_libretro.so"
     addSystem "apple2" "Apple II" ".po .dsk .nib .do .hdv .gz .zip"
+
+    [[ -d "$home/RetroPie-Setup/tmp/build/libslirp" ]] && rm -Rf "$home/RetroPie-Setup/tmp/build/libslirp"
 }
