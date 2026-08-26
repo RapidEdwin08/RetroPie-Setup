@@ -39,11 +39,11 @@ function configure_lr-neocd() {
     mkRomDir "neogeocd"
 
     defaultRAConfig "neogeo"
-    defaultRAConfig "neogeocd"
 
     addEmulator 0 "$md_id" "neogeo" "$md_inst/neocd_libretro.so"
     addEmulator 0 "$md_id" "neogeocd" "$md_inst/neocd_libretro.so"
 
-    addSystem "neogeo"
-    addSystem "neogeocd" "NeoGeoCD" ".7z .chd .cue .fba .iso .zip"
+    # neogeo_exts=".7z .chd .cue .fba .iso .zip" # geolith_exts=".neo .bin"
+    addSystem "neogeo" "Neo Geo" ".7z .chd .cue .fba .iso .zip .neo .bin"
+    addSystem "neogeocd" "NeoGeoCD" ".7z .chd .cue .fba .iso .zip .neo .bin"
 }
