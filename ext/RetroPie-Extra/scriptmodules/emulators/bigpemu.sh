@@ -83,13 +83,12 @@ function configure_bigpemu() {
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'atarijaguar_StartBigPEmu = "bigpemu-ui"' ; echo $?) == '1' ]]; then echo 'atarijaguar_StartBigPEmu = "bigpemu-ui"' >> /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'jaguarcd_StartBigPEmu = "bigpemu-ui"' ; echo $?) == '1' ]]; then echo 'jaguarcd_StartBigPEmu = "bigpemu-ui"' >> /opt/retropie/configs/all/emulators.cfg; fi
 
-    # atarijaguar .j64 .jag .zip 
-    addSystem "atarijaguar" "Atari Jaguar" ".bigpimg .cof .rom .abs .cue .cdi .j64 .jag .zip .gui"
     touch "$romdir/atarijaguar/+Start BigPEmu.gui"; chown -R $__user:$__user "$romdir/atarijaguar"
-
-    # jaguarcd .bigpimg .cof .rom .abs .cue .cdi
-    addSystem "jaguarcd" "Atari Jaguar CD" ".bigpimg .cof .rom .abs .cue .cdi .j64 .jag .zip .gui"
     touch "$romdir/jaguarcd/+Start BigPEmu.gui"; chown -R $__user:$__user "$romdir/jaguarcd"
+
+    # atarijaguar_exts=".j64 .jag .zip" # bigpemu_exts=".cof .rom .abs .cue .cdi .chd .bin .prg .bigpimg .gui"
+    addSystem "atarijaguar" "Atari Jaguar" ".j64 .jag .zip .cof .rom .abs .cue .cdi .chd .bin .prg .bigpimg .gui"
+    addSystem "jaguarcd" "Atari Jaguar CD" ".j64 .jag .zip .cof .rom .abs .cue .cdi .chd .bin .prg .bigpimg .gui"
 
     local launch_prefix
     local big_workaround="$md_inst/bigworkaround.sh"
