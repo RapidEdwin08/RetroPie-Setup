@@ -67,12 +67,13 @@ function depends_lr-applewin() {
 }
 
 function sources_lr-applewin() {
+    gitPullOrClone # 1st pull gets Commit: in retropie.pkg
+
     if [[ "$__os_debian_ver" -le 10 ]]; then
         # no libslirp-dev package in Buster
         rm -Rf "$md_build/../libslirp"
         gitPullOrClone "$md_build/../libslirp" https://gitlab.freedesktop.org/slirp/libslirp.git
     fi
-    gitPullOrClone
     # make sure resources/ will be looked up at /opt/retropie/libretrocores/lr-applewin/
     sed -i s,CMAKE_SOURCE_DIR,\"$md_inst\", \
         $md_build/source/frontends/common2/gnuframe.cpp
