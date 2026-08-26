@@ -11,7 +11,7 @@
 
 rp_module_id="lr-virtualjaguar"
 rp_module_desc="Atari Jaguar emu - Virtual Jaguar (optimised) port for libretro"
-rp_module_help="ROM Extensions: .j64 .jag .zip\n\nCopy your Atari Jaguar roms to $romdir/atarijaguar"
+rp_module_help="ROM Extensions: .j64 .jag .zip .cof .rom .abs .cue .cdi .chd .bin .prg\n\nCopy your Atari Jaguar/CD roms to:\n$romdir/atarijaguar\n$romdir/jaguarcd"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/libretro/virtualjaguar-libretro/master/docs/GPLv3"
 rp_module_repo="git https://github.com/libretro/virtualjaguar-libretro.git master"
 rp_module_section="exp"
@@ -38,8 +38,14 @@ function install_lr-virtualjaguar() {
 
 function configure_lr-virtualjaguar() {
     mkRomDir "atarijaguar"
+    mkRomDir "jaguarcd"
+
     defaultRAConfig "atarijaguar"
 
     addEmulator 1 "$md_id" "atarijaguar" "$md_inst/virtualjaguar_libretro.so"
-    addSystem "atarijaguar"
+    addEmulator 1 "$md_id" "jaguarcd" "$md_inst/virtualjaguar_libretro.so"
+
+    # atarijaguar_exts=".j64 .jag .zip" # bigpemu_exts=".cof .rom .abs .cue .cdi .chd .bin .prg .bigpimg .gui"
+    addSystem "atarijaguar" "Atari Jaguar" ".j64 .jag .zip .cof .rom .abs .cue .cdi .chd .bin .prg .bigpimg .gui"
+    addSystem "jaguarcd" "Atari Jaguar CD" ".j64 .jag .zip .cof .rom .abs .cue .cdi .chd .bin .prg .bigpimg .gui"
 }
