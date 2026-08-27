@@ -215,6 +215,8 @@ function configure_emulationstation-es-x() {
             git clone "$repo" "$target"
             chown -R "$__user:$__user" "$target"
         fi
+
+        chown -R "$__user:$__user" "$target"
     }
 
     #install_esx_theme "https://github.com/Renetrox/art-book-next-ESX" "art-book-next-ESX"
