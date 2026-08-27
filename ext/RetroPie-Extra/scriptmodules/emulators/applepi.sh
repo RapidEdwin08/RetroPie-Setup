@@ -32,12 +32,19 @@ function _get_commit_applepi() {
 
 function depends_applepi() {
     local depends=(qt5-qmake libasound2-dev libpulse-dev qtdeclarative5-dev libqt5gamepad5-dev qtmultimedia5-dev)
-    if ( isPlatform "kms" ) && [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then depends+=(xorg matchbox-window-manager); fi
+    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
 
 function sources_applepi() {
     gitPullOrClone
+
+    # internal_rom_number=1 for Model Apple ][+ # speaker_volume=35 # window_scale=2 # window_position=390,39 # _path's=$romdir/apple2
+    sed -i s+'internal_rom_number", (uint)3'+'internal_rom_number", (uint)1'+g "$md_build/src/config.cpp"
+    sed -i s+'_path", defaultDir'+"_path\", \"$romdir/apple2\""+g "$md_build/src/config.cpp"
+    sed -i s+'window_position", tmpStr'+'window_position", "390,39"'+g "$md_build/src/config.cpp"
+    sed -i s+'window_scale", (uint)1'+'window_scale", (uint)2'+g "$md_build/src/config.cpp"
+    sed -i s+'speaker_volume", (uint)20'+'speaker_volume", (uint)35'+g "$md_build/src/config.cpp"
 }
 
 function build_applepi() {
@@ -81,7 +88,7 @@ function configure_applepi() {
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         local launch_prefix
-        isPlatform "kms" && launch_prefix="XINIT-WMC:"
+        isPlatform "kms" && launch_prefix="XINIT:"
         addEmulator 0 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh"
     fi
 
@@ -91,7 +98,7 @@ function configure_applepi() {
     [[ "$md_mode" == "remove" ]] && return
 
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
-    if [[ "$qjoyui" == '1' ]]; then
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'apple2_StartApplePi = "applepi-qjoy"' ; echo $?) == '1' ]]; then echo 'apple2_StartApplePi = "applepi-qjoy"' >> /opt/retropie/configs/all/emulators.cfg; fi
     else
         if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'apple2_StartApplePi = "applepi"' ; echo $?) == '1' ]]; then echo 'apple2_StartApplePi = "applepi"' >> /opt/retropie/configs/all/emulators.cfg; fi
@@ -100,29 +107,29 @@ function configure_applepi() {
 
     touch "$romdir/apple2/+Start ApplePi.do"; chown -R $__user:$__user "$romdir/apple2"
 
-    # internal_rom_number=1 for Model Apple ][+ # speaker_volume=50 # window_scale=2
+    # internal_rom_number=1 for Model Apple ][+ # speaker_volume=35 # window_scale=2 # window_position=390,39 # _path's=$romdir/apple2
     if [ ! -f $home/.config/applepi.conf ]; then cat >"$home/.config/applepi.conf" <<_EOF_; fi
 [General]
 check-key=DON'T DELETE THIS KEY
-directory_for_slot1_print=/home/pi/RetroPie/roms/apple2
+directory_for_slot1_print=$romdir/apple2
 disassemble_end=0000
 disassemble_end_criterion=0
 disassemble_mem_type=0
 disassemble_start_address=0000
-floppy1_path=/home/pi/RetroPie/roms/apple2
-floppy2_path=/home/pi/RetroPie/roms/apple2
+floppy1_path=$romdir/apple2
+floppy2_path=$romdir/apple2
 game_controller_id=0
 game_controller_name=/dev/input/mouse0
-hd1_volume_path=/home/pi/RetroPie/roms/apple2
-hd2_volume_path=/home/pi/RetroPie/roms/apple2
+hd1_volume_path=$romdir/apple2
+hd2_volume_path=$romdir/apple2
 help_position="10,10"
 help_size="420,500"
 internal_rom_number=1
-rom_path=/home/pi/RetroPie/roms/apple2
-speaker_volume=50
-tape_path=/home/pi/RetroPie/roms/apple2
+rom_path=$romdir/apple2
+speaker_volume=35
+tape_path=$romdir/apple2
 tape_write_protect=0
-text_echo_path=/home/pi/RetroPie/roms/apple2
+text_echo_path=$romdir/apple2
 trace_end_address=FFFF
 trace_start_address=0000
 trap0_address=0000
@@ -146,7 +153,7 @@ watch3_address=0000
 watch3_enable=0
 watch_history_dump=0
 watch_history_lines=0
-window_position="10,10"
+window_position="390,39"
 window_scale=2
 _EOF_
 
@@ -163,11 +170,26 @@ qjoyLYT=\$(
 echo '# QJoyPad 4.3 Layout File
 
 Joystick 1 {
-    Axis 3: dZone 25309, xZone 3163, +mouse 3, -key 0
+    Axis 3: dZone 25000, xZone 3163, +key 0, -key 0
     Axis 4: gradient, maxSpeed 3, tCurve 0, mouse+h
     Axis 5: gradient, maxSpeed 3, tCurve 0, mouse+v
-    Axis 6: dZone 25309, xZone 3163, +mouse 1, -key 0
+    Axis 6: dZone 25000, xZone 3163, +key 0, -key 0
+    Axis 7: +key 114, -key 113
+    Axis 8: +key 116, -key 111
+    Button 1: key 29
+    Button 2: key 57
+    Button 3: key 44
+    Button 4: key 45
+    Button 5: mouse 3
+    Button 6: mouse 1
+    Button 7: key 9
+    Button 8: key 36
+    Button 10: mouse 3
     Button 11: mouse 1
+    Button 12: key 113
+    Button 13: key 114
+    Button 14: key 111
+    Button 15: key 116
 }
 ')
 
@@ -198,14 +220,16 @@ _EOF_
 }
 
 function shortcuts_icons_applepi() {
-    local shortcut_name
-    shortcut_name="ApplePi"
+    local shortcut_name="ApplePi"
+    local shortcut_exec=$md_inst/applepi
+    [[ ! $(dpkg -l | grep qjoypad) == '' ]] && shortcut_exec=$md_inst/applepi-qjoy.sh
+
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=Apple ][ Emulator
-Exec=$md_inst/applepi
+Exec=$shortcut_exec
 Icon=$md_inst/applepi_128x128.xpm
 Terminal=false
 Type=Application
