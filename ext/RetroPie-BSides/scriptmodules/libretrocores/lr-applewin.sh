@@ -123,16 +123,37 @@ function configure_lr-applewin() {
     mkRomDir "apple2"
 
     if [[ "$md_mode" == "install" ]] ; then
-        defaultRAConfig "apple2" "input_auto_game_focus" "0" # 0: off, 1: on, 2: detect
-        defaultRAConfig "apple2" "load_dummy_on_core_shutdown" "false"
+        # force colecovision system
+        local core_config="$md_conf_root/apple2/retroarch.cfg"
+        iniConfig " = " '"' "$core_config"
+        iniSet "input_auto_game_focus" "0" "$core_config" # 0: off, 1: on, 2: detect
+        iniSet "load_dummy_on_core_shutdown" "false" "$core_config"
+
         # Disable at all if defined in parent Retroarch configs or
         # adjust button number below to your controller setup.
         # cf: https://retropie.org.uk/docs/RetroArch-Configuration/#determining-button-values
-        defaultRAConfig "apple2" "input_game_focus_toggle_btn" "3"
+        iniSet "input_game_focus_toggle_btn" "8" "$core_config" # 8 = Pair Button
+
+        chown "$__user":"$__group" "$core_config"
+
+        core_config="$md_conf_root/all/retroarch-core-options.cfg"
+        #iniSet "applewin_machine" "Apple II Plus" "$core_config"
+        #iniSet "applewin_machine" "Apple //e (enhanced)" "$core_config"
+        iniSet "applewin_joypad_l" "Y" "$core_config"
+        iniSet "applewin_joypad_l2" "Left" "$core_config"
+        iniSet "applewin_joypad_l3" "J" "$core_config"
+        iniSet "applewin_joypad_r" "Enter" "$core_config"
+        iniSet "applewin_joypad_r2" "Right" "$core_config"
+        iniSet "applewin_joypad_r3" "1" "$core_config"
+        iniSet "applewin_joypad_select" "S" "$core_config"
+        iniSet "applewin_joypad_start" "Space" "$core_config"
+        iniSet "applewin_video_style" "280 x 192" "$core_config"
+
+        chown "$__user":"$__group" "$core_config"
     fi
 
-    addEmulator 0 "$md_id" "apple2" "$md_inst/applewin_libretro.so"
-    addSystem "apple2" "Apple II" ".po .dsk .nib .do .hdv .gz .zip"
+    addEmulator 1 "$md_id" "apple2" "$md_inst/applewin_libretro.so"
+    addSystem "apple2" "Apple II" ".2mg .po .dsk .nib .do .hdv .gz .zip"
 
     [[ -d "$home/RetroPie-Setup/tmp/build/libslirp" ]] && rm -Rf "$home/RetroPie-Setup/tmp/build/libslirp"
 }
