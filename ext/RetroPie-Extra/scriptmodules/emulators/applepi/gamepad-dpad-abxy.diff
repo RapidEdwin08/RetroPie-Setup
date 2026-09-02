@@ -15,8 +15,8 @@ diff -ur a/help/gamepad.html b/help/gamepad.html
 -Switch 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left bumper<BR>
 -Switch 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right trigger<BR>
 -Switch 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right bumper<BR>
-+Switch 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button A<BR>
-+Switch 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button B<BR>
++Switch 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button B<BR>
++Switch 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button A<BR>
 +Switch 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button X<BR>
 +Switch 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button Y<BR>
  
@@ -31,12 +31,12 @@ diff -ur a/src/gamepad.cpp b/src/gamepad.cpp
          case 0:
 -            n = g->buttonL2() ;
 +            //n = g->buttonL2() ;
-+            n = g->buttonA() ;
++            n = g->buttonB() ;
              break ;
          case 1:
 -            n = g->buttonR2() ;
 +            //n = g->buttonR2() ;
-+            n = g->buttonB() ;
++            n = g->buttonA() ;
              break ;
          case 2:
 -            n = g->buttonL1() ;
