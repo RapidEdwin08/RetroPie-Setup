@@ -38,6 +38,7 @@ function depends_applepi() {
 
 function sources_applepi() {
     gitPullOrClone
+    applyPatch "$md_data/gamepad-dpad-abxy.diff" # Use Both DPad + Stick as Axis # Use ABXY instead of Triggers/Shoulders
 
     # internal_rom_number=1 for Model Apple ][+ # speaker_volume=35 # window_scale=2 # window_position=390,39 # _path's=$romdir/apple2
     sed -i s+'internal_rom_number", (uint)3'+'internal_rom_number", (uint)1'+g "$md_build/src/config.cpp"
@@ -84,12 +85,12 @@ function remove_applepi() {
 function configure_applepi() {
     mkRomDir "apple2"
 
-    addEmulator 0 "$md_id" "apple2" "$md_inst/applepi"
+    addEmulator 1 "$md_id" "apple2" "$md_inst/applepi"
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         local launch_prefix
         isPlatform "kms" && launch_prefix="XINIT:"
-        addEmulator 0 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh"
+        addEmulator 1 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh"
     fi
 
     addSystem "apple2" "Apple II" ".2mg .po .dsk .nib .do .hdv .gz .zip"
@@ -170,26 +171,19 @@ qjoyLYT=\$(
 echo '# QJoyPad 4.3 Layout File
 
 Joystick 1 {
-    Axis 3: dZone 25000, xZone 3163, +key 0, -key 0
+    Axis 3: dZone 25000, xZone 3163, +key 113, -key 0
     Axis 4: gradient, maxSpeed 3, tCurve 0, mouse+h
     Axis 5: gradient, maxSpeed 3, tCurve 0, mouse+v
-    Axis 6: dZone 25000, xZone 3163, +key 0, -key 0
+    Axis 6: dZone 25000, xZone 3163, +key 114, -key 0
     Axis 7: +key 114, -key 113
     Axis 8: +key 116, -key 111
-    Button 1: key 29
-    Button 2: key 57
-    Button 3: key 44
-    Button 4: key 45
-    Button 5: mouse 3
-    Button 6: mouse 1
-    Button 7: key 9
-    Button 8: key 36
-    Button 10: mouse 3
-    Button 11: mouse 1
-    Button 12: key 113
-    Button 13: key 114
-    Button 14: key 111
-    Button 15: key 116
+    Button 4: mouse 1
+    Button 5: key 29
+    Button 6: key 36
+    Button 7: key 39
+    Button 8: key 65
+    Button 10: key 44
+    Button 11: key 10
 }
 ')
 

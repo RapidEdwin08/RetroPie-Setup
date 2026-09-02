@@ -1,0 +1,92 @@
+diff -ur a/help/gamepad.html b/help/gamepad.html
+--- a/help/gamepad.html	Source 8cd141b5
++++ b/help/gamepad.html	Modified
+@@ -29,14 +29,14 @@
+ Current gamepad-to-Apple II mapping:
+ 
+ <h3>Apple II&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gamepad</h3>
+-Paddle 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left stick X-axis<BR>
+-Paddle 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left stick Y-axis<BR>
++Paddle 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left stick X-axis + D-Pad L/R<BR>
++Paddle 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left stick Y-axis + D-Pad U/D<BR>
+ Paddle 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right stick X-axis<BR>
+ Paddle 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right stick Y-axis<BR>
+-Switch 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left trigger<BR>
+-Switch 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left bumper<BR>
+-Switch 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right trigger<BR>
+-Switch 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right bumper<BR>
++Switch 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button A<BR>
++Switch 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button B<BR>
++Switch 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button X<BR>
++Switch 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Button Y<BR>
+ 
+ <BR>
+ <p style="margin-left: 0px">
+diff -ur a/src/gamepad.cpp b/src/gamepad.cpp
+--- a/src/gamepad.cpp	Source 8cd141b5
++++ b/src/gamepad.cpp	Modified
+@@ -72,16 +72,20 @@
+     QGamepad* g = m_gamepad ;
+     switch (buttonNumber) {
+         case 0:
+-            n = g->buttonL2() ;
++            //n = g->buttonL2() ;
++            n = g->buttonA() ;
+             break ;
+         case 1:
+-            n = g->buttonR2() ;
++            //n = g->buttonR2() ;
++            n = g->buttonB() ;
+             break ;
+         case 2:
+-            n = g->buttonL1() ;
++            //n = g->buttonL1() ;
++            n = g->buttonX() ;
+             break ;
+         case 3:
+-            n = g->buttonR1() ;
++            //n = g->buttonR1() ;
++            n = g->buttonY() ;
+             break ;
+         default:
+             n = 0 ; 
+@@ -103,16 +107,37 @@
+ 
+ quint8 Gamepad::readAnalog (int n)
+ {
++// Use Both DPad + Stick as Axis
++    float horizontalAxis = 0.0f;
++    float verticalAxis = 0.0f;
++
++    horizontalAxis = m_gamepad->axisLeftX() ;
++    verticalAxis = m_gamepad->axisLeftY() ;
++
++    if (m_gamepad->buttonLeft()) {
++        horizontalAxis = -1.0f;
++    } else if (m_gamepad->buttonRight()) {
++        horizontalAxis = 1.0f;
++    }
++
++    if (m_gamepad->buttonUp()) {
++        verticalAxis = -1.0f;
++    } else if (m_gamepad->buttonDown()) {
++        verticalAxis = 1.0f;
++    }
++
+     float  f ;
+     quint8 value = 0xff ;
+ 
+     if (m_gamepad->isConnected()) {
+         switch (n) {
+             case 0:
+-                f = m_gamepad->axisLeftX() ;
++                //f = m_gamepad->axisLeftX() ;
++                f = horizontalAxis ;
+                 break ;
+             case 1:
+-                f = m_gamepad->axisLeftY() ;
++                //f = m_gamepad->axisLeftY() ;
++                f = verticalAxis ;
+                 break ;
+             case 2:
+                 f = m_gamepad->axisRightX() ;
