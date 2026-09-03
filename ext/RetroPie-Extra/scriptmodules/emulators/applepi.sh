@@ -85,12 +85,12 @@ function remove_applepi() {
 function configure_applepi() {
     mkRomDir "apple2"
 
-    addEmulator 1 "$md_id" "apple2" "$md_inst/applepi"
+    addEmulator 1 "$md_id" "apple2" "$md_inst/applepi.sh %ROM%"
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         local launch_prefix
         isPlatform "kms" && launch_prefix="XINIT:"
-        addEmulator 1 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh"
+        addEmulator 1 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh %ROM%"
     fi
 
     addSystem "apple2" "Apple II" ".2mg .po .dsk .nib .do .hdv .gz .zip"
@@ -162,6 +162,22 @@ _EOF_
     chown $__user:$__user "$home/.config/applepi.conf"
     moveConfigFile "$home/.config/applepi.conf" "$md_conf_root/apple2/applepi.conf"
 
+    cat >"$md_inst/applepi.sh" << _EOF_
+#!/bin/bash
+
+# Set position and scale when called from ES with %ROM%
+if [[ ! "\$1" == '' ]]; then
+    sed -i "s+^window_position=.*+window_position=\"390,39\"+g" "$md_conf_root/apple2/applepi.conf"
+    sed -i "s+^window_scale=.*+window_scale=2+g" "$md_conf_root/apple2/applepi.conf"
+fi
+
+# Run $md_id
+VC4_DEBUG=always_sync $md_inst/applepi
+
+exit 0
+_EOF_
+    chmod 755 "$md_inst/applepi.sh"
+
     cat >"$md_inst/applepi-qjoy.sh" << _EOF_
 #!/bin/bash
 # https://github.com/RapidEdwin08/
@@ -195,6 +211,12 @@ pkill -15 qjoypad > /dev/null 2>&1
 rm /tmp/qjoypad.pid > /dev/null 2>&1
 echo "qjoypad "\$qjoyLAYOUT" &" >> /dev/shm/runcommand.info
 qjoypad "\$qjoyLAYOUT" &
+
+# Set position and scale when called from ES with %ROM%
+if [[ ! "\$1" == '' ]]; then
+    sed -i "s+^window_position=.*+window_position=\"390,39\"+g" "$md_conf_root/apple2/applepi.conf"
+    sed -i "s+^window_scale=.*+window_scale=2+g" "$md_conf_root/apple2/applepi.conf"
+fi
 
 # Run $md_id
 VC4_DEBUG=always_sync $md_inst/applepi
