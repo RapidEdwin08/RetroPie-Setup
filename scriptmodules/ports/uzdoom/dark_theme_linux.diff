@@ -1,0 +1,23 @@
+diff -ur a/src/utility/system_theme.cpp b/src/utility/system_theme.cpp
+--- a/src/utility/system_theme.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/utility/system_theme.cpp	Modified
+@@ -122,13 +122,13 @@
+ 	}
+ 
+ #elif defined(__linux__)
++result = Dark;
++//	auto color = gdbus_read("color-scheme");
++//	if      (color.find("uint32 1") != std::string::npos) result = Dark;
++//	else if (color.find("uint32 2") != std::string::npos) result = Light;
+ 
+-	auto color = gdbus_read("color-scheme");
+-	if      (color.find("uint32 1") != std::string::npos) result = Dark;
+-	else if (color.find("uint32 2") != std::string::npos) result = Light;
+-
+-	auto contrast = gdbus_read("contrast");
+-	if (contrast.find("uint32 1") != std::string::npos) result = static_cast<InterfaceTheme>(result | HighContrast);
++//	auto contrast = gdbus_read("contrast");
++//	if (contrast.find("uint32 1") != std::string::npos) result = static_cast<InterfaceTheme>(result | HighContrast);
+ 
+ #elif defined(__APPLE__)
+ 

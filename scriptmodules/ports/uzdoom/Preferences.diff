@@ -1,0 +1,131 @@
+diff -ur a/src/common/audio/sound/i_sound.cpp b/src/common/audio/sound/i_sound.cpp
+--- a/src/common/audio/sound/i_sound.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/common/audio/sound/i_sound.cpp	Modified
+@@ -80,7 +80,7 @@
+ // Maximum volume of all audio
+ //==========================================================================
+ 
+-CUSTOM_CVAR(Float, snd_mastervolume, 0.5f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
++CUSTOM_CVAR(Float, snd_mastervolume, 1.f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
+ {
+ 	if (self < 0.f)
+ 		self = 0.f;
+diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
+--- a/src/common/console/c_console.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/common/console/c_console.cpp	Modified
+@@ -126,7 +126,7 @@
+ static char *work = NULL;
+ static int worklen = 0;
+ 
+-CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
++CUSTOM_CVAR(Int, con_scale, 3, CVAR_ARCHIVE)
+ {
+ 	if (self < 0) self = 0;
+ }
+diff -ur a/src/common/rendering/v_video.cpp b/src/common/rendering/v_video.cpp
+--- a/src/common/rendering/v_video.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/common/rendering/v_video.cpp	Modified
+@@ -120,7 +120,7 @@
+ 	else notice = true;
+ }
+ 
+-CUSTOM_CVAR(Int, uiscale, 0, CVAR_ARCHIVE | CVAR_NOINITCALL)
++CUSTOM_CVAR(Int, uiscale, 2, CVAR_ARCHIVE | CVAR_NOINITCALL)
+ {
+ 	if (self < 0)
+ 	{
+diff -ur a/src/common/statusbar/base_sbar.cpp b/src/common/statusbar/base_sbar.cpp
+--- a/src/common/statusbar/base_sbar.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/common/statusbar/base_sbar.cpp	Modified
+@@ -45,7 +45,7 @@
+ IMPLEMENT_CLASS(DStatusBarCore, false, false)
+ IMPLEMENT_CLASS(DHUDFont, false, false);
+ 
+-CVAR(Color, crosshaircolor,     0xff0000, CVAR_ARCHIVE);
++CVAR(Color, crosshaircolor,     0x00ff1e, CVAR_ARCHIVE);
+ CVAR(Color, crosshaircolorFull, 0x00ff00, CVAR_ARCHIVE);
+ CVAR(Color, crosshaircolorMax,  0x7f7fff, CVAR_ARCHIVE);
+ CVAR(Bool, crosshairshowshealth, false, CVAR_HIDDEN);
+@@ -63,7 +63,7 @@
+ 	}
+ 	ALLOW_DEPRECATED((crosshairhealth = self), "for backwards compatibility");
+ };
+-CVARD(Float, crosshairscale, 1.0, CVAR_ARCHIVE, "changes the size of the crosshair");
++CVARD(Float, crosshairscale, 0.75, CVAR_ARCHIVE, "changes the size of the crosshair");
+ CVARD(Bool, crosshairgrow, false, CVAR_ARCHIVE, "grow crosshair upon pickup");
+ 
+ CUSTOM_CVARD(Float, hud_scalefactor, 1.f, CVAR_ARCHIVE, "changes the hud scale")
+diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
+--- a/src/console/c_notifybuffer.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/console/c_notifybuffer.cpp	Modified
+@@ -52,7 +52,7 @@
+ CVAR(Bool, con_centernotify, false, CVAR_ARCHIVE)
+ CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
+ 
+-CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 3, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
+ {
+ 	if (self < 0) self = 0;
+ }
+diff -ur a/src/g_game.cpp b/src/g_game.cpp
+--- a/src/g_game.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/g_game.cpp	Modified
+@@ -232,7 +232,7 @@
+ CVAR (Int,  nametagcolor,  CR_GOLD, CVAR_ARCHIVE);
+ CVAR (Bool, demo_compress, true,    CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
+ 
+-CVAR (Bool,  cl_run,     false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE); // Always run?
++CVAR (Bool,  cl_run,     true, CVAR_GLOBALCONFIG|CVAR_ARCHIVE); // Always run?
+ CVAR (Bool,  freelook,   true,  CVAR_GLOBALCONFIG|CVAR_ARCHIVE); // Always mlook?
+ CVAR (Bool,  lookstrafe, false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE); // Always strafe with mouse?
+ CVAR (Float, m_forward,  1.f,   CVAR_GLOBALCONFIG|CVAR_ARCHIVE);
+@@ -242,7 +242,7 @@
+ // behavior is preferred, but IMO that is so fast that it's practically unplayable...
+ CVAR (Float, cl_analog_sensitivity_yaw,   1.f,   CVAR_GLOBALCONFIG|CVAR_ARCHIVE);
+ CVAR (Float, cl_analog_sensitivity_pitch, 0.6f,  CVAR_GLOBALCONFIG|CVAR_ARCHIVE);
+-CVAR (Bool,  cl_analog_run,               true,  CVAR_GLOBALCONFIG|CVAR_ARCHIVE);
++CVAR (Bool,  cl_analog_run,               false,  CVAR_GLOBALCONFIG|CVAR_ARCHIVE);
+ CVAR (Bool,  cl_analog_straferun,         false, CVAR_GLOBALCONFIG|CVAR_ARCHIVE);
+ 
+ CVAR (Bool, teamplay, false, CVAR_SERVERINFO)
+@@ -284,7 +284,7 @@
+ CVAR (Bool, bot_allowspy, false, 0);
+ 
+ CVAR (Int, autosavenum, 0, CVAR_NOSET|CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
+-CVAR (Int, disableautosave, 0, CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
++CVAR (Int, disableautosave, 1, CVAR_ARCHIVE|CVAR_GLOBALCONFIG);
+ CVAR (Bool, saveloadconfirmation, true, CVAR_ARCHIVE | CVAR_GLOBALCONFIG); // [mxd]
+ 
+ CUSTOM_CVAR (Int, autosavecount, 4, CVAR_ARCHIVE|CVAR_GLOBALCONFIG)
+diff -ur a/src/g_statusbar/shared_sbar.cpp b/src/g_statusbar/shared_sbar.cpp
+--- a/src/g_statusbar/shared_sbar.cpp	Source 20260728-5.0-7b8bea80
++++ b/src/g_statusbar/shared_sbar.cpp	Modified
+@@ -72,7 +72,7 @@
+ EXTERN_CVAR(Bool, inter_subtitles)
+ EXTERN_CVAR(Bool, ui_screenborder_classic_scaling)
+ 
+-CVAR(Int, hud_scale, -1, CVAR_ARCHIVE);
++CVAR(Int, hud_scale, 0, CVAR_ARCHIVE);
+ CVAR(Bool, log_vgafont, false, CVAR_ARCHIVE);
+ CVAR(Bool, hud_oldscale, true, CVAR_ARCHIVE);
+ CVAR(Float, crosshair_offset_x, 0., CVAR_ARCHIVE);
+@@ -90,7 +90,7 @@
+ 
+ 
+ // Stretch status bar to full screen width?
+-CUSTOM_CVAR (Int, st_scale, -1, CVAR_ARCHIVE)
++CUSTOM_CVAR (Int, st_scale, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < -1)
+ 	{
+@@ -108,8 +108,8 @@
+ EXTERN_CVAR(Bool, hud_aspectscale)
+ 
+ CVAR (Bool, crosshairon, true, CVAR_ARCHIVE);
+-CVAR (Int, crosshair, 1, CVAR_ARCHIVE)
+-CVAR (Bool, crosshairforce, false, CVAR_ARCHIVE)
++CVAR (Int, crosshair, 2, CVAR_ARCHIVE)
++CVAR (Bool, crosshairforce, true, CVAR_ARCHIVE)
+ CUSTOM_CVAR(Int, am_showmaplabel, 2, CVAR_ARCHIVE)
+ {
+ 	if (self < 0 || self > 2) self = 2;

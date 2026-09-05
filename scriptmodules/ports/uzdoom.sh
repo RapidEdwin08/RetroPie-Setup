@@ -1,33 +1,39 @@
 #!/usr/bin/env bash
 
-# This file is part of The RetroPie Project
+# This file is part of RetroPie-Extra, a supplement to RetroPie.
+# For more information, please visit:
 #
-# The RetroPie Project is the legal property of its developers, whose names are
-# too numerous to list here. Please refer to the COPYRIGHT.md file distributed with this source.
+# https://github.com/RetroPie/RetroPie-Setup
+# https://github.com/Exarkuniv/RetroPie-Extra
+# https://github.com/RapidEdwin08/RetroPie-Setup
 #
-# See the LICENSE.md file at the top-level directory of this distribution and
-# at https://raw.githubusercontent.com/RetroPie/RetroPie-Setup/master/LICENSE.md
+# See the LICENSE file distributed with this source and at
+# https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup/master/ext/RetroPie-Extra/LICENSE
 #
 
 rp_module_id="uzdoom"
-rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v4.14.3 is the continuation of ZDoom and GZDoom"
+rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v5.0+ is the continuation of ZDoom and GZDoom"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
-rp_module_repo="git https://github.com/UZDoom/UZDoom.git 4.14.3 :_get_commit_uzdoom"
+rp_module_repo="git https://github.com/UZDoom/UZDoom.git :_get_branch_uzdoom :_get_commit_uzdoom"
 rp_module_section="opt"
 rp_module_flags="sdl2 !armv6"
 
-function _get_commit_uzdoom() {
-    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
-    local branch_tag=4.14.3
-    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
+function _get_branch_uzdoom() {
+    local branch_tag=5.0.0
 
-    echo $branch_commit
-    #echo 835be65f; # 20251028 Change default texture filtering to None - Trilinear
-    #echo 1cb7598a; # 20251128 This is 4.14.3
+    echo $branch_tag
 }
 
-function _get_version_zmusic_uzdoom() {
-    echo "1.3.0"
+function _get_commit_uzdoom() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in UZDoom Console
+    local branch_tag=$(_get_branch_uzdoom)
+    local branch_commit="$(git ls-remote https://github.com/UZDoom/UZDoom.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    #echo b4c521ec; # 20251014 Change default texture filtering to None - Trilinear
+    #echo 0ffcba95; # 20260413 Add auto-theme detection for linux #5.0 # Introduced gdbus timeout at Start-Up on KMSDRM
+    #echo 7b8bea80; # 20260728 This is 5.0.0-rc.1
+    #echo 292cf420; # 20260828 This is 5.0.0
+    echo $branch_commit
 }
 
 function depends_uzdoom() {
@@ -40,46 +46,82 @@ function depends_uzdoom() {
         libopenal-dev libjpeg-dev libgl1-mesa-dev libasound2-dev pkg-config
         zlib1g-dev)
     local depends=(libsdl2-dev libvpx-dev libwebp-dev)
+    local depends=(build-essential libgtk2.0-dev waylandpp-dev ninja-build)
     getDepends "${depends[@]}"
 }
 
 function sources_uzdoom() {
     gitPullOrClone
 
-    # Add option for testing old lighting modes to menu https://github.com/drfrag666/lzdoom/commit/afa94ae18673a9a91f1deda4b0e6564fb0223779
-    applyPatch "$md_data/0ld_lighting_modes.diff"
+    # 0ptional Apply JoyPad + Preference Tweaks
+    applyPatch "$md_data/JoyMappings.diff"
 
-    # Apply Single-Board-Computer Specific Tweaks
-    ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
+    # 0ffcba95 Introduced gdbus timeout at Start-Up on KMSDRM # gdbus takes too long and/or hits timeout on some systems. Don't call if not needed
+    isPlatform "kms" && applyPatch "$md_data/dark_theme_linux.diff" # result = Dark;
 
-    # Apply JoyPad Tweaks and Preferences
-    applyPatch "$md_data/01_sijl_tweaks.diff"
-    applyPatch "$md_data/02_JoyMappings_0SFA.diff"
-    applyPatch "$md_data/03_Preferences.diff"
+    # GLES2 for KMSDRM (-X11): BACKEND_OPENGLES # +vid_preferbackend 2
+    # OpenGL on KMSDRM (-X11): Unsupported OpenGL version. At least OpenGL 3.3 required to run UZDoom
+    # Vulkan on KMSDRM (-X11): ERROR: Could not restore CRTC # ERROR: Could not set videomode on CRTC # ERROR: Could not queue pageflip: -13 # Initialization of Vulkan failed: No Vulkan device found supports the minimum requirements of this application
+    # Vulkan on KMSDRM (+X11): Works but poor performance on Raspberry Pi aarch64
+    if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then ##applyPatch "$md_data/backend_default_gles2.diff"
+        sed -i 's+vid_preferbackend, BACKEND_DEFAULT,+vid_preferbackend, BACKEND_OPENGLES,+' "$md_build/src/common/rendering/v_video.cpp"
+    fi
 
-    # VSync On
+    ##! 0ptional Single-Board-Computer Specific Tweaks # Bring on Potato Mode already...
+    if ( isPlatform "rpi"* || isPlatform "aarch64" ); then ##applyPatch "$md_data/sbc_tweaks.diff"
+        sed -i 's+gl_fogmode, 2,+gl_fogmode, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_seamless, true,+gl_seamless, false,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_precache, false,+gl_precache, true,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_shadowmap_filter, 1,+gl_shadowmap_filter, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
+        sed -i 's+gl_shadowmap_quality, 1024,+gl_shadowmap_quality, 128,+' "$md_build/src/common/rendering/hwrenderer/data/hw_shadowmap.cpp"
+        sed -i 's+transsouls, 0.75f,+transsouls, 1.f,+' "$md_build/src/common/rendering/v_video.cpp"
+        sed -i 's+r_maxparticles, 4000,+r_maxparticles, 100,+' "$md_build/src/g_cvars.cpp"
+        sed -i 's+r_vanillatrans, 0,+r_vanillatrans, 1,+' "$md_build/src/r_data/r_vanillatrans.cpp"
+        sed -i 's+gl_light_particles, true,+gl_light_particles, false,+' "$md_build/src/rendering/hwrenderer/hw_dynlightdata.cpp"
+    fi
+
+    ##! 0ptional Preferences
+    if ( isPlatform "64bit" ); then ##applyPatch "$md_data/Preferences.diff"
+        sed -i 's+con_scale, 0,+con_scale, 3,+' "$md_build/src/common/console/c_console.cpp"
+        sed -i 's+uiscale, 0,+uiscale, 2,+' "$md_build/src/common/rendering/v_video.cpp"
+        sed -i 's+crosshaircolor,     0xff0000,+crosshaircolor,     0x00ff1e,+' "$md_build/src/common/statusbar/base_sbar.cpp"
+        sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.75,+' "$md_build/src/common/statusbar/base_sbar.cpp"
+        sed -i 's+con_scaletext, 0,+con_scaletext, 3,+' "$md_build/src/console/c_notifybuffer.cpp"
+        sed -i 's+cl_run,     false,+cl_run,     true,+' "$md_build/src/g_game.cpp"
+        sed -i 's+cl_analog_run,               true,+cl_analog_run,               false,+' "$md_build/src/g_game.cpp"
+        sed -i 's+disableautosave, 0,+disableautosave, 1,+' "$md_build/src/g_game.cpp"
+        sed -i 's+hud_scale, -1,+hud_scale, 0,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+st_scale, -1,+st_scale, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+crosshair, 1,+crosshair, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+crosshairforce, false,+crosshairforce, true,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
+        sed -i 's+snd_mastervolume, 0.5f,+snd_mastervolume, 1.f,+' "$md_build/src/common/audio/sound/i_sound.cpp"
+    fi
+
+    # 0ptional Haptics 0FF in Menus [MyHouse.wad]
+    sed -i 's+haptics_do_menus,  true,+haptics_do_menus,  false,+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    # 0ptional Haptics 0FF for Player Actions [Firing]
+    ##sed -i 's+haptics_do_action, true,+haptics_do_action, false,+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    # 0ptional Haptics Strength [0-10]
+    ##sed -i 's+haptics_strength, 10,+haptics_strength, 0,+' "$md_build/src/common/engine/m_haptics.cpp"
+
+    ##! 0ptional VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
         sed -i 's+vid_vsync, false,+vid_vsync, true,+' "$md_build/src/common/rendering/v_video.cpp"
     fi
 
-    # add 'ZMusic' repo
-    cd "$md_build"
-    gitPullOrClone zmusic https://github.com/ZDoom/ZMusic
-    ##gitPullOrClone zmusic https://github.com/ZDoom/ZMusic $(_get_version_zmusic_uzdoom)
-
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
 
-    # lzma assumes hardware crc support on arm which breaks when building on armv7
-    isPlatform "armv7" && applyPatch "$md_data/lzma_armv7_crc.diff"
-
-    # fix build with gcc 12 for armv8 on aarch64 kernel due to -ffast-math options
-    if isPlatform "armv8"; then
-        if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
-    fi
+    # Disable [i_exit_on_not_found] ERROR_ABORT [1]
+    sed -i 's+i_exit_on_not_found, REQUIRE_DEFAULT,+i_exit_on_not_found, 1,+' "$md_build/src/common/utility/findfile.cpp"
 
     # Apply Sector light mode
-    isPlatform "rpi3" && sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+    if isPlatform "rpi3"; then
+        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"
+        cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+    fi
 
     # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.
@@ -88,30 +130,25 @@ function sources_uzdoom() {
 }
 
 function build_uzdoom() {
-    # build 'ZMusic' first
-    pushd zmusic
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$md_build/release/zmusic" .
-    make
-    make install
-    popd
-
+    local make_jproc="-j$(nproc)"
+    isPlatform "rpi3" && make_jproc=''
+    rpSwap on 2304
     mkdir -p "$md_build/build"
     cd "$md_build/build"
     local params=(-DCMAKE_BUILD_TYPE=RelWithDebInfo) # options are: Debug Release RelWithDebInfo MinSizeRel
-    local params=(-DCMAKE_INSTALL_PREFIX="$md_inst" -DPK3_QUIET_ZIPDIR=ON -DDYN_OPENAL=ON -DCMAKE_PREFIX_PATH="$md_build/release/zmusic")
-    ! hasFlag "vulkan" && params+=(-DHAVE_VULKAN=OFF)
+    local params=(-DCMAKE_INSTALL_PREFIX="$md_inst" -DPK3_QUIET_ZIPDIR=ON -DDYN_OPENAL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_SHARED_LIBS=OFF -G Ninja)
+    ! isPlatform "vulkan" && params+=(-DHAVE_VULKAN=OFF)
+    isPlatform "vulkan" && params+=(-DHAVE_VULKAN=ON)
+    if ( isPlatform "vulkan" ) && ( isPlatform "kms" ) then params+=(-DVULKAN_USE_WAYLAND=0); fi
+    isPlatform "gles" && params+=(-DHAVE_GLES2=ON)
 
     cmake "${params[@]}" ..
-    cmake --build .
-    md_ret_require="$md_build/build/$md_id"
+    cmake --build . $make_jproc
+    rpSwap off
+    md_ret_require="$md_build/build/uzdoom"
 }
 
 function install_uzdoom() {
-    # 20251010 I'm tired of updating the libzmusic.so.1.* version...
-    local libzmusic_ver=libzmusic.so.$(_get_version_zmusic_uzdoom)
-    if [[ ! -f "$md_build/release/zmusic/lib/$libzmusic_ver" ]]; then libzmusic_ver="$(basename $(ls $md_build/release/zmusic/lib/libzmusic.so.1.*))"; fi
-    echo LIBZMUSIC.SO: [$libzmusic_ver]
-
     md_ret_files=(
         'build/brightmaps.pk3'
         'build/uzdoom'
@@ -120,9 +157,6 @@ function install_uzdoom() {
         'build/game_support.pk3'
         'build/game_widescreen_gfx.pk3'
         'build/soundfonts'
-        "release/zmusic/lib/libzmusic.so.1"
-        "release/zmusic/lib/$libzmusic_ver"
-        ##"release/zmusic/lib/libzmusic.so.$(_get_version_zmusic_uzdoom)"
         'README.md'
     )
 }
@@ -135,7 +169,10 @@ function add_games_uzdoom() {
     ##params+=("'+snd_mididevice -5'") # -5 FluidSynth # -2 Timidity++ # -3 OPL Synth Emulation
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
 
-    _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
+    # GLES2 for KMSDRM (-X11): BACKEND_OPENGLES # +vid_preferbackend 2
+    ##if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then params+=("+vid_preferbackend 2"); fi
+
+    _add_games_lr-prboom "$launcher_prefix $md_inst/uzdoom -iwad %ROM% ${params[*]}"
 }
 
 function configure_uzdoom() {
