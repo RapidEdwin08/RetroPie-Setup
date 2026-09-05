@@ -735,7 +735,7 @@ function game_data_godot-engine-v4() {
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/godot-engine-v4-rp-assets.tar.gz" "$romdir/godot-engine"
     if [[ ! -f "$romdir/godot-engine/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/godot-engine/gamelist.xml" ]]; then mv "$romdir/godot-engine/gamelist.xml.godot" "$romdir/godot-engine/gamelist.xml"; fi
     chown -R $__user:$__user "$romdir/godot-engine"
-    mv 'retropie.pkg' "$md_inst"
+    mv "$romdir/godot-engine/retropie.pkg" "$md_inst"
 }
 
 
