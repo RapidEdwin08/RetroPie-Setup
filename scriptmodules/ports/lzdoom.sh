@@ -10,20 +10,27 @@
 #
 
 rp_module_id="lzdoom"
-rp_module_desc="LZDoom (GZDoom Vintage) is a modder-friendly source port for the classic game DOOM\n\nLZDoom uses an OpenGL2 based renderer for better compatibility with lower-end computers\n\nLZDoom v4.14.3a is compatible with Newer Mods such as:\nMyHouse.wad"
+rp_module_desc="LZDoom (GZDoom Vintage) is a modder-friendly source port for the classic game DOOM\n\nLZDoom uses an OpenGL2 based renderer for better compatibility with lower-end computers\n\nLZDoom l4.14.4 is compatible with Newer Mods such as:\nMyHouse.wad"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/drfrag666/gzdoom/master/LICENSE"
-rp_module_repo="git https://github.com/drfrag666/lzdoom.git l4.14.3a :_get_commit_lzdoom"
+rp_module_repo="git https://github.com/drfrag666/lzdoom.git :_get_branch_lzdoom :_get_commit_lzdoom"
 rp_module_section="opt"
 rp_module_flags=""
 
+function _get_branch_lzdoom() {
+    local branch_tag=l4.14.4
+
+    echo $branch_tag
+}
+
 function _get_commit_lzdoom() {
     # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source - Prevent <unknown version> in LZDoom Console
-    local branch_tag=l4.14.3a
+    local branch_tag=$(_get_branch_lzdoom)
     local branch_commit="$(git ls-remote https://github.com/drfrag666/lzdoom.git $branch_tag HEAD | grep $branch_tag | tail -1 | awk '{ print $1}' | cut -c -8)"
 
-    echo $branch_commit
     #echo 0af10dc9; # 20251208 This is l4.14.3a - Fix VM Abort with Crusader A_CrusaderSweepLeft and Right pointers.
     #echo 0d3cc5bb; # 20251210 Revert "fixed DECORATE code generation for direct functions."
+    #echo 7fd44a96; # 20260710 - Bump version number.
+    echo $branch_commit
 }
 
 function _get_version_zmusic_lzdoom() {
@@ -40,9 +47,6 @@ function depends_lzdoom() {
 
 function sources_lzdoom() {
     gitPullOrClone
-
-    # lightning modes
-    sed -i 's+lightning modes+lighting modes+' "$md_build/wadsrc/static/language.def"
 
     # Apply Single-Board-Computer Specific Tweaks
     ( isPlatform "rpi"* || isPlatform "arm" ) && applyPatch "$md_data/00_sbc_tweaks.diff"
@@ -70,12 +74,13 @@ function sources_lzdoom() {
 
     # fix build with gcc 12 for armv8 on aarch64 kernel due to -ffast-math options
     if isPlatform "armv8"; then
-        if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
+        if [[ "$__gcc_version" -eq 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
 
     # Apply Sector light mode
     if isPlatform "arm" || isPlatform "rpi3"; then
-        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"
+        cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
     fi
 
     # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
@@ -135,7 +140,7 @@ function add_games_lzdoom() {
 
     isPlatform "kms" && params+=("-width %XRES%" "-height %YRES%")
 
-    _add_games_lr-prboom "$launcher_prefix $md_inst/$md_id -iwad %ROM% ${params[*]}"
+    _add_games_lr-prboom "$launcher_prefix $md_inst/lzdoom -iwad %ROM% ${params[*]}"
 }
 
 function configure_lzdoom() {
