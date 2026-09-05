@@ -78,7 +78,7 @@ function sources_uzdoom-414() {
     # add 'ZMusic' repo
     cd "$md_build"
     gitPullOrClone zmusic https://github.com/ZDoom/ZMusic
-    ##gitPullOrClone zmusic https://github.com/ZDoom/ZMusic $(_get_version_zmusic_uzdoom)
+    ##gitPullOrClone zmusic https://github.com/ZDoom/ZMusic $(_get_version_zmusic_uzdoom-414)
 
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
@@ -116,7 +116,7 @@ function build_uzdoom-414() {
 
 function install_uzdoom-414() {
     # 20251010 I'm tired of updating the libzmusic.so.1.* version...
-    local libzmusic_ver=libzmusic.so.$(_get_version_zmusic_uzdoom)
+    local libzmusic_ver=libzmusic.so.$(_get_version_zmusic_uzdoom-414)
     if [[ ! -f "$md_build/release/zmusic/lib/$libzmusic_ver" ]]; then libzmusic_ver="$(basename $(ls $md_build/release/zmusic/lib/libzmusic.so.1.*))"; fi
     echo LIBZMUSIC.SO: [$libzmusic_ver]
 
@@ -130,7 +130,7 @@ function install_uzdoom-414() {
         'build/soundfonts'
         "release/zmusic/lib/libzmusic.so.1"
         "release/zmusic/lib/$libzmusic_ver"
-        ##"release/zmusic/lib/libzmusic.so.$(_get_version_zmusic_uzdoom)"
+        ##"release/zmusic/lib/libzmusic.so.$(_get_version_zmusic_uzdoom-414)"
         'README.md'
     )
 }
@@ -149,7 +149,7 @@ function add_games_uzdoom-414() {
 function configure_uzdoom-414() {
     mkRomDir "ports/doom"
     mkRomDir "ports/doom/mods"
-    mkRomDir "ports/doom/uzdoom-saves"
+    mkRomDir "ports/doom/uzdoom-414-saves"
 
     moveConfigDir "$home/.config/$md_id" "$md_conf_root/doom"
 
