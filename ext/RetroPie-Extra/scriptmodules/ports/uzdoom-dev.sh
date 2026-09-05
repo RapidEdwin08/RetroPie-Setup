@@ -12,15 +12,14 @@
 #
 
 rp_module_id="uzdoom-dev"
-rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom v5.0.0+ is the continuation of ZDoom and GZDoom"
+rp_module_desc="UZDoom is a modern feature-rich source port for the classic game DOOM\n\nUZDoom-Dev targets the development branch"
 rp_module_licence="GPL3 https://raw.githubusercontent.com/ZDoom/uzdoom/master/LICENSE"
 rp_module_repo="git https://github.com/UZDoom/UZDoom.git :_get_branch_uzdoom-dev :_get_commit_uzdoom-dev"
 rp_module_section="exp"
 rp_module_flags="sdl2 !armv6"
 
 function _get_branch_uzdoom-dev() {
-    ##local branch_tag=trunk
-    local branch_tag=5.0
+    local branch_tag=trunk
 
     echo $branch_tag
 }
@@ -116,19 +115,14 @@ function sources_uzdoom-dev() {
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
     sed -i 's/IMPORTED_TARGET libw/IMPORTED_TARGET GLOBAL libw/' CMakeLists.txt
 
-    # lzma assumes hardware crc support on arm which breaks when building on armv7
-    isPlatform "armv7" && applyPatch "$md_data/lzma_armv7_crc.diff"
-
-    # fix build with gcc 12 for armv8 on aarch64 kernel due to -ffast-math options
-    if isPlatform "armv8"; then
-        if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
-    fi
-
     # Disable [i_exit_on_not_found] ERROR_ABORT [1]
     sed -i 's+i_exit_on_not_found, REQUIRE_DEFAULT,+i_exit_on_not_found, 1,+' "$md_build/src/common/utility/findfile.cpp"
 
     # Apply Sector light mode
-    isPlatform "rpi3" && sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"
+    if isPlatform "rpi3"; then
+        sed -i 's+gl_lightmode, 1,+gl_lightmode, 0,+' "$md_build/src/g_level.cpp"
+        cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+    fi
 
     # [+gl_lightmode] v4.11.x+ Lighting Modes https://www.doomworld.com/forum/topic/140628-so-gzdoom-has-replaced-its-sector-light-options/
     # 0 (Classic): Dark lighting model and weaker fading in bright sectors plus some added brightening near the current position. Requires GLSL features to be enabled.

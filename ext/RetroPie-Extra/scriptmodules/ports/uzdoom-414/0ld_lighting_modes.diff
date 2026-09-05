@@ -1,0 +1,67 @@
+diff -ur a/src/g_level.cpp b/src/g_level.cpp
+--- a/src/g_level.cpp	Source u4.14.3
++++ b/src/g_level.cpp	Modified
+@@ -148,12 +148,12 @@
+ 	}
+ }
+ 
+-CUSTOM_CVAR(Int, gl_maplightmode, -1, CVAR_NOINITCALL | CVAR_CHEAT) // this is just for testing. -1 means 'inactive'
++CUSTOM_CVARD(Int, gl_maplightmode, -1, CVAR_NOINITCALL, "This is just for testing the old lighting modes. -1 means 'inactive'")
+ {
+ 	if (self > 4 || self < -1) self = -1;
+ }
+ 
+-CUSTOM_CVARD(Int, gl_lightmode, 1, CVAR_ARCHIVE, "Select lighting mode. 2 is vanilla accurate, 1 is accurate to the ZDoom software renderer and 0 is a less demanding non-shader implementation")
++CUSTOM_CVARD(Int, gl_lightmode, 1, CVAR_ARCHIVE, "Select lighting mode. 2 is vanilla accurate, 1 is accurate to the ZDoom software renderer and 0 is without player light radius (Dark)")
+ {
+ 	if (self < 0 || self > 2) self = 1;
+ }
+diff -ur a/wadsrc/static/language.0 b/wadsrc/static/language.0
+--- a/wadsrc/static/language.0	Source u4.14.3
++++ b/wadsrc/static/language.0	Modified
+@@ -905,4 +905,12 @@
+ Allow Background Controller Input,JOYMNU_JOYENABLEINBACKGROUND,"This is enabled per-controller, it means to enable ""this"" controller in the background when GZDoom is not in focus.",,,,,Controller im Hintergrund aktivieren,,Permesi enigon de ludregilo fone,Permitir entrada del controlador en segundo plano,,,,Dopusti unos kontrolera u pozadini,,,,,,,,Permitir controle em segundo plano,,,Разрешить контроллер на фоне,,,,,,
+ Save Game Sorting Order,MISCMNU_SAVEORDER,Order to sort the list of saved games in the save and load game menu. This used to only be alphabetical.,,,,,Gespeicherte Spiele sortieren nach,,Ordo de konservitaj ludadoj,Orden de las partidas guardadas,,,,Redoslijed sortiranja spremljenih igara,,,,,,,,Ordem de jogos salvos,,,Порядок сортировки сохранений,,,,,,
+ Alphabetical,OPTVAL_ALPHABETICAL,,,,,,Alphabetisch,,Alfabeta,Alfabético,,,,Abecedni,,,,,,,,Alfabética,,,По алфавиту,,,,,,
+-Last Saved Time,OPTVAL_LASTSAVEDTIME,,,,,,Zuletzt gespeichert,,Laste konservita tempo,Guardado más reciente,,,,Posljednje spremljeno vrijeme,,,,,,,,Mais recente,,,Время последнего сохранения,,,,,,
+\ No newline at end of file
++Last Saved Time,OPTVAL_LASTSAVEDTIME,,,,,,Zuletzt gespeichert,,Laste konservita tempo,Guardado más reciente,,,,Posljednje spremljeno vrijeme,,,,,,,,Mais recente,,,Время последнего сохранения,,,,,,
++Test old lighting modes,GLPREFMNU_MAPLIGHTMODE,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Standard,OPTVAL_STANDARD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Bright,OPTVAL_BRIGHT,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Doom,OPTVAL_DOOM,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Dark,OPTVAL_DARK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Doom Legacy,OPTVAL_LEGACY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Build,OPTVAL_BUILD,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
++Software,OPTVAL_SOFTWARE,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+\ No newline at end of file
+diff -ur a/wadsrc/static/menudef.txt b/wadsrc/static/menudef.txt
+--- a/wadsrc/static/menudef.txt	Source u4.14.3
++++ b/wadsrc/static/menudef.txt	Modified
+@@ -2496,6 +2496,18 @@
+ 	2, "$OPTVAL_VANILLA"
+ }
+ 
++OptionValue "MapLightModes"
++{
++	-1, "Inactive"
++	0, "$OPTVAL_STANDARD"
++	1, "$OPTVAL_BRIGHT"
++	2, "$OPTVAL_DOOM"
++	3, "$OPTVAL_DARK"
++	4, "$OPTVAL_LEGACY"
++	5, "$OPTVAL_BUILD"
++	8, "$OPTVAL_SOFTWARE"
++}
++
+ OptionValue "Precision"
+ {
+ 	0, "$OPTVAL_SPEED"
+@@ -2657,6 +2669,7 @@
+ 	Submenu "$GLMNU_POSTPROCESS",				"PostProcessMenu"
+ 	StaticText " "
+ 	Option "$GLPREFMNU_SECLIGHTMODE",			gl_lightmode,					"LightingModes"
++	Option "$GLPREFMNU_MAPLIGHTMODE",			gl_maplightmode,				"MapLightModes"
+ 	Option "$GLPREFMNU_SWLMBANDED",				gl_bandedswlight,				"OnOff"
+ 	Option "$GLPREFMNU_FOGMODE",				gl_fogmode,						"FogMode"
+ 	Option "$GLPREFMNU_FOGFORCEFULLBRIGHT",		gl_brightfog,					"YesNo"

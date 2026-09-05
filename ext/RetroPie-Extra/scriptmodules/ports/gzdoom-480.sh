@@ -84,14 +84,16 @@ function sources_gzdoom-480() {
 
     # fix build with gcc 12 for armv8 on aarch64 kernel due to -ffast-math options
     if isPlatform "armv8" || isPlatform "aarch64"; then
-        if [[ "$__gcc_version" -ge 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
+        if [[ "$__gcc_version" -eq 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
 
     # Apply Sector light mode
     if isPlatform "arm" || isPlatform "rpi3"; then
-        sed -i 's+gl_lightmode, 3,+gl_lightmode, 2,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+        sed -i 's+gl_lightmode, 3,+gl_lightmode, 2,+' "$md_build/src/g_level.cpp"
+        cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
     else
-        sed -i 's+gl_lightmode, 3,+gl_lightmode, 8,+' "$md_build/src/g_level.cpp"; cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
+        sed -i 's+gl_lightmode, 3,+gl_lightmode, 8,+' "$md_build/src/g_level.cpp"
+        cat "$md_build/src/g_level.cpp" | grep ' gl_lightmode, '
     fi
 
     # [+gl_lightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/

@@ -63,7 +63,8 @@ function sources_lzdoom-388b() {
 
     # Apply Sector light mode
     if isPlatform "arm" || isPlatform "rpi3"; then
-        sed -i 's+gl_lightmode, 8 ,+gl_lightmode, 2 ,+' "$md_build/src/gl/renderer/gl_lightdata.cpp"; cat "$md_build/src/gl/renderer/gl_lightdata.cpp" | grep ' gl_lightmode, '
+        sed -i 's+gl_lightmode, 8 ,+gl_lightmode, 2 ,+' "$md_build/src/gl/renderer/gl_lightdata.cpp"
+        cat "$md_build/src/gl/renderer/gl_lightdata.cpp" | grep ' gl_lightmode, '
     fi
 
     # [+gl_lightmode] 0ld Lighting Modes https://www.doomworld.com/forum/topic/99002-what-is-your-favorite-sector-light-mode-for-gzdoom/
