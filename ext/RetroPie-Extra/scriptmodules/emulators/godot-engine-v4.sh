@@ -729,13 +729,13 @@ function game_data_godot-engine-v4() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'godot-engine_Portal2D = "godot-engine-3.2.3"' ; echo $?) == '1' ]]; then echo 'godot-engine_Portal2D = "godot-engine-3.2.3"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'godot-engine_turkey_puncher = "godot-engine-v4.4.1-stable"' ; echo $?) == '1' ]]; then echo 'godot-engine_turkey_puncher = "godot-engine-v4.4.1-stable"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
+    if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'godot-engine_SMB1R = "godot-engine-v4.6.3-stable"' ; echo $?) == '1' ]]; then echo 'godot-engine_SMB1R = "godot-engine-v4.6.3-stable"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
 
     # Artwork and gamelist.xml
-    if [[ ! -f "$romdir/godot-engine/media/image/Portal 2D.png" ]]; then
-        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/godot-engine-v4-rp-assets.tar.gz" "$romdir/godot-engine"
-        if [[ ! -f "$romdir/godot-engine/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/godot-engine/gamelist.xml" ]]; then mv "$romdir/godot-engine/gamelist.xml.godot" "$romdir/godot-engine/gamelist.xml"; fi
-        chown -R $__user:$__user "$romdir/godot-engine"
-    fi
+    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/godot-engine-v4-rp-assets.tar.gz" "$romdir/godot-engine"
+    if [[ ! -f "$romdir/godot-engine/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/godot-engine/gamelist.xml" ]]; then mv "$romdir/godot-engine/gamelist.xml.godot" "$romdir/godot-engine/gamelist.xml"; fi
+    chown -R $__user:$__user "$romdir/godot-engine"
+    mv 'retropie.pkg' "$md_inst"
 }
 
 
