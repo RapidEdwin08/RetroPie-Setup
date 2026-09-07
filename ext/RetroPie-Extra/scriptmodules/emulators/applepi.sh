@@ -88,11 +88,11 @@ function remove_applepi() {
 function configure_applepi() {
     mkRomDir "apple2"
 
-    addEmulator 1 "$md_id" "apple2" "$md_inst/applepi.sh %ROM%"
+    ( isPlatform "rpi"* || isPlatform "kms" ) && launch_prefix="XINIT:"
+    addEmulator 1 "$md_id" "apple2" "${launch_prefix}$md_inst/applepi.sh %ROM%"
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         local launch_prefix
-        ( isPlatform "rpi"* || isPlatform "kms" ) && launch_prefix="XINIT:"
         addEmulator 1 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh %ROM%"
     fi
 
