@@ -49,11 +49,14 @@ function sources_applepi() {
 }
 
 function build_applepi() {
+    # Buster Error: qmake: could not exec '/usr/lib/arm-linux-gnueabihf/qt4/bin/qmake': No such file or directory
+    export QT_SELECT=5
     pushd "$md_build"
     qmake -makefile applepi.pro
     make clean
     make
     popd
+    unset QT_SELECT
     md_ret_require="$md_build/bin/applepi"
 }
 
