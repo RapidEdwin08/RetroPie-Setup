@@ -959,7 +959,7 @@ _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
-Comment=A Remake/Celebration of the original Super Mario Bros. games
+Comment=A recreation of a mini hidden game from DOOM 3
 Exec=${sttp3_exec}
 Icon=$md_inst/turkey_puncher_104x128.xpm
 Terminal=false
