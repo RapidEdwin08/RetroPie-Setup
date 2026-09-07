@@ -92,7 +92,7 @@ function configure_applepi() {
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         local launch_prefix
-        isPlatform "kms" && launch_prefix="XINIT:"
+        ( isPlatform "rpi"* || isPlatform "kms" ) && launch_prefix="XINIT:"
         addEmulator 1 "$md_id-qjoy" "apple2" "${launch_prefix}$md_inst/applepi-qjoy.sh %ROM%"
     fi
 
