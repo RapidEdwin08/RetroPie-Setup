@@ -72,8 +72,8 @@ _EOF_
         chown "$__user":"$__group" "$romdir/love/mari0.love"
     fi
 
-    # Get DOOM'd
-    if [[ ! -f "$romdir/love/DOOM'd.love" ]]; then
+    # Get DOOM'd + Minesweeper
+    if [[ ! -f "$romdir/love/DOOM'd.love" ]] || [[ ! -f "$romdir/love/MinesweeperNES-like.love" ]]; then
         downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/ports/love-rp-assets.tar.gz" "$romdir/love"
         if [[ ! -f "$romdir/love/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/love/gamelist.xml" ]]; then mv "$romdir/love/gamelist.xml.love" "$romdir/love/gamelist.xml"; fi
         chown -R $__user:$__user -R "$romdir/love"
