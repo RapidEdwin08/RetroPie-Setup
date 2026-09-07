@@ -61,6 +61,7 @@ GODOT_VERSIONS=(
     "3.5.2"
 )
 
+# _current_pkg_repo_branch
 GODOT4_VERSIONS=(
     "4.2.2"
     "4.3"
@@ -739,16 +740,19 @@ function game_data_godot-engine-v4() {
         ##chown "$__user":"$__group" "$romdir/godot-engine/Portal 2D.pck"
     ##fi
 
+    # Artwork and gamelist.xml # retropie.pkg pkg_repo_branch
+    local _current_pkg_repo_branch=4.7.2-stable
+    if [[ $(cat "$md_inst/retropie.pkg" 2>/dev/null | grep -q $_current_pkg_repo_branch ; echo $?) == '1' ]]; then
+        downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/godot-engine-v4-rp-assets.tar.gz" "$romdir/godot-engine"
+        if [[ ! -f "$romdir/godot-engine/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/godot-engine/gamelist.xml" ]]; then mv "$romdir/godot-engine/gamelist.xml.godot" "$romdir/godot-engine/gamelist.xml"; fi
+        chown -R $__user:$__user "$romdir/godot-engine"
+        mv "$romdir/godot-engine/retropie.pkg" "$md_inst"
+    fi
+
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     ##if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'godot-engine_Portal2D = "godot-engine-3.2.3"' ; echo $?) == '1' ]]; then echo 'godot-engine_Portal2D = "godot-engine-3.2.3"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'godot-engine_turkey_puncher = "godot-engine-v4.4.1-stable"' ; echo $?) == '1' ]]; then echo 'godot-engine_turkey_puncher = "godot-engine-v4.4.1-stable"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'godot-engine_SMB1R = "godot-engine-v4.6.3-stable"' ; echo $?) == '1' ]]; then echo 'godot-engine_SMB1R = "godot-engine-v4.6.3-stable"' >> /opt/retropie/configs/all/emulators.cfg; chown $__user:$__user /opt/retropie/configs/all/emulators.cfg; fi
-
-    # Artwork and gamelist.xml
-    downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/godot-engine-v4-rp-assets.tar.gz" "$romdir/godot-engine"
-    if [[ ! -f "$romdir/godot-engine/gamelist.xml" ]] && [[ ! -f "/opt/retropie/configs/all/emulationstation/gamelists/godot-engine/gamelist.xml" ]]; then mv "$romdir/godot-engine/gamelist.xml.godot" "$romdir/godot-engine/gamelist.xml"; fi
-    chown -R $__user:$__user "$romdir/godot-engine"
-    mv "$romdir/godot-engine/retropie.pkg" "$md_inst"
 }
 
 
