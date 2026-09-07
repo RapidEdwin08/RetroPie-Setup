@@ -32,7 +32,7 @@ function _get_commit_applepi() {
 
 function depends_applepi() {
     local depends=(qt5-qmake libasound2-dev libpulse-dev qtdeclarative5-dev libqt5gamepad5-dev qtmultimedia5-dev)
-    isPlatform "kms" && depends+=(xorg matchbox-window-manager)
+    ( isPlatform "rpi"* || isPlatform "kms" ) && depends+=(xorg matchbox-window-manager)
     getDepends "${depends[@]}"
 }
 
