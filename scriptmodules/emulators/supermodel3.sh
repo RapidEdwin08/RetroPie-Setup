@@ -49,7 +49,8 @@ function sources_supermodel3() {
 
 function build_supermodel3() {
     make -f Makefiles/Makefile.UNIX clean
-    make -f Makefiles/Makefile.UNIX NET_BOARD=1 VERBOSE=1 ARCH="" OPT="$__default_cflags"
+    # Use make -j1 # https://github.com/trzy/Supermodel/issues/287
+    make -j1 -f Makefiles/Makefile.UNIX NET_BOARD=1 VERBOSE=1 ARCH="" OPT="$__default_cflags"
     md_ret_require="bin/supermodel"
 }
 
