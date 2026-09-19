@@ -23,7 +23,7 @@ function _get_commit_lr-genesis-plus-gx() {
 
     #echo ee71e47c; #20260331 add linux-aarch64 build (#401)
     #echo a7985a9c; #20260828 Fetch translations & Recreate libretro_core_options_intl.h
-    #echo c2838c7d; #20260821 Fetch translations & Recreate libretro_core_options_intl.h
+    #echo c2838c7d; #20260912 Fetch translations & Recreate libretro_core_options_intl.h
     echo $branch_commit
 }
 
