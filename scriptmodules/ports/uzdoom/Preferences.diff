@@ -6,7 +6,7 @@ diff -ur a/src/common/audio/sound/i_sound.cpp b/src/common/audio/sound/i_sound.c
  //==========================================================================
  
 -CUSTOM_CVAR(Float, snd_mastervolume, 0.5f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
-+CUSTOM_CVAR(Float, snd_mastervolume, 1.f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
++CUSTOM_CVAR(Float, snd_mastervolume, 0.75f, CVAR_ARCHIVE | CVAR_GLOBALCONFIG | CVAR_NOINITCALL)
  {
  	if (self < 0.f)
  		self = 0.f;
