@@ -1,17 +1,17 @@
 diff -ur a/src/common/engine/m_joy.cpp b/src/common/engine/m_joy.cpp
---- a/src/common/engine/m_joy.cpp	Source 20260728-5.0-7b8bea80
+--- a/src/common/engine/m_joy.cpp	Source 20260728-5.3-7910df71
 +++ b/src/common/engine/m_joy.cpp	Modified
 @@ -56,7 +56,7 @@
  EXTERN_CVAR(Bool, joy_dinput)
  EXTERN_CVAR(Bool, joy_xinput)
  
--extern const float JOYDEADZONE_DEFAULT = 0.1; // reduced from 0.25
-+extern const float JOYDEADZONE_DEFAULT = 0.20; // reduced from 0.25 // That 0G Xbox360 Stick Drift tho...
+-extern const float JOYDEADZONE_DEFAULT = 0.1f; // reduced from 0.25
++extern const float JOYDEADZONE_DEFAULT = 0.2f; // reduced from 0.25
  
- extern const float JOYSENSITIVITY_DEFAULT = 1.0;
+ extern const float JOYSENSITIVITY_DEFAULT = 1.0f;
  
 diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbinds.txt
---- a/wadsrc/static/engine/commonbinds.txt	Source 20260728-5.0-7b8bea80
+--- a/wadsrc/static/engine/commonbinds.txt	Source 20260728-5.3-7910df71
 +++ b/wadsrc/static/engine/commonbinds.txt	Modified
 @@ -59,10 +59,10 @@
  rstickright +right
@@ -45,23 +45,8 @@ diff -ur a/wadsrc/static/engine/commonbinds.txt b/wadsrc/static/engine/commonbin
  paddle_1 "slot 2"
  paddle_2 "slot 3"
  paddle_3 "slot 4"
-@@ -109,3 +110,14 @@
- mapbind dpaddown +am_pandown
- mapbind lshoulder +am_zoomout
- mapbind rshoulder +am_zoomin
-+
-+/* 0riginal D00M/Heretic Keyboard Inputs [NOT WASD] */
-+uparrow +forward
-+leftarrow +left
-+rightarrow +right
-+downarrow +back
-+, +moveleft
-+. +moveright
-+ctrl +attack
-+alt +strafe
-+/ +jump
 diff -ur a/wadsrc/static/engine/defbinds.txt b/wadsrc/static/engine/defbinds.txt
---- a/wadsrc/static/engine/defbinds.txt	Source 20260728-5.0-7b8bea80
+--- a/wadsrc/static/engine/defbinds.txt	Source 20260728-5.3-7910df71
 +++ b/wadsrc/static/engine/defbinds.txt	Modified
 @@ -6,10 +6,28 @@
  d +moveright
