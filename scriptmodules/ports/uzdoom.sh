@@ -17,7 +17,7 @@ rp_module_section="opt"
 rp_module_flags="sdl2 !armv6"
 
 function _get_branch_uzdoom() {
-    local branch_tag=5.0.0
+    local branch_tag=5.0.3
 
     echo $branch_tag
 }
@@ -31,6 +31,7 @@ function _get_commit_uzdoom() {
     #echo 0ffcba95; # 20260413 Add auto-theme detection for linux #5.0 # Introduced gdbus timeout at Start-Up on KMSDRM
     #echo 7b8bea80; # 20260728 This is 5.0.0-rc.1
     #echo 292cf420; # 20260828 This is 5.0.0
+    #echo 7910df71; # 20260923 This is 5.0.3
     echo $branch_commit
 }
 
