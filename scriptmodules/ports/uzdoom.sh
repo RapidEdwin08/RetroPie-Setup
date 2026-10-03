@@ -64,10 +64,12 @@ function sources_uzdoom() {
     # Vulkan on KMSDRM (+X11): Works but poor performance on Raspberry Pi aarch64
     if ( isPlatform "gles" || isPlatform "kms" ) && ( isPlatform "rpi"* || isPlatform "aarch64" ); then ##applyPatch "$md_data/backend_default_gles2.diff"
         sed -i 's+vid_preferbackend, BACKEND_DEFAULT,+vid_preferbackend, BACKEND_OPENGLES,+' "$md_build/src/common/rendering/v_video.cpp"
+        cat "$md_build/src/common/rendering/v_video.cpp" | grep ' vid_preferbackend, '
     fi
 
     ##! 0ptional Single-Board-Computer Specific Tweaks # Bring on Potato Mode already...
     if ( isPlatform "rpi"* || isPlatform "aarch64" ); then ##applyPatch "$md_data/sbc_tweaks.diff"
+        echo SET Single-Board-Computer Specific Tweaks
         sed -i 's+gl_fogmode, 2,+gl_fogmode, 0,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
         sed -i 's+gl_seamless, true,+gl_seamless, false,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
         sed -i 's+gl_precache, false,+gl_precache, true,+' "$md_build/src/common/rendering/hwrenderer/data/hw_cvars.cpp"
@@ -81,6 +83,7 @@ function sources_uzdoom() {
 
     ##! 0ptional Preferences
     if ( isPlatform "64bit" ); then ##applyPatch "$md_data/Preferences.diff"
+        echo SET Preferences
         sed -i 's+con_scale, 0,+con_scale, 3,+' "$md_build/src/common/console/c_console.cpp"
         sed -i 's+uiscale, 0,+uiscale, 2,+' "$md_build/src/common/rendering/v_video.cpp"
         sed -i 's+crosshaircolor,     0xff0000,+crosshaircolor,     0x00ff1e,+' "$md_build/src/common/statusbar/base_sbar.cpp"
@@ -93,7 +96,7 @@ function sources_uzdoom() {
         sed -i 's+st_scale, -1,+st_scale, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
         sed -i 's+crosshair, 1,+crosshair, 2,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
         sed -i 's+crosshairforce, false,+crosshairforce, true,+' "$md_build/src/g_statusbar/shared_sbar.cpp"
-        sed -i 's+snd_mastervolume, 0.5f,+snd_mastervolume, 1.f,+' "$md_build/src/common/audio/sound/i_sound.cpp"
+        sed -i 's+snd_mastervolume, 0.5f,+snd_mastervolume, 0.75f,+' "$md_build/src/common/audio/sound/i_sound.cpp"
     fi
 
     # 0ptional Haptics 0FF in Menus [MyHouse.wad]
@@ -108,6 +111,7 @@ function sources_uzdoom() {
     ##! 0ptional VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
         sed -i 's+vid_vsync, false,+vid_vsync, true,+' "$md_build/src/common/rendering/v_video.cpp"
+        cat "$md_build/src/common/rendering/v_video.cpp" | grep ' vid_vsync, '
     fi
 
     # workaround for Ubuntu 20.04 older vpx/wepm dev libraries
