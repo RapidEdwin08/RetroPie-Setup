@@ -124,11 +124,15 @@ function install_bin_armsx2() {
     echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/armsx2/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onend.sh
     mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
 
-    if [[ ! -f /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh ]]; then
-        mkdir -p /opt/retropie/configs/all/runcommand-menu
-        cp "CacheSX2Cleaner.sh" "/opt/retropie/configs/all/runcommand-menu"
-        chmod 755 /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh
-        chown $__user:$__user /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh
+    mkdir -p /opt/retropie/configs/all/runcommand-menu
+    rm -f /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh
+    cp "CacheSX2Cleaner.sh" "/opt/retropie/configs/all/runcommand-menu"
+    chmod 755 /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh
+    chown $__user:$__user /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh
+    
+    if [[ -f /home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh ]]; then
+        rm -f /home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh
+        cp "CacheSX2Cleaner.sh" "/home/$__user/RetroPie/retropiemenu/Utilities"
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
     mv 'retropie.pkg' "$md_inst"
