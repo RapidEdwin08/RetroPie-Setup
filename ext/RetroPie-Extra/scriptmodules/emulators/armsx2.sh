@@ -133,6 +133,7 @@ function install_bin_armsx2() {
     if [[ -f /home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh ]]; then
         rm -f /home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh
         cp "CacheSX2Cleaner.sh" "/home/$__user/RetroPie/retropiemenu/Utilities"
+        chown $__user:$__user "/home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh"
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
     mv 'retropie.pkg' "$md_inst"
