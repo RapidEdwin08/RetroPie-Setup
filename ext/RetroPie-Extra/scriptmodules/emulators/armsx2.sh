@@ -32,18 +32,21 @@ function depends_armsx2() {
 }
 
 function install_bin_armsx2() {
-    local nightlyNUM=nightly-20261003
-    local commitNUM=9d989ca933
-    local armsx2APP=ARMSX2-$nightlyNUM-$commitNUM-Linux-arm64-4K-pages.AppImage
+    local commitDATE=20261005
+    local commitFULL=8f6da1639fb10dcd4a43d84113d770b6edf2c0c1
+
+    local commitNUM=$(echo $commitFULL | cut -c1-10)
+    local armsx2APP=ARMSX2-nightly-$commitDATE-$commitNUM-Linux-arm64-4K-pages.AppImage
     local armsx2SDLdir="armsx2-linux-arm64-sdl-sha[$commitNUM]"
 
     mkdir "$md_build"; pushd "$md_build"
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/armsx2-rp-assets.tar.gz" "$md_build"
-    download "https://github.com/ARMSX2/ARMSX2/releases/download/$nightlyNUM/$armsx2APP" "$md_build"
+    download "https://github.com/ARMSX2/ARMSX2/releases/download/nightly-$commitDATE/$armsx2APP" "$md_build"
 
     if ( isPlatform "kms" ); then
-        downloadAndExtract "https://github.com/ARMSX2/ARMSX2/releases/download/$nightlyNUM/ARMSX2-$nightlyNUM-$commitNUM-Linux-arm64-SDL-handheld.tar.zst" "$md_build"
-        chmod 755 "$md_build/$armsx2SDLdir/armsx2-sdl"; rm -f "$md_build/$armsx2SDLdir/pcsx2-gsrunner"
+        downloadAndExtract "https://github.com/ARMSX2/ARMSX2/releases/download/nightly-$commitDATE/ARMSX2-nightly-$commitDATE-$commitNUM-Linux-arm64-SDL-handheld.tar.zst" "$md_build"
+        chmod 755 "$md_build/$armsx2SDLdir/armsx2-sdl"
+        rm -f "$md_build/$armsx2SDLdir/pcsx2-gsrunner"
         mv "$md_build/$armsx2SDLdir" "$md_inst"
     fi
 
@@ -136,6 +139,10 @@ function install_bin_armsx2() {
         chown $__user:$__user "/home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh"
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
+
+    sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$commitFULL\"+g" 'retropie.pkg'
+    sed -i "s+^pkg_repo_date=.*+pkg_repo_date=\"$commitDATE\"+g" 'retropie.pkg'
+    sed -i "s+^pkg_date=.*+pkg_date=\"$commitDATE\"+g" 'retropie.pkg'
     mv 'retropie.pkg' "$md_inst"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
