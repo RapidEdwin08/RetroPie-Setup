@@ -32,8 +32,8 @@ function depends_armsx2() {
 }
 
 function install_bin_armsx2() {
-    local commitDATE=20261005
-    local commitFULL=8f6da1639fb10dcd4a43d84113d770b6edf2c0c1
+    local commitDATE=20261006
+    local commitFULL=46c06fe7ca0f1cbe94aab8b27db2a35a2330b3d5
 
     local commitNUM=$(echo $commitFULL | cut -c1-10)
     local armsx2APP=ARMSX2-nightly-$commitDATE-$commitNUM-Linux-arm64-4K-pages.AppImage
@@ -120,9 +120,10 @@ function install_bin_armsx2() {
     chown -R $__user:$__user "$romdir/ps2"
 
     mv "sx2mcmanager.sh" "$md_inst"; chmod 755 "$md_inst/sx2mcmanager.sh"
-    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh; fi
-    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/armsx2/sx2mcmanager.sh onstart; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onstart.sh
-    mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    if [[ -f /opt/retropie/configs/all/runcommand-onlaunch.sh ]]; then cat /opt/retropie/configs/all/runcommand-onlaunch.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onlaunch.sh; fi
+    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/armsx2/sx2mcmanager.sh onlaunch; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onlaunch.sh
+    mv /dev/shm/runcommand-onlaunch.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onlaunch.sh
+
     if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh; fi
     echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/armsx2/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onend.sh
     mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
@@ -153,9 +154,13 @@ function remove_armsx2() {
     rm -f /usr/share/applications/ARMSX2.desktop
     rm -f "$home/Desktop/ARMSX2.desktop"
     rm -f "$romdir/ps2/+Start ARMSX2.z2"
-    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then # Clean up Legacy [sx2mcmanager] from runcommand-onstart.sh
         cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
         mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onlaunch.sh ]]; then
+        cat /opt/retropie/configs/all/runcommand-onlaunch.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onlaunch.sh
+        mv /dev/shm/runcommand-onlaunch.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onlaunch.sh
     fi
     if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then
         cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh
@@ -173,7 +178,8 @@ function configure_armsx2() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addEmulator 1 "$md_id" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen %ROM%"
+    addEmulator 0 "$md_id" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen %ROM%"
+    addEmulator 1 "$md_id+mcmanager" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen %ROM%"
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator 0 "$md_id-ui" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
@@ -183,6 +189,11 @@ function configure_armsx2() {
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
     if [[ $(cat /opt/retropie/configs/all/emulators.cfg | grep -q 'ps2_StartARMSX2 = "armsx2-ui' ; echo $?) == '1' ]]; then echo 'ps2_StartARMSX2 = "armsx2-ui"' >> /opt/retropie/configs/all/emulators.cfg; fi
     chown $__user:$__user /opt/retropie/configs/all/emulators.cfg
+
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then # Clean up Legacy [sx2mcmanager] from runcommand-onstart.sh
+        cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
+        mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    fi
 
     [[ "$md_mode" == "remove" ]] && remove_armsx2
 }
