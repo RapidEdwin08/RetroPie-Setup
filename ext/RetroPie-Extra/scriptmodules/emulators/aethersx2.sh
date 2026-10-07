@@ -145,8 +145,8 @@ function configure_aethersx2() {
     addSystem "ps2"
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addEmulator 0 "$md_id" "ps2" "$launch_prefix$md_inst/aethersx2.sh %ROM%"
     addEmulator 1 "$md_id+mcmanager" "ps2" "$launch_prefix$md_inst/aethersx2.sh %ROM%"
+    addEmulator 0 "$md_id" "ps2" "$launch_prefix$md_inst/aethersx2.sh %ROM%"
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator 0 "$md_id-editor" "ps2" "$launch_prefix$md_inst/aethersx2.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
