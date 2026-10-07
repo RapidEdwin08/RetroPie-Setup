@@ -39,7 +39,8 @@ function install_bin_pcsx2-x64() {
     #local pcsx2_ver="v2.0.2"; # 2f46e5a8 20240712
     #local pcsx2_ver="v2.4.0"; # e4af1c42 20250629
     #local pcsx2_ver="v2.6.3"; # bc8151d2 20260128
-    local pcsx2_ver="v2.8.1"; # d073d750 20260831
+    #local pcsx2_ver="v2.8.1"; # d073d750 20260831
+    local pcsx2_ver="v2.8.2"; # fd9d310c 20260904
 
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/pcsx2-x64-rp-assets.tar.gz" "$md_build"
     download "https://github.com/PCSX2/pcsx2/releases/download/${pcsx2_ver}/pcsx2-${pcsx2_ver}-linux-appimage-x64-Qt.AppImage" "$md_build"
@@ -89,9 +90,9 @@ function install_bin_pcsx2-x64() {
     chown -R $__user:$__user "$romdir/ps2"
 
     mv "sx2mcmanager.sh" "$md_inst"; chmod 755 "$md_inst/sx2mcmanager.sh"
-    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh; fi
-    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onstart; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onstart.sh
-    mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    if [[ -f /opt/retropie/configs/all/runcommand-onlaunch.sh ]]; then cat /opt/retropie/configs/all/runcommand-onlaunch.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onlaunch.sh; fi
+    echo 'if [[ "$1" == "ps2" ]]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onlaunch; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onlaunch.sh
+    mv /dev/shm/runcommand-onlaunch.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onlaunch.sh
     if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh; fi
     echo 'if [ "$(head -1 /dev/shm/runcommand.info)" == "ps2" ]; then bash /opt/retropie/emulators/pcsx2-x64/sx2mcmanager.sh onend; fi #For Use With [sx2mcmanager]' >> /dev/shm/runcommand-onend.sh
     mv /dev/shm/runcommand-onend.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onend.sh
@@ -113,9 +114,13 @@ function remove_pcsx2-x64() {
     rm -f /usr/share/applications/PCSX2.desktop
     rm -f "$home/Desktop/PCSX2.desktop"
     rm -f "$romdir/ps2/+Start PCSX2.z2"
-    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then # Clean up Legacy [sx2mcmanager] from runcommand-onstart.sh
         cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
         mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
+    fi
+    if [[ -f /opt/retropie/configs/all/runcommand-onlaunch.sh ]]; then
+        cat /opt/retropie/configs/all/runcommand-onlaunch.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onlaunch.sh
+        mv /dev/shm/runcommand-onlaunch.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onlaunch.sh
     fi
     if [[ -f /opt/retropie/configs/all/runcommand-onend.sh ]]; then
         cat /opt/retropie/configs/all/runcommand-onend.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onend.sh
@@ -130,11 +135,17 @@ function configure_pcsx2-x64() {
     addSystem "ps2"
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addEmulator 1 "$md_id" "ps2" "$launch_prefix$md_inst/pcsx2.sh %ROM%"
+    addEmulator 0 "$md_id" "ps2" "$launch_prefix$md_inst/pcsx2.sh %ROM%"
+    addEmulator 1 "$md_id+mcmanager" "ps2" "$launch_prefix$md_inst/pcsx2.sh %ROM%"
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator 0 "$md_id-editor" "ps2" "$launch_prefix$md_inst/pcsx2.sh --editor"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-editor+qjoypad" "ps2" "$launch_prefix$md_inst/pcsx2-qjoy.sh --editor"
+    fi
+
+    if [[ -f /opt/retropie/configs/all/runcommand-onstart.sh ]]; then # Clean up Legacy [sx2mcmanager] from runcommand-onstart.sh
+        cat /opt/retropie/configs/all/runcommand-onstart.sh | grep -v 'sx2mcmanager' > /dev/shm/runcommand-onstart.sh
+        mv /dev/shm/runcommand-onstart.sh /opt/retropie/configs/all; chown $__user:$__user /opt/retropie/configs/all/runcommand-onstart.sh
     fi
 
     [[ "$md_mode" == "remove" ]] && remove_pcsx2-x64
