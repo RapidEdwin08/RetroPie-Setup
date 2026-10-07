@@ -175,6 +175,7 @@ function configure_armsx2() {
         addEmulator 1 "$md_id-sdl+mcmanager" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES% %ROM%"
         addEmulator 0 "$md_id-sdl" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES% %ROM%"
         addEmulator 0 "$md_id-sdl-ui" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES%"
+        addEmulator 0 "$md_id-sdl-ui+mcmanager" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES%"
     fi
 
     local launch_prefix
