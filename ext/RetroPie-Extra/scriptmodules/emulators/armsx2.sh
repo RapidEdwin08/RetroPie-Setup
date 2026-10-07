@@ -172,14 +172,15 @@ function configure_armsx2() {
     addSystem "ps2"
 
     if ( isPlatform "kms" ); then
-        addEmulator 1 "$md_id-sdl" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES% %ROM%"
+        addEmulator 1 "$md_id-sdl+mcmanager" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES% %ROM%"
+        addEmulator 0 "$md_id-sdl" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES% %ROM%"
         addEmulator 0 "$md_id-sdl-ui" "ps2" "$md_inst/armsx2-sdl.sh --fullscreen-mode %XRES%x%YRES%"
     fi
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-    addEmulator 0 "$md_id" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen %ROM%"
     addEmulator 1 "$md_id+mcmanager" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen %ROM%"
+    addEmulator 0 "$md_id" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen %ROM%"
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
     addEmulator 0 "$md_id-ui" "ps2" "$launch_prefix$md_inst/armsx2.sh -bigpicture -fullscreen"
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
