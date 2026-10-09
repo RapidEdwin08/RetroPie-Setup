@@ -109,6 +109,7 @@ function install_bin_pcsx2-x64() {
         chown $__user:$__user /opt/retropie/configs/all/runcommand-menu/CacheSX2Cleaner.sh
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
+    sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"$pcsx2_ver\"+g" 'retropie.pkg'
     mv 'retropie.pkg' "$md_inst"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
