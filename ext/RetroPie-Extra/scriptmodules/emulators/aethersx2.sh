@@ -54,7 +54,7 @@ function install_bin_aethersx2() {
     sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini.aethersx2"
     sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini.aethersx2"
     sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini.aethersx2"
-    sed -i s+'ShowAdvancedSettings =.*'+'ShowAdvancedSettings = true'+g "PCSX2.ini.aethersx2"
+    sed -i s+'ShowAdvancedSettings =.*'+'ShowAdvancedSettings = false'+g "PCSX2.ini.aethersx2"
     sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini.aethersx2"
     sed -i s+'WarnAboutUnsafeSettings =.*'+'WarnAboutUnsafeSettings = false'+g "PCSX2.ini.aethersx2"
     sed -i s+'LoadTextureReplacements =.*'+'WarnAboutUnsafeSettings = true'+g "PCSX2.ini.aethersx2"
@@ -65,7 +65,7 @@ function install_bin_aethersx2() {
     if isPlatform "rpi"; then
         sed -i s+'^Renderer =.*'+'Renderer = 14'+g "PCSX2.ini.aethersx2" # -1 Auto 14 Vulkan
         ##sed -i s+'accurate_blending_unit =.*'+'accurate_blending_unit = 0'+g "PCSX2.ini.aethersx2" # Maybe 0 is too low... (it is)
-        sed -i s+'EECycleRate =.*'+'EECycleRate = -3'+g "PCSX2.ini.aethersx2" # -2 %60 -3 %50
+        sed -i s+'EECycleRate =.*'+'EECycleRate = -3'+g "PCSX2.ini.aethersx2" # -1 %75 -2 %60 -3 %50
         ##sed -i s+'EECycleSkip =.*'+'EECycleSkip = 2'+g "PCSX2.ini.aethersx2" # Do not use
         sed -i s+'EnableThreadPinning =.*'+'EnableThreadPinning = true'+g "PCSX2.ini.aethersx2"
         sed -i s+'vuThread =.*'+'vuThread = true'+g "PCSX2.ini.aethersx2"
@@ -116,6 +116,7 @@ function install_bin_aethersx2() {
         chown $__user:$__user "/home/$__user/RetroPie/retropiemenu/Utilities/CacheSX2Cleaner.sh"
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
+    mv 'retropie.pkg' "$md_inst"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
