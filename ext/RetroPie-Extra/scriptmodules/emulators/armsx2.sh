@@ -73,7 +73,7 @@ function install_bin_armsx2() {
     sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini.armsx2"
     sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini.armsx2"
     sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini.armsx2"
-    sed -i s+'ShowAdvancedSettings =.*'+'ShowAdvancedSettings = true'+g "PCSX2.ini.armsx2"
+    sed -i s+'ShowAdvancedSettings =.*'+'ShowAdvancedSettings = false'+g "PCSX2.ini.armsx2"
     sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini.armsx2"
     sed -i s+'WarnAboutUnsafeSettings =.*'+'WarnAboutUnsafeSettings = false'+g "PCSX2.ini.armsx2"
     sed -i s+'LoadTextureReplacements =.*'+'WarnAboutUnsafeSettings = true'+g "PCSX2.ini.armsx2"
