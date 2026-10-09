@@ -57,25 +57,23 @@ function install_bin_aethersx2() {
     sed -i s+'ShowAdvancedSettings =.*'+'ShowAdvancedSettings = true'+g "PCSX2.ini.aethersx2"
     sed -i s+'GameListGridView =.*'+'GameListGridView = true'+g "PCSX2.ini.aethersx2"
     sed -i s+'WarnAboutUnsafeSettings =.*'+'WarnAboutUnsafeSettings = false'+g "PCSX2.ini.aethersx2"
+    sed -i s+'LoadTextureReplacements =.*'+'WarnAboutUnsafeSettings = true'+g "PCSX2.ini.aethersx2"
     # Missing BIOS after [moveConfigDir] related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/aethersx2/bios] for PCSX2.ini
     sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini.aethersx2"
     sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini.aethersx2"
     # RPi Specific Tweaks
     if isPlatform "rpi"; then
-        sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 1'+g "PCSX2.ini.aethersx2"
-        sed -i s+'accurate_blending_unit =.*'+'accurate_blending_unit = 0'+g "PCSX2.ini.aethersx2" # Maybe 0 is too low...
-        sed -i s+'EECycleRate =.*'+'EECycleRate = -2'+g "PCSX2.ini.aethersx2"
-        sed -i s+'EECycleSkip =.*'+'EECycleSkip = 2'+g "PCSX2.ini.aethersx2"
+        sed -i s+'^Renderer =.*'+'Renderer = 14'+g "PCSX2.ini.aethersx2" # -1 Auto 14 Vulkan
+        ##sed -i s+'accurate_blending_unit =.*'+'accurate_blending_unit = 0'+g "PCSX2.ini.aethersx2" # Maybe 0 is too low... (it is)
+        sed -i s+'EECycleRate =.*'+'EECycleRate = -2'+g "PCSX2.ini.aethersx2" # -2 %60 -3 %50
+        ##sed -i s+'EECycleSkip =.*'+'EECycleSkip = 2'+g "PCSX2.ini.aethersx2" # Do not use
+        sed -i s+'EnableThreadPinning =.*'+'EnableThreadPinning = true'+g "PCSX2.ini.aethersx2"
         sed -i s+'vuThread =.*'+'vuThread = true'+g "PCSX2.ini.aethersx2"
         sed -i s+'vu1Instant =.*'+'vu1Instant = false'+g "PCSX2.ini.aethersx2" # Don't use Instant VU1 + Multi-Threaded VU1 Simultaneously
-        sed -i s+'paltex =.*'+'paltex = false'+g "PCSX2.ini.aethersx2"
-        sed -i s+'IntegerScaling =.*'+'IntegerScaling = true'+g "PCSX2.ini.aethersx2"
-        sed -i s+'filter =.*'+'filter = 1'+g "PCSX2.ini.aethersx2"
-        sed -i s+'Interpolation =.*'+'Interpolation = 4'+g "PCSX2.ini.aethersx2"
         sed -i s+'SyncToHostRefreshRate =.*'+'SyncToHostRefreshRate = false'+g "PCSX2.ini.aethersx2"
         sed -i s+'VsyncEnable =.*'+'VsyncEnable = 2'+g "PCSX2.ini.aethersx2"
         sed -i s+'VsyncQueueSize =.*'+'VsyncQueueSize = 2'+g "PCSX2.ini.aethersx2"
-        #sed -i s+'FramerateNTSC =.*'+'FramerateNTSC = 50'+g "PCSX2.ini.aethersx2" # Default is FramerateNTSC = 59.94
+        sed -i s+'^Backend =.*'+'Backend = pulse'+g "PCSX2.ini.aethersx2" # Audio
     fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini" ]]; then cp "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis/PCSX2.ini"; fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2" ]]; then mv "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis"; fi
