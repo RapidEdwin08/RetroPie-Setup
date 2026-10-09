@@ -65,7 +65,7 @@ function install_bin_aethersx2() {
     if isPlatform "rpi"; then
         sed -i s+'^Renderer =.*'+'Renderer = 14'+g "PCSX2.ini.aethersx2" # -1 Auto 14 Vulkan
         ##sed -i s+'accurate_blending_unit =.*'+'accurate_blending_unit = 0'+g "PCSX2.ini.aethersx2" # Maybe 0 is too low... (it is)
-        sed -i s+'EECycleRate =.*'+'EECycleRate = -2'+g "PCSX2.ini.aethersx2" # -2 %60 -3 %50
+        sed -i s+'EECycleRate =.*'+'EECycleRate = -3'+g "PCSX2.ini.aethersx2" # -2 %60 -3 %50
         ##sed -i s+'EECycleSkip =.*'+'EECycleSkip = 2'+g "PCSX2.ini.aethersx2" # Do not use
         sed -i s+'EnableThreadPinning =.*'+'EnableThreadPinning = true'+g "PCSX2.ini.aethersx2"
         sed -i s+'vuThread =.*'+'vuThread = true'+g "PCSX2.ini.aethersx2"
