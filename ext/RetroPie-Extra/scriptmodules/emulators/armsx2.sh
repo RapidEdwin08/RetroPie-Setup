@@ -32,8 +32,8 @@ function depends_armsx2() {
 }
 
 function install_bin_armsx2() {
-    local commitDATE=20261006
-    local commitFULL=46c06fe7ca0f1cbe94aab8b27db2a35a2330b3d5
+    local commitDATE=20261008
+    local commitFULL=b1f3196b9ea6aa4e89907b02dffd63b784d13ed2
 
     local commitNUM=$(echo $commitFULL | cut -c1-10)
     local armsx2APP=ARMSX2-nightly-$commitDATE-$commitNUM-Linux-arm64-4K-pages.AppImage
