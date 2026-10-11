@@ -60,7 +60,7 @@ function install_bin_pcsx2-x64() {
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
     sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
     sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.pcsx2" # I don't care what anyone says...
-    sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
+    ##sed -i s+'upscale_multiplier =.*'+'upscale_multiplier = 2'+g "PCSX2.ini.pcsx2"
     sed -i s+'EnablePerGameSettings =.*'+'EnablePerGameSettings = true'+g "PCSX2.ini.pcsx2"
     sed -i s+'StartFullscreen =.*'+'StartFullscreen = true'+g "PCSX2.ini.pcsx2"
     sed -i s+'ConfirmShutdown =.*'+'ConfirmShutdown = false'+g "PCSX2.ini.pcsx2"
