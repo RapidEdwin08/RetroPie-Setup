@@ -6,6 +6,7 @@
 # https://github.com/RetroPie/RetroPie-Setup
 # https://github.com/Exarkuniv/RetroPie-Extra
 # https://github.com/FollyMaddy/RetroPie-Share
+# https://github.com/DTEAM-1/Borked3DS-rpi
 # https://github.com/RapidEdwin08/RetroPie-Setup
 #
 # See the LICENSE file distributed with this source and at
@@ -18,9 +19,33 @@ rp_module_id="borked3ds"
 rp_module_desc="3DS Emulator borked3ds"
 rp_module_help="ROM Extension: .3ds .3dsx .elf .axf .cci .cxi .app\n\nCopy your 3DS roms to $romdir/3ds"
 rp_module_licence="GPL2 https://github.com/Borked3DS/Borked3DS/blob/master/license.txt"
+rp_module_repo="git :_get_repo_borked3ds master :_get_commit_borked3ds"
 rp_module_section="exp"
-rp_module_flags="64bit"
- 
+rp_module_flags="!all rpi4 rpi5 x86 !32bit"
+
+function _get_repo_borked3ds() {
+    local git_repo
+
+    git_repo=https://github.com/DTEAM-1/Borked3DS-rpi.git
+    isPlatform "rpi4" && git_repo=https://github.com/gvx64/Borked3DS-rpi.git
+
+    #git_repo=https://github.com/rtiangha/Borked3DS.git
+
+    echo $git_repo
+}
+
+function _get_commit_borked3ds() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local git_repo=$(_get_repo_borked3ds)
+    local branch_tag=master
+    local branch_commit="$(git ls-remote $git_repo $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    #echo 4d5cb16c; # 20261006 # DTEAM-1
+    #echo 41eca493; # 20261002 # gvx64
+    #echo 20c47a77; # 20250613 # rtiangha
+    echo $branch_commit
+}
+
 function depends_borked3ds() {
     if compareVersions $__gcc_version lt 7; then
         md_ret_errors+=("Sorry, you need an OS with gcc 7.0 or newer to compile borked3ds")
@@ -29,11 +54,16 @@ function depends_borked3ds() {
 
     local depends=(
         build-essential cmake clang clang-format libsdl2-dev libssl-dev libxcb-cursor-dev
-        qt6-l10n-tools qt6-tools-dev qt6-tools-dev-tools qt6-base-dev qt6-base-private-dev qt6-multimedia-dev libqt6sql6
+        qt6-l10n-tools qt6-tools-dev qt6-tools-dev-tools qt6-base-dev qt6-base-dev-tools qt6-base-private-dev qt6-multimedia-dev libqt6sql6
         libasound2-dev xorg-dev libx11-dev libxext-dev libpipewire-0.3-dev libsndio-dev libgl-dev
         libswscale-dev libavformat-dev libavcodec-dev libglut3.12 libglut-dev freeglut3-dev
         libvulkan-dev mesa-vulkan-drivers
     )
+
+    # DTEAM-1/Borked3DS-rpi
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/DTEAM-1/Borked3DS-rpi.git" ]]; then
+        depends+=(pkg-config ninja-build libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libevdev-dev libpulse-dev libboost-all-dev libcrypto++-dev)
+    fi
 
     # Additional libraries required for running
     depends+=(libinput-dev)
@@ -49,7 +79,9 @@ function depends_borked3ds() {
     fi
 
     # robin-map-dev is in the source and found when using https://github.com/rtiangha/Borked3DS.git
-    isPlatform "aarch64" && depends+=(robin-map-dev)
+    if [[ ! "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]]; then
+        depends+=(robin-map-dev)
+    fi
 
     # use libqt6core6t64 for Trixie or higher
     if compareVersions $__gcc_version lt 14; then
@@ -63,31 +95,7 @@ function depends_borked3ds() {
 }
 
 function sources_borked3ds() {
-#backup of all forks, replace in if function when needed
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-regression 
-#gitPullOrClone "$md_build" https://github.com/borked3ds/Borked3DS.git
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vulkan-validation
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git mobile-gpus
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git gpu-revert
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git opengles-dev
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git opengles-dev
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-revert
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-revert-mem-alloc
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-revert-0
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-revert-1
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-revert-2
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git vk-revert-3
-#gitPullOrClone "$md_build" https://github.com/Borked3DS/Borked3DS.git
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git opengles-dev-v2
-#gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git fix-gcc12
-#gitPullOrClone "$md_build" https://github.com/gvx64/Borked3DS-rpi.git
-
-    if isPlatform "aarch64"; then
-        gitPullOrClone "$md_build" https://github.com/gvx64/Borked3DS-rpi.git
-    else
-        gitPullOrClone "$md_build" https://github.com/rtiangha/Borked3DS.git
-    fi
+    gitPullOrClone
 
     #do this after cloning Borked3ds, otherwise the $md_build will already exist and cloning will fail
     #Borked3DS requires a cmake 3.5 as minimum, we will use the 4.0.2 binary when using Bookworm or lower
@@ -100,30 +108,182 @@ function sources_borked3ds() {
         fi
         mv cmake-4.0.2* cmake-4.0.2
     fi
+
+    ################################
+    # gvx64 (PI4): no source patching. The tree is built exactly as RetroPie-Extra builds
+    # it (system compiler), so the fixes are not needed.
+    ################################
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/DTEAM-1/Borked3DS-rpi.git" ]]; then
+        ################################
+        # FIX CMAKE PKGCONFIG BUG
+        ################################
+
+        if [ -f "$md_build/externals/cmake-modules/Findcryptopp.cmake" ]; then
+            sed -i '1ifind_package(PkgConfig)' \
+            "$md_build/externals/cmake-modules/Findcryptopp.cmake"
+        fi
+
+        ################################
+        # FIX CLANG -Werror INCOMPATIBILITY
+        #
+        # The fork sets -Werror in its cmake files, so Clang rejects code that GCC accepts.
+        # CMAKE_CXX_FLAGS cannot override a -Werror set by target_compile_options().
+        #   Fix 1: strip bare -Werror from every cmake file (-Werror=... forms are kept).
+        #   Fix 2: patch the two offending source files directly.
+        #
+        # TODO (packaging): the two source fixes should be committed to the repository and
+        # removed from here; if the upstream pattern changes, the sed silently does nothing.
+        ################################
+
+        find "$md_build" \( -name "CMakeLists.txt" -o -name "*.cmake" \) | \
+            xargs grep -l "\-Werror" 2>/dev/null | while read -r f; do
+            echo "Patching -Werror out of: $f"
+            sed -i 's/[[:space:]]-Werror[[:space:]]/ /g' "$f"
+            sed -i 's/[[:space:]]-Werror"/ "/g' "$f"
+            sed -i 's/-Werror\([^=]\)/\1/g; s/-Werror$//' "$f"
+        done
+
+        # Check: no bare -Werror may remain (-Werror=... is legitimate).
+        local werror_left
+        werror_left="$(grep -rn -- "-Werror" "$md_build" --include="CMakeLists.txt" --include="*.cmake" 2>/dev/null | grep -v -- "-Werror=" | wc -l)"
+        if [ "$werror_left" -ne 0 ]; then
+            echo "ATTENTION : $werror_left occurrence(s) of -Werror remain in the cmake files."
+        else
+            echo "-Werror: No empty -Werror remaining occurrence(s)."
+        fi
+
+        # Source fix 1: glsl_fs_shader_gen.cpp
+        # Logical '||' with a constant operand (GL_SHADER_IMAGE_ATOMIC is an int constant).
+        # Clang rejects it; bitwise '|' is equivalent here.
+        local fs_gen="$md_build/src/video_core/shader/generator/glsl_fs_shader_gen.cpp"
+        if [ -f "$fs_gen" ]; then
+            if grep -q "GLAD_GL_ARB_shader_image_load_store || GL_SHADER_IMAGE_ATOMIC" "$fs_gen"; then
+                sed -i 's/GLAD_GL_ARB_shader_image_load_store || GL_SHADER_IMAGE_ATOMIC/GLAD_GL_ARB_shader_image_load_store | GL_SHADER_IMAGE_ATOMIC/' "$fs_gen"
+                echo "Patched glsl_fs_shader_gen.cpp: || -> | for GL_SHADER_IMAGE_ATOMIC"
+            else
+                echo "NOTE: GL_SHADER_IMAGE_ATOMIC absent from glsl_fs_shader_gen.cpp (already corrected beforehand?)"
+            fi
+        fi
+
+        # Source fix 2: texture_decode.cpp
+        # Unused function 'MakeBlackAlpha': [[nodiscard]] -> [[maybe_unused]]
+        local tex_decode="$md_build/src/video_core/texture/texture_decode.cpp"
+        if [ -f "$tex_decode" ]; then
+            if grep -q "\[\[nodiscard\]\] constexpr Common::Vec4<u8> MakeBlackAlpha" "$tex_decode"; then
+                sed -i 's/\[\[nodiscard\]\] constexpr Common::Vec4<u8> MakeBlackAlpha/[[maybe_unused]] constexpr Common::Vec4<u8> MakeBlackAlpha/' "$tex_decode"
+                echo "Patched texture_decode.cpp: [[nodiscard]] -> [[maybe_unused]] for MakeBlackAlpha"
+            else
+                echo "NOTE: MakeBlackAlpha pattern missing from texture_decode.cpp (already corrected before?)"
+            fi
+        fi
+    fi
 }
  
 function build_borked3ds() {
-    local extra_build_options
-    isPlatform "aarch64" && extra_build_options="-DDYNARMIC_USE_BUNDLED_EXTERNALS=OFF"
+    cd "$md_build"
     mkdir build
     cd build
-    #Borked3DS requires a cmake 3.5 as minimum, we will use the 4.0.2 binary when using Bookworm or lower
-    if compareVersions $__gcc_version lt 14; then
-        $md_build/cmake-4.0.2/bin/cmake .. -DCMAKE_BUILD_TYPE=Release $extra_build_options
-        $md_build/cmake-4.0.2/bin/cmake --build . -- -j"$(nproc)"
-    else
-        cmake .. -DCMAKE_BUILD_TYPE=Release $extra_build_options
-        cmake --build . -- -j"$(nproc)"
+
+    local extra_build_options
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]] && ( isPlatform "aarch64" ); then
+        extra_build_options="-DDYNARMIC_USE_BUNDLED_EXTERNALS=OFF"
     fi
+
+    #Borked3DS requires a cmake 3.5 as minimum, we will use the 4.0.2 binary when using Bookworm or lower
+    local cmake_bin=cmake
+    if compareVersions $__gcc_version lt 14; then cmake_bin=$md_build/cmake-4.0.2/bin/cmake; fi
+
+    local jobs mem_mb
+    jobs="$(nproc)"
+    mem_mb="$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)"
+
+    # Pi4 4 GB: one job per core can run out of RAM on the big translation units.
+    if ( isPlatform "rpi4" ) && [ "$mem_mb" -lt 6000 ]; then
+        jobs=2
+        echo "Pi4 with less than 6 GB of RAM: ninja -j$jobs"
+    fi
+    # x86_64: GCC needs up to ~2 GB per job on the largest files; cap the jobs by RAM.
+    if ( ! isPlatform "aarch64" ) && [ $((mem_mb / 2000)) -lt "$jobs" ]; then
+        jobs=$((mem_mb / 2000))
+        [ "$jobs" -lt 1 ] && jobs=1
+        echo "x86_64 with $mem_mb MB of RAM: ninja -j$jobs"
+    fi
+
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]]; then
+        $cmake_bin .. -DCMAKE_BUILD_TYPE=Release $extra_build_options
+    elif ( ! isPlatform "aarch64" ); then # x86_64
+        ################################
+        # x86_64 / DTEAM-1 (v400): system compiler (CC/CXX respected if set), no -march at
+        # all: no ARM option, and a binary that runs on any x86_64 CPU (dynarmic and the
+        # shader JIT detect SSE/AVX at run time). The top CMakeLists computes its own
+        # SIMD_FLAGS before project(), so they are empty and add nothing.
+        # Libraries: the bundled submodules (what upstream ships for desktop Linux), except
+        # Qt and SDL2 which come from the system like on the Pi. USE_SYSTEM_LIBS=ON would
+        # require system dynarmic, glslang, cubeb, Catch2... that x86 distributions lack.
+        # -Werror is stripped in sources_borked3ds() and disabled here for GCC.
+        ################################
+        "$cmake_bin" .. \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS="-O3" \
+            -DCMAKE_CXX_FLAGS="-O3" \
+            -DENABLE_QT=ON \
+            -DENABLE_SDL2=ON \
+            -DENABLE_TESTS=OFF \
+            -DBORKED3DS_WARNINGS_AS_ERRORS=OFF \
+            -DUSE_SYSTEM_LIBS=OFF \
+            -DUSE_SYSTEM_QT=ON \
+            -DUSE_SYSTEM_SDL2=ON
+    elif ( isPlatform "rpi4" ); then
+        ################################
+        # PI4 / gvx64: OpenGL-GLES build, as in RetroPie-Extra: system compiler (GCC) and
+        # RetroPie's CFLAGS for the Cortex-A72. No +crypto: the Pi4 SoC has no ARMv8
+        # crypto extension (illegal instruction).
+        ################################
+        "$cmake_bin" .. \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DUSE_SYSTEM_QT=ON \
+            -DDYNARMIC_USE_BUNDLED_EXTERNALS=OFF
+    else
+        ################################
+        # PI5 / DTEAM-1: Clang, upstream notes that "Vulkan may crash if the executable was
+        # compiled with GCC". -Werror is stripped in sources_borked3ds() above.
+        # Bookworm: clang-16 (system clang 14 is too old)
+        # Trixie Pi5: Build Fails on Pi5 with -DUSE_SYSTEM_LIBS=ON
+        # Trixie Pi5: ninja build stopped without -DCMAKE_CXX_COMPILER_AR=$_ar and -DCMAKE_CXX_COMPILER_RANLIB=$_ranlib
+        ################################
+        local cc="clang" cxx="clang++"
+        # ninja: build stopped: subcommand [3/4] failed on Pi5 CMAKE_CXX_COMPILER_AR-NOTFOUND CMAKE_CXX_COMPILER_RANLIB-NOTFOUND
+        local _ar="/usr/bin/ar" _ranlib="/usr/bin/ranlib"
+        "$cmake_bin" .. \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER="$cc" \
+            -DCMAKE_CXX_COMPILER="$cxx" \
+            -DCMAKE_C_FLAGS="-march=armv8.2-a+crc+crypto -O3" \
+            -DCMAKE_CXX_FLAGS="-march=armv8.2-a+crc+crypto -O3" \
+            -DENABLE_QT=ON \
+            -DENABLE_SDL2=ON \
+            -DENABLE_TESTS=OFF \
+            -DCMAKE_CXX_COMPILER_AR="$_ar" \
+            -DCMAKE_CXX_COMPILER_RANLIB="$_ranlib" \
+            -DUSE_SYSTEM_QT=ON ##\
+            ##-DUSE_SYSTEM_LIBS=ON
+    fi
+
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]]; then
+        $cmake_bin --build . -- -j"$jobs" # rtiangha
+    else
+        ninja -j"$jobs" # DTEAM-1 / gvx64
+    fi
+
     md_ret_require="$md_build/build/bin"
 }
  
 function install_borked3ds() {
     md_ret_files=(
     'build/bin/Release/borked3ds'
-    #'build/bin/Release/borked3ds-cli'
-    #'build/bin/Release/borked3ds-room'
-    #'build/bin/Release/tests'
     )
 }
 
@@ -143,26 +303,164 @@ function remove_borked3ds() {
 }
 
 function configure_borked3ds() {
+    ################################
+    # MINIMAL SAVEDATA
+    #
+    # archive_source_sd_savedata.cpp mounts SaveData from
+    # sdmc/.../title/{high}/{low}/data/00000001/. Sonic Lost World reads network_id.dat
+    # at startup; if it is missing, the unhandled FILE_NOT_FOUND crashes the ARM thread.
+    #
+    # TODO (packaging): this is specific to the project's test games and does not belong
+    # in a distributable package.
+    ################################
+
+    local sdmc_base="/home/$__user/.local/share/borked3ds-emu/sdmc/Nintendo 3DS"
+    local sdmc_id0="00000000000000000000000000000000"
+    local sdmc_id1="00000000000000000000000000000000"
+    local sdmc="$sdmc_base/$sdmc_id0/$sdmc_id1"
+
+    # Sonic Lost World US (00040000000C8C00) — network_id.dat
+    # 16 bytes: LocalFriendCodeSeed (8 non-zero bytes) + NetworkID (8 bytes)
+    local sonic_us_data="$sdmc/title/00040000/000c8c00/data/00000001"
+    if [ ! -f "$sonic_us_data/network_id.dat" ]; then
+        mkdir -p "$sonic_us_data"
+        python3 -c "
+import struct
+data = struct.pack('<Q', 0x0123456789ABCDEF) + bytes(8)
+open('$sonic_us_data/network_id.dat', 'wb').write(data)
+" && echo "Created network_id.dat for Sonic Lost World US" \
+          || echo "WARNING: failed to create network_id.dat"
+    fi
+
+    # Sonic Lost World EU (00040000000C8D00) — same layout
+    local sonic_eu_data="$sdmc/title/00040000/000c8d00/data/00000001"
+    if [ ! -f "$sonic_eu_data/network_id.dat" ]; then
+        mkdir -p "$sonic_eu_data"
+        python3 -c "
+import struct
+data = struct.pack('<Q', 0x0123456789ABCDEF) + bytes(8)
+open('$sonic_eu_data/network_id.dat', 'wb').write(data)
+" && echo "Created network_id.dat for Sonic Lost World EU" \
+          || echo "WARNING: failed to create network_id.dat EU"
+    fi
+    chown -R $__user:$__user "$sdmc_base"
+
+    ################################
+    # VULKAN SHADER CACHE (v392): KEPT ACROSS REBUILDS
+    #
+    # The caches survive a rebuild, so areas already visited in a game never recompile
+    # (Luigi's Mansion 2 needs 1-2 s per new pipeline):
+    #   - <cache>/*.bin      : VkPipelineCache, validated by the driver itself (vendor, device,
+    #                          pipelineCacheUUID); a Mesa update simply invalidates it.
+    #   - <cache>/spirv/*.spv: GLSL -> SPIR-V results, keyed by a hash of the GLSL text, so a
+    #                          change in the shader generators produces new keys, never stale hits.
+    # Only the GLSL -> SPIR-V conversion itself can make old .spv files wrong (glslang version or
+    # vk_shader_util.cpp options). The spirv/ directory is therefore purged only when that key
+    # changes. BORKED3DS_PURGE_SHADER_CACHE=1 forces a full purge (cold measurements).
+    ################################
+    local vk_cache="/home/$__user/.local/share/borked3ds-emu/shaders/vulkan"
+    local spirv_key
+    spirv_key="$(git -C "$md_build" rev-parse HEAD:externals/glslang 2>/dev/null)-$(md5sum "$md_build/src/video_core/renderer_vulkan/vk_shader_util.cpp" 2>/dev/null | cut -c1-32)"
+    if [ -n "${BORKED3DS_PURGE_SHADER_CACHE:-}" ]; then
+        rm -rf "$vk_cache"
+        echo "Vulkan shader cache: full purge (BORKED3DS_PURGE_SHADER_CACHE)."
+    elif [ -d "$vk_cache" ]; then
+        if [ "$(cat "$vk_cache/.spirv_key" 2>/dev/null)" != "$spirv_key" ]; then
+            rm -rf "$vk_cache/spirv"
+            echo "Vulkan shader cache: kept, SPIR-V part purged (GLSL -> SPIR-V conversion changed)."
+        else
+            echo "Vulkan shader cache: kept ($(ls "$vk_cache"/spirv 2>/dev/null | wc -l) SPIR-V files)."
+        fi
+    fi
+    mkdir -p "$vk_cache"
+    echo "$spirv_key" > "$vk_cache/.spirv_key"
+    chown -R $__user:$__user "/home/$__user/.local/share/borked3ds-emu/shaders" 2>/dev/null
+    echo "=========================================================="
+    echo ""
+
+    ################################
+    # PI4 STARTING SETTINGS (v398): OpenGL with GLES
+    #
+    # The Pi4 GPU (V3D 4.2) has no usable desktop OpenGL nor Vulkan for this emulator: the
+    # renderer must start as OpenGL (graphics_api=1) with "Use OpenGL ES" ticked
+    # (use_gles=true). Both keys need the double write key=value + key\default=false,
+    # otherwise the code default wins.
+    # A key the user already set by hand (key\default=false) is left alone, and nothing
+    # else is touched (never the gamepad). The Pi5 and x86_64 need nothing here: Vulkan is
+    # the code default of the DTEAM-1 fork.
+    ################################
+    if ( isPlatform "rpi4" ); then
+        local qtcfg="/home/$__user/.config/borked3ds-emu/qt-config.ini"
+        mkdir -p "$(dirname "$qtcfg")"
+        python3 - "$qtcfg" <<'_EOF_'
+import os, sys
+path = sys.argv[1]
+wanted = [("graphics_api", "1"), ("use_gles", "true")]
+lines = open(path, encoding="utf-8").read().splitlines() if os.path.exists(path) else []
+
+# Locate the [Renderer] section (create it if absent).
+start = next((i for i, l in enumerate(lines) if l.strip() == "[Renderer]"), None)
+if start is None:
+    if lines and lines[-1].strip():
+        lines.append("")
+    lines.append("[Renderer]")
+    start = len(lines) - 1
+end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("[")), len(lines))
+
+def find(key):
+    for i in range(start + 1, end):
+        if lines[i].split("=", 1)[0] == key:
+            return i
+    return None
+
+for key, value in wanted:
+    d = find(key + "\\default")
+    if d is not None and lines[d].split("=", 1)[1].strip() == "false":
+        cur = find(key)
+        print("  %s : choix de l'utilisateur garde (%s)" % (key, lines[cur] if cur is not None else "?"))
+        continue
+    for k, v in ((key + "\\default", "false"), (key, value)):
+        i = find(k)
+        if i is None:
+            lines.insert(end, k + "=" + v)
+            end += 1
+        else:
+            lines[i] = k + "=" + v
+    print("  %s=%s (defaut Pi4)" % (key, value))
+
+open(path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
+_EOF_
+        echo "Pi4: OpenGL + GLES Settings configured in $qtcfg"
+    fi
+
     mkdir -p "$home/.config/borked3ds-emu"
-    mkdir -p "$md_conf_root/3ds/borked3ds"
-    moveConfigDir "$home/.config/borked3ds-emu" "$md_conf_root/3ds/borked3ds"
-    chown -R $__user:$__user "$md_conf_root/3ds/borked3ds"
+    mkdir -p "$md_conf_root/3ds/borked3ds-config"
+    moveConfigDir "$home/.config/borked3ds-emu" "$md_conf_root/3ds/borked3ds-config"
+    chown -R $__user:$__user "$md_conf_root/3ds/borked3ds-config"
+
+    mkdir -p "$home/.local/share/borked3ds-emu"
+    mkdir -p "$md_conf_root/3ds/borked3ds-local"
+    moveConfigDir "$home/.local/share/borked3ds-emu" "$md_conf_root/3ds/borked3ds-local"
+    chown -R $__user:$__user "$md_conf_root/3ds/borked3ds-local"
 
     mkRomDir "3ds"
-    ensureSystemretroconfig "3ds"
     local launch_prefix
-    local launch_extension
+
+    isPlatform "kms" && launch_prefix="XINIT-WM:"
+    addEmulator 1 "$md_id" "3ds" "$launch_prefix$md_inst/borked3ds -f %ROM%"
     isPlatform "kms" && launch_prefix="XINIT-WMC:"
-    #isPlatform "aarch64" && launch_extension="env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer;"
-    addEmulator 0 "$md_id-ui" "3ds" "$launch_extension$launch_prefix$md_inst/borked3ds"
-    addEmulator 1 "$md_id-roms" "3ds" "$launch_extension$launch_prefix$md_inst/borked3ds %ROM%"
-    #addEmulator 1 "$md_id-room" "3ds" "$launch_extension$launch_prefix$md_inst/borked3ds-room"
-    #addEmulator 2 "$md_id-cli" "3ds" "$launch_extension$launch_prefix$md_inst/borked3ds-cli"
-    #addEmulator 3 "$md_id-tests" "3ds" "$launch_extension$launch_prefix$md_inst/tests"
-    addSystem "3ds" "3ds" ".3ds .3dsx .elf .axf .cci .cxi .app .gui"
+    addEmulator 0 "${md_id}-ui" "3ds" "$launch_prefix$md_inst/borked3ds"
+    addEmulator 0 "${md_id}-ui-qt06" "3ds" "${launch_prefix}QT_SCALE_FACTOR=0.6 $md_inst/borked3ds" # DTEAM-1/Borked3DS-rpi
 
     if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
         addEmulator 0 "$md_id-ui+qjoypad" "3ds" "$launch_prefix$md_inst/borked3ds-qjoy.sh"
+        addEmulator 0 "$md_id-ui-qt06+qjoypad" "3ds" "${launch_prefix}QT_SCALE_FACTOR=0.6 $md_inst/borked3ds-qjoy.sh" # DTEAM-1/Borked3DS-rpi
+    fi
+
+    addSystem "3ds" "3ds" ".3ds .3dsx .elf .axf .cci .cxi .app .gui"
+
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]] && ( isPlatform "aarch64" ); then
+        [[ "$md_mode" == "install" ]] && patch_es_systems_cfg_borked3ds # rtiangha
     fi
 
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
@@ -230,69 +528,21 @@ _EOF_
     [[ "$md_mode" == "install" ]] && shortcuts_icons_borked3ds
 }
 
-function gui_borked3ds() {
-    #special charachters ■□▪▫▬▲►▼◄◊○◌●☺☻←↑→↓↔↕⇔
-    local csv=()
-    csv=(
-`□menu_item□□to_do□□□□□help_to_do□`
-'□Add/Remove GL_OES_texture_buffer (Mesa Extension Overide)□□patch_es_systems_cfg_borked3ds□□□□□printMsgs dialog "@gvx64:\nI added support for GL_OES_texture_buffer in Borked3ds-rpi. This is a GLES 3.2 extension that the Pi does not completely support, but the code in Borked3ds-rpi does not depend on the problematic portions of this extension and so we can tap into this GLES 3.2 functionality on the Pi by using an environment variable override. to launch within Retropie with GL_OES_texture_buffer support enabled, edit the contents of /etc/emulationstation/es_systems.cfg so that the 3DS entry appears as follows. This will theoretically give better performance than the fall-back code path that uses 2D texture LUTs and it should be more accelerated in games that have fog/lighting effects (that said, I am not noticing much of an improvement on my Pi4, maybe because it is GPU is too weak for it to matter)."□'
-# next are a few examples
-#'□Enable Gles□□iniConfig "=" "" "/home/$user/.config/borked3ds-emu/qt-config.ini";iniSet "use_gles" "true"□□□□□printMsgs dialog "NO HELP"□'
-#'□Disable Gles□□iniConfig "=" "" "/home/$user/.config/borked3ds-emu/qt-config.ini";iniSet "use_gles" "false"□□□□□printMsgs dialog "NO HELP"□'
-#'□Overwrite qt-config.ini from pastebin (@DTEAM)□□curl https://pastebin.com/raw/KXEmXpjQ > "/home/$user/.config/borked3ds-emu/qt-config.ini"□□□□□printMsgs dialog "NO HELP"□'
-    )
-    build_menu_borked3ds
-}
-
-function build_menu_borked3ds() {
-    local options=()
-    local default
-    local i
-    local run
-    IFS="□"
-    for i in ${!csv[@]}; do set ${csv[$i]}; options+=("$i" "$2");done
-    while true; do
-        local cmd=(dialog --colors --no-collapse --help-button --menu "Choose an option" 22 76 16)
-        local choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
-        default="$choice"
-        IFS="□"
-        if [[ -n "$choice" ]]; then
-            joy2keyStop
-            joy2keyStart 0x00 0x00 kich1 kdch1 0x20 0x71
-            clear
-            if [[ $choice == HELP* ]];then
-            run="$(set ${csv[${choice/* /}]};echo $9)"
-            else
-            run="$(set ${csv[$choice]};echo $4)"
-            fi
-            joy2keyStop
-            joy2keyStart
-            unset IFS
-        eval $run
-        joy2keyStart
-        else
-            break
-        fi
-    done
-    unset IFS
-}
-
 function patch_es_systems_cfg_borked3ds() {
-local patch_option
-local patch_msgs
-if [[ $(cat /etc/emulationstation/es_systems.cfg) == *"buffer;"* ]];then
-patch_msgs=Remove
-patch_option=-R
-else
-patch_msgs=Add
-patch_option=
-fi
-printMsgs dialog "$patch_msgs :\n'env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer'\nin /etc/emulationstation/es_systems.cfg\n\nJust use this option again to reverse !"
-patch $patch_option /etc/emulationstation/es_systems.cfg << _EOF_
+    local patch_option
+    local patch_msgs
+    if [[ ! $(cat /etc/emulationstation/es_systems.cfg) == *"buffer;"* ]];then # rtiangha aarch64
+        ##patch_msgs=Remove
+        ##patch_option=-R
+        patch_msgs=Add
+        patch_option=
+        printMsgs dialog "$patch_msgs :\n'env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer'\nin /etc/emulationstation/es_systems.cfg"
+        patch $patch_option /etc/emulationstation/es_systems.cfg << _EOF_
 @@ -1 +1 @@
 -    <command>/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ 3ds %ROM%</command>
 +    <command>env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer;/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ 3ds %ROM%</command>
 _EOF_
+    fi
 }
 
 function shortcuts_icons_borked3ds() {
