@@ -46,6 +46,10 @@ function sources_lzdoom-388b() {
     applyPatch "$md_data/02_JoyMappings_0SFA.diff"
     applyPatch "$md_data/03_Preferences.diff"
 
+    # $HOME/RetroPie/roms/ports/doom/screenshots
+    mkUserDir "$home/RetroPie/roms/ports/doom/screenshots"
+    sed -i 's+screenshot_dir, "",+screenshot_dir, "$HOME/RetroPie/roms/ports/doom/screenshots",+' "$md_build/src/m_misc.cpp"
+
     if isPlatform "arm"; then
         # patch the CMake build file to remove the ARMv8 options, we handle `gcc`'s CPU flags ourselves
         applyPatch "$md_data/01_remove_cmake_arm_options.diff"
