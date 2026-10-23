@@ -64,8 +64,8 @@ function install_bin_armsx2() {
     if [[ -d "$home/Desktop" ]]; then mv -f "ARMSX2.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/ARMSX2.desktop"; fi
     mv "ARMSX2-128x128.xpm" "$md_inst"; mv "PS2BIOSRequired.jpg" "$md_inst"
 
-    mkdir -p "$home/.config/ARMSX2/inis"
-    mkdir -p "$md_conf_root/ps2/ARMSX2"
+    mkUserDir "$home/.config/ARMSX2/inis"
+    mkUserDir "$md_conf_root/ps2/ARMSX2"
     # Basic Settings
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.armsx2"
     sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.armsx2" # I don't care what anyone says...
@@ -95,7 +95,7 @@ function install_bin_armsx2() {
         sed -i s+'^Backend =.*'+'Backend = SDL'+g "PCSX2.ini.armsx2" # Audio
     fi
     if [[ ! -f "$home/.config/ARMSX2/inis/PCSX2.ini" ]]; then cp "PCSX2.ini.armsx2" "$home/.config/ARMSX2/inis/PCSX2.ini"; fi
-    if [[ ! -f "$home/.config/ARMSX2/inis/PCSX2.ini.armsx2" ]]; then mv "PCSX2.ini.armsx2" "$home/.config/ARMSX2/inis"; fi
+    if [[ ! -f "$home/.config/ARMSX2/inis/PCSX2.ini.armsx2" ]]; then cp "PCSX2.ini.armsx2" "$home/.config/ARMSX2/inis/PCSX2.ini.armsx2"; fi
     if [[ ! -d "$home/.config/ARMSX2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/ARMSX2/bios"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
