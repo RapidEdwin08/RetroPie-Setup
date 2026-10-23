@@ -70,6 +70,10 @@ function sources_uzdoom-414() {
     applyPatch "$md_data/02_JoyMappings_0SFA.diff"
     applyPatch "$md_data/03_Preferences.diff"
 
+    # $HOME/RetroPie/roms/ports/doom/screenshots
+    mkUserDir "$home/RetroPie/roms/ports/doom/screenshots"
+    sed -i 's+screenshot_dir, "",+screenshot_dir, "$HOME/RetroPie/roms/ports/doom/screenshots",+' "$md_build/src/m_misc.cpp"
+
     # VSync On
     if ( isPlatform "kms" || isPlatform "mesa" ) || ( isPlatform "gl" || isPlatform "vulkan" ); then
         sed -i 's+vid_vsync, false,+vid_vsync, true,+' "$md_build/src/common/rendering/v_video.cpp"
