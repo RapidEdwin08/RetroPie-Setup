@@ -98,6 +98,10 @@ function sources_uzdoom-dev() {
         sed -i 's+snd_mastervolume, 0.5f,+snd_mastervolume, 1.f,+' "$md_build/src/common/audio/sound/i_sound.cpp"
     fi
 
+    # $HOME/RetroPie/roms/ports/doom/screenshots
+    mkUserDir "$home/RetroPie/roms/ports/doom/screenshots"
+    sed -i 's+screenshot_dir, "",+screenshot_dir, "$HOME/RetroPie/roms/ports/doom/screenshots",+' "$md_build/src/m_misc.cpp"
+
     # 0ptional Haptics 0FF in Menus [MyHouse.wad]
     sed -i 's+haptics_do_menus,  true,+haptics_do_menus,  false,+' "$md_build/src/common/engine/m_haptics.cpp"
 
