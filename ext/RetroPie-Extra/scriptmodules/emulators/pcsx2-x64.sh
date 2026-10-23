@@ -54,8 +54,8 @@ function install_bin_pcsx2-x64() {
     if [[ -d "$home/Desktop" ]]; then mv -f "PCSX2.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/PCSX2.desktop"; fi
     mv "PCSX2-128.xpm" "$md_inst"; mv "PS2BIOSRequired.jpg" "$md_inst"
 
-    mkdir -p "$home/.config/PCSX2/inis"
-    mkdir -p "$md_conf_root/ps2/PCSX2"
+    mkUserDir "$home/.config/PCSX2/inis"
+    mkUserDir "$md_conf_root/ps2/PCSX2"
     # Basic Settings
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.pcsx2"
     sed -i s+'EnableFastBoot =.*'+'EnableFastBoot = true'+g "PCSX2.ini.pcsx2"
@@ -73,8 +73,9 @@ function install_bin_pcsx2-x64() {
     # Missing BIOS after moveConfigDir related to [GameList] RecursivePaths [../../RetroPie/BIOS]; USE [$home/.config/PCSX2/bios] for PCSX2.ini
     sed -i s+'Bios =.*'+'Bios = bios'+g "PCSX2.ini.pcsx2"
     sed -i s+'MemoryCards =.*'+'MemoryCards = bios'+g "PCSX2.ini.pcsx2"
+
     if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini" ]]; then cp "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis/PCSX2.ini"; fi
-    if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2" ]]; then mv "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis"; fi
+    if [[ ! -f "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2" ]]; then cp "PCSX2.ini.pcsx2" "$home/.config/PCSX2/inis/PCSX2.ini.pcsx2"; fi
     if [[ ! -d "$home/.config/PCSX2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/PCSX2/bios"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
