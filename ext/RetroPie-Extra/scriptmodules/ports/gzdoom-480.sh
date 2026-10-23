@@ -51,6 +51,10 @@ function sources_gzdoom-480() {
     applyPatch "$md_data/02_JoyMappings_0SFA.diff"
     applyPatch "$md_data/03_Preferences.diff"
 
+    # $HOME/RetroPie/roms/ports/doom/screenshots
+    mkUserDir "$home/RetroPie/roms/ports/doom/screenshots"
+    sed -i 's+screenshot_dir, "",+screenshot_dir, "$HOME/RetroPie/roms/ports/doom/screenshots",+' "$md_build/src/m_misc.cpp"
+
     # remove clang-format directives # https://github.com/ZDoom/gzdoom/commit/37da5268e10804fc766b75c4d09a013f501faae4
     applyPatch "$md_data/clang_format.diff"
 
