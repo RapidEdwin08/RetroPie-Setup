@@ -45,8 +45,8 @@ function install_bin_aethersx2() {
     if [[ -d "$home/Desktop" ]]; then mv -f "AetherSX2.desktop" "$home/Desktop"; chown $__user:$__user "$home/Desktop/AetherSX2.desktop"; fi
     mv "AetherSX2-128.xpm" "$md_inst"; mv "PS2BIOSRequired.jpg" "$md_inst"
 
-    mkdir -p "$home/.config/aethersx2/inis"
-    mkdir -p "$md_conf_root/ps2/aethersx2"
+    mkUserDir "$home/.config/aethersx2/inis"
+    mkUserDir "$md_conf_root/ps2/aethersx2"
     # Basic Settings
     sed -i s+'/home/pi/'+"$home/"+g "PCSX2.ini.aethersx2"
     sed -i s+'AspectRatio =.*'+'AspectRatio = Stretch'+g "PCSX2.ini.aethersx2" # I don't care what anyone says...
@@ -76,7 +76,7 @@ function install_bin_aethersx2() {
         sed -i s+'^Backend =.*'+'Backend = pulse'+g "PCSX2.ini.aethersx2" # Audio
     fi
     if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini" ]]; then cp "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis/PCSX2.ini"; fi
-    if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2" ]]; then mv "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis"; fi
+    if [[ ! -f "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2" ]]; then cp "PCSX2.ini.aethersx2" "$home/.config/aethersx2/inis/PCSX2.ini.aethersx2"; fi
     if [[ ! -d "$home/.config/aethersx2/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.config/aethersx2/bios"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd001.ps2" ]]; then mv "Mcd001.ps2" "$home/RetroPie/BIOS"; fi
     if [[ ! -f "$home/RetroPie/BIOS/Mcd002.ps2" ]]; then mv "Mcd002.ps2" "$home/RetroPie/BIOS"; fi
