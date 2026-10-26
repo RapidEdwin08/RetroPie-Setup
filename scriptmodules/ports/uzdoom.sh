@@ -84,11 +84,11 @@ function sources_uzdoom() {
     ##! 0ptional Preferences
     if ( isPlatform "64bit" ); then ##applyPatch "$md_data/Preferences.diff"
         echo SET Preferences
-        sed -i 's+con_scale, 0,+con_scale, 3,+' "$md_build/src/common/console/c_console.cpp"
+        sed -i 's+con_scale, 0,+con_scale, 2,+' "$md_build/src/common/console/c_console.cpp"
         sed -i 's+uiscale, 0,+uiscale, 2,+' "$md_build/src/common/rendering/v_video.cpp"
         sed -i 's+crosshaircolor,     0xff0000,+crosshaircolor,     0x00ff1e,+' "$md_build/src/common/statusbar/base_sbar.cpp"
         sed -i 's+crosshairscale, 1.0,+crosshairscale, 0.75,+' "$md_build/src/common/statusbar/base_sbar.cpp"
-        sed -i 's+con_scaletext, 0,+con_scaletext, 3,+' "$md_build/src/console/c_notifybuffer.cpp"
+        sed -i 's+con_scaletext, 0,+con_scaletext, 2,+' "$md_build/src/console/c_notifybuffer.cpp"
         sed -i 's+cl_run,     false,+cl_run,     true,+' "$md_build/src/g_game.cpp"
         sed -i 's+cl_analog_run,               true,+cl_analog_run,               false,+' "$md_build/src/g_game.cpp"
         sed -i 's+disableautosave, 0,+disableautosave, 1,+' "$md_build/src/g_game.cpp"
