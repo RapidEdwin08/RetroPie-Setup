@@ -33,14 +33,14 @@ function depends_armsx2() {
 
 function install_bin_armsx2() {
     local stableVER=2.9
+    local stableDATE=20261026
     local commitSTABLE=023224576867a3846faedc7640911772c7783529
+    local armsx2APP=ARMSX2-$stableVER-Linux-arm64-4K-pages.AppImage
 
     # Nightly (SDL/KMS)
     local commitDATE=20261023
     local commitFULL=90126bdfea7a3ffb1fd288b2f7f0ae0b033af2d6
-
     local commitNUM=$(echo $commitFULL | cut -c1-10)
-    local armsx2APP=ARMSX2-$stableVER-Linux-arm64-4K-pages.AppImage
     local armsx2SDLdir="armsx2-linux-arm64-sdl-sha[$commitNUM]"
 
     mkdir "$md_build"; pushd "$md_build"
@@ -142,13 +142,13 @@ function install_bin_armsx2() {
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
 
-    # commit will reflect STABLE, date will reflect Nightly if SDL/KMS
     if ( isPlatform "kms" ); then
-        sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$commitFULL\"+g" 'retropie.pkg'
+        sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"$stableVER/Nightly-SDL-$commitNUM\"+g" 'retropie.pkg'
     else
-        sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$commitSTABLE\"+g" 'retropie.pkg'
+        sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"$stableVER\"+g" 'retropie.pkg'
     fi
-    sed -i "s+^pkg_repo_date=.*+pkg_repo_date=\"$commitDATE\"+g" 'retropie.pkg'
+    sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$commitSTABLE\"+g" 'retropie.pkg'
+    sed -i "s+^pkg_repo_date=.*+pkg_repo_date=\"$stableDATE\"+g" 'retropie.pkg'
     sed -i "s+^pkg_date=.*+pkg_date=\"$commitDATE\"+g" 'retropie.pkg'
     mv 'retropie.pkg' "$md_inst"
 
