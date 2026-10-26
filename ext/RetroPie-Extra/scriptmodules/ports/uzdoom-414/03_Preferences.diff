@@ -18,7 +18,7 @@ diff -ur a/src/common/console/c_console.cpp b/src/common/console/c_console.cpp
  static int worklen = 0;
  
 -CUSTOM_CVAR(Int, con_scale, 0, CVAR_ARCHIVE)
-+CUSTOM_CVAR(Int, con_scale, 4, CVAR_ARCHIVE)
++CUSTOM_CVAR(Int, con_scale, 2, CVAR_ARCHIVE)
  {
  	if (self < 0) self = 0;
  }
@@ -70,7 +70,7 @@ diff -ur a/src/console/c_notifybuffer.cpp b/src/console/c_notifybuffer.cpp
  CVAR(Bool, con_pulsetext, false, CVAR_ARCHIVE)
  
 -CUSTOM_CVAR(Int, con_scaletext, 0, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
-+CUSTOM_CVAR(Int, con_scaletext, 4, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
++CUSTOM_CVAR(Int, con_scaletext, 2, CVAR_ARCHIVE)		// Scale notify text at high resolutions?
  {
  	if (self < 0) self = 0;
  }

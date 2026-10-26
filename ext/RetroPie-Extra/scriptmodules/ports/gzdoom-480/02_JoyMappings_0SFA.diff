@@ -6,7 +6,7 @@ diff -ur a/src/common/platform/posix/sdl/i_joystick.cpp b/src/common/platform/po
  			else
  				info.Name.Format("Hat %d (%c)", (i-NumAxes)/2 + 1, (i-NumAxes)%2 == 0 ? 'x' : 'y');
 -			info.DeadZone = MIN_DEADZONE;
-+			info.DeadZone = 0.25f;
++			info.DeadZone = 0.20f;
  			info.Multiplier = 1.0f;
  			info.Value = 0.0;
  			info.ButtonValue = 0;
