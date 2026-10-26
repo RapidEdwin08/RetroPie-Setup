@@ -93,6 +93,10 @@ function sources_gzdoom-480() {
         if [[ "$__gcc_version" -eq 12 ]]; then applyPatch "$md_data/armv8_gcc12_fix.diff"; fi
     fi
 
+    # https://github.com/ZDoom/gzdoom/issues/2018
+    # https://github.com/flathub/com.moddb.TotalChaosRetro/blob/77fc27c2fb708577c52ec8c6f1b83d3c83b89a9a/gcc14.patch
+    if [[ "$__gcc_version" -ge 14 ]]; then applyPatch "$md_data/gcc14.patch"; fi
+
     # Apply Sector light mode
     if isPlatform "arm" || isPlatform "rpi3"; then
         sed -i 's+gl_lightmode, 3,+gl_lightmode, 2,+' "$md_build/src/g_level.cpp"
@@ -176,4 +180,3 @@ function configure_gzdoom-480() {
     [[ "$md_mode" == "install" ]] && game_data_lr-prboom
     add_games_${md_id}
 }
-
