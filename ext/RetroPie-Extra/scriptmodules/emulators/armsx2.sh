@@ -149,7 +149,7 @@ function install_bin_armsx2() {
     fi
     sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$commitSTABLE\"+g" 'retropie.pkg'
     sed -i "s+^pkg_repo_date=.*+pkg_repo_date=\"$stableDATE\"+g" 'retropie.pkg'
-    sed -i "s+^pkg_date=.*+pkg_date=\"$commitDATE\"+g" 'retropie.pkg'
+    sed -i "s+^pkg_date=.*+pkg_date=\"$stableDATE\"+g" 'retropie.pkg'
     mv 'retropie.pkg' "$md_inst"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
