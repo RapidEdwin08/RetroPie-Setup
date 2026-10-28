@@ -250,12 +250,16 @@ _EOF_
 function shortcuts_icons_mesen-ce() {
     local shortcut_name
     shortcut_name="MesenCE"
+
+    local shortcut_exec="$md_inst/mesence.sh"
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then shortcut_exec="$md_inst/mesence-qjoy.sh"; fi
+
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=Community fork of Mesen Multi-System Emulator
-Exec=$md_inst/Mesen
+Exec=$shortcut_exec
 Icon=$md_inst/MesenCE_64x64.xpm
 Terminal=false
 Type=Application
