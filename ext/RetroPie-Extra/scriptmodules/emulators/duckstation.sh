@@ -17,8 +17,18 @@ rp_module_id="duckstation"
 rp_module_desc="DuckStation - PlayStation 1, aka. PSX Emulator"
 rp_module_help="[DuckStation.AppImage]\nhttps://github.com/stenzek/duckstation/releases\n \nROM Extensions: .cue .cbn .chd .img .iso .m3u .mdf .pbp .toc .z .znx\n\nCopy your PSX roms to $romdir/psx\nCopy the required BIOS file to $biosdir\n \n\"PlayStation\" and \"PSX\" are registered trademarks of Sony Interactive Entertainment.\n \nThis project is not affiliated in any way with \nSony Interactive Entertainment."
 rp_module_licence="Duckstation https://raw.githubusercontent.com/stenzek/duckstation/master/LICENSE"
+rp_module_repo="git https://github.com/stenzek/duckstation.git latest :_get_commit_duckstation"
 rp_module_section="exp"
 rp_module_flags="!all arm aarch64 x86_64"
+
+function _get_commit_duckstation() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest
+    local branch_tag=latest
+    local branch_commit="$(git ls-remote https://github.com/stenzek/duckstation.git $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}')"
+
+    #echo dd4a0eb7; # 20261025 GPU/HW: Track dirty depth rect to shrink depth merges/clears
+    echo $branch_commit
+}
 
 function depends_duckstation() {
     local depends=(mesa-vulkan-drivers libvulkan-dev libsdl2-dev)
@@ -32,7 +42,7 @@ function depends_duckstation() {
 }
 
 function install_bin_duckstation() {
-    #local duckstation_version="v0.1-9226"
+    #local duckstation_version="v0.1-12083"
     local duckstation_version="latest"
     local duckstation_platform=armhf
     if [[ "$__platform_arch" == 'x86_64' ]]; then duckstation_platform=x64; fi
@@ -85,6 +95,12 @@ function install_bin_duckstation() {
     mv 'media/image/DuckStation.png' "$romdir/psx/media/image"; mv 'media/marquee/DuckStation.png' "$romdir/psx/media/marquee"; mv 'media/video/DuckStation.mp4' "$romdir/psx/media/video"
     if [[ ! -f "$romdir/psx/gamelist.xml" ]]; then mv 'gamelist.xml' "$romdir/psx"; else mv 'gamelist.xml' "$romdir/psx/gamelist.xml.duckstation"; fi
     chown -R $__user:$__user "$romdir/psx"
+
+    sed -i "s+^pkg_repo_type=.*+pkg_repo_type=\"${duckstation_appimage}\"+g" 'retropie.pkg'
+    sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$(_get_commit_duckstation)\"+g" 'retropie.pkg'
+    sed -i "s/^pkg_repo_date=.*/pkg_repo_date=\"$(date +%Y-%m-%dT%H:%M:%S%:z)\"/g" 'retropie.pkg'
+    mv 'retropie.pkg' "$md_inst"
+
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
     popd
 }
