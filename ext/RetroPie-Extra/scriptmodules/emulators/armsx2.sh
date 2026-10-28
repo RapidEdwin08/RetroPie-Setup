@@ -33,23 +33,23 @@ function depends_armsx2() {
 
 function install_bin_armsx2() {
     local stableVER=2.9
-    local stableDATE=20261026
+    local stableDATE='2026-10-26T14:16:28+00:00'
     local commitSTABLE=023224576867a3846faedc7640911772c7783529
     local armsx2APP=ARMSX2-$stableVER-Linux-arm64-4K-pages.AppImage
 
     # Nightly (SDL/KMS)
-    local commitDATE=20261023
-    local commitFULL=90126bdfea7a3ffb1fd288b2f7f0ae0b033af2d6
-    local commitNUM=$(echo $commitFULL | cut -c1-10)
-    local armsx2SDLdir="armsx2-linux-arm64-sdl-sha[$commitNUM]"
+    local nightlyDATE=20261028
+    local commitNIGHTLY=e3c7d2102e733c35b1bb34c4cff9223341dc035a
+    local nightlyNUM=$(echo $commitNIGHTLY | cut -c1-10)
+    local armsx2SDLdir="armsx2-linux-arm64-sdl-sha[$nightlyNUM]"
 
     mkdir "$md_build"; pushd "$md_build"
     downloadAndExtract "https://raw.githubusercontent.com/RapidEdwin08/RetroPie-Setup-Assets/main/emulators/armsx2-rp-assets.tar.gz" "$md_build"
-    ##download "https://github.com/ARMSX2/ARMSX2/releases/download/nightly-$commitDATE/$armsx2APP" "$md_build" # Nightly
+    ##download "https://github.com/ARMSX2/ARMSX2/releases/download/nightly-$nightlyDATE/$armsx2APP" "$md_build" # Nightly
     download "https://github.com/ARMSX2/ARMSX2/releases/download/$stableVER/$armsx2APP" "$md_build" # Stable
 
     if ( isPlatform "kms" ); then
-        downloadAndExtract "https://github.com/ARMSX2/ARMSX2/releases/download/nightly-$commitDATE/ARMSX2-nightly-$commitDATE-$commitNUM-Linux-arm64-SDL-handheld.tar.zst" "$md_build"
+        downloadAndExtract "https://github.com/ARMSX2/ARMSX2/releases/download/nightly-$nightlyDATE/ARMSX2-nightly-$nightlyDATE-$nightlyNUM-Linux-arm64-SDL-handheld.tar.zst" "$md_build"
         chmod 755 "$md_build/$armsx2SDLdir/armsx2-sdl"
         rm -f "$md_build/$armsx2SDLdir/pcsx2-gsrunner"
         mv "$md_build/$armsx2SDLdir" "$md_inst"
@@ -143,13 +143,13 @@ function install_bin_armsx2() {
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
 
     if ( isPlatform "kms" ); then
-        sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"$stableVER/Nightly-SDL-$commitNUM\"+g" 'retropie.pkg'
+        sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"Stable-$stableVER/Nightly-$nightlyDATE-SDL-$nightlyNUM\"+g" 'retropie.pkg'
     else
         sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"$stableVER\"+g" 'retropie.pkg'
     fi
     sed -i "s+^pkg_repo_commit=.*+pkg_repo_commit=\"$commitSTABLE\"+g" 'retropie.pkg'
-    sed -i "s+^pkg_repo_date=.*+pkg_repo_date=\"$stableDATE\"+g" 'retropie.pkg'
-    sed -i "s+^pkg_date=.*+pkg_date=\"$stableDATE\"+g" 'retropie.pkg'
+    sed -i "s/^pkg_repo_date=.*/pkg_repo_date=\"$stableDATE\"/g" 'retropie.pkg'
+    sed -i "s/^pkg_date=.*/pkg_date=\"$stableDATE\"/g" 'retropie.pkg'
     mv 'retropie.pkg' "$md_inst"
 
     if [[ -d "$md_build" ]]; then rm -Rf "$md_build"; fi
