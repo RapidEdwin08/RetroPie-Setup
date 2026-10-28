@@ -105,7 +105,6 @@ function install_bin_minecraft-pi-reborn() {
     if [[ ! -f "$romdir/ports/README-MCPI-Reborn.txt" ]]; then cp "$home/.minecraft-pi/README-MCPI-Reborn.txt" "$romdir/ports"; fi
     chown -R $__user:$__user "$romdir/ports"
 
-    sed -i "s+url=.*+url=\"https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn/releases/download/${minecraftpi_version}/${minecraftpi_appimage}\"+g" 'retropie.pkg'
     mv 'retropie.pkg' "$md_inst"
 
     popd
