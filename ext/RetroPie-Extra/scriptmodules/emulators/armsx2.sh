@@ -32,14 +32,14 @@ function depends_armsx2() {
 }
 
 function install_bin_armsx2() {
-    local stableVER=2.9
-    local stableDATE='2026-10-26T14:16:28+00:00'
-    local commitSTABLE=023224576867a3846faedc7640911772c7783529
+    local stableVER=2.9.1
+    local stableDATE='2026-10-28T21:26:28+00:00'
+    local commitSTABLE=ce3743fa039f9aea4c53e4f2fd7d200043dc86ab
     local armsx2APP=ARMSX2-$stableVER-Linux-arm64-4K-pages.AppImage
 
     # Nightly (SDL/KMS)
-    local nightlyDATE=20261028
-    local commitNIGHTLY=e3c7d2102e733c35b1bb34c4cff9223341dc035a
+    local nightlyDATE=20261029
+    local commitNIGHTLY=aa52a1fdc7cd03fb02bd404ebaa9940944e7fc60
     local nightlyNUM=$(echo $commitNIGHTLY | cut -c1-10)
     local armsx2SDLdir="armsx2-linux-arm64-sdl-sha[$nightlyNUM]"
 
@@ -142,6 +142,7 @@ function install_bin_armsx2() {
     fi
     mv "CacheSX2Cleaner.sh" "$md_inst"; chmod 755 "$md_inst/CacheSX2Cleaner.sh"
 
+    sed -i "s+^pkg_repo_type=.*+pkg_repo_type=\"$armsx2APP\"+g" 'retropie.pkg'
     if ( isPlatform "kms" ); then
         sed -i "s+^pkg_repo_branch=.*+pkg_repo_branch=\"Stable-$stableVER/Nightly-$nightlyDATE-SDL-$nightlyNUM\"+g" 'retropie.pkg'
     else
