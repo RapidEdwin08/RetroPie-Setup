@@ -67,20 +67,25 @@ function install_bin_duckstation() {
     if [[ ! -d "$home/.local/share/duckstation" ]]; then mkdir "$home/.local/share/duckstation"; fi
     sed -i 's+SearchDirectory\ =.*+SearchDirectory\ =\ ../../../../../home/pi/RetroPie/BIOS+g' "settings.ini"
     sed -i s+'/home/pi/'+"$home/"+g "settings.ini"
+
+    sed -i 's/FullscreenUITheme\ =.*/FullscreenUITheme\ =\ Dark/g' "settings.ini"
+    sed -i 's/FullscreenUIBackground\ =.*/FullscreenUIBackground\ =\ StaticGray/g' "settings.ini"
+
     if [[ "$__platform_arch" == 'x86_64' ]]; then
         sed -i 's/VSync\ =.*/VSync\ =\ true/g' "settings.ini"
-        sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
-        sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 3/g' "settings.ini"
+        ##sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
+        sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 2/g' "settings.ini"
     fi
     if isPlatform "aarch64"; then
+        isPlatform "vulkan" && sed -i 's/Renderer\ =.*/Renderer\ =\ Vulkan/g' "settings.ini"
         sed -i 's/VSync\ =.*/VSync\ =\ true/g' "settings.ini"
-        sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
-        sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 2/g' "settings.ini"
+        ##sed -i 's/SyncToHostRefreshRate\ =.*/SyncToHostRefreshRate\ =\ true/g' "settings.ini" # Questionable
+        sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 1/g' "settings.ini"
     fi
     if isPlatform "rpi5" || isPlatform "rpi4"; then
         sed -i 's/Renderer\ =.*/Renderer\ =\ Vulkan/g' "settings.ini"
         sed -i 's/Adapter\ =.*/Adapter\ =\ V3D\ 7.1.10/g' "settings.ini"
-        #if isPlatform "rpi5"; then sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 3/g' "settings.ini"; fi
+        #if isPlatform "rpi5"; then sed -i 's/ResolutionScale\ =.*/ResolutionScale\ =\ 2/g' "settings.ini"; fi
     fi
     if [[ ! -f "$home/.local/share/duckstation/settings.ini" ]]; then mv "settings.ini" "$home/.local/share/duckstation"; fi
     if [[ ! -d "$home/.local/share/duckstation/bios" ]]; then ln -s "$home/RetroPie/BIOS" "$home/.local/share/duckstation/bios"; fi
