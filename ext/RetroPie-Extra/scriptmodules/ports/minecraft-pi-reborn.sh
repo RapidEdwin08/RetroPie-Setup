@@ -40,7 +40,7 @@ function depends_minecraft-pi-reborn() {
 
 function install_bin_minecraft-pi-reborn() {
     #local minecraftpi_version="latest"
-    local minecraftpi_version="3.0.3"
+    local minecraftpi_version="3.0.4"
     local minecraftpi_platform=armhf
     if [[ "$__platform_arch" == 'x86_64' ]]; then minecraftpi_platform=amd64; fi
     if isPlatform "aarch64"; then minecraftpi_platform=arm64; fi
