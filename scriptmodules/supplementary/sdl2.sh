@@ -64,6 +64,7 @@ function _list_depends_sdl2() {
     isPlatform "kms" || isPlatform "rpi" && depends+=(libdrm-dev libgbm-dev)
     isPlatform "x11" && depends+=(libpulse-dev libwayland-dev)
     [[ "$__os_debian_ver" -lt 11 ]] && depends+=(fcitx-libs-dev)
+    isPlatform "vulkan" && depends+=(libvulkan-dev)
 
     echo "${depends[@]}"
 }
