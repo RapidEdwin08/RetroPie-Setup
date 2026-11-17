@@ -38,8 +38,8 @@ function install_bin_armsx2() {
     local armsx2APP=ARMSX2-$stableVER-Linux-arm64-4K-pages.AppImage
 
     # Nightly (SDL/KMS)
-    local nightlyDATE=20261113
-    local commitNIGHTLY=37ed35b88fe9a0164369c8042f2c9aa707e33667
+    local nightlyDATE=20261114
+    local commitNIGHTLY=6d9511e29e3e00d5ab78899f5292b967ab850ddb
     local nightlyNUM=$(echo $commitNIGHTLY | cut -c1-10)
     local armsx2SDLdir="armsx2-linux-arm64-sdl-sha[$nightlyNUM]"
 
