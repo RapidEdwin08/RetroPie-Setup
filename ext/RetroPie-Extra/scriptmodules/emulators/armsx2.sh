@@ -32,9 +32,9 @@ function depends_armsx2() {
 }
 
 function install_bin_armsx2() {
-    local stableVER=2.9.3
-    local stableDATE='2026-11-09T15:34:28+00:00'
-    local commitSTABLE=1d680349c8f3e6ceb856412033e1346bd3ef9cbd
+    local stableVER=2.9.5
+    local stableDATE='2026-11-16T16:49:28+00:00'
+    local commitSTABLE=378e6bce00345886eb3f42851f8d8c8e7c29a99f
     local armsx2APP=ARMSX2-$stableVER-Linux-arm64-4K-pages.AppImage
 
     # Nightly (SDL/KMS)
