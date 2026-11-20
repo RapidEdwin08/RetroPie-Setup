@@ -40,9 +40,11 @@ function _get_commit_borked3ds() {
     local branch_tag=master
     local branch_commit="$(git ls-remote $git_repo $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
 
-    #echo 4d5cb16c; # 20261006 # DTEAM-1
-    #echo 41eca493; # 20261002 # gvx64
     #echo 20c47a77; # 20250613 # rtiangha
+    #echo 41eca493; # 20261002 # gvx64
+    #echo 4d5cb16c; # 20261006 # DTEAM-1
+    #echo a7095a7a; # 20261119 # gvx64
+    #echo 099f6237; # 20261119 # DTEAM-1
     echo $branch_commit
 }
 
@@ -602,6 +604,10 @@ _EOF_
 
     addSystem "3ds" "3ds" ".3ds .3dsx .elf .axf .cci .cxi .app .gui"
 
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/gvx64/Borked3DS-rpi.git" ]] && ( isPlatform "rpi4" ); then
+        [[ "$md_mode" == "install" ]] && patch_es_systems_cfg_borked3ds # gvx64 rpi4
+    fi
+
     if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]] && ( isPlatform "aarch64" ); then
         [[ "$md_mode" == "install" ]] && patch_es_systems_cfg_borked3ds # rtiangha
     fi
@@ -674,7 +680,7 @@ _EOF_
 function patch_es_systems_cfg_borked3ds() {
     local patch_option
     local patch_msgs
-    if [[ ! $(cat /etc/emulationstation/es_systems.cfg) == *"buffer;"* ]];then # rtiangha aarch64
+    if [[ ! $(cat /etc/emulationstation/es_systems.cfg) == *"buffer;"* ]];then # rtiangha aarch64 # gvx64 rpi4
         ##patch_msgs=Remove
         ##patch_option=-R
         patch_msgs=Add
