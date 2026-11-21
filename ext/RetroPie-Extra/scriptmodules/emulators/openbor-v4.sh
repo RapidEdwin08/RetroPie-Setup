@@ -17,9 +17,22 @@ rp_module_id="openbor-v4"
 rp_module_desc="OpenBOR - Beat 'em Up Game Engine V4 (.PAK/SDL2)"
 rp_module_help="*   OpenBOR.PAK games do NOT need to be Extracted   *\n \nOpenBOR.PAK files can be placed in:\n $romdir/openbor/\n \n[openbor-unpak] + [openbor-repak] Utilities are included as Additional Emulator Entries accessible via runcommand\n \n * RESTART ES after [unpak/repak] to Refresh GameList * "
 rp_module_licence="BSD https://raw.githubusercontent.com/DCurrent/openbor/refs/heads/master/LICENSE"
-rp_module_repo="git https://github.com/DCurrent/openbor.git master"
+rp_module_repo="git https://github.com/DCurrent/openbor.git master :_get_commit_openbor-v4"
 rp_module_section="exp"
 rp_module_flags="sdl2 !mali !:\$__os_debian_ver:-lt:11"
+
+function _get_commit_openbor-v4() {
+    # Pull Latest Commit SHA - Allow RP Module Script to Check against Latest Source
+    local git_repo=https://github.com/DCurrent/openbor.git
+    local branch_tag=master
+    local branch_commit="$(git ls-remote $git_repo $branch_tag HEAD | grep $branch_tag  | tail -1 | awk '{ print $1}' | cut -c -8)"
+
+    #echo f903011c; # 20260217 # Ignore NDK build files
+    echo a1ee56d0; # 20260222 # Merge pull request #344 from carlsonsantana/master
+    #echo bd1033d5; # 20260601 # Fix Win64 PNG loading and simplify still image loader (Remove legacy BMP, PCX, and still GIF image loading) Error: Unsupported image format '.gif'
+
+    #echo $branch_commit
+}
 
 function depends_openbor-v4() {
     getDepends libogg-dev libvorbisidec-dev libvorbis-dev libpng-dev zlib1g-dev libvpx-dev libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-gfx-dev
@@ -37,7 +50,7 @@ function build_openbor-v4() {
     if [[ "$__platform_arch" =~ (i386|i686) ]]; then btarget=x86; dtarget="X86"; fi
     if [[ "$__platform_arch" == 'x86_64' ]]; then btarget=amd64; dtarget="AMD64"; fi
     if isPlatform "aarch64"; then btarget=arm64; dtarget="ARM64"; fi
-    cmake -DBUILD_LINUX=ON -DUSE_SDL=ON -DTARGET_ARCH=$dtarget -S . -B build.lin.$btarget && cmake --build build.lin.$btarget --config Release -- $make_jproc
+    cmake -DBUILD_LINUX=ON -DUSE_SDL=ON -DUSE_LOADGL=ON -DTARGET_ARCH=$dtarget -S . -B build.lin.$btarget && cmake --build build.lin.$btarget --config Release -- $make_jproc
     cd "$md_build/tools/borpak/source"
     chmod 755 ./build.sh; ./build.sh Linux
     rpSwap off
