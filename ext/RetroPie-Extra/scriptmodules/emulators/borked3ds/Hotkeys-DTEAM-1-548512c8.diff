@@ -1,0 +1,1467 @@
+diff -ur a/src/borked3ds_qt/configuration/config.cpp b/src/borked3ds_qt/configuration/config.cpp
+--- a/src/borked3ds_qt/configuration/config.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/config.cpp	Hotkeys-DTEAM-1-548512c8
+@@ -63,17 +63,22 @@
+ // This must be in alphabetical order according to action name as it must have the same order as
+ // UISetting::values.shortcuts, which is alphabetically ordered.
+ // clang-format off
+-const std::array<UISettings::Shortcut, 39> Config::default_hotkeys {{
++// v426 : 4th field = default controller hotkey (symbolic, see ControllerHotkey in hotkeys.h). With
++// the default hotkey enable button (3DS Select) this gives the RetroPie combos:
++// Select+Start quit, Select+R quick save, Select+L quick load, Select+X menu, Select+B reset,
++// Select+L3 screenshot, Select+R3 video dumping. "Toggle Turbo Mode" moved back to its
++// alphabetical place (the restore-default code now looks defaults up by name anyway).
++const std::array<UISettings::Shortcut, 41> Config::default_hotkeys {{
+      {QStringLiteral("Advance Frame"),            QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
+      {QStringLiteral("Audio Mute/Unmute"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+M"), Qt::WindowShortcut}},
+      {QStringLiteral("Audio Volume Down"),        QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
+      {QStringLiteral("Audio Volume Up"),          QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
+-     {QStringLiteral("Capture Screenshot"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl+P"), Qt::WidgetWithChildrenShortcut}},
++     {QStringLiteral("Capture Screenshot"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl+P"), Qt::WidgetWithChildrenShortcut}, QStringLiteral("engine:hotkey_pad,button:leftstick")},
+      {QStringLiteral("Continue/Pause Emulation"), QStringLiteral("Main Window"), {QStringLiteral("F4"),     Qt::WindowShortcut}},
+      {QStringLiteral("Decrease 3D Factor"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl+-"), Qt::ApplicationShortcut}},
+      {QStringLiteral("Decrease Speed Limit"),     QStringLiteral("Main Window"), {QStringLiteral("-"),      Qt::ApplicationShortcut}},
+      {QStringLiteral("Emergency SW Fallback"),    QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
+-     {QStringLiteral("Exit Borked3DS"),               QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Q"), Qt::WindowShortcut}},
++     {QStringLiteral("Exit Borked3DS"),               QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Q"), Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:start")},
+      {QStringLiteral("Exit Fullscreen"),          QStringLiteral("Main Window"), {QStringLiteral("Esc"),    Qt::WindowShortcut}},
+      {QStringLiteral("Fullscreen"),               QStringLiteral("Main Window"), {QStringLiteral("F11"),    Qt::WindowShortcut}},
+      {QStringLiteral("Increase 3D Factor"),       QStringLiteral("Main Window"), {QStringLiteral("Ctrl++"), Qt::ApplicationShortcut}},
+@@ -86,10 +91,10 @@
+      {QStringLiteral("Multiplayer Direct Connect to Room"),   QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Shift"), Qt::ApplicationShortcut}},
+      {QStringLiteral("Multiplayer Leave Room"),               QStringLiteral("Main Window"), {QStringLiteral("Ctrl+L"), Qt::ApplicationShortcut}},
+      {QStringLiteral("Multiplayer Show Current Room"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+R"), Qt::ApplicationShortcut}},
+-     {QStringLiteral("Quick Save"),                QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
+-     {QStringLiteral("Quick Load"),               QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}},
++     {QStringLiteral("Quick Save"),                QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:r")},
++     {QStringLiteral("Quick Load"),               QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:l")},
+      {QStringLiteral("Remove Amiibo"),            QStringLiteral("Main Window"), {QStringLiteral("F3"),     Qt::ApplicationShortcut}},
+-     {QStringLiteral("Restart Emulation"),        QStringLiteral("Main Window"), {QStringLiteral("F6"),     Qt::WindowShortcut}},
++     {QStringLiteral("Restart Emulation"),        QStringLiteral("Main Window"), {QStringLiteral("F6"),     Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:b")},
+      {QStringLiteral("Rotate Screens Upright"),   QStringLiteral("Main Window"), {QStringLiteral("F8"),     Qt::WindowShortcut}},
+      {QStringLiteral("Save to Oldest Non-Quick Slot"),      QStringLiteral("Main Window"), {QStringLiteral("Ctrl+C"), Qt::WindowShortcut}},
+      {QStringLiteral("Stop Emulation"),           QStringLiteral("Main Window"), {QStringLiteral("F5"),     Qt::WindowShortcut}},
+@@ -99,13 +104,24 @@
+      {QStringLiteral("Toggle Custom Textures"),   QStringLiteral("Main Window"), {QStringLiteral("F7"),     Qt::ApplicationShortcut}},
+      {QStringLiteral("Toggle Filter Bar"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+F"), Qt::WindowShortcut}},
+      {QStringLiteral("Toggle Frame Advancing"),   QStringLiteral("Main Window"), {QStringLiteral("Ctrl+A"), Qt::ApplicationShortcut}},
++     {QStringLiteral("Toggle Menu"),              QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:x")},
+      {QStringLiteral("Toggle Per-Game Speed"),    QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Z"), Qt::ApplicationShortcut}},
+      {QStringLiteral("Toggle Screen Layout"),     QStringLiteral("Main Window"), {QStringLiteral("F10"),    Qt::WindowShortcut}},
+      {QStringLiteral("Toggle Status Bar"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+S"), Qt::WindowShortcut}},
+      {QStringLiteral("Toggle Texture Dumping"),   QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
++     {QStringLiteral("Toggle Video Dumping"),     QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}, QStringLiteral("engine:hotkey_pad,button:rightstick")},
+     }};
+ // clang-format on
+ 
++const UISettings::Shortcut* Config::FindDefaultHotkey(const QString& group, const QString& name) {
++    for (const auto& hotkey : default_hotkeys) {
++        if (hotkey.group == group && hotkey.name == name) {
++            return &hotkey;
++        }
++    }
++    return nullptr;
++}
++
+ void Config::Initialize(const std::string& config_name) {
+     const std::string fs_config_loc = FileUtil::GetUserPath(FileUtil::UserPath::ConfigDir);
+     const std::string config_file = fmt::format("{}.ini", config_name);
+@@ -745,12 +761,19 @@
+              group,
+              {ReadSetting(QStringLiteral("KeySeq"), shortcut.keyseq).toString(),
+               shortcut.context},
+-             ReadSetting(QStringLiteral("Controller"), QString{}).toString()}); // gvx64
++             ReadSetting(QStringLiteral("Controller"), controller_shortcut).toString()}); // gvx64, v426 default
+ 
+         qt_config->endGroup();
+         qt_config->endGroup();
+     }
+ 
++    // v426 : controller hotkey enable button (modifier), default = 3DS Select
++    UISettings::values.controller_hotkey_modifier =
++        ReadSetting(QStringLiteral("ControllerHotkeyModifier"),
++                    QStringLiteral("engine:hotkey_3ds,button:select"))
++            .toString();
++
++
+     qt_config->endGroup();
+ }
+ 
+@@ -1289,23 +1312,31 @@
+ void Config::SaveShortcutValues() {
+     qt_config->beginGroup(QStringLiteral("Shortcuts"));
+ 
+-    // Lengths of UISettings::values.shortcuts & default_hotkeys are same.
+-    // However, their ordering must also be the same.
+-    for (std::size_t i = 0; i < default_hotkeys.size(); i++) {
+-        const auto& [name, group, shortcut, controller_shortcut] = UISettings::values.shortcuts[i]; // gvx64
+-        const auto& default_hotkey = default_hotkeys[i].shortcut;
++
++    // v426 : defaults are looked up by name, the ordering of UISettings::values.shortcuts (registry
++    // map order) and default_hotkeys no longer has to match.
++    for (const auto& [name, group, shortcut, controller_shortcut] : UISettings::values.shortcuts) {
++        const UISettings::Shortcut* default_hotkey = FindDefaultHotkey(group, name);
++        if (!default_hotkey) {
++            continue;
++        }
+ 
+         qt_config->beginGroup(group);
+         qt_config->beginGroup(name);
+ 
+-        WriteSetting(QStringLiteral("KeySeq"), shortcut.keyseq, default_hotkey.keyseq);
+-        WriteSetting(QStringLiteral("Context"), shortcut.context, default_hotkey.context);
+-        WriteSetting(QStringLiteral("Controller"), controller_shortcut, QString{}); // gvx64
++        WriteSetting(QStringLiteral("KeySeq"), shortcut.keyseq, default_hotkey->shortcut.keyseq);
++        WriteSetting(QStringLiteral("Context"), shortcut.context, default_hotkey->shortcut.context);
++        WriteSetting(QStringLiteral("Controller"), controller_shortcut,
++                     default_hotkey->controller_shortcut); // gvx64, v426 default
+ 
+         qt_config->endGroup();
+         qt_config->endGroup();
+     }
+ 
++    WriteSetting(QStringLiteral("ControllerHotkeyModifier"),
++                 UISettings::values.controller_hotkey_modifier,
++                 QStringLiteral("engine:hotkey_3ds,button:select")); // v426
++
+     qt_config->endGroup();
+ }
+ 
+diff -ur a/src/borked3ds_qt/configuration/config.h b/src/borked3ds_qt/configuration/config.h
+--- a/src/borked3ds_qt/configuration/config.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/config.h	Hotkeys-DTEAM-1-548512c8
+@@ -27,7 +27,9 @@
+ 
+     static const std::array<int, Settings::NativeButton::NumButtons> default_buttons;
+     static const std::array<std::array<int, 9>, Settings::NativeAnalog::NumAnalogs> default_analogs;
+-    static const std::array<UISettings::Shortcut, 39> default_hotkeys;
++    static const std::array<UISettings::Shortcut, 41> default_hotkeys;
++    /// v426 : default hotkey looked up by group and action name (nullptr if unknown)
++    static const UISettings::Shortcut* FindDefaultHotkey(const QString& group, const QString& name);
+ 
+ private:
+     void Initialize(const std::string& config_name);
+diff -ur a/src/borked3ds_qt/configuration/configure_hotkeys.cpp b/src/borked3ds_qt/configuration/configure_hotkeys.cpp
+--- a/src/borked3ds_qt/configuration/configure_hotkeys.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_hotkeys.cpp	Hotkeys-DTEAM-1-548512c8
+@@ -3,24 +3,53 @@
+ // Licensed under GPLv2 or any later version
+ // Refer to the license.txt file included.
+ 
++#include <QHBoxLayout>
++#include <QLabel>
+ #include <QMenu>
+ #include <QMessageBox>
++#include <QPushButton>
+ #include <QStandardItemModel>
+ #include "borked3ds_qt/configuration/config.h"
+ #include "borked3ds_qt/configuration/configure_hotkeys.h"
+ #include "borked3ds_qt/hotkeys.h"
++#include "borked3ds_qt/uisettings.h"
+ #include "borked3ds_qt/util/sequence_dialog/sequence_dialog.h"
+ #include "ui_configure_hotkeys.h"
+ #include "borked3ds_qt/util/controller_dialog/controller_dialog.h" // gvx64
+ 
+ constexpr int name_column = 0;
+ constexpr int hotkey_column = 1;
++constexpr int controller_column = 2;            // gvx64
++constexpr int controller_binding_role = Qt::UserRole + 1; // v426 : raw/symbolic binding
+ 
+ ConfigureHotkeys::ConfigureHotkeys(QWidget* parent)
+     : QWidget(parent), ui(std::make_unique<Ui::ConfigureHotkeys>()) {
+     ui->setupUi(this);
+     setFocusPolicy(Qt::ClickFocus);
+ 
++    // v426 : controller hotkey enable button (modifier), RetroPie style ("Select + Start", ...)
++    auto* modifier_layout = new QHBoxLayout();
++    auto* modifier_label = new QLabel(tr("Controller hotkey enable button:"), this);
++    modifier_button = new QPushButton(this);
++    auto* modifier_clear = new QPushButton(tr("None"), this);
++    auto* modifier_default = new QPushButton(tr("Default (Select)"), this);
++    const QString modifier_tooltip =
++        tr("Hold this button, then press the button of a controller hotkey (e.g. Select + Start "
++           "to quit).\n\"(3DS)\" bindings follow the buttons configured in Controls, so they work "
++           "with any controller.\nNone: controller hotkeys trigger on a single button.");
++    modifier_label->setToolTip(modifier_tooltip);
++    modifier_button->setToolTip(modifier_tooltip);
++    modifier_layout->addWidget(modifier_label);
++    modifier_layout->addWidget(modifier_button, 1);
++    modifier_layout->addWidget(modifier_clear);
++    modifier_layout->addWidget(modifier_default);
++    ui->verticalLayout->insertLayout(1, modifier_layout);
++
++    connect(modifier_button, &QPushButton::clicked, this, &ConfigureHotkeys::ConfigureModifier);
++    connect(modifier_clear, &QPushButton::clicked, this, [this] { SetModifier(QString{}); });
++    connect(modifier_default, &QPushButton::clicked, this,
++            [this] { SetModifier(ControllerHotkey::DefaultModifier()); });
++
+     model = new QStandardItemModel(this);
+     model->setColumnCount(3); // Changed from 2 - gvx64
+     model->setHorizontalHeaderLabels({tr("Action"), tr("Hotkey"), tr("Controller")}); // gvx64
+@@ -38,6 +67,8 @@
+     connect(ui->button_restore_defaults, &QPushButton::clicked, this,
+             &ConfigureHotkeys::RestoreDefaults);
+     connect(ui->button_clear_all, &QPushButton::clicked, this, &ConfigureHotkeys::ClearAll);
++
++    SetModifier(UISettings::values.controller_hotkey_modifier);
+ }
+ 
+ ConfigureHotkeys::~ConfigureHotkeys() = default;
+@@ -58,6 +89,54 @@
+     return list;
+ }
+ 
++void ConfigureHotkeys::SetControllerBinding(QStandardItem* item, const QString& binding) {
++    item->setData(binding, controller_binding_role);
++    item->setText(ControllerHotkey::DisplayName(binding));
++    item->setToolTip(binding);
++}
++
++QString ConfigureHotkeys::GetControllerBinding(const QStandardItem* item) const {
++    return item->data(controller_binding_role).toString();
++}
++
++void ConfigureHotkeys::SetModifier(const QString& binding) {
++    modifier_binding = binding;
++    if (binding.isEmpty()) {
++        modifier_button->setText(tr("None (single-button controller hotkeys)"));
++    } else {
++        modifier_button->setText(ControllerHotkey::DisplayName(binding));
++    }
++}
++
++void ConfigureHotkeys::ConfigureModifier() {
++    ControllerDialog controller_dialog{this};
++
++    const int return_code = controller_dialog.exec();
++    const QString raw = controller_dialog.GetButtonString();
++    if (return_code == QDialog::Rejected || raw.isEmpty()) {
++        return;
++    }
++    const QString binding = ControllerHotkey::Symbolize(raw);
++
++    // The enable button cannot also be the button of a hotkey
++    const std::string resolved = ControllerHotkey::Resolve(binding);
++    for (int r = 0; r < model->rowCount(); ++r) {
++        const QStandardItem* const parent = model->item(r, 0);
++        for (int r2 = 0; r2 < parent->rowCount(); ++r2) {
++            const QString other = GetControllerBinding(parent->child(r2, controller_column));
++            if (other == binding ||
++                ControllerHotkey::SameInput(ControllerHotkey::Resolve(other), resolved)) {
++                QMessageBox::warning(
++                    this, tr("Conflicting Button"),
++                    tr("The entered button is already assigned to: %1")
++                        .arg(parent->child(r2, name_column)->text()));
++                return;
++            }
++        }
++    }
++    SetModifier(binding);
++}
++
+ void ConfigureHotkeys::Populate(const HotkeyRegistry& registry) {
+     model->clear(); // gvx64 - Clear before repopulating
+     model->setColumnCount(3); // gvx64
+@@ -71,8 +150,8 @@
+             QStandardItem* action = new QStandardItem(hotkey.first);
+             QStandardItem* keyseq =
+                 new QStandardItem(hotkey.second.keyseq.toString(QKeySequence::NativeText));
+-            QStandardItem* controller_keyseq =
+-                new QStandardItem(hotkey.second.controller_keyseq); // gvx64
++            QStandardItem* controller_keyseq = new QStandardItem(); // gvx64
++            SetControllerBinding(controller_keyseq, hotkey.second.controller_keyseq); // v426
+ 
+             action->setEditable(false);
+             keyseq->setEditable(false);
+@@ -84,6 +163,9 @@
+     }
+ 
+     ui->hotkey_list->expandAll();
++    ui->hotkey_list->resizeColumnToContents(controller_column);
++
++    SetModifier(UISettings::values.controller_hotkey_modifier); // v426
+ }
+ 
+ void ConfigureHotkeys::OnInputKeysChanged(QList<QKeySequence> new_key_list) {
+@@ -165,16 +247,33 @@
+ 
+ void ConfigureHotkeys::ConfigureControllerHotkey(QModelIndex index) { //gvx64
+     // Swap to the controller column
+-    index = index.sibling(index.row(), 2); // Column 2 = controller - gvx64
++    index = index.sibling(index.row(), controller_column); // Column 2 = controller - gvx64
++    QStandardItem* const item = model->itemFromIndex(index);
++    if (!item) {
++        return;
++    }
+ 
+-    const auto previous_button = model->data(index).toString();
++    const QString previous_button = GetControllerBinding(item);
+ 
+     ControllerDialog controller_dialog{this};
+ 
+     const int return_code = controller_dialog.exec();
+-    const QString button_string = controller_dialog.GetButtonString();
++    const QString raw_button = controller_dialog.GetButtonString();
+ 
+-    if (return_code == QDialog::Rejected || button_string.isEmpty()) {
++    if (return_code == QDialog::Rejected || raw_button.isEmpty()) {
++        return;
++    }
++
++    // v426 : store "(3DS)" / L3 / R3 bindings symbolically so they follow the configured controls
++    const QString button_string = ControllerHotkey::Symbolize(raw_button);
++
++    // v426 : the hotkey enable button cannot also be a hotkey button
++    if (!modifier_binding.isEmpty() &&
++        (button_string == modifier_binding ||
++         ControllerHotkey::SameInput(ControllerHotkey::Resolve(button_string),
++                                     ControllerHotkey::Resolve(modifier_binding)))) {
++        QMessageBox::warning(this, tr("Conflicting Button"),
++                             tr("This button is the controller hotkey enable button."));
+         return;
+     }
+ 
+@@ -186,7 +285,7 @@
+             this, tr("Conflicting Button"),
+             tr("The entered button is already assigned to: %1").arg(used_action));
+     } else {
+-        model->setData(index, button_string);
++        SetControllerBinding(item, button_string);
+     }
+ }
+ 
+@@ -194,15 +293,18 @@
+     if (button_string.isEmpty()) {
+         return std::make_pair(false, QString());
+     }
++    const std::string resolved = ControllerHotkey::Resolve(button_string); // v426
+ 
+     for (int r = 0; r < model->rowCount(); ++r) {
+         const QStandardItem* const parent = model->item(r, 0);
+ 
+         for (int r2 = 0; r2 < parent->rowCount(); ++r2) {
+-            const QStandardItem* const controller_item = parent->child(r2, 2); // Column 2
+-            const auto controller_str = controller_item->text();
++            const QStandardItem* const controller_item = parent->child(r2, controller_column);
++            const auto controller_str = GetControllerBinding(controller_item);
+ 
+-            if (button_string == controller_str) {
++            if (button_string == controller_str ||
++                ControllerHotkey::SameInput(ControllerHotkey::Resolve(controller_str),
++                                            resolved)) {
+                 return std::make_pair(true, parent->child(r2, 0)->text());
+             }
+         }
+@@ -252,12 +354,13 @@
+                     if (action_name != action->text())
+                         continue;
+                     hotkey.keyseq = QKeySequence(keyseq->text());
+-                    hotkey.controller_keyseq = controller_keyseq->text(); // gvx64
++                    hotkey.controller_keyseq = GetControllerBinding(controller_keyseq); // v426
+                 }
+             }
+         }
+     }
+ 
++    UISettings::values.controller_hotkey_modifier = modifier_binding; // v426
+     registry.SaveHotkeys();
+ }
+ 
+@@ -266,14 +369,16 @@
+         const QStandardItem* parent = model->item(r, 0);
+ 
+         for (int r2 = 0; r2 < parent->rowCount(); ++r2) {
+-            // Restore keyboard defaults
+-            model->item(r, 0)
+-                ->child(r2, 1)
+-                ->setText(Config::default_hotkeys[r2].shortcut.keyseq);
+-            // Clear controller bindings (no defaults) - gvx64
+-            model->item(r, 0)->child(r2, 2)->setText(QString{});
++            // v426 : defaults looked up by name (the array order used to be relied upon)
++            const UISettings::Shortcut* default_hotkey =
++                Config::FindDefaultHotkey(parent->text(), parent->child(r2, name_column)->text());
++            model->item(r, 0)->child(r2, 1)->setText(
++                default_hotkey ? default_hotkey->shortcut.keyseq : QString{});
++            SetControllerBinding(model->item(r, 0)->child(r2, controller_column),
++                                 default_hotkey ? default_hotkey->controller_shortcut : QString{});
+         }
+     }
++    SetModifier(ControllerHotkey::DefaultModifier()); // v426
+ }
+ 
+ void ConfigureHotkeys::ClearAll() {
+@@ -282,7 +387,8 @@
+ 
+         for (int r2 = 0; r2 < parent->rowCount(); ++r2) {
+             model->item(r, 0)->child(r2, 1)->setText(QString{}); // Keyboard
+-            model->item(r, 0)->child(r2, 2)->setText(QString{}); // Controller - gvx64
++            SetControllerBinding(model->item(r, 0)->child(r2, controller_column),
++                                 QString{}); // Controller - gvx64
+         }
+     }
+ }
+@@ -321,18 +427,31 @@
+ 
+ void ConfigureHotkeys::ShowControllerContextMenu(QModelIndex index, const QPoint& menu_location) {
+     QMenu context_menu;
++    QAction* restore_default = context_menu.addAction(tr("Restore Default")); // v426
+     QAction* clear = context_menu.addAction(tr("Clear"));
+ 
+-    const auto controller_index = index.sibling(index.row(), 2); // Controller column
+-    connect(clear, &QAction::triggered, this,
+-            [this, controller_index] { model->setData(controller_index, QString{}); });
++    const auto controller_index = index.sibling(index.row(), controller_column); // Controller column
++    connect(restore_default, &QAction::triggered, this,
++            [this, controller_index] { RestoreControllerHotkey(controller_index); });
++    connect(clear, &QAction::triggered, this, [this, controller_index] {
++        if (QStandardItem* item = model->itemFromIndex(controller_index)) {
++            SetControllerBinding(item, QString{});
++        }
++    });
+ 
+     context_menu.exec(ui->hotkey_list->viewport()->mapToGlobal(menu_location));
+ }
+ 
+ void ConfigureHotkeys::RestoreHotkey(QModelIndex index) {
+-    const QKeySequence& default_key_sequence = QKeySequence::fromString(
+-        Config::default_hotkeys[index.row()].shortcut.keyseq, QKeySequence::NativeText);
++    // v426 : default looked up by group/action name instead of the row index
++    const QString group = index.parent().data().toString();
++    const QString action = index.sibling(index.row(), name_column).data().toString();
++    const UISettings::Shortcut* default_hotkey = Config::FindDefaultHotkey(group, action);
++    if (!default_hotkey) {
++        return;
++    }
++    const QKeySequence& default_key_sequence =
++        QKeySequence::fromString(default_hotkey->shortcut.keyseq, QKeySequence::NativeText);
+     const auto [key_sequence_used, used_action] = IsUsedKey(default_key_sequence);
+ 
+     if (key_sequence_used && default_key_sequence != QKeySequence(model->data(index).toString())) {
+@@ -344,6 +463,26 @@
+     }
+ }
+ 
++void ConfigureHotkeys::RestoreControllerHotkey(QModelIndex index) { // v426
++    QStandardItem* const item = model->itemFromIndex(index);
++    if (!item) {
++        return;
++    }
++    const QString group = index.parent().data().toString();
++    const QString action = index.sibling(index.row(), name_column).data().toString();
++    const UISettings::Shortcut* default_hotkey = Config::FindDefaultHotkey(group, action);
++    const QString binding = default_hotkey ? default_hotkey->controller_shortcut : QString{};
++
++    const auto [button_used, used_action] = IsUsedControllerButton(binding);
++    if (button_used && binding != GetControllerBinding(item)) {
++        QMessageBox::warning(
++            this, tr("Conflicting Button"),
++            tr("The default button is already assigned to: %1").arg(used_action));
++    } else {
++        SetControllerBinding(item, binding);
++    }
++}
++
+ void ConfigureHotkeys::RetranslateUI() {
+     ui->retranslateUi(this);
+ }
+diff -ur a/src/borked3ds_qt/configuration/configure_hotkeys.h b/src/borked3ds_qt/configuration/configure_hotkeys.h
+--- a/src/borked3ds_qt/configuration/configure_hotkeys.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_hotkeys.h	Hotkeys-DTEAM-1-548512c8
+@@ -13,6 +13,8 @@
+ }
+ 
+ class HotkeyRegistry;
++class QPushButton;
++class QStandardItem;
+ class QStandardItemModel;
+ 
+ class ConfigureHotkeys : public QWidget {
+@@ -55,6 +57,16 @@
+     void ShowControllerContextMenu(QModelIndex index, const QPoint& menu_location); // gvx64
+     void RestoreHotkey(QModelIndex index);
+ 
++    // v426 : controller hotkey enable button (modifier) + symbolic controller bindings
++    void SetControllerBinding(QStandardItem* item, const QString& binding);
++    QString GetControllerBinding(const QStandardItem* item) const;
++    void ConfigureModifier();
++    void SetModifier(const QString& binding);
++    void RestoreControllerHotkey(QModelIndex index);
++
++    QString modifier_binding;
++    QPushButton* modifier_button = nullptr;
++
+     /**
+      * List of keyboard keys currently registered to any of the 3DS inputs.
+      * These can't be bound to any hotkey.
+diff -ur a/src/borked3ds_qt/hotkeys.cpp b/src/borked3ds_qt/hotkeys.cpp
+--- a/src/borked3ds_qt/hotkeys.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/hotkeys.cpp	Hotkeys-DTEAM-1-548512c8
+@@ -3,10 +3,18 @@
+ // Licensed under GPLv2 or any later version
+ // Refer to the license.txt file included.
+ 
++#include <array>
++#include <QCoreApplication>
++#include <QDir>
++#include <QFile>
+ #include <QShortcut>
++#include <QXmlStreamReader>
+ #include <QtGlobal>
+ #include "borked3ds_qt/hotkeys.h"
+ #include "borked3ds_qt/uisettings.h"
++#include "common/param_package.h"
++#include "common/settings.h"
++#include "input_common/main.h"
+ 
+ HotkeyRegistry::HotkeyRegistry() = default;
+ 
+@@ -76,3 +84,296 @@
+     Hotkey& hk = hotkey_groups[group][action];
+     return hk.context;
+ }
++
++// ---------------------------------------------------------------------------------------------
++// v426 - Controller hotkeys (hotkey enable button + button), symbolic bindings
++// ---------------------------------------------------------------------------------------------
++namespace ControllerHotkey {
++
++namespace {
++
++constexpr char ENGINE_3DS[] = "hotkey_3ds";
++constexpr char ENGINE_PAD[] = "hotkey_pad";
++
++// Named gamepad buttons that can be stored symbolically (SDL_GameController names).
++constexpr std::array<const char*, 3> PAD_BUTTONS{{"leftstick", "rightstick", "guide"}};
++
++QString Translate(const char* text) {
++    return QCoreApplication::translate("ControllerHotkey", text);
++}
++
++int NativeButtonIndex(const std::string& name) {
++    const std::string key = "button_" + name;
++    for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
++        if (key == Settings::NativeButton::mapping[i]) {
++            return i;
++        }
++    }
++    return -1;
++}
++
++// Controller (engine/guid/port) of the current input profile, taken from the 3DS Select binding
++// first, then Start, then any SDL binding.
++bool FindProfileController(Common::ParamPackage& out) {
++    const auto& buttons = Settings::values.current_input_profile.buttons;
++    std::array<int, Settings::NativeButton::NumButtons + 2> order{};
++    std::size_t n = 0;
++    order[n++] = Settings::NativeButton::Select;
++    order[n++] = Settings::NativeButton::Start;
++    for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
++        order[n++] = i;
++    }
++    for (std::size_t k = 0; k < n; ++k) {
++        const Common::ParamPackage params(buttons[order[k]]);
++        if (params.Get("engine", "") == "sdl" && params.Has("guid")) {
++            out = Common::ParamPackage{};
++            out.Set("engine", "sdl");
++            out.Set("guid", params.Get("guid", "0"));
++            out.Set("port", params.Get("port", 0));
++            return true;
++        }
++    }
++    return false;
++}
++
++// EmulationStation (RetroPie) fallback: es_input.cfg uses SDL joystick indices and the same GUID
++// string format as the SDL backend, so its "leftthumb"/"rightthumb" entries map directly.
++std::string FromEmulationStation(const std::string& guid, int port, const QString& es_name) {
++    const std::array<QString, 2> candidates{{
++        QDir::homePath() + QStringLiteral("/.emulationstation/es_input.cfg"),
++        QStringLiteral("/opt/retropie/configs/all/emulationstation/es_input.cfg"),
++    }};
++
++    for (const QString& path : candidates) {
++        QFile file(path);
++        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
++            continue;
++        }
++
++        QXmlStreamReader xml(&file);
++        bool in_target = false;
++        while (!xml.atEnd()) {
++            xml.readNext();
++            if (xml.isStartElement()) {
++                const auto attrs = xml.attributes();
++                if (xml.name() == QStringLiteral("inputConfig")) {
++                    in_target =
++                        attrs.value(QStringLiteral("type")) == QStringLiteral("joystick") &&
++                        attrs.value(QStringLiteral("deviceGUID")).toString().toStdString() == guid;
++                } else if (in_target && xml.name() == QStringLiteral("input") &&
++                           attrs.value(QStringLiteral("name")) == es_name) {
++                    const QString type = attrs.value(QStringLiteral("type")).toString();
++                    const int id = attrs.value(QStringLiteral("id")).toInt();
++                    const int value = attrs.value(QStringLiteral("value")).toInt();
++
++                    Common::ParamPackage params;
++                    params.Set("engine", "sdl");
++                    params.Set("guid", guid);
++                    params.Set("port", port);
++                    if (type == QStringLiteral("button")) {
++                        params.Set("button", id);
++                    } else if (type == QStringLiteral("hat")) {
++                        params.Set("hat", id);
++                        switch (value) {
++                        case 1:
++                            params.Set("direction", "up");
++                            break;
++                        case 2:
++                            params.Set("direction", "right");
++                            break;
++                        case 4:
++                            params.Set("direction", "down");
++                            break;
++                        case 8:
++                            params.Set("direction", "left");
++                            break;
++                        default:
++                            return {};
++                        }
++                    } else if (type == QStringLiteral("axis")) {
++                        params.Set("axis", id);
++                        params.Set("direction", value < 0 ? "-" : "+");
++                        params.Set("threshold", value < 0 ? -0.5f : 0.5f);
++                    } else {
++                        return {};
++                    }
++                    return params.Serialize();
++                }
++            } else if (xml.isEndElement() && xml.name() == QStringLiteral("inputConfig")) {
++                in_target = false;
++            }
++        }
++    }
++    return {};
++}
++
++std::string ResolvePadButton(const std::string& name) {
++    Common::ParamPackage controller;
++    if (!FindProfileController(controller)) {
++        return {};
++    }
++
++    const Common::ParamPackage bind = InputCommon::GetControllerNamedButtonBind(controller, name);
++    if (bind.Has("engine")) {
++        return bind.Serialize();
++    }
++
++    QString es_name;
++    if (name == "leftstick") {
++        es_name = QStringLiteral("leftthumb");
++    } else if (name == "rightstick") {
++        es_name = QStringLiteral("rightthumb");
++    } else {
++        return {};
++    }
++    return FromEmulationStation(controller.Get("guid", "0"), controller.Get("port", 0), es_name);
++}
++
++QString Display3DSButton(const std::string& name) {
++    static const std::array<std::pair<const char*, const char*>, 18> names{{
++        {"a", "A"},         {"b", "B"},           {"x", "X"},
++        {"y", "Y"},         {"up", "D-Pad Up"},   {"down", "D-Pad Down"},
++        {"left", "D-Pad Left"}, {"right", "D-Pad Right"}, {"l", "L"},
++        {"r", "R"},         {"start", "Start"},   {"select", "Select"},
++        {"debug", "Debug"}, {"gpio14", "Gpio14"}, {"zl", "ZL"},
++        {"zr", "ZR"},       {"home", "Home"},     {"power", "Power"},
++    }};
++    for (const auto& [key, label] : names) {
++        if (name == key) {
++            return QString::fromLatin1(label);
++        }
++    }
++    return QString::fromStdString(name);
++}
++
++} // Anonymous namespace
++
++QString DefaultModifier() {
++    return QStringLiteral("engine:hotkey_3ds,button:select");
++}
++
++std::string Resolve(const QString& binding) {
++    if (binding.isEmpty()) {
++        return {};
++    }
++    const Common::ParamPackage params(binding.toStdString());
++    const std::string engine = params.Get("engine", "");
++    if (engine.empty()) {
++        return {};
++    }
++    if (engine == ENGINE_3DS) {
++        const int index = NativeButtonIndex(params.Get("button", ""));
++        if (index < 0) {
++            return {};
++        }
++        return Settings::values.current_input_profile.buttons[index];
++    }
++    if (engine == ENGINE_PAD) {
++        return ResolvePadButton(params.Get("button", ""));
++    }
++    return binding.toStdString();
++}
++
++bool SameInput(const std::string& a, const std::string& b) {
++    if (a.empty() || b.empty()) {
++        return false;
++    }
++    if (a == b) {
++        return true;
++    }
++    const Common::ParamPackage pa(a);
++    const Common::ParamPackage pb(b);
++    const std::string engine = pa.Get("engine", "");
++    if (engine != pb.Get("engine", "")) {
++        return false;
++    }
++    if (engine == "sdl") {
++        if (pa.Get("guid", "") != pb.Get("guid", "") || pa.Get("port", 0) != pb.Get("port", 0)) {
++            return false;
++        }
++        if (pa.Has("button") || pb.Has("button")) {
++            return pa.Has("button") && pb.Has("button") &&
++                   pa.Get("button", -1) == pb.Get("button", -1);
++        }
++        if (pa.Has("hat") || pb.Has("hat")) {
++            return pa.Has("hat") && pb.Has("hat") && pa.Get("hat", -1) == pb.Get("hat", -1) &&
++                   pa.Get("direction", "") == pb.Get("direction", "");
++        }
++        if (pa.Has("axis") || pb.Has("axis")) {
++            return pa.Has("axis") && pb.Has("axis") && pa.Get("axis", -1) == pb.Get("axis", -1) &&
++                   pa.Get("direction", "") == pb.Get("direction", "");
++        }
++        return false;
++    }
++    if (engine == "keyboard") {
++        return pa.Get("code", -1) == pb.Get("code", -2);
++    }
++    return false;
++}
++
++QString Symbolize(const QString& raw_binding) {
++    const Common::ParamPackage params(raw_binding.toStdString());
++    const std::string engine = params.Get("engine", "");
++    if (engine.empty() || engine == ENGINE_3DS || engine == ENGINE_PAD) {
++        return raw_binding;
++    }
++    const std::string raw = raw_binding.toStdString();
++
++    for (int i = 0; i < Settings::NativeButton::NumButtons; ++i) {
++        if (SameInput(Settings::values.current_input_profile.buttons[i], raw)) {
++            const std::string name = std::string(Settings::NativeButton::mapping[i]).substr(7);
++            return QStringLiteral("engine:hotkey_3ds,button:%1").arg(QString::fromStdString(name));
++        }
++    }
++    for (const char* name : PAD_BUTTONS) {
++        if (SameInput(ResolvePadButton(name), raw)) {
++            return QStringLiteral("engine:hotkey_pad,button:%1").arg(QString::fromLatin1(name));
++        }
++    }
++    return raw_binding;
++}
++
++QString DisplayName(const QString& binding) {
++    if (binding.isEmpty()) {
++        return {};
++    }
++    const Common::ParamPackage params(binding.toStdString());
++    const std::string engine = params.Get("engine", "");
++    if (engine == ENGINE_3DS) {
++        return Translate("%1 (3DS)").arg(Display3DSButton(params.Get("button", "")));
++    }
++    if (engine == ENGINE_PAD) {
++        const std::string name = params.Get("button", "");
++        if (name == "leftstick") {
++            return QStringLiteral("L3");
++        }
++        if (name == "rightstick") {
++            return QStringLiteral("R3");
++        }
++        if (name == "guide") {
++            return QStringLiteral("Guide");
++        }
++        return QString::fromStdString(name);
++    }
++    if (engine == "sdl") {
++        if (params.Has("button")) {
++            return Translate("Button %1").arg(params.Get("button", 0));
++        }
++        if (params.Has("hat")) {
++            return Translate("Hat %1 %2")
++                .arg(params.Get("hat", 0))
++                .arg(QString::fromStdString(params.Get("direction", "")));
++        }
++        if (params.Has("axis")) {
++            return Translate("Axis %1%2")
++                .arg(params.Get("axis", 0))
++                .arg(QString::fromStdString(params.Get("direction", "")));
++        }
++    }
++    if (engine == "keyboard") {
++        return QKeySequence(params.Get("code", 0)).toString(QKeySequence::NativeText);
++    }
++    return binding;
++}
++
++} // namespace ControllerHotkey
+diff -ur a/src/borked3ds_qt/hotkeys.h b/src/borked3ds_qt/hotkeys.h
+--- a/src/borked3ds_qt/hotkeys.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/hotkeys.h	Hotkeys-DTEAM-1-548512c8
+@@ -6,6 +6,7 @@
+ #pragma once
+ 
+ #include <map>
++#include <string>
+ #include <QKeySequence>
+ #include <QString>
+ 
+@@ -82,3 +83,37 @@
+ 
+     HotkeyGroupMap hotkey_groups;
+ };
++
++/**
++ * v426 - Controller hotkeys "a la RetroPie" (hotkey enable button + button).
++ *
++ * A controller hotkey binding is either a raw input ParamPackage recorded by ControllerDialog
++ * (engine:sdl,guid:...,port:...,button:N) or one of two symbolic forms that never hard-code a
++ * controller, so the defaults work with whatever gamepad the player configured:
++ *   engine:hotkey_3ds,button:<name>  -> the input bound to that 3DS button in the current input
++ *                                       profile (name = select, start, l, r, x, b, ...)
++ *   engine:hotkey_pad,button:<name>  -> a named gamepad button the 3DS does not have
++ *                                       (leftstick = L3, rightstick = R3, guide), looked up on the
++ *                                       controller of the current input profile through its
++ *                                       SDL_GameController mapping, then EmulationStation's
++ *                                       es_input.cfg (leftthumb/rightthumb) as a fallback.
++ */
++namespace ControllerHotkey {
++
++/// Default hotkey enable button (modifier): the button mapped to 3DS Select.
++QString DefaultModifier();
++
++/// Resolves a binding (raw or symbolic) to a concrete input ParamPackage string; empty on failure.
++std::string Resolve(const QString& binding);
++
++/// Converts a raw binding to its symbolic form when it matches a 3DS button of the current input
++/// profile (or L3/R3), so it keeps working with another controller. Returns the input otherwise.
++QString Symbolize(const QString& raw_binding);
++
++/// True when both resolved ParamPackage strings designate the same physical input.
++bool SameInput(const std::string& a, const std::string& b);
++
++/// Human readable name of a binding for the configuration UI.
++QString DisplayName(const QString& binding);
++
++} // namespace ControllerHotkey
+diff -ur a/src/borked3ds_qt/main.cpp b/src/borked3ds_qt/main.cpp
+--- a/src/borked3ds_qt/main.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/main.cpp	Hotkeys-DTEAM-1-548512c8
+@@ -677,10 +677,14 @@
+     // Quick save / load uses slot
+     connect(ui->action_Quick_Save, &QAction::triggered, this, [this] {
+         UpdateSaveStates();
++        ShowOsdMessage(tr("Saving state...")); // v427
+         actions_save_state[0]->trigger();
+     });
+     connect(ui->action_Quick_Load, &QAction::triggered, this, [this] {
+         UpdateSaveStates();
++        // v427 : a disabled slot action ignores trigger(), say so instead of "Loading"
++        ShowOsdMessage(actions_load_state[0]->isEnabled() ? tr("Loading state...")
++                                                          : tr("No quick save to load"));
+         actions_load_state[0]->trigger();
+     });
+ 
+@@ -803,6 +807,10 @@
+     connect_shortcut(QStringLiteral("Audio Volume Down"), &GMainWindow::OnDecreaseVolume);
+     connect_shortcut(QStringLiteral("Audio Volume Up"), &GMainWindow::OnIncreaseVolume);
+ 
++    // v426 : new actions, mainly meant for the controller hotkeys (no keyboard default)
++    connect_shortcut(QStringLiteral("Toggle Menu"), &GMainWindow::ToggleHotkeyMenu);
++    connect_shortcut(QStringLiteral("Toggle Video Dumping"), &GMainWindow::ToggleVideoDumpingHotkey);
++
+     // We use "static" here in order to avoid capturing by lambda due to a MSVC bug, which makes the
+     // variable hold a garbage value after this function exits
+     static constexpr u16 FACTOR_3D_STEP = 5;
+@@ -846,8 +854,13 @@
+                                 SLOT(ToggleSecondaryFullscreen()));
+ 
+     // Initialize gamepad hotkey polling - gvx64
+-    connect(&gamepad_hotkey_poll_timer, &QTimer::timeout, this, &GMainWindow::PollGamepadHotkeys);
++    // v426 : UniqueConnection, InitializeHotkeys() runs again after each Configure dialog and the
++    // poll used to be connected once more every time.
++    connect(&gamepad_hotkey_poll_timer, &QTimer::timeout, this, &GMainWindow::PollGamepadHotkeys,
++            Qt::UniqueConnection);
+     gamepad_hotkey_poll_timer.setInterval(16); // Poll at ~60Hz (16ms)
++    // v426 : bindings / input profile may have changed, rebuild the devices on the next poll
++    gamepad_hotkeys_built = false;
+ 
+     // Start polling when emulation starts
+     // Timer will be started/stopped in OnStartGame/OnStopGame
+@@ -920,54 +933,103 @@
+     }
+ }
+ 
+-void GMainWindow::PollGamepadHotkeys() {
+-    if (!emulation_running) {
+-        return;
++void GMainWindow::ClearGamepadHotkeys() { // v426
++    gamepad_hotkey_bindings.clear();
++    gamepad_hotkey_modifier.reset();
++    gamepad_hotkey_modifier_required = false;
++    gamepad_hotkeys_built = false;
++}
++
++void GMainWindow::BuildGamepadHotkeys() { // v426
++    ClearGamepadHotkeys();
++    gamepad_hotkeys_built = true;
++
++    std::string modifier_params;
++    const QString& modifier = UISettings::values.controller_hotkey_modifier;
++    if (!modifier.isEmpty()) {
++        gamepad_hotkey_modifier_required = true;
++        modifier_params = ControllerHotkey::Resolve(modifier);
++        if (!modifier_params.empty()) {
++            gamepad_hotkey_modifier = Input::CreateDevice<Input::ButtonDevice>(modifier_params);
++        }
++        if (!gamepad_hotkey_modifier) {
++            // Never fall back to single-button hotkeys: Start alone would quit the game.
++            LOG_WARNING(Frontend,
++                        "V426_HOTKEY modifier '{}' unresolved (not bound in Controls?) - "
++                        "controller hotkeys disabled",
++                        modifier.toStdString());
++            return;
++        }
+     }
+ 
+-    // Check each configured hotkey's controller binding
++    std::size_t unresolved = 0;
+     for (const auto& [group_name, group] : hotkey_registry.hotkey_groups) {
+         for (const auto& [action_name, hotkey] : group) {
+             if (hotkey.controller_keyseq.isEmpty()) {
+                 continue;
+             }
+ 
+-            QString hotkey_id = group_name + QStringLiteral("::") + action_name;
+-
+-            // Create device on first use and cache it - gvx64
+-            if (hotkey_button_devices.find(hotkey_id) == hotkey_button_devices.end()) {
+-                Common::ParamPackage params(hotkey.controller_keyseq.toStdString());
+-                if (!params.Has("engine") || !params.Has("button")) {
+-                    continue;
+-                }
+-
+-                auto button_device = Input::CreateDevice<Input::ButtonDevice>(params.Serialize());
+-                if (!button_device) {
+-                    // Cache nullptr to avoid trying again
+-                    hotkey_button_devices[hotkey_id] = nullptr;
+-                    continue;
+-                }
+-
+-                hotkey_button_devices[hotkey_id] = std::move(button_device);
++            const std::string params = ControllerHotkey::Resolve(hotkey.controller_keyseq);
++            if (params.empty()) {
++                ++unresolved;
++                LOG_WARNING(Frontend, "V426_HOTKEY '{}' -> '{}' unresolved",
++                            action_name.toStdString(), hotkey.controller_keyseq.toStdString());
++                continue;
+             }
+-
+-            // Skip if device creation failed
+-            if (!hotkey_button_devices[hotkey_id]) {
++            if (gamepad_hotkey_modifier_required &&
++                ControllerHotkey::SameInput(params, modifier_params)) {
++                LOG_WARNING(Frontend, "V426_HOTKEY '{}' uses the enable button itself, ignored",
++                            action_name.toStdString());
+                 continue;
+             }
+-
+-            // Check if button is currently pressed
+-            bool is_pressed = hotkey_button_devices[hotkey_id]->GetStatus();
+-
+-            // Trigger on new press (not held)
+-            if (is_pressed && !gamepad_hotkey_pressed[hotkey_id]) {
+-                gamepad_hotkey_pressed[hotkey_id] = true;
+-                TriggerHotkeyAction(group_name, action_name);
+-            } else if (!is_pressed && gamepad_hotkey_pressed[hotkey_id]) {
+-                gamepad_hotkey_pressed[hotkey_id] = false;
++            auto device = Input::CreateDevice<Input::ButtonDevice>(params);
++            if (!device) {
++                ++unresolved;
++                continue;
+             }
++            gamepad_hotkey_bindings.push_back({group_name, action_name, std::move(device), true});
+         }
+     }
++
++    LOG_WARNING(Frontend, "V426_HOTKEY ready: modifier='{}' ({}) active={} unresolved={}",
++                ControllerHotkey::DisplayName(modifier).toStdString(), modifier_params,
++                gamepad_hotkey_bindings.size(), unresolved);
++}
++
++void GMainWindow::PollGamepadHotkeys() {
++    if (!emulation_running) {
++        return;
++    }
++    if (!gamepad_hotkeys_built) {
++        BuildGamepadHotkeys();
++    }
++    if (gamepad_hotkey_modifier_required && !gamepad_hotkey_modifier) {
++        return; // unresolved enable button, see BuildGamepadHotkeys()
++    }
++
++    // v426 : RetroPie style, the hotkey button only counts while the enable button is held
++    const bool modifier_held =
++        !gamepad_hotkey_modifier_required || gamepad_hotkey_modifier->GetStatus();
++    // Never act behind an open dialog (nested event loop: Configure, message boxes...)
++    const bool blocked = QApplication::activeModalWidget() != nullptr;
++
++    const GamepadHotkeyBinding* triggered = nullptr;
++    for (auto& binding : gamepad_hotkey_bindings) {
++        const bool is_pressed = binding.device->GetStatus();
++        // Trigger on new press (not held)
++        if (is_pressed && !binding.was_pressed && modifier_held && !blocked && !triggered) {
++            triggered = &binding;
++        }
++        binding.was_pressed = is_pressed;
++    }
++
++    if (triggered) {
++        // Copy: the action may stop the game and clear gamepad_hotkey_bindings
++        const QString group = triggered->group;
++        const QString action = triggered->action;
++        LOG_WARNING(Frontend, "V426_HOTKEY trigger '{}'", action.toStdString());
++        TriggerHotkeyAction(group, action);
++    }
+ }
+ 
+ void GMainWindow::TriggerHotkeyAction(const QString& group, const QString& action) {
+@@ -1076,6 +1138,10 @@
+     } else if (action == QStringLiteral("Quick Load")) {
+         // Trigger the QAction directly - gvx64
+         ui->action_Quick_Load->trigger();
++    } else if (action == QStringLiteral("Toggle Menu")) { // v426
++        ToggleHotkeyMenu();
++    } else if (action == QStringLiteral("Toggle Video Dumping")) { // v426
++        ToggleVideoDumpingHotkey();
+     } else if (action == QStringLiteral("Emergency SW Fallback")) {
+         // gvx64: Mirror the keyboard shortcut handler exactly
+         if (!emulation_running)
+@@ -2649,6 +2715,9 @@
+     if (has_controller_hotkeys) {
+         // Don't use pollers - just start the timer
+         // Pollers consume input and break game controls - gvx64
++        // v426 : devices are (re)built on the first poll; already-held buttons must be released
++        // first, so a combo held across a restart/resume cannot fire again.
++        gamepad_hotkeys_built = false;
+         gamepad_hotkey_poll_timer.start();
+     }
+ }
+@@ -2712,9 +2781,12 @@
+ 
+     // Stop gamepad hotkey polling - gvx64
+     gamepad_hotkey_poll_timer.stop();
+-    gamepad_hotkey_pressed.clear();
+-    // Don't need to manage pollers anymore
+-    hotkey_button_devices.clear(); // Clear cached devices - gvx64
++    ClearGamepadHotkeys(); // v426
++    if (osd_label) { // v427
++        osd_hide_timer.stop();
++        osd_label->hide();
++    }
++    hotkey_menu_open = false;
+ }
+ 
+ void GMainWindow::OnLoadComplete() {
+@@ -3223,6 +3295,10 @@
+             OnPauseGame();
+         }
+         std::string path = UISettings::values.screenshot_path.GetValue();
++        if (path.empty()) {
++            // v426 : an empty path used to write "/<title>.png" (root, fails silently)
++            path = FileUtil::GetUserPath(FileUtil::UserPath::UserDir) + "screenshots/";
++        }
+         if (!FileUtil::IsDirectory(path)) {
+             if (!FileUtil::CreateFullPath(path)) {
+                 QMessageBox::information(
+@@ -3248,6 +3324,7 @@
+             UISettings::values.screenshot_resolution_factor.GetValue(),
+             QString::fromStdString(path));
+         OnStartGame();
++        ShowOsdMessage(tr("Screenshot taken")); // v427
+     }
+ }
+ 
+@@ -3347,6 +3424,123 @@
+ }
+ #endif
+ 
++// v426 : controller "menu" hotkey (Select + X by default). The Qt menus are only reachable
++// outside fullscreen, so: pause + leave fullscreen; pressed again: back to fullscreen + resume.
++void GMainWindow::ToggleHotkeyMenu() {
++    if (!emulation_running || !emu_thread) {
++        return;
++    }
++    if (hotkey_menu_open) {
++        hotkey_menu_open = false;
++        if (hotkey_menu_restore_fullscreen && !ui->action_Fullscreen->isChecked()) {
++            ui->action_Fullscreen->setChecked(true);
++            ToggleFullscreen();
++        }
++        if (hotkey_menu_resume && !emu_thread->IsRunning()) {
++            OnStartGame();
++        }
++        return;
++    }
++    hotkey_menu_open = true;
++    hotkey_menu_resume = emu_thread->IsRunning();
++    hotkey_menu_restore_fullscreen = ui->action_Fullscreen->isChecked();
++    if (hotkey_menu_resume) {
++        OnPauseGame();
++    }
++    if (hotkey_menu_restore_fullscreen) {
++        ui->action_Fullscreen->setChecked(false);
++        ToggleFullscreen();
++    }
++}
++
++// v426 : controller video dump hotkey (Select + R3 by default). Starts dumping without the
++// file dialog, using the format/encoders chosen in Emulation > Dump Video; pressed again stops.
++void GMainWindow::ToggleVideoDumpingHotkey() {
++    if (!emulation_running) {
++        return;
++    }
++    const auto current = system.GetVideoDumper();
++    if (current && current->IsDumping()) {
++        OnStopVideoDumping();
++        return;
++    }
++    if (!DynamicLibrary::FFmpeg::LoadFFmpeg()) {
++        LOG_ERROR(Frontend, "V426_HOTKEY video dumping: FFmpeg could not be loaded");
++        return;
++    }
++
++    QString dir = UISettings::values.video_dumping_path;
++    if (dir.isEmpty() || !QDir().mkpath(dir)) {
++        dir = QString::fromStdString(FileUtil::GetUserPath(FileUtil::UserPath::UserDir)) +
++              QStringLiteral("videos");
++        QDir().mkpath(dir);
++    }
++
++    // Extension of the chosen muxer (ffmpeg format name -> usual file extension)
++    const QString format = QString::fromStdString(Settings::values.output_format);
++    QString extension = format.isEmpty() ? QStringLiteral("webm") : format;
++    if (format == QStringLiteral("matroska")) {
++        extension = QStringLiteral("mkv");
++    } else if (format == QStringLiteral("mpegts")) {
++        extension = QStringLiteral("ts");
++    } else if (format == QStringLiteral("ogg")) {
++        extension = QStringLiteral("ogv");
++    }
++
++    static const QRegularExpression invalid_chars(QStringLiteral("[\\/:?\"<>|*]"));
++    QString title = game_title; // copy, game_title must stay intact
++    title.remove(invalid_chars);
++    if (title.isEmpty()) {
++        title = QStringLiteral("borked3ds");
++    }
++    const QString timestamp =
++        QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd_hh.mm.ss"));
++    const QString path =
++        QStringLiteral("%1/%2_%3.%4").arg(dir, title, timestamp, extension);
++
++    LOG_WARNING(Frontend, "V426_HOTKEY video dumping to '{}'", path.toStdString());
++    ui->action_Dump_Video->setChecked(true);
++    StartVideoDumping(path);
++}
++
++// v427 : RetroArch-style on-screen message. A frameless tool-tip window (override-redirect on X11,
++// so it stays above the fullscreen Vulkan window without a compositor) at the bottom left of the
++// game, white text on dark blue, hidden after 2 s. Not part of screenshots or video dumps, which are
++// taken from the renderer.
++void GMainWindow::ShowOsdMessage(const QString& text) {
++    if (!emulation_running || !render_window) {
++        return;
++    }
++    QWidget* const target =
++        render_window->isVisible() ? static_cast<QWidget*>(render_window) : static_cast<QWidget*>(this);
++
++    if (!osd_label) {
++        osd_label = new QLabel(this, Qt::ToolTip | Qt::FramelessWindowHint |
++                                         Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus);
++        osd_label->setAttribute(Qt::WA_ShowWithoutActivating);
++        osd_label->setAttribute(Qt::WA_TransparentForMouseEvents);
++        osd_label->setStyleSheet(QStringLiteral(
++            "QLabel { color: #ffffff; background-color: #0b1f4d; padding: 6px 14px; }"));
++        osd_hide_timer.setSingleShot(true);
++        connect(&osd_hide_timer, &QTimer::timeout, osd_label, &QWidget::hide);
++    }
++
++    // Size relative to the game area (480 px high -> 20 px text)
++    const int height = std::max(target->height(), 1);
++    QFont font = osd_label->font();
++    font.setPixelSize(std::max(14, height / 24));
++    osd_label->setFont(font);
++    osd_label->setText(text);
++    osd_label->adjustSize();
++
++    const int margin = std::max(8, height / 40);
++    const QPoint origin = target->mapToGlobal(QPoint(0, 0));
++    osd_label->move(origin.x() + margin, origin.y() + height - osd_label->height() - margin);
++    osd_label->show();
++    osd_label->raise();
++    osd_hide_timer.start(2000);
++}
++
+ void GMainWindow::OnStartVideoDumping() {
+     DumpingDialog dialog(this, system);
+     if (dialog.exec() != QDialog::DialogCode::Accepted) {
+@@ -3369,6 +3563,7 @@
+     auto dumper = std::make_shared<VideoDumper::FFmpegBackend>(renderer);
+     if (dumper->StartDumping(path.toStdString(), layout)) {
+         system.RegisterVideoDumper(dumper);
++        ShowOsdMessage(tr("Video recording started")); // v427
+     } else {
+         QMessageBox::critical(
+             this, tr("Borked3DS"),
+@@ -3390,6 +3585,7 @@
+             return;
+         }
+ 
++        ShowOsdMessage(tr("Video recording stopped")); // v427
+         game_paused_for_dumping = emu_thread->IsRunning();
+         OnPauseGame();
+ 
+diff -ur a/src/borked3ds_qt/main.h b/src/borked3ds_qt/main.h
+--- a/src/borked3ds_qt/main.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/main.h	Hotkeys-DTEAM-1-548512c8
+@@ -364,12 +364,36 @@
+ 
+     // Gamepad hotkey polling - gvx64
+     QTimer gamepad_hotkey_poll_timer;
+-    std::map<QString, bool> gamepad_hotkey_pressed; // Track button states
+-    std::map<QString, std::unique_ptr<Input::ButtonDevice>> hotkey_button_devices; // Cache devices - gvx64
++    // v426 : hotkey enable button (modifier) + per-hotkey button, RetroPie style
++    struct GamepadHotkeyBinding {
++        QString group;
++        QString action;
++        std::unique_ptr<Input::ButtonDevice> device;
++        bool was_pressed = true; // must be seen released once before it can trigger
++    };
++    std::vector<GamepadHotkeyBinding> gamepad_hotkey_bindings;
++    std::unique_ptr<Input::ButtonDevice> gamepad_hotkey_modifier;
++    bool gamepad_hotkey_modifier_required = false;
++    bool gamepad_hotkeys_built = false;
+ 
+     void PollGamepadHotkeys(); // gvx64
++    void BuildGamepadHotkeys(); // v426
++    void ClearGamepadHotkeys(); // v426
+     void TriggerHotkeyAction(const QString& group, const QString& action); // gvx64
+ 
++    // v426 : "Toggle Menu" (pause + leave fullscreen / resume + fullscreen) and quick video dump
++    void ToggleHotkeyMenu();
++    void ToggleVideoDumpingHotkey();
++    bool hotkey_menu_open = false;
++    bool hotkey_menu_resume = false;
++    bool hotkey_menu_restore_fullscreen = false;
++
++    // v427 : RetroArch-style on-screen message (2 s, white on dark blue) for quick save/load,
++    // video recording start/stop and screenshots
++    void ShowOsdMessage(const QString& text);
++    QLabel* osd_label = nullptr;
++    QTimer osd_hide_timer;
++
+     // Whether emulation is currently running in Borked3DS.
+     bool emulation_running = false;
+     // gvx64: slot 11 is outside the UI menu (which uses slots 0-10) so it won't
+diff -ur a/src/borked3ds_qt/uisettings.h b/src/borked3ds_qt/uisettings.h
+--- a/src/borked3ds_qt/uisettings.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/uisettings.h	Hotkeys-DTEAM-1-548512c8
+@@ -125,6 +125,8 @@
+ 
+     // Shortcut name <Shortcut, context>
+     std::vector<Shortcut> shortcuts;
++    // v426 : controller hotkey enable button (modifier). Empty = single-button controller hotkeys.
++    QString controller_hotkey_modifier;
+ 
+     Settings::Setting<u32> callout_flags{0, "calloutFlags"};
+ 
+diff -ur a/src/input_common/main.cpp b/src/input_common/main.cpp
+--- a/src/input_common/main.cpp	Source-gvx64-a7095a7a
++++ b/src/input_common/main.cpp	Hotkeys-DTEAM-1-548512c8
+@@ -116,6 +116,19 @@
+     return {};
+ }
+ 
++Common::ParamPackage GetControllerNamedButtonBind(const Common::ParamPackage& params,
++                                                  const std::string& button_name) {
++    if (params.Get("engine", "") != "sdl") {
++        return {};
++    }
++    auto* const sdl_state = dynamic_cast<SDL::SDLState*>(sdl.get());
++    if (!sdl_state) {
++        return {};
++    }
++    return sdl_state->GetSDLControllerButtonBindByName(params.Get("guid", "0"),
++                                                       params.Get("port", 0), button_name);
++}
++
+ Common::ParamPackage GetControllerAnalogBinds(const Common::ParamPackage& params, int analog) {
+     const auto native_analog{static_cast<Settings::NativeAnalog::Values>(analog)};
+     const auto engine{params.Get("engine", "")};
+diff -ur a/src/input_common/main.h b/src/input_common/main.h
+--- a/src/input_common/main.h	Source-gvx64-a7095a7a
++++ b/src/input_common/main.h	Hotkeys-DTEAM-1-548512c8
+@@ -41,6 +41,14 @@
+ Common::ParamPackage GetControllerButtonBinds(const Common::ParamPackage& params, int button);
+ Common::ParamPackage GetControllerAnalogBinds(const Common::ParamPackage& params, int analog);
+ 
++/**
++ * v426 : resolves a named SDL_GameController button ("leftstick", "rightstick", "guide", ...) on
++ * the controller identified by params (engine/guid/port). Used by the controller hotkeys for
++ * buttons the 3DS does not have (L3/R3). Returns an empty package if it cannot be resolved.
++ */
++Common::ParamPackage GetControllerNamedButtonBind(const Common::ParamPackage& params,
++                                                  const std::string& button_name);
++
+ /// Reloads the input devices
+ void ReloadInputDevices();
+ 
+diff -ur a/src/input_common/sdl/sdl_impl.cpp b/src/input_common/sdl/sdl_impl.cpp
+--- a/src/input_common/sdl/sdl_impl.cpp	Source-gvx64-a7095a7a
++++ b/src/input_common/sdl/sdl_impl.cpp	Hotkeys-DTEAM-1-548512c8
+@@ -374,34 +374,13 @@
+     return *vec_it;
+ }
+ 
+-Common::ParamPackage SDLState::GetSDLControllerButtonBindByGUID(
+-    const std::string& guid, int port, Settings::NativeButton::Values button) {
+-    Common::ParamPackage params({{"engine", "sdl"}});
+-    params.Set("guid", guid);
+-    params.Set("port", port);
+-    SDL_GameController* controller = GetSDLJoystickByGUID(guid, port)->GetSDLGameController();
+-    SDL_GameControllerButtonBind button_bind;
+-
+-    if (!controller) {
+-        LOG_WARNING(Input, "failed to open controller {}", guid);
+-        return {{}};
+-    }
+-
+-    auto mapped_button = xinput_to_3ds_mapping[static_cast<int>(button)];
+-    if (mapped_button == SDL_CONTROLLER_BUTTON_INVALID) {
+-        if (button == Settings::NativeButton::Values::ZL) {
+-            button_bind =
+-                SDL_GameControllerGetBindForAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+-        } else if (button == Settings::NativeButton::Values::ZR) {
+-            button_bind =
+-                SDL_GameControllerGetBindForAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+-        } else {
+-            return {{}};
+-        }
+-    } else {
+-        button_bind = SDL_GameControllerGetBindForButton(controller, mapped_button);
+-    }
+-
++// v426 : conversion d'un bind SDL_GameController en ParamPackage, partagee entre le mapping
++// automatique des boutons 3DS et la resolution des boutons manette nommes (L3/R3) des hotkeys.
++static Common::ParamPackage SDLButtonBindToParams(Common::ParamPackage params,
++                                                  SDL_GameController* controller,
++                                                  SDL_GameControllerButton mapped_button,
++                                                  const SDL_GameControllerButtonBind& button_bind,
++                                                  const char* label) {
+     switch (button_bind.bindType) {
+     case SDL_CONTROLLER_BINDTYPE_BUTTON:
+         params.Set("button", button_bind.value.button);
+@@ -450,7 +429,7 @@
+ #endif
+         break;
+     case SDL_CONTROLLER_BINDTYPE_NONE:
+-        LOG_WARNING(Input, "Button not bound: {}", Settings::NativeButton::mapping[button]);
++        LOG_WARNING(Input, "Button not bound: {}", label);
+         return {{}};
+     default:
+         LOG_WARNING(Input, "unknown SDL bind type {}", button_bind.bindType);
+@@ -460,6 +439,63 @@
+     return params;
+ }
+ 
++Common::ParamPackage SDLState::GetSDLControllerButtonBindByGUID(
++    const std::string& guid, int port, Settings::NativeButton::Values button) {
++    Common::ParamPackage params({{"engine", "sdl"}});
++    params.Set("guid", guid);
++    params.Set("port", port);
++    SDL_GameController* controller = GetSDLJoystickByGUID(guid, port)->GetSDLGameController();
++    SDL_GameControllerButtonBind button_bind;
++
++    if (!controller) {
++        LOG_WARNING(Input, "failed to open controller {}", guid);
++        return {{}};
++    }
++
++    auto mapped_button = xinput_to_3ds_mapping[static_cast<int>(button)];
++    if (mapped_button == SDL_CONTROLLER_BUTTON_INVALID) {
++        if (button == Settings::NativeButton::Values::ZL) {
++            button_bind =
++                SDL_GameControllerGetBindForAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
++        } else if (button == Settings::NativeButton::Values::ZR) {
++            button_bind =
++                SDL_GameControllerGetBindForAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
++        } else {
++            return {{}};
++        }
++    } else {
++        button_bind = SDL_GameControllerGetBindForButton(controller, mapped_button);
++    }
++
++    return SDLButtonBindToParams(std::move(params), controller, mapped_button, button_bind,
++                                 Settings::NativeButton::mapping[button]);
++}
++
++// v426 : bouton manette designe par son nom SDL_GameController ("leftstick", "rightstick",
++// "guide", ...). Sert aux hotkeys manette pour les boutons absents de la 3DS (L3/R3).
++// Retourne un ParamPackage vide si la manette n'a pas de mapping SDL_GameController.
++Common::ParamPackage SDLState::GetSDLControllerButtonBindByName(const std::string& guid, int port,
++                                                                const std::string& button_name) {
++    Common::ParamPackage params({{"engine", "sdl"}});
++    params.Set("guid", guid);
++    params.Set("port", port);
++    SDL_GameController* controller = GetSDLJoystickByGUID(guid, port)->GetSDLGameController();
++    if (!controller) {
++        return {{}};
++    }
++
++    const SDL_GameControllerButton sdl_button =
++        SDL_GameControllerGetButtonFromString(button_name.c_str());
++    if (sdl_button == SDL_CONTROLLER_BUTTON_INVALID) {
++        return {{}};
++    }
++
++    const SDL_GameControllerButtonBind button_bind =
++        SDL_GameControllerGetBindForButton(controller, sdl_button);
++    return SDLButtonBindToParams(std::move(params), controller, sdl_button, button_bind,
++                                 button_name.c_str());
++}
++
+ Common::ParamPackage SDLState::GetSDLControllerAnalogBindByGUID(
+     const std::string& guid, int port, Settings::NativeAnalog::Values analog) {
+     Common::ParamPackage params({{"engine", "sdl"}});
+diff -ur a/src/input_common/sdl/sdl_impl.h b/src/input_common/sdl/sdl_impl.h
+--- a/src/input_common/sdl/sdl_impl.h	Source-gvx64-a7095a7a
++++ b/src/input_common/sdl/sdl_impl.h	Hotkeys-DTEAM-1-548512c8
+@@ -44,6 +44,9 @@
+                                                           Settings::NativeButton::Values button);
+     Common::ParamPackage GetSDLControllerAnalogBindByGUID(const std::string& guid, int port,
+                                                           Settings::NativeAnalog::Values analog);
++    // v426 : bouton nomme SDL_GameController ("leftstick", "rightstick", ...) pour les hotkeys
++    Common::ParamPackage GetSDLControllerButtonBindByName(const std::string& guid, int port,
++                                                          const std::string& button_name);
+ 
+     /// Get all DevicePoller that use the SDL backend for a specific device type
+     Pollers GetPollers(Polling::DeviceType type) override;
