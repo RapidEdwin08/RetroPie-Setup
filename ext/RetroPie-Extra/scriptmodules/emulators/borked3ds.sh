@@ -45,6 +45,7 @@ function _get_commit_borked3ds() {
     #echo 4d5cb16c; # 20261006 # DTEAM-1
     #echo a7095a7a; # 20261119 # gvx64
     #echo 099f6237; # 20261119 # DTEAM-1
+    #echo 548512c8; # 20261120 # DTEAM-1
     echo $branch_commit
 }
 
@@ -101,92 +102,14 @@ function depends_borked3ds() {
     getDepends "${depends[@]}"
 }
 
-################################
-# PGO PROFILE (v421, Pi5 only)
-#
-# The repository ships a profile of the emulator's hot code: dist/pgo/borked3ds.proftext.xz
-# (LLVM text format, so any recent llvm-profdata can read it), recorded on a Pi 5 with an
-# instrumented build (-fprofile-generate) over 7 play sessions (Luigi's Mansion 2 warm x2 and
-# cold, Castlevania Mirror of Fate, Kid Icarus Uprising, Smash Bros, Metroid Samus Returns).
-# Clang uses it (-fprofile-use) to lay out and optimize the code that games really run.
-# Measured on a Pi 5 at fixed work (16 Nov. 2026), CPU time of the emulation thread:
-#   Luigi's Mansion 2 -11 %, and on games that are NOT in the profile:
-#   Zelda -17 %, Sonic Lost World -8.5 %.
-# Build time is unchanged (no training on the user's machine).
-#
-# Profile and sources: the profile was made on commit 1a105e20b. Code changed later is simply
-# compiled without profile data for the changed functions (warnings silenced); the rest keeps
-# the gain. Regenerate the profile from time to time (see dist/pgo/PROFIL.txt).
-#
-# Any problem (file missing, wrong SHA-256, no llvm-profdata, conversion failure) prints the
-# reason and builds WITHOUT PGO, exactly like before: never a failed build because of it.
-# BORKED3DS_NO_PGO=1 forces a build without PGO.
-#
-# Prints the extra compiler flags on stdout (nothing = no PGO); messages go to stderr.
-################################
-function _pgo_borked3ds() {
-    local cxx="$1"
-    local dir="$md_build/dist/pgo"
-    local out="$md_build/build/borked3ds.profdata"
-    local state="$md_build/.borked3ds_pgo"
-
-    _pgo_off_borked3ds() {
-        echo "PGO : inactive -- $1 -> build without PGO." >&2
-        echo "inactive ($1)" > "$state"
-    }
-
-    if [ -n "${BORKED3DS_NO_PGO:-}" ]; then
-        _pgo_off_borked3ds "BORKED3DS_NO_PGO"; return
-    fi
-    if [ ! -f "$dir/borked3ds.proftext.xz" ]; then
-        _pgo_off_borked3ds "profile missing from the repository (dist/pgo/borked3ds.proftext.xz)"; return
-    fi
-    if [ -f "$dir/borked3ds.proftext.xz.sha256" ]; then
-        if ! (cd "$dir" && sha256sum -c --status borked3ds.proftext.xz.sha256); then
-            _pgo_off_borked3ds "incorrect SHA-256 profile summary"; return
-        fi
-    fi
-
-    # llvm-profdata of the same LLVM version as the compiler.
-    local major prof=""
-    major="$("$cxx" -dumpversion 2>/dev/null | cut -d. -f1)"
-    for prof in "llvm-profdata-$major" "/usr/lib/llvm-$major/bin/llvm-profdata" ""; do
-        [ -n "$prof" ] && command -v "$prof" >/dev/null 2>&1 && break
-    done
-    if [ -z "$prof" ]; then
-        _pgo_off_borked3ds "llvm-profdata $major not found (llvm package)"; return
-    fi
-
-    local txt="$md_build/build/borked3ds.proftext"
-    if ! xz -dc "$dir/borked3ds.proftext.xz" > "$txt" 2>/dev/null; then
-        rm -f "$txt"; _pgo_off_borked3ds "profile decompression impossible"; return
-    fi
-    # Local functions (static, anonymous namespace, lambdas) are named "<source path>;<name>"
-    # in the profile, with the path of the tree where it was recorded. Clang looks them up with
-    # the path of THIS tree: without the rewrite below, ~10 % of the functions (6 % of the
-    # executed code, including dynarmic's register allocator) would get no profile data.
-    local src_prefix bld_prefix nloc
-    src_prefix="$(sed -n 's/^prefixe_sources=//p' "$dir/PROFIL.txt" 2>/dev/null)"
-    bld_prefix="$(sed -n 's/^prefixe_build=//p' "$dir/PROFIL.txt" 2>/dev/null)"
-    [ -n "$src_prefix" ] && sed -i "s|$src_prefix|$md_build/|g" "$txt"
-    [ -n "$bld_prefix" ] && sed -i "s|$bld_prefix|$md_build/build/|g" "$txt"
-    nloc="$(grep -c "^$md_build/" "$txt")"
-    echo "PGO : $nloc local functions linked to sources of $md_build" >&2
-
-    if ! "$prof" merge -o "$out" "$txt" >/dev/null 2>&1 || [ ! -s "$out" ]; then
-        rm -f "$txt" "$out"; _pgo_off_borked3ds "Profile conversion Impossible with $prof"; return
-    fi
-    rm -f "$txt"
-
-    local info="profil $(sed -n 's/^commit_profil=//p' "$dir/PROFIL.txt" 2>/dev/null)"
-    echo "PGO : active -- $info, sources $(cat "$md_build/.borked3ds_commit" 2>/dev/null), $prof" >&2
-    echo "active ($info, sources $(cat "$md_build/.borked3ds_commit" 2>/dev/null))" > "$state"
-    echo "-fprofile-use=$out -Wno-backend-plugin -Wno-profile-instr-out-of-date -Wno-profile-instr-unprofiled"
-}
-
 function sources_borked3ds() {
     gitPullOrClone
     git -C "$md_build" rev-parse --short HEAD > "$md_build/.borked3ds_commit"
+
+    # https://github.com/DTEAM-1/Borked3DS-rpi/compare/099f62370...22e947c18
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/gvx64/Borked3DS-rpi.git" ]] && [[ "$(_get_commit_borked3ds)" == "a7095a7a" ]]; then # Only applied to Tested Commits
+        applyPatch "$md_data/Hotkeys-DTEAM-1-548512c8.diff"
+    fi
 
     #do this after cloning Borked3ds, otherwise the $md_build will already exist and cloning will fail
     #Borked3DS requires a cmake 3.5 as minimum, we will use the 4.0.2 binary when using Bookworm or lower
@@ -275,7 +198,90 @@ function sources_borked3ds() {
         fi
     fi
 }
- 
+
+################################
+# PGO PROFILE (v421, Pi5 only)
+#
+# The repository ships a profile of the emulator's hot code: dist/pgo/borked3ds.proftext.xz
+# (LLVM text format, so any recent llvm-profdata can read it), recorded on a Pi 5 with an
+# instrumented build (-fprofile-generate) over 7 play sessions (Luigi's Mansion 2 warm x2 and
+# cold, Castlevania Mirror of Fate, Kid Icarus Uprising, Smash Bros, Metroid Samus Returns).
+# Clang uses it (-fprofile-use) to lay out and optimize the code that games really run.
+# Measured on a Pi 5 at fixed work (16 Nov. 2026), CPU time of the emulation thread:
+#   Luigi's Mansion 2 -11 %, and on games that are NOT in the profile:
+#   Zelda -17 %, Sonic Lost World -8.5 %.
+# Build time is unchanged (no training on the user's machine).
+#
+# Profile and sources: the profile was made on commit 1a105e20b. Code changed later is simply
+# compiled without profile data for the changed functions (warnings silenced); the rest keeps
+# the gain. Regenerate the profile from time to time (see dist/pgo/PROFIL.txt).
+#
+# Any problem (file missing, wrong SHA-256, no llvm-profdata, conversion failure) prints the
+# reason and builds WITHOUT PGO, exactly like before: never a failed build because of it.
+# BORKED3DS_NO_PGO=1 forces a build without PGO.
+#
+# Prints the extra compiler flags on stdout (nothing = no PGO); messages go to stderr.
+################################
+function _pgo_borked3ds() {
+    local cxx="$1"
+    local dir="$md_build/dist/pgo"
+    local out="$md_build/build/borked3ds.profdata"
+    local state="$md_build/.borked3ds_pgo"
+
+    _pgo_off_borked3ds() {
+        echo "PGO : inactive -- $1 -> build without PGO." >&2
+        echo "inactive ($1)" > "$state"
+    }
+
+    if [ -n "${BORKED3DS_NO_PGO:-}" ]; then
+        _pgo_off_borked3ds "BORKED3DS_NO_PGO"; return
+    fi
+    if [ ! -f "$dir/borked3ds.proftext.xz" ]; then
+        _pgo_off_borked3ds "profile missing from the repository (dist/pgo/borked3ds.proftext.xz)"; return
+    fi
+    if [ -f "$dir/borked3ds.proftext.xz.sha256" ]; then
+        if ! (cd "$dir" && sha256sum -c --status borked3ds.proftext.xz.sha256); then
+            _pgo_off_borked3ds "incorrect SHA-256 profile summary"; return
+        fi
+    fi
+
+    # llvm-profdata of the same LLVM version as the compiler.
+    local major prof=""
+    major="$("$cxx" -dumpversion 2>/dev/null | cut -d. -f1)"
+    for prof in "llvm-profdata-$major" "/usr/lib/llvm-$major/bin/llvm-profdata" ""; do
+        [ -n "$prof" ] && command -v "$prof" >/dev/null 2>&1 && break
+    done
+    if [ -z "$prof" ]; then
+        _pgo_off_borked3ds "llvm-profdata $major not found (llvm package)"; return
+    fi
+
+    local txt="$md_build/build/borked3ds.proftext"
+    if ! xz -dc "$dir/borked3ds.proftext.xz" > "$txt" 2>/dev/null; then
+        rm -f "$txt"; _pgo_off_borked3ds "profile decompression impossible"; return
+    fi
+    # Local functions (static, anonymous namespace, lambdas) are named "<source path>;<name>"
+    # in the profile, with the path of the tree where it was recorded. Clang looks them up with
+    # the path of THIS tree: without the rewrite below, ~10 % of the functions (6 % of the
+    # executed code, including dynarmic's register allocator) would get no profile data.
+    local src_prefix bld_prefix nloc
+    src_prefix="$(sed -n 's/^prefixe_sources=//p' "$dir/PROFIL.txt" 2>/dev/null)"
+    bld_prefix="$(sed -n 's/^prefixe_build=//p' "$dir/PROFIL.txt" 2>/dev/null)"
+    [ -n "$src_prefix" ] && sed -i "s|$src_prefix|$md_build/|g" "$txt"
+    [ -n "$bld_prefix" ] && sed -i "s|$bld_prefix|$md_build/build/|g" "$txt"
+    nloc="$(grep -c "^$md_build/" "$txt")"
+    echo "PGO : $nloc local functions linked to sources of $md_build" >&2
+
+    if ! "$prof" merge -o "$out" "$txt" >/dev/null 2>&1 || [ ! -s "$out" ]; then
+        rm -f "$txt" "$out"; _pgo_off_borked3ds "Profile conversion Impossible with $prof"; return
+    fi
+    rm -f "$txt"
+
+    local info="profil $(sed -n 's/^commit_profil=//p' "$dir/PROFIL.txt" 2>/dev/null)"
+    echo "PGO : active -- $info, sources $(cat "$md_build/.borked3ds_commit" 2>/dev/null), $prof" >&2
+    echo "active ($info, sources $(cat "$md_build/.borked3ds_commit" 2>/dev/null))" > "$state"
+    echo "-fprofile-use=$out -Wno-backend-plugin -Wno-profile-instr-out-of-date -Wno-profile-instr-unprofiled"
+}
+
 function build_borked3ds() {
     cd "$md_build"
     mkdir build
