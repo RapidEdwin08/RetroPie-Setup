@@ -19,8 +19,8 @@ rp_module_licence="BSD3 https://raw.githubusercontent.com/cheviman/tmnt-port/mai
 rp_module_repo="git https://github.com/cheviman/tmnt-port.git main"
 rp_module_help="*TMNT ROM/ASSETS REQUIRED* (MAME's tmnt World 4 Player)
 
-*1st RUN* OPEN from DESKTOP ENVIRONMENT*
-DRAG/DROP TMNT.ZIP ROM INTO PORT    (Alt+F4 to Quit)
+*1st RUN* OPEN in DESKTOP ENVIRONMENT* (F11 Fullscreen)
+DRAG/DROP TMNT.ZIP ROM INTO PORT       (Alt+F4 to Quit)
 
 Konami's 1989 arcade game Teenage Mutant Ninja Turtles
 as a native game for computers, Raspberry Pi, Switch,
