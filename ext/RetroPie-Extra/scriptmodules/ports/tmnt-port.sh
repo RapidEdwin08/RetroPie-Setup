@@ -60,6 +60,8 @@ function build_tmnt-port() {
 function install_tmnt-port() {
     md_ret_files=(
        'build/bin'
+       'LICENSE'
+       'README.md'
     )
 }
 
