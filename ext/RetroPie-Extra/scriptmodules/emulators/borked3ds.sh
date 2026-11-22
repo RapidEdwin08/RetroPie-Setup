@@ -610,12 +610,11 @@ _EOF_
 
     addSystem "3ds" "3ds" ".3ds .3dsx .elf .axf .cci .cxi .app .gui"
 
-    if [[ "$(_get_repo_borked3ds)" == "https://github.com/gvx64/Borked3DS-rpi.git" ]] && ( isPlatform "rpi4" ); then
-        [[ "$md_mode" == "install" ]] && patch_es_systems_cfg_borked3ds # gvx64 rpi4
-    fi
-
-    if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]] && ( isPlatform "aarch64" ); then
-        [[ "$md_mode" == "install" ]] && patch_es_systems_cfg_borked3ds # rtiangha
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/gvx64/Borked3DS-rpi.git" ]] || [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]]; then
+        if [[ "$md_mode" == "install" ]] && ( isPlatform "aarch64" ); then
+            echo 'OpenGL/GLES: env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer'
+            patch_es_systems_cfg_borked3ds # gvx64 rpi4 # rtiangha
+        fi
     fi
 
     if [[ ! -f /opt/retropie/configs/all/emulators.cfg ]]; then touch /opt/retropie/configs/all/emulators.cfg; fi
@@ -691,18 +690,23 @@ function patch_es_systems_cfg_borked3ds() {
         ##patch_option=-R
         patch_msgs=Add
         patch_option=
-        printMsgs dialog "$patch_msgs :\n'env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer'\nin /etc/emulationstation/es_systems.cfg"
+        ##printMsgs dialog "$patch_msgs :\n'env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer'\nin /etc/emulationstation/es_systems.cfg"
         patch $patch_option /etc/emulationstation/es_systems.cfg << _EOF_
 @@ -1 +1 @@
 -    <command>/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ 3ds %ROM%</command>
-+    <command>env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer;/opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ 3ds %ROM%</command>
++    <command>env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer; /opt/retropie/supplementary/runcommand/runcommand.sh 0 _SYS_ 3ds %ROM%</command>
 _EOF_
     fi
 }
 
 function shortcuts_icons_borked3ds() {
-    local shortcut_name
-    shortcut_name="Borked 3DS"
+    local shortcut_name="Borked 3DS"
+    local shortcut_exec="$md_inst/borked3ds"
+
+    if [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]] || [[ "$(_get_repo_borked3ds)" == "https://github.com/gvx64/Borked3DS-rpi.git" ]]; then
+        isPlatform "aarch64" && shortcut_exec="env MESA_EXTENSION_OVERRIDE=GL_OES_texture_buffer; $md_inst/borked3ds"
+    fi
+
     cat >"$md_inst/$shortcut_name.desktop" << _EOF_
 [Desktop Entry]
 Name=$shortcut_name
