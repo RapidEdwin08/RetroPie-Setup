@@ -712,7 +712,7 @@ function shortcuts_icons_borked3ds() {
 Name=$shortcut_name
 GenericName=$shortcut_name
 Comment=$shortcut_name
-Exec=$md_inst/borked3ds
+Exec=$shortcut_exec
 Icon=$md_inst/Borked3DS_72x65.xpm
 Terminal=false
 Type=Application
