@@ -1,0 +1,1588 @@
+diff -urN a/src/borked3ds_qt/CMakeLists.txt b/src/borked3ds_qt/CMakeLists.txt
+--- a/src/borked3ds_qt/CMakeLists.txt	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/CMakeLists.txt	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -56,6 +56,8 @@
+     configuration/configure_general.cpp
+     configuration/configure_general.h
+     configuration/configure_general.ui
++    configuration/configure_gamepad_cursor.cpp
++    configuration/configure_gamepad_cursor.h
+     configuration/configure_graphics.cpp
+     configuration/configure_graphics.h
+     configuration/configure_graphics.ui
+@@ -138,6 +140,8 @@
+     game_list_p.h
+     game_list_worker.cpp
+     game_list_worker.h
++    gamepad_cursor.cpp
++    gamepad_cursor.h
+     hotkeys.cpp
+     hotkeys.h
+     infrared/skylanderportal/skylander_dialog.cpp
+diff -urN a/src/borked3ds_qt/configuration/config.cpp b/src/borked3ds_qt/configuration/config.cpp
+--- a/src/borked3ds_qt/configuration/config.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/config.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -66,7 +66,7 @@
+ // v426 : 4th field = default controller hotkey (symbolic, see ControllerHotkey in hotkeys.h). With
+ // the default hotkey enable button (3DS Select) this gives the RetroPie combos:
+ // Select+Start quit, Select+R quick save, Select+L quick load, Select+X menu, Select+B reset,
+-// Select+L3 screenshot, Select+R3 video dumping. "Toggle Turbo Mode" moved back to its
++// Select+L3 screenshot, Select+R3 video dumping. v428 : Select+L2 (3DS ZL) = Toggle Screen Layout. "Toggle Turbo Mode" moved back to its
+ // alphabetical place (the restore-default code now looks defaults up by name anyway).
+ const std::array<UISettings::Shortcut, 41> Config::default_hotkeys {{
+      {QStringLiteral("Advance Frame"),            QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
+@@ -106,7 +106,7 @@
+      {QStringLiteral("Toggle Frame Advancing"),   QStringLiteral("Main Window"), {QStringLiteral("Ctrl+A"), Qt::ApplicationShortcut}},
+      {QStringLiteral("Toggle Menu"),              QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:x")},
+      {QStringLiteral("Toggle Per-Game Speed"),    QStringLiteral("Main Window"), {QStringLiteral("Ctrl+Z"), Qt::ApplicationShortcut}},
+-     {QStringLiteral("Toggle Screen Layout"),     QStringLiteral("Main Window"), {QStringLiteral("F10"),    Qt::WindowShortcut}},
++     {QStringLiteral("Toggle Screen Layout"),     QStringLiteral("Main Window"), {QStringLiteral("F10"),    Qt::WindowShortcut}, QStringLiteral("engine:hotkey_3ds,button:zl")},
+      {QStringLiteral("Toggle Status Bar"),        QStringLiteral("Main Window"), {QStringLiteral("Ctrl+S"), Qt::WindowShortcut}},
+      {QStringLiteral("Toggle Texture Dumping"),   QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::ApplicationShortcut}},
+      {QStringLiteral("Toggle Video Dumping"),     QStringLiteral("Main Window"), {QStringLiteral(""),       Qt::WindowShortcut}, QStringLiteral("engine:hotkey_pad,button:rightstick")},
+@@ -361,6 +361,17 @@
+ 
+     ReadBasicSetting(Settings::values.use_artic_base_controller);
+ 
++    // v428 : global gamepad cursor (enabled by default)
++    ReadBasicSetting(Settings::values.gamepad_cursor_enabled);
++    ReadBasicSetting(Settings::values.gamepad_cursor_in_games);
++    ReadBasicSetting(Settings::values.gamepad_cursor_stick);
++    ReadBasicSetting(Settings::values.gamepad_cursor_sensitivity);
++    ReadBasicSetting(Settings::values.gamepad_cursor_click1);
++    ReadBasicSetting(Settings::values.gamepad_cursor_click2);
++    ReadBasicSetting(Settings::values.gamepad_cursor_ui_stick);
++    ReadBasicSetting(Settings::values.gamepad_cursor_ui_click1);
++    ReadBasicSetting(Settings::values.gamepad_cursor_ui_click2);
++
+     int num_touch_from_button_maps =
+         qt_config->beginReadArray(QStringLiteral("touch_from_button_maps"));
+ 
+@@ -1018,6 +1029,17 @@
+ 
+     WriteBasicSetting(Settings::values.use_artic_base_controller);
+ 
++    // v428 : global gamepad cursor
++    WriteBasicSetting(Settings::values.gamepad_cursor_enabled);
++    WriteBasicSetting(Settings::values.gamepad_cursor_in_games);
++    WriteBasicSetting(Settings::values.gamepad_cursor_stick);
++    WriteBasicSetting(Settings::values.gamepad_cursor_sensitivity);
++    WriteBasicSetting(Settings::values.gamepad_cursor_click1);
++    WriteBasicSetting(Settings::values.gamepad_cursor_click2);
++    WriteBasicSetting(Settings::values.gamepad_cursor_ui_stick);
++    WriteBasicSetting(Settings::values.gamepad_cursor_ui_click1);
++    WriteBasicSetting(Settings::values.gamepad_cursor_ui_click2);
++
+     WriteSetting(QStringLiteral("profile"), Settings::values.current_input_profile_index, 0);
+     qt_config->beginWriteArray(QStringLiteral("profiles"));
+     for (std::size_t p = 0; p < Settings::values.input_profiles.size(); ++p) {
+diff -urN a/src/borked3ds_qt/configuration/configure_controls.cpp b/src/borked3ds_qt/configuration/configure_controls.cpp
+--- a/src/borked3ds_qt/configuration/configure_controls.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_controls.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -111,6 +111,20 @@
+ }
+ 
+ void ConfigureControls::UpdateUIState() {
++    // v428 : the global gamepad cursor (Configure > Controls > Gamepad Cursor) works in every game
++    // and replaces this per-game touch cursor while it is enabled.
++    const bool global_cursor = Settings::values.gamepad_cursor_enabled.GetValue();
++    ui->touchCursorGroupBox->setEnabled(!global_cursor);
++    if (global_cursor) {
++        ui->description_label->setText(
++            tr("The global gamepad cursor is enabled (Configure > Controls > Gamepad Cursor): it "
++               "works in every game and in the interface, so this per-game cursor is not used."));
++    } else {
++        ui->description_label->setText(
++            tr("Control the touchscreen cursor with your gamepad's analog stick. A cursor will "
++               "appear on the bottom screen."));
++    }
++
+     bool enabled = ui->enable_touch_cursor->isChecked();
+     ui->analog_stick_label->setEnabled(enabled);
+     ui->analog_stick_combobox->setEnabled(enabled);
+diff -urN a/src/borked3ds_qt/configuration/configure_dialog.cpp b/src/borked3ds_qt/configuration/configure_dialog.cpp
+--- a/src/borked3ds_qt/configuration/configure_dialog.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_dialog.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -10,6 +10,7 @@
+ #include "borked3ds_qt/configuration/configure_debug.h"
+ #include "borked3ds_qt/configuration/configure_dialog.h"
+ #include "borked3ds_qt/configuration/configure_enhancements.h"
++#include "borked3ds_qt/configuration/configure_gamepad_cursor.h" // v428
+ #include "borked3ds_qt/configuration/configure_general.h"
+ #include "borked3ds_qt/configuration/configure_graphics.h"
+ #include "borked3ds_qt/configuration/configure_hotkeys.h"
+@@ -47,6 +48,7 @@
+       system_tab{std::make_unique<ConfigureSystem>(system, this)},
+       input_tab{std::make_unique<ConfigureInput>(system, this)},
+       hotkeys_tab{std::make_unique<ConfigureHotkeys>(this)},
++      gamepad_cursor_tab{std::make_unique<ConfigureGamepadCursor>(this)}, // v428
+       graphics_tab{
+           std::make_unique<ConfigureGraphics>(gl_renderer, physical_devices, is_powered_on, this)},
+       enhancements_tab{std::make_unique<ConfigureEnhancements>(this)},
+@@ -66,6 +68,7 @@
+     ui->tabWidget->addTab(MakeScrollable(system_tab.get()), tr("System"));
+     ui->tabWidget->addTab(MakeScrollable(input_tab.get()), tr("Input"));
+     ui->tabWidget->addTab(MakeScrollable(hotkeys_tab.get()), tr("Hotkeys"));
++    ui->tabWidget->addTab(MakeScrollable(gamepad_cursor_tab.get()), tr("Gamepad Cursor")); // v428
+     ui->tabWidget->addTab(MakeScrollable(graphics_tab.get()), tr("Graphics"));
+     ui->tabWidget->addTab(MakeScrollable(enhancements_tab.get()), tr("Enhancements"));
+     ui->tabWidget->addTab(MakeScrollable(layout_tab.get()), tr("Layout"));
+@@ -80,6 +83,7 @@
+     ui->tabWidget->addTab(system_tab.get(), tr("System"));
+     ui->tabWidget->addTab(input_tab.get(), tr("Input"));
+     ui->tabWidget->addTab(hotkeys_tab.get(), tr("Hotkeys"));
++    ui->tabWidget->addTab(gamepad_cursor_tab.get(), tr("Gamepad Cursor")); // v428
+     ui->tabWidget->addTab(graphics_tab.get(), tr("Graphics"));
+     ui->tabWidget->addTab(enhancements_tab.get(), tr("Enhancements"));
+     ui->tabWidget->addTab(layout_tab.get(), tr("Layout"));
+@@ -118,6 +122,7 @@
+     general_tab->SetConfiguration();
+     system_tab->SetConfiguration();
+     input_tab->LoadConfiguration();
++    gamepad_cursor_tab->SetConfiguration(); // v428
+     graphics_tab->SetConfiguration();
+     enhancements_tab->SetConfiguration();
+     layout_tab->SetConfiguration();
+@@ -135,6 +140,7 @@
+     input_tab->ApplyConfiguration();
+     input_tab->ApplyProfile();
+     hotkeys_tab->ApplyConfiguration(registry);
++    gamepad_cursor_tab->ApplyConfiguration(); // v428
+     graphics_tab->ApplyConfiguration();
+     enhancements_tab->ApplyConfiguration();
+     layout_tab->ApplyConfiguration();
+@@ -158,7 +164,7 @@
+          {tr("System"), {system_tab.get(), camera_tab.get(), storage_tab.get()}},
+          {tr("Graphics"), {enhancements_tab.get(), layout_tab.get(), graphics_tab.get()}},
+          {tr("Audio"), {audio_tab.get()}},
+-         {tr("Controls"), {input_tab.get(), hotkeys_tab.get()}}}};
++         {tr("Controls"), {input_tab.get(), hotkeys_tab.get(), gamepad_cursor_tab.get()}}}};
+ 
+     for (const auto& entry : items) {
+         auto* const item = new QListWidgetItem(entry.first);
+@@ -189,6 +195,7 @@
+     system_tab->RetranslateUI();
+     input_tab->RetranslateUI();
+     hotkeys_tab->RetranslateUI();
++    gamepad_cursor_tab->RetranslateUI(); // v428
+     graphics_tab->RetranslateUI();
+     enhancements_tab->RetranslateUI();
+     layout_tab->RetranslateUI();
+@@ -209,6 +216,7 @@
+                                                  {system_tab.get(), tr("System")},
+                                                  {input_tab.get(), tr("Input")},
+                                                  {hotkeys_tab.get(), tr("Hotkeys")},
++                                                 {gamepad_cursor_tab.get(), tr("Gamepad Cursor")},
+                                                  {enhancements_tab.get(), tr("Enhancements")},
+                                                  {layout_tab.get(), tr("Layout")},
+                                                  {graphics_tab.get(), tr("Advanced")},
+diff -urN a/src/borked3ds_qt/configuration/configure_dialog.h b/src/borked3ds_qt/configuration/configure_dialog.h
+--- a/src/borked3ds_qt/configuration/configure_dialog.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_dialog.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -24,6 +24,7 @@
+ class ConfigureSystem;
+ class ConfigureInput;
+ class ConfigureHotkeys;
++class ConfigureGamepadCursor; // v428
+ class ConfigureGraphics;
+ class ConfigureLayout;
+ class ConfigureEnhancements;
+@@ -66,6 +67,7 @@
+     std::unique_ptr<ConfigureSystem> system_tab;
+     std::unique_ptr<ConfigureInput> input_tab;
+     std::unique_ptr<ConfigureHotkeys> hotkeys_tab;
++    std::unique_ptr<ConfigureGamepadCursor> gamepad_cursor_tab; // v428
+     std::unique_ptr<ConfigureGraphics> graphics_tab;
+     std::unique_ptr<ConfigureEnhancements> enhancements_tab;
+     std::unique_ptr<ConfigureLayout> layout_tab;
+diff -urN a/src/borked3ds_qt/configuration/configure_gamepad_cursor.cpp b/src/borked3ds_qt/configuration/configure_gamepad_cursor.cpp
+--- a/src/borked3ds_qt/configuration/configure_gamepad_cursor.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_gamepad_cursor.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -0,0 +1,327 @@
++// Copyright 2026 Borked3DS Emulator Project
++// Licensed under GPLv2 or any later version
++// Refer to the license.txt file included.
++
++#include <QCheckBox>
++#include <QComboBox>
++#include <QDialog>
++#include <QFormLayout>
++#include <QGroupBox>
++#include <QHBoxLayout>
++#include <QLabel>
++#include <QPushButton>
++#include <QSlider>
++#include <QVBoxLayout>
++#include "borked3ds_qt/configuration/configure_gamepad_cursor.h"
++#include "borked3ds_qt/hotkeys.h"
++#include "borked3ds_qt/util/controller_dialog/controller_dialog.h"
++#include "common/settings.h"
++
++ConfigureGamepadCursor::ConfigureGamepadCursor(QWidget* parent) : QWidget(parent) {
++    auto* const layout = new QVBoxLayout(this);
++
++    enable_checkbox = new QCheckBox(this);
++    layout->addWidget(enable_checkbox);
++
++    description_label = new QLabel(this);
++    description_label->setWordWrap(true);
++    layout->addWidget(description_label);
++
++    // Sensitivity 1 - 100 %, default 50 %, shared by the interface and games (v429)
++    auto* const speed_form = new QFormLayout();
++    speed_label = new QLabel(this);
++    speed_slider = new QSlider(Qt::Horizontal, this);
++    speed_slider->setRange(1, 100);
++    speed_slider->setSingleStep(1);
++    speed_slider->setPageStep(10);
++    speed_slider->setTickInterval(10);
++    speed_slider->setTickPosition(QSlider::TicksBelow);
++    speed_value_label = new QLabel(this);
++    speed_value_label->setMinimumWidth(40);
++    auto* const speed_layout = new QHBoxLayout();
++    speed_layout->addWidget(speed_slider, 1);
++    speed_layout->addWidget(speed_value_label);
++    speed_form->addRow(speed_label, speed_layout);
++    layout->addLayout(speed_form);
++
++    CreateSet(Interface);
++    layout->addWidget(sets[Interface].group);
++
++    // The game set starts with the "Also in games" switch
++    in_games_checkbox = new QCheckBox(this);
++    CreateSet(Game);
++    if (auto* const game_form = qobject_cast<QFormLayout*>(sets[Game].group->layout())) {
++        game_form->insertRow(0, in_games_checkbox);
++    }
++    layout->addWidget(sets[Game].group);
++
++    defaults_button = new QPushButton(this);
++    layout->addWidget(defaults_button, 0, Qt::AlignLeft);
++
++    status_label = new QLabel(this);
++    status_label->setWordWrap(true);
++    layout->addWidget(status_label);
++    layout->addStretch(1);
++
++    connect(enable_checkbox, &QCheckBox::toggled, this, [this] { UpdateState(); });
++    connect(in_games_checkbox, &QCheckBox::toggled, this, [this] { UpdateState(); });
++    connect(speed_slider, &QSlider::valueChanged, this, [this] { UpdateSpeedLabel(); });
++    connect(defaults_button, &QPushButton::clicked, this, [this] {
++        speed_slider->setValue(
++            static_cast<int>(Settings::values.gamepad_cursor_sensitivity.GetDefault()));
++        in_games_checkbox->setChecked(Settings::values.gamepad_cursor_in_games.GetDefault());
++        for (const Set set : {Interface, Game}) {
++            ControlSet& controls = sets[set];
++            controls.stick_combobox->setCurrentIndex(
++                controls.stick_combobox->findData(DefaultStick(set)));
++            for (std::size_t i = 0; i < controls.click_bindings.size(); ++i) {
++                SetClick(set, i, AutomaticClick(set, i));
++            }
++        }
++    });
++
++    ApplyTexts();
++    SetConfiguration();
++}
++
++ConfigureGamepadCursor::~ConfigureGamepadCursor() = default;
++
++void ConfigureGamepadCursor::CreateSet(Set set) {
++    ControlSet& controls = sets[set];
++    controls.group = new QGroupBox(this);
++    auto* const form = new QFormLayout(controls.group);
++
++    controls.stick_label = new QLabel(controls.group);
++    controls.stick_combobox = new QComboBox(controls.group);
++    controls.stick_combobox->addItem(QString{}, 0u);
++    controls.stick_combobox->addItem(QString{}, 1u);
++    form->addRow(controls.stick_label, controls.stick_combobox);
++    connect(controls.stick_combobox, qOverload<int>(&QComboBox::currentIndexChanged), this,
++            [this] { UpdateStatus(); });
++
++    for (std::size_t i = 0; i < controls.click_buttons.size(); ++i) {
++        controls.click_labels[i] = new QLabel(controls.group);
++        controls.click_buttons[i] = new QPushButton(controls.group);
++        controls.clear_buttons[i] = new QPushButton(controls.group);
++        auto* const click_layout = new QHBoxLayout();
++        click_layout->addWidget(controls.click_buttons[i], 1);
++        click_layout->addWidget(controls.clear_buttons[i]);
++        form->addRow(controls.click_labels[i], click_layout);
++        connect(controls.click_buttons[i], &QPushButton::clicked, this,
++                [this, set, i] { ConfigureClick(set, i); });
++        connect(controls.clear_buttons[i], &QPushButton::clicked, this,
++                [this, set, i] { SetClick(set, i, {}); });
++    }
++}
++
++QString ConfigureGamepadCursor::AutomaticClick(Set set, std::size_t index) const {
++    if (set == Interface) {
++        return QString::fromStdString(index == 0
++                                          ? Settings::values.gamepad_cursor_ui_click1.GetDefault()
++                                          : Settings::values.gamepad_cursor_ui_click2.GetDefault());
++    }
++    return QString::fromStdString(index == 0 ? Settings::values.gamepad_cursor_click1.GetDefault()
++                                             : Settings::values.gamepad_cursor_click2.GetDefault());
++}
++
++unsigned ConfigureGamepadCursor::DefaultStick(Set set) const {
++    return set == Interface ? Settings::values.gamepad_cursor_ui_stick.GetDefault()
++                            : Settings::values.gamepad_cursor_stick.GetDefault();
++}
++
++void ConfigureGamepadCursor::ApplyTexts() {
++    enable_checkbox->setText(tr("Enable the gamepad cursor (interface and games)"));
++    description_label->setText(
++        tr("Moves the mouse pointer with a stick: menus, game list, settings and the 3DS touch "
++           "screen. Hold a click button to keep it pressed (drag a scroll bar or a slider, slide "
++           "on the touch screen); click twice to open a game. The interface and games have their "
++           "own stick and click buttons. In a game the arrow hides after 1 second and never "
++           "shows for the touch screen; in the interface it stays visible. The mouse and the "
++           "touch screen keep working.\nWhen enabled, the per-game touch cursor (game "
++           "Properties > Controls) is not used."));
++    speed_label->setText(tr("Sensitivity:"));
++    speed_slider->setToolTip(tr("Pointer speed, in the interface and in games (default 50 %)"));
++
++    sets[Interface].group->setTitle(
++        tr("Interface (menus, game list, settings, and a paused game)"));
++    sets[Game].group->setTitle(tr("Games"));
++    in_games_checkbox->setText(tr("Also in games (off: the cursor is not used while a game runs)"));
++
++    for (const Set set : {Interface, Game}) {
++        ControlSet& controls = sets[set];
++        controls.stick_label->setText(tr("Stick:"));
++        controls.stick_combobox->setItemText(0, tr("Left stick"));
++        controls.stick_combobox->setItemText(1, tr("Right stick"));
++        controls.click_labels[0]->setText(tr("Click button 1:"));
++        controls.click_labels[1]->setText(tr("Click button 2:"));
++        for (QPushButton* const button : controls.click_buttons) {
++            button->setToolTip(tr("Click, then press the gamepad button that clicks. Choosing a "
++                                  "button replaces the automatic one(s); add a second one in "
++                                  "the other field if you want two."));
++        }
++        for (QPushButton* const button : controls.clear_buttons) {
++            button->setText(tr("Clear"));
++        }
++        for (std::size_t i = 0; i < controls.click_bindings.size(); ++i) {
++            SetClick(set, i, controls.click_bindings[i]);
++        }
++    }
++    defaults_button->setText(tr("Restore Defaults (interface: left stick + A; games: right stick "
++                                "+ L3 / R3; 50 %)"));
++    UpdateSpeedLabel();
++    UpdateStatus();
++}
++
++void ConfigureGamepadCursor::SetConfiguration() {
++    enable_checkbox->setChecked(Settings::values.gamepad_cursor_enabled.GetValue());
++    in_games_checkbox->setChecked(Settings::values.gamepad_cursor_in_games.GetValue());
++    speed_slider->setValue(static_cast<int>(Settings::values.gamepad_cursor_sensitivity.GetValue()));
++
++    const std::array<unsigned, 2> sticks{
++        Settings::values.gamepad_cursor_ui_stick.GetValue() != 0 ? 1u : 0u,
++        Settings::values.gamepad_cursor_stick.GetValue() != 0 ? 1u : 0u,
++    };
++    const std::array<std::array<std::string, 2>, 2> clicks{{
++        {Settings::values.gamepad_cursor_ui_click1.GetValue(),
++         Settings::values.gamepad_cursor_ui_click2.GetValue()},
++        {Settings::values.gamepad_cursor_click1.GetValue(),
++         Settings::values.gamepad_cursor_click2.GetValue()},
++    }};
++    for (const Set set : {Interface, Game}) {
++        ControlSet& controls = sets[set];
++        const int index = controls.stick_combobox->findData(sticks[set]);
++        controls.stick_combobox->setCurrentIndex(index < 0 ? 0 : index);
++        for (std::size_t i = 0; i < controls.click_bindings.size(); ++i) {
++            SetClick(set, i, QString::fromStdString(clicks[set][i]));
++        }
++    }
++    UpdateState();
++}
++
++void ConfigureGamepadCursor::ApplyConfiguration() {
++    Settings::values.gamepad_cursor_enabled = enable_checkbox->isChecked();
++    Settings::values.gamepad_cursor_in_games = in_games_checkbox->isChecked();
++    Settings::values.gamepad_cursor_sensitivity = static_cast<u32>(speed_slider->value());
++
++    const ControlSet& ui = sets[Interface];
++    Settings::values.gamepad_cursor_ui_stick = ui.stick_combobox->currentData().toUInt();
++    Settings::values.gamepad_cursor_ui_click1 = ui.click_bindings[0].toStdString();
++    Settings::values.gamepad_cursor_ui_click2 = ui.click_bindings[1].toStdString();
++
++    const ControlSet& game = sets[Game];
++    Settings::values.gamepad_cursor_stick = game.stick_combobox->currentData().toUInt();
++    Settings::values.gamepad_cursor_click1 = game.click_bindings[0].toStdString();
++    Settings::values.gamepad_cursor_click2 = game.click_bindings[1].toStdString();
++}
++
++void ConfigureGamepadCursor::RetranslateUI() {
++    ApplyTexts();
++}
++
++void ConfigureGamepadCursor::UpdateState() {
++    const bool enabled = enable_checkbox->isChecked();
++    speed_slider->setEnabled(enabled);
++    speed_label->setEnabled(enabled);
++    sets[Interface].group->setEnabled(enabled);
++    sets[Game].group->setEnabled(enabled);
++
++    // "Also in games" off: the game stick and buttons are unused
++    const bool game_enabled = enabled && in_games_checkbox->isChecked();
++    ControlSet& game = sets[Game];
++    game.stick_label->setEnabled(game_enabled);
++    game.stick_combobox->setEnabled(game_enabled);
++    for (std::size_t i = 0; i < game.click_buttons.size(); ++i) {
++        game.click_labels[i]->setEnabled(game_enabled);
++        game.click_buttons[i]->setEnabled(game_enabled);
++        game.clear_buttons[i]->setEnabled(game_enabled && !game.click_bindings[i].isEmpty());
++    }
++    UpdateStatus();
++}
++
++void ConfigureGamepadCursor::UpdateSpeedLabel() {
++    speed_value_label->setText(QStringLiteral("%1 %").arg(speed_slider->value()));
++}
++
++void ConfigureGamepadCursor::SetClick(Set set, std::size_t index, const QString& binding) {
++    ControlSet& controls = sets[set];
++    controls.click_bindings[index] = binding;
++    QString text = binding.isEmpty() ? tr("[none]") : ControllerHotkey::DisplayName(binding);
++    if (!binding.isEmpty() && binding == AutomaticClick(set, index)) {
++        text = tr("%1 (automatic)").arg(text);
++    }
++    controls.click_buttons[index]->setText(text);
++    if (controls.clear_buttons[index]) {
++        controls.clear_buttons[index]->setEnabled(!binding.isEmpty() &&
++                                                  controls.click_buttons[index]->isEnabled());
++    }
++    UpdateStatus();
++}
++
++void ConfigureGamepadCursor::ConfigureClick(Set set, std::size_t index) {
++    ControllerDialog dialog{this};
++    const int result = dialog.exec();
++    const QString raw = dialog.GetButtonString();
++    if (result == QDialog::Rejected || raw.isEmpty()) {
++        return;
++    }
++    // Stored as "A (3DS)" / "L3" / "R3" when it matches, so it follows the configured controls
++    SetClick(set, index, ControllerHotkey::Symbolize(raw));
++
++    // A button chosen by the player replaces the automatic one(s): the other field is cleared if
++    // it still holds its automatic value (a second button can then be chosen there).
++    ControlSet& controls = sets[set];
++    const std::size_t other = index == 0 ? 1 : 0;
++    const QString other_automatic = AutomaticClick(set, other);
++    if (!other_automatic.isEmpty() && controls.click_bindings[other] == other_automatic &&
++        controls.click_bindings[other] != controls.click_bindings[index]) {
++        SetClick(set, other, {});
++    }
++}
++
++void ConfigureGamepadCursor::UpdateStatus() {
++    if (!status_label || !sets[Game].stick_combobox) {
++        return;
++    }
++    if (!enable_checkbox->isChecked()) {
++        status_label->setText(tr("Gamepad cursor disabled. The per-game touch cursor (game "
++                                 "Properties > Controls) can be used instead."));
++        return;
++    }
++
++    QStringList lines;
++    for (const Set set : {Interface, Game}) {
++        if (set == Game && !in_games_checkbox->isChecked()) {
++            lines << tr("Games: cursor not used while a game runs.");
++            continue;
++        }
++        const ControlSet& controls = sets[set];
++        const QString name = set == Interface ? tr("Interface") : tr("Games");
++        bool invert_x = false;
++        bool invert_y = false;
++        const bool right = controls.stick_combobox->currentData().toUInt() != 0;
++        if (ControllerHotkey::ResolveStick(right, invert_x, invert_y).empty()) {
++            lines << tr("%1: stick not found. Bind the %2 in Input, or configure the %3 analog "
++                        "stick in EmulationStation.")
++                         .arg(name, right ? tr("C-Stick") : tr("Circle Pad"),
++                              right ? tr("right") : tr("left"));
++        } else {
++            lines << tr("%1: stick found.").arg(name);
++        }
++        for (std::size_t i = 0; i < controls.click_bindings.size(); ++i) {
++            const QString& binding = controls.click_bindings[i];
++            if (!binding.isEmpty() && ControllerHotkey::Resolve(binding).empty()) {
++                lines << tr("%1: click button %2 (%3) not found on this controller, click the "
++                            "field and press the button.")
++                             .arg(name)
++                             .arg(i + 1)
++                             .arg(ControllerHotkey::DisplayName(binding));
++            }
++        }
++        if (controls.click_bindings[0].isEmpty() && controls.click_bindings[1].isEmpty()) {
++            lines << tr("%1: no click button, the stick moves the arrow only.").arg(name);
++        }
++    }
++    lines << tr("No click while the controller hotkey enable button is held (Select + L3 / R3 "
++                "are hotkeys).");
++    status_label->setText(lines.join(QLatin1Char('\n')));
++}
+diff -urN a/src/borked3ds_qt/configuration/configure_gamepad_cursor.h b/src/borked3ds_qt/configuration/configure_gamepad_cursor.h
+--- a/src/borked3ds_qt/configuration/configure_gamepad_cursor.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/configuration/configure_gamepad_cursor.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -0,0 +1,64 @@
++// Copyright 2026 Borked3DS Emulator Project
++// Licensed under GPLv2 or any later version
++// Refer to the license.txt file included.
++
++#pragma once
++
++#include <array>
++#include <QString>
++#include <QWidget>
++
++class QCheckBox;
++class QComboBox;
++class QGroupBox;
++class QLabel;
++class QPushButton;
++class QSlider;
++
++/// v428 : Configure > Controls > Gamepad Cursor (global, interface and games)
++/// v431 : separate stick and click buttons for the interface and for games
++class ConfigureGamepadCursor : public QWidget {
++    Q_OBJECT
++
++public:
++    explicit ConfigureGamepadCursor(QWidget* parent = nullptr);
++    ~ConfigureGamepadCursor() override;
++
++    void SetConfiguration();
++    void ApplyConfiguration();
++    void RetranslateUI();
++
++private:
++    enum Set : std::size_t { Interface = 0, Game = 1 };
++
++    /// Stick + two click buttons of one set (interface or game)
++    struct ControlSet {
++        QGroupBox* group = nullptr;
++        QLabel* stick_label = nullptr;
++        QComboBox* stick_combobox = nullptr;
++        std::array<QLabel*, 2> click_labels{};
++        std::array<QPushButton*, 2> click_buttons{};
++        std::array<QPushButton*, 2> clear_buttons{};
++        std::array<QString, 2> click_bindings;
++    };
++
++    void CreateSet(Set set);
++    void ApplyTexts();
++    void UpdateState();
++    void UpdateStatus();
++    void UpdateSpeedLabel();
++    void ConfigureClick(Set set, std::size_t index);
++    void SetClick(Set set, std::size_t index, const QString& binding);
++    QString AutomaticClick(Set set, std::size_t index) const;
++    unsigned DefaultStick(Set set) const;
++
++    QCheckBox* enable_checkbox = nullptr;
++    QLabel* description_label = nullptr;
++    QLabel* speed_label = nullptr;
++    QSlider* speed_slider = nullptr;
++    QLabel* speed_value_label = nullptr;
++    QCheckBox* in_games_checkbox = nullptr;
++    std::array<ControlSet, 2> sets;
++    QPushButton* defaults_button = nullptr;
++    QLabel* status_label = nullptr;
++};
+diff -urN a/src/borked3ds_qt/gamepad_cursor.cpp b/src/borked3ds_qt/gamepad_cursor.cpp
+--- a/src/borked3ds_qt/gamepad_cursor.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/gamepad_cursor.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -0,0 +1,472 @@
++// Copyright 2026 Borked3DS Emulator Project
++// Licensed under GPLv2 or any later version
++// Refer to the license.txt file included.
++
++#include <algorithm>
++#include <cmath>
++#include <QApplication>
++#include <QCursor>
++#include <QGuiApplication>
++#include <QMouseEvent>
++#include <QScreen>
++#include <QWidget>
++#if defined(__linux__)
++#include <dlfcn.h>
++#include <QtGui/qguiapplication_platform.h>
++#endif
++#include "borked3ds_qt/gamepad_cursor.h"
++#include "borked3ds_qt/hotkeys.h"
++#include "borked3ds_qt/uisettings.h"
++#include "common/logging/log.h"
++#include "common/settings.h"
++
++namespace {
++
++constexpr int POLL_INTERVAL_MS = 16;  // ~60 Hz, like the controller hotkeys
++constexpr qint64 HIDE_DELAY_MS = 1000; // pointer hidden after 1 s without stick activity
++constexpr float DEAD_ZONE = 0.20f;     // radial, on top of the device's own dead zone
++// Full tilt at 80 % sensitivity (the v428 speed): 1.6 screen heights per second, about
++// 770 px/s on a 480 px screen. The default 50 % gives 1.0 screen height per second.
++constexpr float FULL_TILT_SCREENS_PER_SECOND = 1.6f;
++constexpr float REFERENCE_SENSITIVITY = 80.0f;
++
++float SensitivityFactor() {
++    return static_cast<float>(Settings::values.gamepad_cursor_sensitivity.GetValue()) /
++           REFERENCE_SENSITIVITY;
++}
++
++// Dialogs that read the gamepad themselves: never click behind them
++bool IsInputCaptureDialog(const QWidget* widget) {
++    return widget &&
++           (widget->inherits("ControllerDialog") || widget->inherits("SequenceDialog"));
++}
++
++// v432 : real mouse button through the X server (XTest, as xdotool does), loaded at run time so
++// there is no build dependency. A real button works everywhere a mouse does: window manager
++// buttons (the window's close button), native drags (sliders, scroll bars, title bars), Qt's own
++// double click and popup handling, and the game window. When libXtst or X11 is not available
++// (Wayland, Windows, macOS), the Qt events fallback below is used.
++class XTestButton {
++public:
++    static XTestButton& Get() {
++        static XTestButton instance;
++        return instance;
++    }
++
++    bool Available() const {
++        return fake_button != nullptr;
++    }
++
++    void Set(bool press) const {
++        if (!fake_button) {
++            return;
++        }
++        fake_button(display, 1, press ? 1 : 0, 0);
++        flush(display);
++    }
++
++private:
++    using FakeButtonFn = int (*)(void*, unsigned int, int, unsigned long);
++    using FlushFn = int (*)(void*);
++
++    XTestButton() {
++#if defined(__linux__) && QT_CONFIG(xcb)
++        auto* const x11 = qGuiApp->nativeInterface<QNativeInterface::QX11Application>();
++        if (!x11 || !x11->display()) {
++            return;
++        }
++        void* const xtst = dlopen("libXtst.so.6", RTLD_NOW | RTLD_LOCAL);
++        void* const xlib = dlopen("libX11.so.6", RTLD_NOW | RTLD_LOCAL);
++        if (!xtst || !xlib) {
++            return;
++        }
++        auto* const button = reinterpret_cast<FakeButtonFn>(dlsym(xtst, "XTestFakeButtonEvent"));
++        auto* const flush_fn = reinterpret_cast<FlushFn>(dlsym(xlib, "XFlush"));
++        if (!button || !flush_fn) {
++            return;
++        }
++        display = x11->display();
++        flush = flush_fn;
++        fake_button = button;
++#endif
++    }
++
++    void* display = nullptr;
++    FakeButtonFn fake_button = nullptr;
++    FlushFn flush = nullptr;
++};
++
++// Mouse events that the touch screen produces (Qt or the X server emulating a pointer)
++bool IsFromTouchScreen(const QMouseEvent* mouse) {
++    const QPointingDevice* const device = mouse->pointingDevice();
++    return (device && device->type() == QInputDevice::DeviceType::TouchScreen) ||
++           mouse->source() != Qt::MouseEventNotSynthesized;
++}
++
++} // Anonymous namespace
++
++GamepadCursor::GamepadCursor(QObject* parent) : QObject(parent) {
++    poll_timer.setInterval(POLL_INTERVAL_MS);
++    connect(&poll_timer, &QTimer::timeout, this, [this] { Poll(); });
++    qApp->installEventFilter(this);
++    // The arrow is hidden after 1 s only while a game runs (from the first poll in a game, like
++    // after a stick movement); in the interface it stays visible.
++    gamepad_moved_pointer = true;
++    last_warp_pos = QCursor::pos(); // events at the starting position are not "real mouse"
++    activity_clock.start();
++    Reload();
++}
++
++void GamepadCursor::SetGameRunningCallback(std::function<bool()> callback) {
++    game_running = std::move(callback);
++}
++
++bool GamepadCursor::InGame() const {
++    return game_running && game_running();
++}
++
++GamepadCursor::~GamepadCursor() {
++    qApp->removeEventFilter(this);
++    ShowPointer();
++}
++
++void GamepadCursor::Reload() {
++    built = false;
++    if (Settings::values.gamepad_cursor_enabled.GetValue()) {
++        if (!poll_timer.isActive()) {
++            frame_clock.start();
++            poll_timer.start();
++        }
++    } else {
++        poll_timer.stop();
++        enabled = false;
++        if (pressed) {
++            Release(QCursor::pos());
++        }
++        interface_controls.Reset();
++        game_controls.Reset();
++        modifier.reset();
++        ShowPointer();
++    }
++}
++
++void GamepadCursor::Controls::Reset() {
++    stick.reset();
++    invert_x = false;
++    invert_y = false;
++    for (auto& click : clicks) {
++        click.reset();
++    }
++}
++
++void GamepadCursor::BuildControls(Controls& controls, bool right_stick, const std::string& click1,
++                                  const std::string& click2, const char* name) {
++    controls.Reset();
++    const std::string stick_params =
++        ControllerHotkey::ResolveStick(right_stick, controls.invert_x, controls.invert_y);
++    if (!stick_params.empty()) {
++        controls.stick = Input::CreateDevice<Input::AnalogDevice>(stick_params);
++    }
++
++    const std::array<std::string, 2> bindings{click1, click2};
++    std::array<const char*, 2> state{"none", "none"};
++    for (std::size_t i = 0; i < bindings.size(); ++i) {
++        if (bindings[i].empty()) {
++            continue;
++        }
++        const std::string params = ControllerHotkey::Resolve(QString::fromStdString(bindings[i]));
++        if (params.empty()) {
++            state[i] = "NOT FOUND";
++            continue;
++        }
++        controls.clicks[i] = Input::CreateDevice<Input::ButtonDevice>(params);
++        state[i] = "found";
++    }
++
++    LOG_WARNING(Frontend, "V431_CURSOR {}: stick={} ({}{}) click1={} click2={}", name,
++                right_stick ? "right" : "left", controls.stick ? "found" : "NOT FOUND",
++                (controls.invert_x || controls.invert_y) ? ", inverted from EmulationStation"
++                                                         : "",
++                state[0], state[1]);
++}
++
++void GamepadCursor::Build() {
++    built = true;
++    enabled = Settings::values.gamepad_cursor_enabled.GetValue();
++    in_games = Settings::values.gamepad_cursor_in_games.GetValue();
++    interface_controls.Reset();
++    game_controls.Reset();
++    modifier.reset();
++    click_was_pressed = true;
++    accumulated_x = 0.0f;
++    accumulated_y = 0.0f;
++    if (!enabled) {
++        return;
++    }
++
++    // Interface: left stick and A by default. Game: right stick, L3 and R3 by default.
++    BuildControls(interface_controls, Settings::values.gamepad_cursor_ui_stick.GetValue() != 0,
++                  Settings::values.gamepad_cursor_ui_click1.GetValue(),
++                  Settings::values.gamepad_cursor_ui_click2.GetValue(), "interface");
++    BuildControls(game_controls, Settings::values.gamepad_cursor_stick.GetValue() != 0,
++                  Settings::values.gamepad_cursor_click1.GetValue(),
++                  Settings::values.gamepad_cursor_click2.GetValue(), "game");
++
++    // The hotkey enable button (Select) + L3/R3 are hotkeys: no click while it is held
++    const QString& modifier_binding = UISettings::values.controller_hotkey_modifier;
++    if (!modifier_binding.isEmpty()) {
++        const std::string params = ControllerHotkey::Resolve(modifier_binding);
++        if (!params.empty()) {
++            modifier = Input::CreateDevice<Input::ButtonDevice>(params);
++        }
++    }
++
++    LOG_WARNING(Frontend, "V428_CURSOR ready: sensitivity={}% in_games={} clicks={}",
++                Settings::values.gamepad_cursor_sensitivity.GetValue(), in_games ? "yes" : "no",
++                XTestButton::Get().Available() ? "V432 X11 XTest (real mouse button)"
++                                               : "V432 Qt events (XTest unavailable)");
++}
++
++void GamepadCursor::Poll() {
++    if (!built) {
++        Build();
++    }
++    // Seconds since the previous poll, bounded so a stalled event loop cannot fling the pointer
++    const float dt = std::clamp(static_cast<float>(frame_clock.restart()) / 1000.0f, 0.0f, 0.05f);
++    if (!enabled) {
++        return;
++    }
++
++    QPoint pos = QCursor::pos();
++
++    // v431 : interface set or game set. Switching (game starts, pauses, resumes) ends a click in
++    // progress, and the new set's buttons must be released before they can click.
++    const bool in_game = InGame();
++    if (in_game != using_game_controls) {
++        using_game_controls = in_game;
++        if (pressed) {
++            Release(pos);
++        }
++        click_was_pressed = true;
++        accumulated_x = 0.0f;
++        accumulated_y = 0.0f;
++    }
++    const Controls& controls = in_game ? game_controls : interface_controls;
++
++    QWidget* const modal = QApplication::activeModalWidget();
++    // "Also in games" off: nothing while a game runs (the stick belongs to the game)
++    const bool game_blocked = !in_games && in_game;
++    const bool capturing = IsInputCaptureDialog(modal) || game_blocked;
++    if (game_blocked && pressed) {
++        Release(pos);
++    }
++
++    // --- Movement -------------------------------------------------------------------------
++    if (controls.stick && !capturing) {
++        auto [x, y] = controls.stick->GetStatus();
++        if (controls.invert_x) {
++            x = -x;
++        }
++        if (controls.invert_y) {
++            y = -y;
++        }
++        const float r = std::sqrt(x * x + y * y);
++        if (r > DEAD_ZONE) {
++            const float t = std::min(1.0f, (r - DEAD_ZONE) / (1.0f - DEAD_ZONE));
++            QScreen* screen = QGuiApplication::screenAt(pos);
++            if (!screen) {
++                screen = QGuiApplication::primaryScreen();
++            }
++            const QRect area = screen ? screen->geometry() : QRect(0, 0, 800, 480);
++            const float pixels_per_second = static_cast<float>(area.height()) *
++                                            FULL_TILT_SCREENS_PER_SECOND * SensitivityFactor();
++            const float step = t * t * pixels_per_second * dt;
++            // 3DS convention: y > 0 is up, the screen goes down
++            accumulated_x += x / r * step;
++            accumulated_y += -y / r * step;
++
++            const int move_x = static_cast<int>(accumulated_x);
++            const int move_y = static_cast<int>(accumulated_y);
++            if (move_x != 0 || move_y != 0) {
++                accumulated_x -= static_cast<float>(move_x);
++                accumulated_y -= static_cast<float>(move_y);
++                pos = QPoint(std::clamp(pos.x() + move_x, area.left(), area.right()),
++                             std::clamp(pos.y() + move_y, area.top(), area.bottom()));
++                last_warp_pos = pos;
++                QCursor::setPos(pos);
++                NoteActivity();
++                if (pressed && press_target) {
++                    // Button held: drag (scroll bar, slider, list selection, touch slide)
++                    SendMouse(QEvent::MouseMove, pos, Qt::NoButton, Qt::LeftButton,
++                              press_target.data());
++                }
++            }
++        } else {
++            accumulated_x = 0.0f;
++            accumulated_y = 0.0f;
++        }
++    }
++
++    // --- Click buttons: press on push, held while held, release on release -------------------
++    bool click_now = false;
++    for (const auto& click : controls.clicks) {
++        if (click && click->GetStatus()) {
++            click_now = true;
++        }
++    }
++    const bool modifier_held = modifier && modifier->GetStatus();
++    if (click_now && !click_was_pressed && !modifier_held && !capturing) {
++        last_warp_pos = pos;
++        NoteActivity();
++        Press(pos);
++    } else if (!click_now && click_was_pressed && pressed) {
++        Release(pos);
++    }
++    click_was_pressed = click_now;
++
++    // --- Auto-hide, only while a game runs (v430: always visible in the interface) --------
++    if (in_game && !was_in_game) {
++        // A game starts or resumes: the arrow hides 1 s later, as after a stick movement
++        gamepad_moved_pointer = true;
++        activity_clock.start();
++    }
++    was_in_game = in_game;
++    if (!in_game) {
++        ShowPointer();
++    } else if (gamepad_moved_pointer && !hidden && !pressed && activity_clock.isValid() &&
++               activity_clock.elapsed() >= HIDE_DELAY_MS) {
++        HidePointer();
++    }
++}
++
++QWidget* GamepadCursor::TargetAt(const QPoint& global) const {
++    QWidget* const under = QApplication::widgetAt(global);
++    if (QWidget* const popup = QApplication::activePopupWidget()) {
++        // Outside an open menu: the menu gets the click and closes, as with a real mouse
++        if (!under || under->window() != popup) {
++            return popup;
++        }
++    }
++    return under;
++}
++
++void GamepadCursor::SendMouse(QEvent::Type type, const QPoint& global, Qt::MouseButton button,
++                              Qt::MouseButtons buttons, QWidget* target) {
++    if (!target) {
++        return;
++    }
++    // v430 : posted, never sent from inside the poll timer. A click that opens a dialog or a
++    // menu with exec() runs a nested event loop in its handler; Qt never re-fires a timer whose
++    // slot has not returned, so a click delivered from Poll() froze the stick and the clicks
++    // until that dialog closed. Posted events are delivered by the event loop after Poll().
++    const QPointF global_f(global);
++    QCoreApplication::postEvent(target, new QMouseEvent(type, target->mapFromGlobal(global_f),
++                                                        global_f, button, buttons,
++                                                        Qt::NoModifier));
++}
++
++void GamepadCursor::Press(const QPoint& global) {
++    if (XTestButton::Get().Available()) {
++        // Real button: the X server and Qt do the rest (grab, drag, double click, menus)
++        pressed = true;
++        press_target.clear();
++        XTestButton::Get().Set(true);
++        return;
++    }
++
++    QWidget* const target = TargetAt(global);
++    if (!target) {
++        return;
++    }
++    if (!QApplication::activePopupWidget()) {
++        if (QWidget* const window = target->window()) {
++            window->activateWindow();
++        }
++    }
++    const bool double_click = last_press_clock.isValid() &&
++                              last_press_clock.elapsed() < QApplication::doubleClickInterval() &&
++                              (global - last_press_pos).manhattanLength() <=
++                                  QApplication::startDragDistance();
++    last_press_clock.start();
++    last_press_pos = global;
++
++    pressed = true;
++    press_target = target;
++    SendMouse(QEvent::MouseButtonPress, global, Qt::LeftButton, Qt::LeftButton, target);
++    if (double_click && press_target) {
++        // Qt 6 order: press, release, press, double click, release
++        SendMouse(QEvent::MouseButtonDblClick, global, Qt::LeftButton, Qt::LeftButton,
++                  press_target.data());
++        last_press_clock.invalidate();
++    }
++}
++
++void GamepadCursor::Release(const QPoint& global) {
++    if (XTestButton::Get().Available()) {
++        pressed = false;
++        press_target.clear();
++        XTestButton::Get().Set(false);
++        return;
++    }
++
++    pressed = false;
++    QWidget* const target = press_target ? press_target.data() : TargetAt(global);
++    press_target.clear();
++    SendMouse(QEvent::MouseButtonRelease, global, Qt::LeftButton, Qt::NoButton, target);
++}
++
++void GamepadCursor::NoteActivity() {
++    gamepad_moved_pointer = true;
++    activity_clock.start();
++    ShowPointer();
++}
++
++void GamepadCursor::ShowPointer() {
++    if (hidden) {
++        hidden = false;
++        QGuiApplication::restoreOverrideCursor();
++    }
++}
++
++void GamepadCursor::HidePointer() {
++    if (!hidden) {
++        hidden = true;
++        QGuiApplication::setOverrideCursor(QCursor(Qt::BlankCursor));
++    }
++}
++
++bool GamepadCursor::eventFilter(QObject* watched, QEvent* event) {
++    if (!enabled) {
++        return QObject::eventFilter(watched, event);
++    }
++    // Touch screen in a game: the arrow never shows (the X server moves the pointer to the touch
++    // point). In the interface the arrow stays visible.
++    const QEvent::Type type = event->type();
++    const bool touch_event =
++        type == QEvent::TouchBegin || type == QEvent::TouchUpdate || type == QEvent::TouchEnd ||
++        ((type == QEvent::MouseMove || type == QEvent::MouseButtonPress ||
++          type == QEvent::MouseButtonRelease) &&
++         IsFromTouchScreen(static_cast<QMouseEvent*>(event)));
++    if (touch_event) {
++        if (InGame()) {
++            gamepad_moved_pointer = false;
++            HidePointer();
++        }
++        return QObject::eventFilter(watched, event);
++    }
++
++    // A real mouse movement (not one of our warps): the mouse is in use, never hide its pointer
++    // The X server delivers the motion of our own warps asynchronously, possibly one poll late,
++    // so moves within 200 ms of stick activity are ours.
++    if (type == QEvent::MouseMove) {
++        const auto* const mouse = static_cast<QMouseEvent*>(event);
++        const QPoint global = mouse->globalPosition().toPoint();
++        const bool recent_stick_activity = gamepad_moved_pointer && activity_clock.isValid() &&
++                                           activity_clock.elapsed() < 200;
++        if (!recent_stick_activity && (global - last_warp_pos).manhattanLength() > 2) {
++            gamepad_moved_pointer = false;
++            ShowPointer();
++        }
++    }
++    return QObject::eventFilter(watched, event);
++}
+diff -urN a/src/borked3ds_qt/gamepad_cursor.h b/src/borked3ds_qt/gamepad_cursor.h
+--- a/src/borked3ds_qt/gamepad_cursor.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/gamepad_cursor.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -0,0 +1,108 @@
++// Copyright 2026 Borked3DS Emulator Project
++// Licensed under GPLv2 or any later version
++// Refer to the license.txt file included.
++
++#pragma once
++
++#include <array>
++#include <functional>
++#include <memory>
++#include <QElapsedTimer>
++#include <QObject>
++#include <QPoint>
++#include <QPointer>
++#include <QTimer>
++#include "core/frontend/input.h"
++
++class QWidget;
++
++/**
++ * v428 - Global gamepad cursor (Configure > Controls > Gamepad Cursor).
++ *
++ * Moves the real mouse pointer with a stick, everywhere: menus, game list, dialogs and the game
++ * window (where a click is a touch of the 3DS bottom screen, through the normal mouse path, so it
++ * works with every renderer). A click button held down keeps the button pressed: drag a scroll
++ * bar or a slider in the interface, slide on the touch screen in a game. Double click opens a
++ * game in the list.
++ *
++ * v431 : two independent sets, chosen automatically:
++ *  - Interface (no game running, or the game paused, e.g. with the Select + X menu):
++ *    left stick and A by default.
++ *  - Game (a game running, if "Also in games" is checked): right stick, L3 and R3 by default.
++ *
++ * In a game, the pointer hides after 1 s without stick activity and comes back as soon as the
++ * stick moves; it never shows for the touch screen there. In the interface it stays visible.
++ * The real mouse and the touch screen keep working: a real mouse movement shows the pointer again
++ * and the gamepad never hides a pointer it did not move.
++ *
++ * Built on gvx64's per-game touch cursor (sub-pixel accumulation, sensitivity), improved with a
++ * radial dead zone and a quadratic response curve (precise near the centre, fast at full tilt,
++ * like Steam Input / Dolphin's default curves), time-based speed, and the interface support.
++ */
++class GamepadCursor : public QObject {
++public:
++    explicit GamepadCursor(QObject* parent = nullptr);
++    ~GamepadCursor() override;
++
++    /// Settings or input profile changed: devices are rebuilt on the next poll.
++    void Reload();
++
++    /// Returns true while a game is running (not paused): selects the game set.
++    void SetGameRunningCallback(std::function<bool()> callback);
++
++protected:
++    bool eventFilter(QObject* watched, QEvent* event) override;
++
++private:
++    /// One set of stick + click buttons (interface or game)
++    struct Controls {
++        std::unique_ptr<Input::AnalogDevice> stick;
++        bool invert_x = false;
++        bool invert_y = false;
++        std::array<std::unique_ptr<Input::ButtonDevice>, 2> clicks;
++
++        void Reset();
++    };
++
++    void Build();
++    void BuildControls(Controls& controls, bool right_stick, const std::string& click1,
++                       const std::string& click2, const char* name);
++    bool InGame() const;
++    void Poll();
++    void Press(const QPoint& global);
++    void Release(const QPoint& global);
++    void SendMouse(QEvent::Type type, const QPoint& global, Qt::MouseButton button,
++                   Qt::MouseButtons buttons, QWidget* target);
++    QWidget* TargetAt(const QPoint& global) const;
++    void NoteActivity();
++    void ShowPointer();
++    void HidePointer();
++
++    QTimer poll_timer;
++    QElapsedTimer frame_clock;
++    QElapsedTimer activity_clock;
++    QElapsedTimer last_press_clock;
++
++    bool built = false;
++    bool enabled = false;
++    bool in_games = true;
++    std::function<bool()> game_running;
++
++    Controls interface_controls;
++    Controls game_controls;
++    bool using_game_controls = false;
++    std::unique_ptr<Input::ButtonDevice> modifier;
++    bool click_was_pressed = true; // must be seen released once before it can click
++
++    float accumulated_x = 0.0f;
++    float accumulated_y = 0.0f;
++
++    bool pressed = false;
++    QPointer<QWidget> press_target;
++    QPoint last_press_pos;
++
++    bool gamepad_moved_pointer = false; // the pointer was last moved by the stick
++    bool hidden = false;                // override cursor (blank) installed by us
++    bool was_in_game = false;
++    QPoint last_warp_pos;
++};
+diff -urN a/src/borked3ds_qt/hotkeys.cpp b/src/borked3ds_qt/hotkeys.cpp
+--- a/src/borked3ds_qt/hotkeys.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/hotkeys.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -137,8 +137,10 @@
+ }
+ 
+ // EmulationStation (RetroPie) fallback: es_input.cfg uses SDL joystick indices and the same GUID
+-// string format as the SDL backend, so its "leftthumb"/"rightthumb" entries map directly.
+-std::string FromEmulationStation(const std::string& guid, int port, const QString& es_name) {
++// string format as the SDL backend, so its entries map directly. Finds input `es_name` of the
++// joystick `guid` and returns its type ("button", "hat", "axis"), id and value.
++bool FindEmulationStationInput(const std::string& guid, const QString& es_name, QString& type,
++                               int& id, int& value) {
+     const std::array<QString, 2> candidates{{
+         QDir::homePath() + QStringLiteral("/.emulationstation/es_input.cfg"),
+         QStringLiteral("/opt/retropie/configs/all/emulationstation/es_input.cfg"),
+@@ -162,49 +164,59 @@
+                         attrs.value(QStringLiteral("deviceGUID")).toString().toStdString() == guid;
+                 } else if (in_target && xml.name() == QStringLiteral("input") &&
+                            attrs.value(QStringLiteral("name")) == es_name) {
+-                    const QString type = attrs.value(QStringLiteral("type")).toString();
+-                    const int id = attrs.value(QStringLiteral("id")).toInt();
+-                    const int value = attrs.value(QStringLiteral("value")).toInt();
+-
+-                    Common::ParamPackage params;
+-                    params.Set("engine", "sdl");
+-                    params.Set("guid", guid);
+-                    params.Set("port", port);
+-                    if (type == QStringLiteral("button")) {
+-                        params.Set("button", id);
+-                    } else if (type == QStringLiteral("hat")) {
+-                        params.Set("hat", id);
+-                        switch (value) {
+-                        case 1:
+-                            params.Set("direction", "up");
+-                            break;
+-                        case 2:
+-                            params.Set("direction", "right");
+-                            break;
+-                        case 4:
+-                            params.Set("direction", "down");
+-                            break;
+-                        case 8:
+-                            params.Set("direction", "left");
+-                            break;
+-                        default:
+-                            return {};
+-                        }
+-                    } else if (type == QStringLiteral("axis")) {
+-                        params.Set("axis", id);
+-                        params.Set("direction", value < 0 ? "-" : "+");
+-                        params.Set("threshold", value < 0 ? -0.5f : 0.5f);
+-                    } else {
+-                        return {};
+-                    }
+-                    return params.Serialize();
++                    type = attrs.value(QStringLiteral("type")).toString();
++                    id = attrs.value(QStringLiteral("id")).toInt();
++                    value = attrs.value(QStringLiteral("value")).toInt();
++                    return true;
+                 }
+             } else if (xml.isEndElement() && xml.name() == QStringLiteral("inputConfig")) {
+                 in_target = false;
+             }
+         }
+     }
+-    return {};
++    return false;
++}
++
++std::string FromEmulationStation(const std::string& guid, int port, const QString& es_name) {
++    QString type;
++    int id = 0;
++    int value = 0;
++    if (!FindEmulationStationInput(guid, es_name, type, id, value)) {
++        return {};
++    }
++
++    Common::ParamPackage params;
++    params.Set("engine", "sdl");
++    params.Set("guid", guid);
++    params.Set("port", port);
++    if (type == QStringLiteral("button")) {
++        params.Set("button", id);
++    } else if (type == QStringLiteral("hat")) {
++        params.Set("hat", id);
++        switch (value) {
++        case 1:
++            params.Set("direction", "up");
++            break;
++        case 2:
++            params.Set("direction", "right");
++            break;
++        case 4:
++            params.Set("direction", "down");
++            break;
++        case 8:
++            params.Set("direction", "left");
++            break;
++        default:
++            return {};
++        }
++    } else if (type == QStringLiteral("axis")) {
++        params.Set("axis", id);
++        params.Set("direction", value < 0 ? "-" : "+");
++        params.Set("threshold", value < 0 ? -0.5f : 0.5f);
++    } else {
++        return {};
++    }
++    return params.Serialize();
+ }
+ 
+ std::string ResolvePadButton(const std::string& name) {
+@@ -274,6 +286,55 @@
+     return binding.toStdString();
+ }
+ 
++std::string ResolveStick(bool right, bool& invert_x, bool& invert_y) {
++    invert_x = false;
++    invert_y = false;
++
++    // 1. The stick bound in Controls: right = 3DS C-Stick, left = 3DS Circle Pad
++    const auto& analogs = Settings::values.current_input_profile.analogs;
++    const std::string& bound =
++        analogs[right ? Settings::NativeAnalog::CStick : Settings::NativeAnalog::CirclePad];
++    if (!Common::ParamPackage(bound).Get("engine", "").empty()) {
++        return bound;
++    }
++
++    Common::ParamPackage controller;
++    if (!FindProfileController(controller)) {
++        return {};
++    }
++
++    // 2. SDL's controller database
++    const Common::ParamPackage axes = InputCommon::GetControllerNamedAxesBind(
++        controller, right ? "rightx" : "leftx", right ? "righty" : "lefty");
++    if (axes.Has("engine")) {
++        return axes.Serialize();
++    }
++
++    // 3. EmulationStation: <side>analogleft / <side>analogup, value -1 when not inverted
++    const QString side = right ? QStringLiteral("right") : QStringLiteral("left");
++    const std::string guid = controller.Get("guid", "0");
++    QString type_x, type_y;
++    int id_x = 0, id_y = 0, value_x = 0, value_y = 0;
++    if (!FindEmulationStationInput(guid, side + QStringLiteral("analogleft"), type_x, id_x,
++                                   value_x) ||
++        !FindEmulationStationInput(guid, side + QStringLiteral("analogup"), type_y, id_y,
++                                   value_y) ||
++        type_x != QStringLiteral("axis") || type_y != QStringLiteral("axis")) {
++        return {};
++    }
++    invert_x = value_x > 0;
++    invert_y = value_y > 0;
++
++    Common::ParamPackage params;
++    params.Set("engine", "sdl");
++    params.Set("guid", guid);
++    params.Set("port", controller.Get("port", 0));
++    params.Set("axis_x", id_x);
++    params.Set("axis_y", id_y);
++    params.Set("deadzone", 0.1f);
++    return params.Serialize();
++}
++
+ bool SameInput(const std::string& a, const std::string& b) {
+     if (a.empty() || b.empty()) {
+         return false;
+diff -urN a/src/borked3ds_qt/hotkeys.h b/src/borked3ds_qt/hotkeys.h
+--- a/src/borked3ds_qt/hotkeys.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/hotkeys.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -110,6 +110,12 @@
+ /// profile (or L3/R3), so it keeps working with another controller. Returns the input otherwise.
+ QString Symbolize(const QString& raw_binding);
+ 
++/// v428 : analog ParamPackage of the left or right stick for the gamepad cursor: the 3DS Circle
++/// Pad / C-Stick binding of the current input profile, else the SDL_GameController mapping, else
++/// EmulationStation's es_input.cfg (leftanalog* / rightanalog*). invert_x / invert_y are set
++/// when es_input.cfg declares an inverted axis. Empty on failure.
++std::string ResolveStick(bool right, bool& invert_x, bool& invert_y);
++
+ /// True when both resolved ParamPackage strings designate the same physical input.
+ bool SameInput(const std::string& a, const std::string& b);
+ 
+diff -urN a/src/borked3ds_qt/main.cpp b/src/borked3ds_qt/main.cpp
+--- a/src/borked3ds_qt/main.cpp	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/main.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -59,6 +59,7 @@
+ #include "borked3ds_qt/discord.h"
+ #include "borked3ds_qt/dumping/dumping_dialog.h"
+ #include "borked3ds_qt/game_list.h"
++#include "borked3ds_qt/gamepad_cursor.h" // v428
+ #include "borked3ds_qt/hotkeys.h"
+ #include "borked3ds_qt/infrared/skylanderportal/skylander_dialog.h"
+ #include "borked3ds_qt/loading_screen.h"
+@@ -862,6 +863,15 @@
+     // v426 : bindings / input profile may have changed, rebuild the devices on the next poll
+     gamepad_hotkeys_built = false;
+ 
++    // v428 : global gamepad cursor, interface and games (settings re-read after Configure)
++    if (!gamepad_cursor) {
++        gamepad_cursor = new GamepadCursor(this);
++        // "Also in games" off: the cursor sleeps while a game runs (active again when paused)
++        gamepad_cursor->SetGameRunningCallback(
++            [this] { return emulation_running && emu_thread && emu_thread->IsRunning(); });
++    }
++    gamepad_cursor->Reload();
++
+     // Start polling when emulation starts
+     // Timer will be started/stopped in OnStartGame/OnStopGame
+ }
+@@ -2700,6 +2710,11 @@
+     UpdateSaveStates();
+     UpdateStatusButtons();
+ 
++    // v428 : the game may switch the input profile (per-game profile), re-resolve the stick
++    if (gamepad_cursor) {
++        gamepad_cursor->Reload();
++    }
++
+     // Only start gamepad hotkey polling if there are controller hotkeys - gvx64
+     bool has_controller_hotkeys = false;
+     for (const auto& [group_name, group] : hotkey_registry.hotkey_groups) {
+@@ -2782,6 +2797,9 @@
+     // Stop gamepad hotkey polling - gvx64
+     gamepad_hotkey_poll_timer.stop();
+     ClearGamepadHotkeys(); // v426
++    if (gamepad_cursor) { // v428 : back to the global input profile
++        gamepad_cursor->Reload();
++    }
+     if (osd_label) { // v427
+         osd_hide_timer.stop();
+         osd_label->hide();
+diff -urN a/src/borked3ds_qt/main.h b/src/borked3ds_qt/main.h
+--- a/src/borked3ds_qt/main.h	Source-gvx64-a7095a7a
++++ b/src/borked3ds_qt/main.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -41,6 +41,7 @@
+ class GraphicsTracingWidget;
+ class GraphicsVertexShaderWidget;
+ class GRenderWindow;
++class GamepadCursor; // v428
+ class IPCRecorderWidget;
+ class LLEServiceModulesWidget;
+ class LoadingScreen;
+@@ -388,6 +389,9 @@
+     bool hotkey_menu_resume = false;
+     bool hotkey_menu_restore_fullscreen = false;
+ 
++    // v428 : global gamepad cursor (stick moves the mouse pointer, L3/R3 click)
++    GamepadCursor* gamepad_cursor = nullptr;
++
+     // v427 : RetroArch-style on-screen message (2 s, white on dark blue) for quick save/load,
+     // video recording start/stop and screenshots
+     void ShowOsdMessage(const QString& text);
+diff -urN a/src/common/settings.h b/src/common/settings.h
+--- a/src/common/settings.h	Source-gvx64-a7095a7a
++++ b/src/common/settings.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -482,6 +482,25 @@
+     SwitchableSetting<u32> touch_cursor_button{0, "touch_cursor_button"}; //gvx64
+     SwitchableSetting<float, true> touch_cursor_sensitivity{1.0f, 0.1f, 5.0f, "touch_cursor_sensitivity"}; //gvx64
+ 
++    // v428 : global gamepad cursor (Configure > Controls > Gamepad Cursor). Moves the real mouse
++    // pointer with a stick, in the interface and in games; L3/R3 click (touch the 3DS screen).
++    // When enabled, the per-game touch cursor above is ignored. Global only, not per game.
++    Setting<bool> gamepad_cursor_enabled{true, "gamepad_cursor_enabled"};
++    Setting<bool> gamepad_cursor_in_games{true, "gamepad_cursor_in_games"}; // also while playing
++    Setting<u32> gamepad_cursor_stick{1, "gamepad_cursor_stick"}; // 0 = left stick, 1 = right stick
++    // v429 : sensitivity in percent, interface and games (80 % = v428 speed, default 50 %)
++    Setting<u32, true> gamepad_cursor_sensitivity{50, 1, 100, "gamepad_cursor_sensitivity"};
++    Setting<std::string> gamepad_cursor_click1{"engine:hotkey_pad,button:leftstick",
++                                               "gamepad_cursor_click1"};
++    Setting<std::string> gamepad_cursor_click2{"engine:hotkey_pad,button:rightstick",
++                                               "gamepad_cursor_click2"};
++    // v431 : interface set (no game running, or paused): left stick and A by default. The
++    // settings above (stick, click1, click2) are the game set: right stick, L3 and R3.
++    Setting<u32> gamepad_cursor_ui_stick{0, "gamepad_cursor_ui_stick"}; // 0 = left, 1 = right
++    Setting<std::string> gamepad_cursor_ui_click1{"engine:hotkey_3ds,button:a",
++                                                  "gamepad_cursor_ui_click1"};
++    Setting<std::string> gamepad_cursor_ui_click2{"", "gamepad_cursor_ui_click2"};
++
+     std::vector<InputProfile> input_profiles; ///< The list of input profiles
+     std::vector<TouchFromButtonMap> touch_from_button_maps;
+     Setting<bool> use_artic_base_controller{false, "use_artic_base_controller"};
+diff -urN a/src/core/hle/service/hid/hid.cpp b/src/core/hle/service/hid/hid.cpp
+--- a/src/core/hle/service/hid/hid.cpp	Source-gvx64-a7095a7a
++++ b/src/core/hle/service/hid/hid.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -719,7 +719,9 @@
+ 
+     // Configure touch cursor controller from settings - gvx64
+     Service::HID::TouchCursorConfig cursor_config; //gvx64
+-    cursor_config.enabled = Settings::values.touch_cursor_enabled.GetValue(); //gvx64
++    // v428 : the global gamepad cursor (real mouse pointer) replaces the per-game touch cursor
++    cursor_config.enabled = Settings::values.touch_cursor_enabled.GetValue() &&
++                            !Settings::values.gamepad_cursor_enabled.GetValue(); //gvx64
+     cursor_config.analog_stick_button = Settings::values.touch_cursor_analog_stick.GetValue(); //gvx64
+     cursor_config.touch_button = Settings::values.touch_cursor_button.GetValue(); //gvx64
+     cursor_config.sensitivity = Settings::values.touch_cursor_sensitivity.GetValue(); //gvx64
+@@ -750,7 +752,8 @@
+     // Reload touch cursor settings - gvx64
+     if (touch_cursor_controller) {
+         Service::HID::TouchCursorConfig cursor_config;
+-        cursor_config.enabled = Settings::values.touch_cursor_enabled.GetValue();
++        cursor_config.enabled = Settings::values.touch_cursor_enabled.GetValue() &&
++                                !Settings::values.gamepad_cursor_enabled.GetValue(); // v428
+         cursor_config.analog_stick_button = Settings::values.touch_cursor_analog_stick.GetValue();
+         cursor_config.touch_button = Settings::values.touch_cursor_button.GetValue();
+         cursor_config.sensitivity = Settings::values.touch_cursor_sensitivity.GetValue();
+diff -urN a/src/input_common/main.cpp b/src/input_common/main.cpp
+--- a/src/input_common/main.cpp	Source-gvx64-a7095a7a
++++ b/src/input_common/main.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -129,6 +129,20 @@
+                                                        params.Get("port", 0), button_name);
+ }
+ 
++Common::ParamPackage GetControllerNamedAxesBind(const Common::ParamPackage& params,
++                                                const std::string& axis_x_name,
++                                                const std::string& axis_y_name) {
++    if (params.Get("engine", "") != "sdl") {
++        return {};
++    }
++    auto* const sdl_state = dynamic_cast<SDL::SDLState*>(sdl.get());
++    if (!sdl_state) {
++        return {};
++    }
++    return sdl_state->GetSDLControllerAxesBindByName(params.Get("guid", "0"), params.Get("port", 0),
++                                                     axis_x_name, axis_y_name);
++}
++
+ Common::ParamPackage GetControllerAnalogBinds(const Common::ParamPackage& params, int analog) {
+     const auto native_analog{static_cast<Settings::NativeAnalog::Values>(analog)};
+     const auto engine{params.Get("engine", "")};
+diff -urN a/src/input_common/main.h b/src/input_common/main.h
+--- a/src/input_common/main.h	Source-gvx64-a7095a7a
++++ b/src/input_common/main.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -49,6 +49,15 @@
+ Common::ParamPackage GetControllerNamedButtonBind(const Common::ParamPackage& params,
+                                                   const std::string& button_name);
+ 
++/**
++ * v428 : resolves a pair of named SDL_GameController axes ("leftx"/"lefty", "rightx"/"righty") on
++ * the controller identified by params (engine/guid/port) as an analog ParamPackage. Used by the
++ * gamepad cursor. Returns an empty package if it cannot be resolved.
++ */
++Common::ParamPackage GetControllerNamedAxesBind(const Common::ParamPackage& params,
++                                                const std::string& axis_x_name,
++                                                const std::string& axis_y_name);
++
+ /// Reloads the input devices
+ void ReloadInputDevices();
+ 
+diff -urN a/src/input_common/sdl/sdl_impl.cpp b/src/input_common/sdl/sdl_impl.cpp
+--- a/src/input_common/sdl/sdl_impl.cpp	Source-gvx64-a7095a7a
++++ b/src/input_common/sdl/sdl_impl.cpp	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -496,6 +496,35 @@
+                                  button_name.c_str());
+ }
+ 
++// v428 : pair of named SDL_GameController axes ("leftx"/"lefty", "rightx"/"righty") as an analog
++// ParamPackage, for the gamepad cursor when the stick is not bound in the input profile.
++Common::ParamPackage SDLState::GetSDLControllerAxesBindByName(const std::string& guid, int port,
++                                                              const std::string& axis_x_name,
++                                                              const std::string& axis_y_name) {
++    SDL_GameController* controller = GetSDLJoystickByGUID(guid, port)->GetSDLGameController();
++    if (!controller) {
++        return {{}};
++    }
++    const SDL_GameControllerAxis axis_x = SDL_GameControllerGetAxisFromString(axis_x_name.c_str());
++    const SDL_GameControllerAxis axis_y = SDL_GameControllerGetAxisFromString(axis_y_name.c_str());
++    if (axis_x == SDL_CONTROLLER_AXIS_INVALID || axis_y == SDL_CONTROLLER_AXIS_INVALID) {
++        return {{}};
++    }
++    const SDL_GameControllerButtonBind bind_x = SDL_GameControllerGetBindForAxis(controller, axis_x);
++    const SDL_GameControllerButtonBind bind_y = SDL_GameControllerGetBindForAxis(controller, axis_y);
++    if (bind_x.bindType != SDL_CONTROLLER_BINDTYPE_AXIS ||
++        bind_y.bindType != SDL_CONTROLLER_BINDTYPE_AXIS) {
++        return {{}};
++    }
++    Common::ParamPackage params({{"engine", "sdl"}});
++    params.Set("guid", guid);
++    params.Set("port", port);
++    params.Set("axis_x", bind_x.value.axis);
++    params.Set("axis_y", bind_y.value.axis);
++    params.Set("deadzone", 0.1f);
++    return params;
++}
++
+ Common::ParamPackage SDLState::GetSDLControllerAnalogBindByGUID(
+     const std::string& guid, int port, Settings::NativeAnalog::Values analog) {
+     Common::ParamPackage params({{"engine", "sdl"}});
+diff -urN a/src/input_common/sdl/sdl_impl.h b/src/input_common/sdl/sdl_impl.h
+--- a/src/input_common/sdl/sdl_impl.h	Source-gvx64-a7095a7a
++++ b/src/input_common/sdl/sdl_impl.h	Gamepad-Cursor-DTEAM-1-b298f856
+@@ -47,6 +47,10 @@
+     // v426 : bouton nomme SDL_GameController ("leftstick", "rightstick", ...) pour les hotkeys
+     Common::ParamPackage GetSDLControllerButtonBindByName(const std::string& guid, int port,
+                                                           const std::string& button_name);
++    // v428 : named SDL_GameController axes ("rightx"/"righty", ...) for the gamepad cursor
++    Common::ParamPackage GetSDLControllerAxesBindByName(const std::string& guid, int port,
++                                                        const std::string& axis_x_name,
++                                                        const std::string& axis_y_name);
+ 
+     /// Get all DevicePoller that use the SDL backend for a specific device type
+     Pollers GetPollers(Polling::DeviceType type) override;
