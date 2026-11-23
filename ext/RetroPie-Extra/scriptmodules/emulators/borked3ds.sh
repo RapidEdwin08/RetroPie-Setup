@@ -45,7 +45,8 @@ function _get_commit_borked3ds() {
     #echo 4d5cb16c; # 20261006 # DTEAM-1
     #echo a7095a7a; # 20261119 # gvx64
     #echo 099f6237; # 20261119 # DTEAM-1
-    #echo 548512c8; # 20261120 # DTEAM-1
+    #echo 548512c8; # 20261120 # DTEAM-1 +Hotkeys Select+*
+    #echo b298f856; # 20261122 # DTEAM-1 +Gamepad Cursor
     echo $branch_commit
 }
 
@@ -106,9 +107,9 @@ function sources_borked3ds() {
     gitPullOrClone
     git -C "$md_build" rev-parse --short HEAD > "$md_build/.borked3ds_commit"
 
-    # https://github.com/DTEAM-1/Borked3DS-rpi/compare/099f62370...22e947c18
     if [[ "$(_get_repo_borked3ds)" == "https://github.com/gvx64/Borked3DS-rpi.git" ]] && [[ "$(_get_commit_borked3ds)" == "a7095a7a" ]]; then # Only applied to Tested Commits
-        applyPatch "$md_data/Hotkeys-DTEAM-1-548512c8.diff"
+        applyPatch "$md_data/Hotkeys-DTEAM-1-548512c8.diff" # https://github.com/DTEAM-1/Borked3DS-rpi/compare/099f62370...22e947c18
+        applyPatch "$md_data/Gamepad-Cursor-DTEAM-1-b298f856.diff" # https://github.com/DTEAM-1/Borked3DS-rpi/compare/548512c84...11a72d18f
     fi
 
     #do this after cloning Borked3ds, otherwise the $md_build will already exist and cloning will fail
@@ -597,7 +598,7 @@ _EOF_
     addEmulator 0 "${md_id}-ui" "3ds" "$launch_prefix$md_inst/borked3ds"
     addEmulator 0 "${md_id}-ui-qt06" "3ds" "${launch_prefix}QT_SCALE_FACTOR=0.6 $md_inst/borked3ds" # DTEAM-1/Borked3DS-rpi
 
-    if [[ ! $(dpkg -l | grep qjoypad) == '' ]]; then
+    if [[ ! $(dpkg -l | grep qjoypad) == '' ]] && [[ "$(_get_repo_borked3ds)" == "https://github.com/rtiangha/Borked3DS.git" ]]; then # Not needed with DTEAM-1 Gamepad-Cursor
         addEmulator 0 "$md_id-ui+qjoypad" "3ds" "$launch_prefix$md_inst/borked3ds-qjoy.sh"
         addEmulator 0 "$md_id-ui-qt06+qjoypad" "3ds" "${launch_prefix}QT_SCALE_FACTOR=0.6 $md_inst/borked3ds-qjoy.sh" # DTEAM-1/Borked3DS-rpi
     fi
